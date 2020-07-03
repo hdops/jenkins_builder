@@ -1,0 +1,83 @@
+def node=""
+if (env.node){
+    node =env.node
+}else{
+    node ="master"
+}
+def whether_post=""
+if (env.whether_post){
+    whether_post =env.whether_post
+}else{
+    whether_post ="True"
+}
+pipeline {
+   agent {label node}
+    options {
+	//     buildDiscarder(logRotator(numToKeepStr: '30'))
+	//     disableConcurrentBuilds()
+	//     disableResume()
+	    timeout(time: 3, unit: 'HOURS')
+    }
+	// environment{
+    //     DNET_PRIVATE_AK="$DNET_PRIVATE_AK"
+    //     DNET_PRIVATE_AS="$DNET_PRIVATE_AS"
+ 	// }
+	// parameters {
+	// 	choice(name: 'DNET_PRODUCT', choices:'pay')
+	//     choice(name:'DNET_PROFILE', choices:'branch_test\nproduction')
+	// 	choice(name: 'action_nginx', choices:'backup\nrestore')
+	// 	choice(name: 'action', choices:'--请选择\ndown\nrestart')
+	//     string(name: 'containerid', description: '异常节点name,异常节点以逗号分隔',trim: true)
+	//     string(name: 'GIT_BRANCH', defaultValue: 'develop', description: 'git branch',trim: true)
+	//     string(name: 'receivers', defaultValue: 'gaoweizong@hd123.com', description: '收件人列表,多个以逗号分割',trim: true)
+	//    // choice(name: 'DINGTALK_TOKEN', choices:'268f9a602050e395b131c90ba947fc595048f4c1dfd5ef996a77e533114d2002')
+	// }
+    stages {
+	    stage('DFT_nginx_backup_restore') {
+			steps{
+				script{
+                    if (env.on_k8s){
+                        container("hdtoolsetcore"){
+                            echo "active profile is ${params.DNET_PROFILE}"
+                            echo "product is ${params.DNET_PRODUCT}"
+                            echo "workspace is $WORKSPACE"
+                            retry(2){
+                                sh "DNET_PROFILE=integration_test DNET_PRODUCT=dnet hdops download_toolset --branch ${params.GIT_BRANCH} -p ."
+                            }
+                            sh "tar zxf toolset.tar.gz -C $WORKSPACE"
+                            sh "DNET_PRODUCT=${params.DNET_PRODUCT} DNET_PROFILE=${params.DNET_PROFILE} DINGTALK_TOKEN=${DINGTALK_TOKEN} hdops nginx ${params.action_nginx} --dryrun False --action ${params.action}  --container ${params.containerid} --receivers ${params.receivers}"
+                        }
+                    }else {
+                        echo "active profile is ${params.DNET_PROFILE}"
+                        echo "product is ${params.DNET_PRODUCT}"
+                        echo "workspace is $WORKSPACE"
+                        retry(2){
+                            sh "DNET_PROFILE=integration_test DNET_PRODUCT=dnet hdops download_toolset --branch ${params.GIT_BRANCH} -p ."
+                        }
+                        sh "tar zxf toolset.tar.gz -C $WORKSPACE"
+                        sh "DNET_PRODUCT=${params.DNET_PRODUCT} DNET_PROFILE=${params.DNET_PROFILE} DINGTALK_TOKEN=${DINGTALK_TOKEN} hdops nginx ${params.action_nginx} --dryrun False --action ${params.action}  --container ${params.containerid} --receivers ${params.receivers}"
+                    }
+                }
+			}
+        }
+       
+    }
+	post {
+    // 构建失败之后钉钉通知
+        failure {
+            script {
+                if (whether_post == "True") {
+                    dingTalk accessToken: "${DINGTALK_TOKEN}", imageUrl: '', jenkinsUrl: "${jenkinsUrl}", message: "构建失败 ${new Date().format("yyyy-MM-dd HH:mm:ss")}", notifyPeople: ''
+                }
+            }
+        }
+	// 失败转成功之后钉钉通知
+        fixed {
+            script {
+                if (whether_post == "True") {
+                    dingTalk accessToken: "${DINGTALK_TOKEN}", imageUrl: '', jenkinsUrl: "${jenkinsUrl}", message: "恢复正常 ${new Date().format("yyyy-MM-dd HH:mm:ss")}", notifyPeople: ''
+                }
+            }
+        }
+    }
+}

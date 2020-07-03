@@ -1,0 +1,43 @@
+def node=""
+if (env.node){
+    node =env.node
+}else{
+    node ="master"
+}
+if (!env.GIT_GROUP){
+    env.GIT_GROUP="phoenix-config"
+}
+pipeline {
+    agent {label node}
+	options {
+	//     buildDiscarder(logRotator(numToKeepStr: '10'))
+	//     disableConcurrentBuilds()
+	//     disableResume()
+	    timeout(time: 3, unit: 'MINUTES')
+    }
+	// parameters {
+    //     string(name: 'GIT_REPONAME', defaultValue: 'heading', description: 'git repo url')
+    //     string(name: 'GIT_BRANCH', defaultValue: 'uat', description: 'git_url 的分支')
+    //     choice(name:'action', choices:'get\nupdate', description: '对gateway的操作')
+
+	// }
+
+    stages {
+        stage('delete workspace') {
+			steps{
+				deleteDir()
+			}
+        }
+        stage('下载phoenix config') {
+            steps{
+
+                git branch: "${params.GIT_BRANCH}", credentialsId: '17643215-09f8-4a9a-b0ea-c8e49777ce1d', url: "http://gitlab.app.hd123.cn:10080/${GIT_GROUP}/${params.GIT_REPONAME}.git"
+            }
+        }
+        stage('Gateway') {
+            steps {
+                sh "phoenix-tools gateway ${params.action} "
+            }
+        }
+    }
+}

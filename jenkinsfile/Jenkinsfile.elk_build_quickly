@@ -1,0 +1,76 @@
+def node=""
+if (env.node){
+    node =env.node
+}else{
+    node ="master"
+}
+def whether_post=""
+if (env.whether_post){
+    whether_post =env.whether_post
+}else{
+    whether_post ="True"
+}
+pipeline {
+    agent {label node}
+	options {
+	//     buildDiscarder(logRotator(numToKeepStr: '10'))
+	//     disableConcurrentBuilds()
+	//     disableResume()
+	    timeout(time: 20, unit: 'MINUTES')
+    }
+	// environment{
+    //     DNET_PRIVATE_AK="$DNET_PRIVATE_AK"
+    //     DNET_PRIVATE_AS="$DNET_PRIVATE_AS"
+ 	// }
+	// parameters {
+	//    string(name: 'GIT_BRANCH', defaultValue: 'develop', description: 'release/release\ndevelop')
+	//    string(name: 'cfgname', defaultValue: 'elk_build_quickly/es_init.yml', description: '配置')
+	//    string(name: 'jenkins_home', defaultValue: '/hdapp/jenkins_home', description: 'jenkins安装目录')
+	// }
+    stages {
+        stage('download toolset') {
+			steps{
+				echo "profile is ${params.DNET_PROFILE}"
+                retry(2){
+				    sh "DNET_PROFILE=integration_test DNET_PRODUCT=dnet hdops download_toolset --branch ${params.GIT_BRANCH} -p ."
+                }
+				sh "tar zxf toolset.tar.gz -C ${WORKSPACE}"
+			}
+        }
+        stage('es init') {
+			steps{
+				sh "DINGTALK_TOKEN=${DINGTALK_TOKEN} hdmon es_init --cfgname ${params.cfgname}"
+			}
+        }
+        stage('install logstash') {
+			steps{
+			    sh 'docker pull harbor.qianfan123.com/base/iac:0.1.0'
+				sh "docker run -i --rm -v /root/.ssh:/root/.ssh -v ${params.jenkins_home}/workspace/${JOB_NAME}/elk_build_quickly:/root/iac/elk_build_quickly harbor.qianfan123.com/base/iac:0.1.0 'ansible-playbook -i elk_build_quickly/elk_inventory hdiac/logstash/logstash7.yml -e @elk_build_quickly/logstash_vars.yml'"
+			}
+        }
+        stage('install filebeat') {
+			steps{
+			    sh 'docker pull harbor.qianfan123.com/base/iac:0.1.0'
+				sh "docker run -i --rm -v /root/.ssh:/root/.ssh -v ${params.jenkins_home}/workspace/${JOB_NAME}/elk_build_quickly:/root/iac/elk_build_quickly harbor.qianfan123.com/base/iac:0.1.0 'ansible-playbook -i elk_build_quickly/elk_inventory hdiac/filebeat/filebeat7.yml -e @elk_build_quickly/filebeat_vars.yml'"
+			}
+        }
+    }
+	post {
+    // 构建失败之后钉钉通知
+        failure {
+            script {
+                if (whether_post == "True") {
+                    dingTalk accessToken: "${DINGTALK_TOKEN}", imageUrl: '', jenkinsUrl: "${jenkinsUrl}", message: "构建失败 ${new Date().format("yyyy-MM-dd HH:mm:ss")}", notifyPeople: ''
+                }
+            }
+        }
+	// 失败转成功之后钉钉通知
+        fixed {
+            script {
+                if (whether_post == "True") {
+                    dingTalk accessToken: "${DINGTALK_TOKEN}", imageUrl: '', jenkinsUrl: "${jenkinsUrl}", message: "恢复正常 ${new Date().format("yyyy-MM-dd HH:mm:ss")}", notifyPeople: ''
+                }
+            }
+        }
+    }
+}

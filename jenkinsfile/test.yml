@@ -1,0 +1,21 @@
+def worker = 'master'
+if (env.worker){
+    worker= env.worker
+}
+
+pipeline{
+    agent {label worker}
+    stages{
+        stage('test'){
+            steps{
+                script{
+                    echo "hello world"
+                    checkout([$class: 'GitSCM', branches: [[name: '*/master']],
+						userRemoteConfigs: [[
+							url: 'https://gitee.com/hdops/test_git.git']]])
+                }
+                
+            }
+        }
+    }
+}

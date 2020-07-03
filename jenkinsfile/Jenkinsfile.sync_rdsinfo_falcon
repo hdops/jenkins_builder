@@ -1,0 +1,90 @@
+def node=""
+if (env.node){
+    node =env.node
+}else{
+    node ="master"
+}
+def whether_post=""
+if (env.whether_post){
+    whether_post =env.whether_post
+}else{
+    whether_post ="True"
+}
+pipeline {
+    agent {label node}
+    options {
+	//    buildDiscarder(logRotator(numToKeepStr: '20'))
+	//    disableConcurrentBuilds()
+	//    disableResume()
+	    timeout(time: 1, unit: 'HOURS')
+    }
+	// environment{
+    //     DNET_PRIVATE_AK="$DNET_PRIVATE_AK"
+    //     DNET_PRIVATE_AS="$DNET_PRIVATE_AS"
+ 	// }
+	// parameters {
+	//     choice(name:'DNET_PROFILE', choices:'performance_test\nbranch_test\nproduction\nprd-guoda\nuat')
+	//     choice(name:'DNET_PRODUCT', choices:'dnet\ndly\nscm\nbaas')
+	//     choice(name:'DNET_CLOUD_VENDOR', choices:'aliyun\ntencent')
+	//     string(name: 'dbinstanceid', defaultValue: 'None', description: 'rds实例id,默认从cmdb中获取性能测试环境的所有rds,如果想特殊指定则可以在此指定,但是必须在cmdb中配置,多个以逗号分割',trim: true)
+	//     string(name: 'host', defaultValue: 'None', description: 'falcon-agent所在的host,如果不传则从cmdb中获取',trim: true)
+	//     string(name: 'GIT_BRANCH', defaultValue: 'develop', description: 'git branch',trim: true)
+	//     string(name: 'DNET_AK', defaultValue: 'resource/aliyun_access_key.yaml', description: 'ak信息',trim: true)
+
+	// }
+	triggers {
+        cron '* * * * *'
+     }
+
+	stages {
+	    stage('sync rdsinfo to falcon') {
+			steps{
+				script {
+					if (env.on_k8s){
+						container("hdtoolsetcore"){
+							echo "active profile is ${params.DNET_PROFILE}"
+							echo "product is ${params.DNET_PRODUCT}"
+							echo "workspace is $WORKSPACE"
+							retry(2){
+								sh "DNET_PROFILE=integration_test DNET_PRODUCT=dnet hdops download_toolset --branch ${params.GIT_BRANCH} -p ."
+							}
+							sh "tar zxf toolset.tar.gz -C $WORKSPACE"
+							sh "DNET_AK=${params.DNET_AK} DNET_CLOUD_VENDOR=${params.DNET_CLOUD_VENDOR} DNET_PRODUCT=${params.DNET_PRODUCT} DNET_PROFILE=${params.DNET_PROFILE} hdmon sync_rdsinfo_falcon --dbinstanceid ${params.dbinstanceid} --host ${params.host}"
+						}
+					}else {
+						echo "active profile is ${params.DNET_PROFILE}"
+						echo "product is ${params.DNET_PRODUCT}"
+						echo "workspace is $WORKSPACE"
+						retry(2){
+							sh "DNET_PROFILE=integration_test DNET_PRODUCT=dnet hdops download_toolset --branch ${params.GIT_BRANCH} -p ."
+						}
+						sh "tar zxf toolset.tar.gz -C $WORKSPACE"
+						sh "DNET_AK=${params.DNET_AK} DNET_CLOUD_VENDOR=${params.DNET_CLOUD_VENDOR} DNET_PRODUCT=${params.DNET_PRODUCT} DNET_PROFILE=${params.DNET_PROFILE} hdmon sync_rdsinfo_falcon --dbinstanceid ${params.dbinstanceid} --host ${params.host}"
+					}
+				}
+			}
+        }
+	    
+	}
+	post {
+    // 构建失败之后钉钉通知
+        failure {
+            script {
+                if (whether_post == "True") {
+                    dingTalk accessToken: "${DINGTALK_TOKEN}", imageUrl: '', jenkinsUrl: "${jenkinsUrl}", message: "构建失败 ${new Date().format("yyyy-MM-dd HH:mm:ss")}", notifyPeople: ''
+                }
+            }
+        }
+	// 失败转成功之后钉钉通知
+        fixed {
+            script {
+                if (whether_post == "True") {
+                    dingTalk accessToken: "${DINGTALK_TOKEN}", imageUrl: '', jenkinsUrl: "${jenkinsUrl}", message: "恢复正常 ${new Date().format("yyyy-MM-dd HH:mm:ss")}", notifyPeople: ''
+                }
+            }
+        }
+		aborted { 
+			dingTalk accessToken: "${DINGTALK_TOKEN}", imageUrl: '', jenkinsUrl:  "${jenkinsUrl}", message: "被取消了(${new Date().format("yyyy-MM-dd HH:mm:ss")})", notifyPeople: '13370268139'
+		}
+    }
+}

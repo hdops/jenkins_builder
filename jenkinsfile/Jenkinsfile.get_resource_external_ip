@@ -1,0 +1,67 @@
+def node=""
+if (env.node){
+    node =env.node
+}else{
+    node ="master"
+}
+def whether_post=""
+if (env.whether_post){
+    whether_post =env.whether_post
+}else{
+    whether_post ="True"
+}
+pipeline {
+    agent {label node}
+    stages {
+        stage('查询ip') {
+			steps{
+				script {
+                    if (env.on_k8s){
+                        container('hdtoolsetcore'){
+                            def tasks = [ : ]
+                            tasks['aliyun-test'] = {
+                                stage('aliyun-test') {
+                                    sh "DNET_CLOUD_VENDOR=aliyun hdmon get_resource_external_ip"
+                                }
+                            }
+                            tasks['aliyun-pro'] = {
+                                stage('aliyun-pro') {
+                                    sh "DNET_CLOUD_VENDOR=aliyun DNET_PROFILE=production hdmon get_resource_external_ip"
+                                }
+                            }
+                            tasks['tencent'] = {
+                                stage('tencent') {
+                                    sh "DNET_CLOUD_VENDOR=tencent hdmon get_resource_external_ip "
+                                }
+                            }
+                            parallel tasks
+                        }
+                    }else {
+                        def tasks = [ : ]
+                        tasks['aliyun-test'] = {
+                            stage('aliyun-test') {
+                                sh "DNET_CLOUD_VENDOR=aliyun hdmon get_resource_external_ip"
+                            }
+                        }
+                        tasks['aliyun-pro'] = {
+                            stage('aliyun-pro') {
+                                sh "DNET_CLOUD_VENDOR=aliyun DNET_PROFILE=production hdmon get_resource_external_ip"
+                            }
+                        }
+                        tasks['tencent'] = {
+                            stage('tencent') {
+                                sh "DNET_CLOUD_VENDOR=tencent hdmon get_resource_external_ip "
+                            }
+                        }
+                        parallel tasks
+                    }
+                }
+			}
+        }
+        stage('保存文件') {
+            steps{
+                archiveArtifacts 'resource_external_ip*'
+            }
+        }
+    }
+}

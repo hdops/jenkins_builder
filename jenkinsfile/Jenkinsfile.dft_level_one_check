@@ -1,0 +1,84 @@
+def node="master"
+if (env.node){
+    node =env.node
+}
+
+def whether_post="False"
+if (env.whether_post){
+    whether_post =env.whether_post
+}
+
+pipeline {
+    agent {label node}
+	options {
+	//     buildDiscarder(logRotator(numToKeepStr: '10'))
+	//     disableConcurrentBuilds()
+	//     disableResume()
+	    timeout(time: 5, unit: 'MINUTES')
+    }
+    // environment{
+    //     DNET_PRIVATE_AK="$DNET_PRIVATE_AK"
+    //     DNET_PRIVATE_AS="$DNET_PRIVATE_AS"
+ 	// }
+	// parameters {
+	//    choice(name:'DNET_PROFILE', choices:'integration_test\nproduction')
+	//    string(name: 'DNET_PRODUCT', defaultValue: 'dnet', description: '')
+	//    string(name: 'receivers', defaultValue: 'qinliming@hd123.com,shujun@hd123.com,gonghaiwei@hd123.com,buhaiqing@hd123.com,liliangwei@hd123.com,liqi@hd123.com,gaoweizong@hd123.com', description: '邮件接受人')
+    //    string(name: 'GIT_BRANCH', defaultValue: 'develop', description: 'git branch')
+    // }
+    // triggers {
+    //     cron "H/2 * * * *"
+    // }
+    stages {
+        stage('下载toolset') {
+			steps{
+			    script {
+                    if (env.on_k8s) {
+                        container("hdtoolsetcore"){
+                            retry(2){
+                                sh "DNET_PROFILE=integration_test DNET_PRODUCT=dnet hdops download_toolset --branch ${params.GIT_BRANCH} -p ."
+                            }
+                            sh "tar zxf toolset.tar.gz -C ${WORKSPACE}"
+                        }
+                    } else {
+                        retry(2){
+                            sh "DNET_PROFILE=integration_test DNET_PRODUCT=dnet hdops download_toolset --branch ${params.GIT_BRANCH} -p ."
+                        }
+                        sh "tar zxf toolset.tar.gz -C $WORKSPACE"
+                    }
+			    }
+			}
+        }
+        stage('dft level one check') {
+            steps {
+                script {
+                    if (env.on_k8s) {
+                        container("hdtoolsetcore") {
+                            sh "DNET_PRODUCT=${params.DNET_PRODUCT} DNET_PROFILE=${params.DNET_PROFILE}  hdmon dft_level_one_mon --cfgname ${params.cfgname} --receivers ${params.receivers}"
+                        }
+                    } else {
+                        sh "DNET_PRODUCT=${params.DNET_PRODUCT} DNET_PROFILE=${params.DNET_PROFILE}  hdmon dft_level_one_mon --cfgname ${params.cfgname} --receivers ${params.receivers}"
+                    }
+                }
+            }
+        }
+    }
+	post {
+    // 构建失败之后钉钉通知
+        failure {
+            script {
+                if (whether_post == "True") {
+                    dingTalk accessToken: "${DINGTALK_TOKEN}", imageUrl: '', jenkinsUrl: "${jenkinsUrl}", message: "构建失败 ${new Date().format("yyyy-MM-dd HH:mm:ss")}", notifyPeople: ''
+                }
+            }
+        }
+	// 失败转成功之后钉钉通知
+        fixed {
+            script {
+                if (whether_post == "True") {
+                    dingTalk accessToken: "${DINGTALK_TOKEN}", imageUrl: '', jenkinsUrl: "${jenkinsUrl}", message: "恢复正常 ${new Date().format("yyyy-MM-dd HH:mm:ss")}", notifyPeople: ''
+                }
+            }
+        }
+    }
+}

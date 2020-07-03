@@ -1,0 +1,65 @@
+def node=""
+if (env.node){
+    node =env.node
+}else{
+    node ="master"
+}
+def whether_post="False"
+if (env.whether_post){
+    whether_post =env.whether_post
+}
+
+pipeline {
+    agent {label node}
+    options {
+	//    buildDiscarder(logRotator(numToKeepStr: '10'))
+	//    disableConcurrentBuilds()
+    //    disableResume()
+        timeout(time: 2, unit: 'MINUTES')
+    }
+	// parameters {
+	//     string(name: 'workspace_job', defaultValue: '/hdapp/workspace/logstash/restart_logstash_2m', description: 'workspace',trim: true)
+	// }
+
+	stages {
+	    stage('统计logstash 重启次数') {
+	        steps {
+                dir("${params.workspace_job}") {
+                    script {
+                        if (env.on_k8s){
+                            container('hdtoolsetcore'){
+                                // sh "cd ${params.workspace_job}"
+                                sh "hdmon statistic --action restartlogstash"
+                            }
+                        }else {
+                            docker.image("harbor.qianfan123.com/toolset/toolsetcore:0.3.0").pull()
+                            docker.image("harbor.qianfan123.com/toolset/toolsetcore:0.3.0").withRun('-v /var/run/docker.sock:/var/run/docker.sock') {
+                            // sh "cd ${params.workspace_job}"
+                                sh "hdmon statistic --action restartlogstash"
+                            }
+
+                        }
+                    }
+                }
+	        }
+	    }
+	}
+	post {
+    // 构建失败之后钉钉通知
+        failure {
+            script {
+                if (whether_post == "True") {
+                    dingTalk accessToken: "${DINGTALK_TOKEN}", imageUrl: '', jenkinsUrl: "${jenkinsUrl}", message: "构建失败 ${new Date().format("yyyy-MM-dd HH:mm:ss")}", notifyPeople: ''
+                }
+            }
+        }
+	// 失败转成功之后钉钉通知
+        fixed {
+            script {
+                if (whether_post == "True") {
+                    dingTalk accessToken: "${DINGTALK_TOKEN}", imageUrl: '', jenkinsUrl: "${jenkinsUrl}", message: "恢复正常 ${new Date().format("yyyy-MM-dd HH:mm:ss")}", notifyPeople: ''
+                }
+            }
+        }
+    }
+}

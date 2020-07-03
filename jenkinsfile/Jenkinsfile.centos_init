@@ -1,0 +1,64 @@
+def node="master"
+if (env.node){
+    node =env.node
+}
+
+def whether_post="False"
+if (env.whether_post){
+    whether_post =env.whether_post
+}
+
+pipeline {
+    agent {label node}
+	options {
+	//     buildDiscarder(logRotator(numToKeepStr: '10'))
+	//     disableConcurrentBuilds()
+	//     disableResume()
+	    timeout(time: 300, unit: 'MINUTES')
+    }
+	// parameters {
+	   // string(name:'hosts', description: 'inventory,format(hostname1:ip1,hostname2:ip2)')
+	   // string(name: 'port', defaultValue: '22', description: 'ssh port')
+	   // string(name: 'user', defaultValue: 'root', description: 'ssh user')
+	   // string(name: 'password', defaultValue: '123456', description: 'ssh user password')
+	   // string(name: 'filename', defaultValue: 'cenots_init', description: 'output to inventory/$filename')
+	// }
+    stages {
+        stage('初始化机器') {
+			steps{
+			    deleteDir()
+			    script{
+			        if (env.on_k8s){
+                        container("hdtoolsetcore"){
+                            deleteDir()
+                            sh 'docker pull harbor.qianfan123.com/base/iac:0.1.0'
+                            sh 'docker run -i -e ANSIBLE_HOSTS=$hosts -e ANSIBLE_PORT=$port -e ANSIBLE_USER=$user -e ANSIBLE_PASSWORD=$password -e ANSIBLE_FILE=$filename --rm -v /root/.ssh:/root/.ssh harbor.qianfan123.com/base/iac:0.1.0 "ansible-playbook -i inventory/$filename hdiac/centos_init/init.yml --tags $tags"'
+                        }
+                    } else {
+                        deleteDir()
+                        sh 'docker pull harbor.qianfan123.com/base/iac:0.1.0'
+                        sh 'docker run -i -e ANSIBLE_HOSTS=$hosts -e ANSIBLE_PORT=$port -e ANSIBLE_USER=$user -e ANSIBLE_PASSWORD=$password -e ANSIBLE_FILE=$filename --rm -v /root/.ssh:/root/.ssh harbor.qianfan123.com/base/iac:0.1.0 "ansible-playbook -i inventory/$filename hdiac/centos_init/init.yml --tags $tags"'
+                    }
+			    }
+			}
+        }
+    }
+	post {
+    // 构建失败之后钉钉通知
+        failure {
+            script {
+                if (whether_post == "True") {
+                    dingTalk accessToken: "${DINGTALK_TOKEN}", imageUrl: '', jenkinsUrl: "${jenkinsUrl}", message: "构建失败 ${new Date().format("yyyy-MM-dd HH:mm:ss")}", notifyPeople: ''
+                }
+            }
+        }
+	// 失败转成功之后钉钉通知
+        fixed {
+            script {
+                if (whether_post == "True") {
+                    dingTalk accessToken: "${DINGTALK_TOKEN}", imageUrl: '', jenkinsUrl: "${jenkinsUrl}", message: "恢复正常 ${new Date().format("yyyy-MM-dd HH:mm:ss")}", notifyPeople: ''
+                }
+            }
+        }
+    }
+}

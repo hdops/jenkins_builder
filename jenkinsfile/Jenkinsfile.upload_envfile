@@ -1,0 +1,84 @@
+def node=""
+if (env.node){
+    node =env.node
+}else{
+    node ="master"
+}
+def whether_post=""
+if (env.whether_post){
+    whether_post =env.whether_post
+}else{
+    whether_post ="True"
+}
+pipeline {
+    agent {label node}
+    options {
+	//    buildDiscarder(logRotator(numToKeepStr: '10'))
+	//    disableConcurrentBuilds()
+	//    disableResume()
+	    timeout(time: 1, unit: 'HOURS')
+    }
+	// environment{
+    //     DNET_PRIVATE_AK="$DNET_PRIVATE_AK"
+    //     DNET_PRIVATE_AS="$DNET_PRIVATE_AS"
+ 	// }
+	// parameters {
+	//     choice(name:'DNET_PROFILE', choices:'integration_test\ndev_test\nbranch_test\nproduction\nprd-guoda\nuat')
+	//     choice(name:'DNET_PRODUCT', choices:'baas')
+	//     string(name: 'image', defaultValue: 'None', description: '镜像名称',trim: true)
+	//     string(name: 'version', defaultValue: 'None', description: '镜像版本',trim: true)
+	//     string(name: 'GIT_BRANCH', defaultValue: 'develop', description: 'git branch',trim: true)
+	// }
+	stages {
+	    stage('删除workspace') {
+            steps{
+                deleteDir()
+            }
+        }
+		stage('upload envfile') {
+			steps{
+                script {
+                    if (env.on_k8s){
+                        container("hdtoolsetcore"){
+                            retry(2){
+                                sh "DNET_PROFILE=integration_test DNET_PRODUCT=dnet hdops download_toolset --branch ${params.GIT_BRANCH} -p ."
+                            }
+                            sh "tar zxf toolset.tar.gz -C ${WORKSPACE}"
+                            sh "DNET_PRODUCT=${params.DNET_PRODUCT} DNET_PROFILE=${params.DNET_PROFILE} hdops upload_envfile --image ${params.image} --version ${params.version} "
+                        }
+                    }else {
+                        //docker.image("harbor.qianfan123.com/toolset/toolsetcore:0.3.0").pull()
+                        docker.image("harbor.qianfan123.com/toolset/toolsetcore:0.3.0").withRun('-v /var/run/docker.sock:/var/run/docker.sock') {
+                            retry(2){
+                                sh "DNET_PROFILE=integration_test DNET_PRODUCT=dnet hdops download_toolset --branch ${params.GIT_BRANCH} -p ."
+                            }
+                            sh "tar zxf toolset.tar.gz -C ${WORKSPACE}"
+                            sh "DNET_PRODUCT=${params.DNET_PRODUCT} DNET_PROFILE=${params.DNET_PROFILE} hdops upload_envfile --image ${params.image} --version ${params.version} "
+                        }
+
+                    }
+                }
+			}
+        }
+	   
+	}
+	post {
+    // 构建失败之后钉钉通知
+        failure {
+            script {
+                if (whether_post == "True") {
+                    dingTalk accessToken: "${DINGTALK_TOKEN}", imageUrl: '', jenkinsUrl: "${jenkinsUrl}", message: "构建失败 ${new Date().format("yyyy-MM-dd HH:mm:ss")}", notifyPeople: ''
+                }
+            }
+        }
+	// 失败转成功之后钉钉通知
+        fixed {
+            script {
+                if (whether_post == "True") {
+                    dingTalk accessToken: "${DINGTALK_TOKEN}", imageUrl: '', jenkinsUrl: "${jenkinsUrl}", message: "恢复正常 ${new Date().format("yyyy-MM-dd HH:mm:ss")}", notifyPeople: ''
+                }
+            }
+        }
+    }
+}
+

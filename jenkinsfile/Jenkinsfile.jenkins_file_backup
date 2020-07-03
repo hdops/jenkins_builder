@@ -1,0 +1,68 @@
+def node="master"
+if (env.node){
+    node =env.node
+}
+
+def whether_post="False"
+if (env.whether_post){
+    whether_post =env.whether_post
+}
+pipeline {
+    agent {label node}
+	options {
+	//    buildDiscarder(logRotator(numToKeepStr: '10'))
+	//    disableConcurrentBuilds()
+	//    disableResume()
+	    timeout(time: 3, unit: 'HOURS')
+    }
+	// environment{
+    //     DNET_PRIVATE_AK="$DNET_PRIVATE_AK"
+    //     DNET_PRIVATE_AS="$DNET_PRIVATE_AS"
+ 	// }
+	// parameters {
+	//    string(name: 'action', defaultValue: 'oss', description: '备份方式')
+	//    string(name: 'cfg_name', defaultValue: '', description: '备份文件清单的配置文件')
+	//    string(name: 'bucket', defaultValue: 'cos02-1258325089', description: '备份到oss的bucket')
+	//    choice(name: 'backup_type', choices:'full_backup\nplugins_backup\njobs_backup\nconfig_backup', description: '备份类型,需要在配置文件中定义。full_backup为全量备份,plugins_backup为插件备份,jobs_backup为job备份,config_backup为配置文件备份')
+	//    string(name: 'GIT_BRANCH', defaultValue: 'develop', description: 'develop')
+	//   // string(name: 'DINGTALK_TOKEN', defaultValue: '1e93162cec116308ffb29fe19ba83b0f57121cc79cfb9b0958e1b1025e55a445', description: '钉钉token')
+	// }
+	// triggers {
+    //     cron 'H 4 * * *'
+    //  }
+    stages {
+        stage('download toolset') {
+			steps{
+				echo "profile is ${params.DNET_PROFILE}"
+                retry(2){
+				    sh "DNET_PROFILE=integration_test DNET_PRODUCT=dnet hdops download_toolset --branch ${params.GIT_BRANCH} -p ."
+                }
+				sh "tar zxf toolset.tar.gz -C ${WORKSPACE}"
+			}
+        }
+        stage('jenkins重要文件备份') {
+			steps{
+				sh "DINGTALK_TOKEN=${DINGTALK_TOKEN} hdops jenkins_file_backup ${params.action} --cfg_name ${params.cfg_name} --bucket ${params.bucket} --backup_type ${params.backup_type}"
+			}
+        }
+    }
+	post {
+    // 构建失败之后钉钉通知
+        failure {
+            script {
+                if (whether_post == "True") {
+                    dingTalk accessToken: "${DINGTALK_TOKEN}", imageUrl: '', jenkinsUrl: "${jenkinsUrl}", message: "构建失败 ${new Date().format("yyyy-MM-dd HH:mm:ss")}", notifyPeople: ''
+                }
+            }
+        }
+	// 失败转成功之后钉钉通知
+        fixed {
+            script {
+                if (whether_post == "True") {
+                    dingTalk accessToken: "${DINGTALK_TOKEN}", imageUrl: '', jenkinsUrl: "${jenkinsUrl}", message: "恢复正常 ${new Date().format("yyyy-MM-dd HH:mm:ss")}", notifyPeople: ''
+                }
+            }
+        }
+    }
+}
+

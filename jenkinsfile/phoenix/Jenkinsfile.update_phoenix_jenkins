@@ -1,0 +1,37 @@
+def node=""
+if (env.node){
+    node =env.node
+}else{
+    node ="master"
+}
+pipeline {
+    agent {label node}
+	options {
+	//     buildDiscarder(logRotator(numToKeepStr: '10'))
+	//     disableConcurrentBuilds()
+	//     disableResume()
+	    timeout(time: 15, unit: 'MINUTES')
+    }
+	// parameters {
+	//     string(name: 'GIT_REPONAME', defaultValue: 'heading', description: 'phoenix_template git repo name',trim: true)
+	//     string(name: 'GIT_BRANCH', defaultValue: 'uat', description: 'phoenix_template git branch',trim: true)
+	// }
+    stages {
+	    // stage('delete workspace') {
+		// 	steps{
+		// 		deleteDir()
+		// 	}
+        // }
+        // stage('下载phoenix_template') {
+		// 	steps{
+		// 		sh "git clone http://${GIT_USER}:${GIT_PASSWORD}@gitlab.app.hd123.cn:10080/phoenix-config/${params.GIT_REPONAME}.git -b ${params.GIT_BRANCH} ."
+		// 	}
+        // }
+        stage('update jenkins') {
+			steps{
+			    sh "docker pull harbor.qianfan123.com/base/jenkins-job-builder:0.1.0"
+				sh "docker run -i --rm -v $jenkins_home/workspace/$JOB_NAME/jenkins:/root/jenkins harbor.qianfan123.com/base/jenkins-job-builder:0.1.0 jenkins-jobs --conf jenkins/jenkins_jobs.ini update jenkins/phoenix/project.yml"
+			}
+        }
+    }
+}

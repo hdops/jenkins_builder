@@ -1,0 +1,80 @@
+def node=""
+if (env.node){
+    node =env.node
+}else{
+    node ="master"
+}
+def whether_post=""
+if (env.whether_post){
+    whether_post =env.whether_post
+}else{
+    whether_post ="True"
+}
+pipeline {
+   agent {label node}
+    options {
+	//     buildDiscarder(logRotator(numToKeepStr: '10'))
+	//     disableConcurrentBuilds()
+	//     disableResume()
+	    timeout(time: 3, unit: 'HOURS')
+    }
+	// environment{
+    //     DNET_PRIVATE_AK="$DNET_PRIVATE_AK"
+    //     DNET_PRIVATE_AS="$DNET_PRIVATE_AS"
+ 	// }
+	// parameters {
+	//     choice(name:'DNET_PROFILE', choices:'integration_test\ndev_test\nperformance_test')
+	//     string(name: 'DNET_PRODUCT', defaultValue: 'baas', description: '',trim: true)
+	//     string(name: 'subsystem', defaultValue: 'cvt', description: '子系统，多值以逗号分隔，例如account,custom,commonsa,commonsb,invc,cvt,server,operatorweb,optwaltzweb,optservice,operatorlogin,vendorweb,vendorservice,storeweb,push,sequence,console,consoleweb,search,dfm,market',trim: true)
+	//     choice(name:'skipversion', choices:'False\nTrue')
+	//     string(name: 'GIT_BRANCH', defaultValue: 'develop', description: 'git branch',trim: true)
+	// }
+    stages {
+    	stage('deploy') {
+			steps{
+				script{
+                    if (env.on_k8s){
+                        container("hdtoolsetcore"){
+                            echo "active profile is ${params.DNET_PROFILE}"
+                            echo "product is ${params.DNET_PRODUCT}"
+                            echo "workspace is $WORKSPACE"
+                            retry(2){
+                                sh "DNET_PROFILE=integration_test DNET_PRODUCT=dnet hdops download_toolset --branch ${params.GIT_BRANCH} -p ."
+                            }
+                            sh "tar zxf toolset.tar.gz -C $WORKSPACE"
+                            sh "DNET_PROFILE=${params.DNET_PROFILE} DNET_PRODUCT=${params.DNET_PRODUCT} python combine_deploy-baas.py -subsystem ${params.subsystem} -skipversion ${params.skipversion} -GIT_BRANCH ${params.GIT_BRANCH}"
+                        }
+                    }else {
+                        echo "active profile is ${params.DNET_PROFILE}"
+                        echo "product is ${params.DNET_PRODUCT}"
+                        echo "workspace is $WORKSPACE"
+                        retry(2){
+                            sh "DNET_PROFILE=integration_test DNET_PRODUCT=dnet hdops download_toolset --branch ${params.GIT_BRANCH} -p ."
+                        }
+                        sh "tar zxf toolset.tar.gz -C $WORKSPACE"
+                        sh "DNET_PROFILE=${params.DNET_PROFILE} DNET_PRODUCT=${params.DNET_PRODUCT} python combine_deploy-baas.py -subsystem ${params.subsystem} -skipversion ${params.skipversion} -GIT_BRANCH ${params.GIT_BRANCH}"
+                    }
+                }
+			}
+        }
+        
+    }
+	post {
+    // 构建失败之后钉钉通知
+        failure {
+            script {
+                if (whether_post == "True") {
+                    dingTalk accessToken: "${DINGTALK_TOKEN}", imageUrl: '', jenkinsUrl: "${jenkinsUrl}", message: "构建失败 ${new Date().format("yyyy-MM-dd HH:mm:ss")}", notifyPeople: ''
+                }
+            }
+        }
+	// 失败转成功之后钉钉通知
+        fixed {
+            script {
+                if (whether_post == "True") {
+                    dingTalk accessToken: "${DINGTALK_TOKEN}", imageUrl: '', jenkinsUrl: "${jenkinsUrl}", message: "恢复正常 ${new Date().format("yyyy-MM-dd HH:mm:ss")}", notifyPeople: ''
+                }
+            }
+        }
+    }
+}
