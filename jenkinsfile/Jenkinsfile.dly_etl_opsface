@@ -1,0 +1,81 @@
+def node="master"
+if (env.node){
+    node =env.node
+}
+
+def whether_post="False"
+if (env.whether_post){
+    whether_post =env.whether_post
+}
+
+pipeline {
+    agent {label node}
+	options {
+	//     buildDiscarder(logRotator(numToKeepStr: '10'))
+	//     disableConcurrentBuilds()
+	//     disableResume()
+	    timeout(time: 3, unit: 'HOURS')
+    }
+	// environment{
+    //     DNET_PRIVATE_AK="$DNET_PRIVATE_AK"
+    //     DNET_PRIVATE_AS="$DNET_PRIVATE_AS"
+ 	// }
+	// parameters {
+	//    choice(name:'DNET_PROFILE', choices:'integration_test\nbranch_test\nuat\nproduction')
+	//    string(name: 'DNET_PRODUCT', defaultValue: 'pay', description: '')
+	//    string(name: 'GIT_BRANCH', defaultValue: 'develop', description: 'release/release\ndevelop')
+	//    string(name: 'cfgname', defaultValue: 'etl/member/quasirealtime.yaml', description: 'cfgname')
+	//   // string(name: 'DINGTALK_TOKEN', defaultValue: '1e93162cec116308ffb29fe19ba83b0f57121cc79cfb9b0958e1b1025e55a445', description: '钉钉token')
+	// }
+	// triggers {
+    //     cron '*/2 * * * *'
+    //  }
+    stages {
+        stage('etl') {
+			steps{
+				script {
+                    if (env.on_k8s){
+                        container("hdtoolsetcore"){
+                            echo "profile is ${params.DNET_PROFILE}"
+                            retry(2){
+                                sh "DNET_PROFILE=integration_test DNET_PRODUCT=dnet hdops download_toolset --branch ${params.GIT_BRANCH} -p ."
+                            }
+                            sh "tar zxf toolset.tar.gz -C ${WORKSPACE}"
+                            sh "DINGTALK_TOKEN=${DINGTALK_TOKEN} hdmon dly_etl_opsface --cfgname ${params.cfgname}"
+                        }
+                    }else {
+                        docker.image("harbor.qianfan123.com/toolset/toolsetcore:0.3.0").withRun('-v /var/run/docker.sock:/var/run/docker.sock') {
+                            echo "profile is ${params.DNET_PROFILE}"
+                            retry(2){
+                                sh "DNET_PROFILE=integration_test DNET_PRODUCT=dnet hdops download_toolset --branch ${params.GIT_BRANCH} -p ."
+                            }
+                            sh "tar zxf toolset.tar.gz -C ${WORKSPACE}"
+                            sh "DINGTALK_TOKEN=${DINGTALK_TOKEN} hdmon dly_etl_opsface --cfgname ${params.cfgname}"
+                        }
+
+                    }
+                }
+			}
+        }
+        
+    }
+	post {
+    // 构建失败之后钉钉通知
+        failure {
+            script {
+                if (whether_post == "True") {
+                    dingTalk accessToken: "${DINGTALK_TOKEN}", imageUrl: '', jenkinsUrl: "${jenkinsUrl}", message: "构建失败 ${new Date().format("yyyy-MM-dd HH:mm:ss")}", notifyPeople: ''
+                }
+            }
+        }
+	// 失败转成功之后钉钉通知
+        fixed {
+            script {
+                if (whether_post == "True") {
+                    dingTalk accessToken: "${DINGTALK_TOKEN}", imageUrl: '', jenkinsUrl: "${jenkinsUrl}", message: "恢复正常 ${new Date().format("yyyy-MM-dd HH:mm:ss")}", notifyPeople: ''
+                }
+            }
+        }
+    }
+}
+
