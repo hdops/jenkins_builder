@@ -1,4 +1,4 @@
 # jenkins_builder
 
 
-Jenkins Pipeline definition for CI/CD 
+Jenkins Pipeline definitions for CI/CD 
