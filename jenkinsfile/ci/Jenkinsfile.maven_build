@@ -109,7 +109,7 @@ pipeline {
 				// deploy 
 				triggerRemoteJob job: "${remoteJob}", maxConn: 1, parameters: '''DNET_PROFILE=${DNET_PROFILE}
 subsystem=${subsystem} 
-skipversion=True''', remoteJenkinsName: "${remoteJenkins}", useCrumbCache: true, useJobInfoCache: true
+skipversion=${skipversion}''', remoteJenkinsName: "${remoteJenkins}", useCrumbCache: true, useJobInfoCache: true
 			}
 		}
     }
