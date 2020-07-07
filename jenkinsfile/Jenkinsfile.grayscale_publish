@@ -100,10 +100,10 @@ pipeline {
 			    script{
 					if (env.on_k8s){
 						container("hdtoolsetcore"){
-							sh "DNET_PRODUCT=${params.DNET_PRODUCT} DNET_PROFILE=${params.DNET_PROFILE} PRESET_IMAGE_VERSION=$PRESET_IMAGE_VERSION hdops deploy db_upgrade --subsystem ${params.subsystem} --stackids $stackIds --dblist $dblist ${params.skipversion} ${params.skipversionupdate} --receivers ${params.receivers} --timeout ${params.timeout} --threadcount ${params.threadcount} --tag ${params.tag}"
+							sh "DNET_PRODUCT=${params.DNET_PRODUCT} DNET_PROFILE=${params.DNET_PROFILE} PRESET_IMAGE_VERSION=$PRESET_IMAGE_VERSION hdops deploy db_upgrade --subsystem ${params.subsystem} --stackids $stackIds --dblist $dblist ${params.skipversion} ${params.skipversionupdate} --receivers ${params.receivers} --timeout ${params.timeout} --threadcount ${params.threadcount}"
 						}
 					}else {
-						sh "DNET_PRODUCT=${params.DNET_PRODUCT} DNET_PROFILE=${params.DNET_PROFILE} PRESET_IMAGE_VERSION=$PRESET_IMAGE_VERSION hdops deploy db_upgrade --subsystem ${params.subsystem} --stackids $stackIds --dblist $dblist ${params.skipversion} ${params.skipversionupdate} --receivers ${params.receivers} --timeout ${params.timeout} --threadcount ${params.threadcount} --tag ${params.tag}"
+						sh "DNET_PRODUCT=${params.DNET_PRODUCT} DNET_PROFILE=${params.DNET_PROFILE} PRESET_IMAGE_VERSION=$PRESET_IMAGE_VERSION hdops deploy db_upgrade --subsystem ${params.subsystem} --stackids $stackIds --dblist $dblist ${params.skipversion} ${params.skipversionupdate} --receivers ${params.receivers} --timeout ${params.timeout} --threadcount ${params.threadcount}"
 					}
 				}
 			}
@@ -126,12 +126,12 @@ pipeline {
 				script{
 					if (env.on_k8s){
 						container("hdtoolsetcore"){
-							sh "DNET_PRODUCT=${params.DNET_PRODUCT} DNET_PROFILE=${params.DNET_PROFILE} PRESET_IMAGE_VERSION=$PRESET_IMAGE_VERSION hdops deploy image_download --subsystem ${params.subsystem} --stackids $stackIds --tag ${params.tag}"
-		        			sh "DNET_AK=${params.DNET_AK} DNET_PRODUCT=${params.DNET_PRODUCT} DNET_PROFILE=${params.DNET_PROFILE} PRESET_IMAGE_VERSION=$PRESET_IMAGE_VERSION hdops deploy appinstall --subsystem ${params.subsystem} --stackids $stackIds  --operate ${params.action} --tag ${params.tag}"
+							sh "DNET_PRODUCT=${params.DNET_PRODUCT} DNET_PROFILE=${params.DNET_PROFILE} PRESET_IMAGE_VERSION=$PRESET_IMAGE_VERSION hdops deploy image_download --subsystem ${params.subsystem} --stackids $stackIds
+		        			sh "DNET_AK=${params.DNET_AK} DNET_PRODUCT=${params.DNET_PRODUCT} DNET_PROFILE=${params.DNET_PROFILE} PRESET_IMAGE_VERSION=$PRESET_IMAGE_VERSION hdops deploy appinstall --subsystem ${params.subsystem} --stackids $stackIds  --operate ${params.action}"
 						}
 					}else {
-						sh "DNET_PRODUCT=${params.DNET_PRODUCT} DNET_PROFILE=${params.DNET_PROFILE} PRESET_IMAGE_VERSION=$PRESET_IMAGE_VERSION hdops deploy image_download --subsystem ${params.subsystem} --stackids $stackIds --tag ${params.tag}"
-		        		sh "DNET_AK=${params.DNET_AK} DNET_PRODUCT=${params.DNET_PRODUCT} DNET_PROFILE=${params.DNET_PROFILE} PRESET_IMAGE_VERSION=$PRESET_IMAGE_VERSION hdops deploy appinstall --subsystem ${params.subsystem} --stackids $stackIds  --operate ${params.action} --tag ${params.tag}"
+						sh "DNET_PRODUCT=${params.DNET_PRODUCT} DNET_PROFILE=${params.DNET_PROFILE} PRESET_IMAGE_VERSION=$PRESET_IMAGE_VERSION hdops deploy image_download --subsystem ${params.subsystem} --stackids $stackIds"
+		        		sh "DNET_AK=${params.DNET_AK} DNET_PRODUCT=${params.DNET_PRODUCT} DNET_PROFILE=${params.DNET_PROFILE} PRESET_IMAGE_VERSION=$PRESET_IMAGE_VERSION hdops deploy appinstall --subsystem ${params.subsystem} --stackids $stackIds  --operate ${params.action}"
 					}
 				}
 			}
