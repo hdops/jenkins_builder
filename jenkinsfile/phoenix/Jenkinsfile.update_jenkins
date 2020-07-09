@@ -13,6 +13,7 @@ pipeline {
 	//     buildDiscarder(logRotator(numToKeepStr: '10'))
 	//     disableConcurrentBuilds()
 	//     disableResume()
+	    timeout(time: 15, unit: 'MINUTES')
     }
 	// parameters {
     //     string(name: 'GIT_REPONAME', defaultValue: 'heading', description: 'git repo url')
