@@ -71,7 +71,7 @@ pipeline {
                     cfg = data[env.DNET_PROFILE][env.subsystem]
                     println(cfg)
                     env.PRESET_IMAGE_VERSION = cfg.version
-                    env.stackIds = cfg.stackids
+                    env.stackIds = cfg.stackid
                     env.dblist = cfg.dbs
                 }
             }
