@@ -41,41 +41,6 @@ pipeline {
                 deleteDir()
             }
         }  
-        stage('checkout') {
-            steps{
-                echo "checkout http://github.app.hd123.cn:10080/${git_project}.git  branch:${build_branch}"
-                git branch: "${build_branch}", credentialsId: "${credentialsId}", url: "http://github.app.hd123.cn:10080/${git_project}.git"
-            }
-        }  
-		stage('build') {
-		    steps{
-				script{  
-						def mvn_shell="mvn "
-                        if (env.mvn_pom){
-                            mvn_shell+=" -f "+env.mvn_pom+" "+env.mvn_goals
-                            }
-                        else{
-                            mvn_shell+=env.mvn_goals
-                            }
-                        if (env.mvn_options){
-                            echo "mvn_options is ${mvn_options}" 
-                            mvn_shell+=" -D"+env.mvn_options+"=true"
-                            } 
-                        if (env.mvn_configfile){
-                            echo "mvn_configfile is ${mvn_configfile}" 
-                            configFileProvider([configFile(fileId:env.mvn_configfile, targetLocation: '/hdapp/java/.m2/repository/settings.xml')]) {
-                                mvn_shell+="  -s /hdapp/java/.m2/repository/settings.xml"
-                                echo "mvn_shell is ${mvn_shell}" 
-                                sh "${mvn_shell}" 
-                                } 
-                            } 
-                        else{
-                            echo "mvn_shell is ${mvn_shell}" 
-                            sh "${mvn_shell}" 
-                            }
-				}
-			} 
-		}
         stage('deploy'){ 
 			when {
                 anyOf {
@@ -102,7 +67,7 @@ pipeline {
 						echo("ImageVersion=${ImageVersion}")
 				}
                 // read loop cfg
-                data = readJson text: "${remote_deploy_cfg}"
+                data = readYaml text: "${remote_deploy_cfg}"
                 println(data)
                 count = data.size()
                 tasks = [:]
