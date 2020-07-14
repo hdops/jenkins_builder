@@ -1,0 +1,149 @@
+def node=""
+if (env.node){
+    node =env.node
+}else{
+    node ="master"
+}
+
+def maven_image=""
+if (env.maven_image){
+    maven_image =env.maven_image
+}else{
+    maven_image ="harbor.qianfan123.com/base/maven:3.3.9_jdk8"
+}
+
+def docker_args="-v /var/run/docker.sock:/var/run/docker.sock -v /usr/bin/docker:/usr/bin/docker"
+if (env.maven_repository){
+    docker_args+=" -v "+env.maven_repository+":/hdapp/java"
+}else{
+    docker_args+=" -v /hdapp/java:/hdapp/java"
+}
+
+
+def credentialsId="qianfan"
+ 
+
+pipeline {
+    // agent {label node}
+    agent {docker {
+            image "${maven_image}"
+            args "${docker_args}"
+          }}
+    options {
+	//     buildDiscarder(logRotator(numToKeepStr: '10'))
+	//     disableConcurrentBuilds()
+	//     disableResume()
+	    timeout(time: 1, unit: 'HOURS')
+    } 
+    stages {
+        stage('delete workspace') {
+            steps{
+                deleteDir()
+            }
+        }  
+        stage('checkout') {
+            steps{
+                echo "checkout http://github.app.hd123.cn:10080/${git_project}.git  branch:${build_branch}"
+                git branch: "${build_branch}", credentialsId: "${credentialsId}", url: "http://github.app.hd123.cn:10080/${git_project}.git"
+            }
+        }  
+		stage('build') {
+		    steps{
+				script{  
+						def mvn_shell="mvn "
+                        if (env.mvn_pom){
+                            mvn_shell+=" -f "+env.mvn_pom+" "+env.mvn_goals
+                            }
+                        else{
+                            mvn_shell+=env.mvn_goals
+                            }
+                        if (env.mvn_options){
+                            echo "mvn_options is ${mvn_options}" 
+                            mvn_shell+=" -D"+env.mvn_options+"=true"
+                            } 
+                        if (env.mvn_configfile){
+                            echo "mvn_configfile is ${mvn_configfile}" 
+                            configFileProvider([configFile(fileId:env.mvn_configfile, targetLocation: '/hdapp/java/.m2/repository/settings.xml')]) {
+                                mvn_shell+="  -s /hdapp/java/.m2/repository/settings.xml"
+                                echo "mvn_shell is ${mvn_shell}" 
+                                sh "${mvn_shell}" 
+                                } 
+                            } 
+                        else{
+                            echo "mvn_shell is ${mvn_shell}" 
+                            sh "${mvn_shell}" 
+                            }
+				}
+			} 
+		}
+        stage('deploy'){ 
+			when {
+                anyOf {
+                    environment name: 'remoteJenkins', value: 'aliyun'
+                    environment name: 'remoteJenkins', value: 'k8s-int'
+                }
+            }
+			steps{
+				script{  
+//						echo "using shell:mvn "
+//						sh '''ImageVersion=$(mvn -q -N -Dexec.executable="echo"  -Dexec.args='${project.version}'  org.codehaus.mojo:exec-maven-plugin:1.3.1:exec)
+//echo ImageVersion=$ImageVersion >image.version'''
+						
+//						echo "read file "
+//						def props = readProperties file: 'image.version'
+//						if (props['ImageVersion']){
+//						    env.ImageVersion = props['ImageVersion'] 
+//						    echo("ImageVersion=${ImageVersion}")
+//                    } 
+
+						echo "using mvn "
+						//ImageVersion = readMavenPom().getVersion() 
+						ImageVersion = readMavenPom().version
+						echo("ImageVersion=${ImageVersion}")
+				}
+                // read loop cfg
+                data = readJson text: "${remote_deploy_cfg}"
+                println(data)
+                count = data.size()
+                tasks = [:]
+                def i = 0
+                for(i = 0; i < count; i = i + 1){
+                    remoteJenkins = data[i].remoteJenkins
+                    remoteJob = data[i].remoteJob
+                    tasks[remoteJenkins] = {
+                        stage("${remoteJob}") {
+                            steps {
+                                echo "remoteJenkins is ${remoteJenkins}"
+                                echo "remoteJob is ${remoteJob}"
+                                triggerRemoteJob job: "${remoteJob}", maxConn: 1, parameters: '''DNET_PROFILE=${DNET_PROFILE}
+subsystem=${subsystem}
+skipversion=${skipversion}''', remoteJenkinsName: "${remoteJenkins}", useCrumbCache: true, useJobInfoCache: true
+                            }
+                        }
+                    }
+                }
+			}
+		}
+    }
+    post{
+        success{
+            script{
+                if (env.post_shell){
+                    sh """
+                    ${env.post_shell}
+                    """
+                }
+            }
+        }
+        failure{
+            script{
+
+                def subject = env.email_subject ? "${env.email_subject}" : "failure on Job ${env.JOB_NAME}"
+                def to = env.email_recipients ? "${env.email_recipients}" : "heweiwei@hd123.com"
+                def body = env.email_body ? "${env.email_body}" : "failure on Job ${env.JOB_NAME}"
+                // send email
+                emailext subject: subject, to: to, body:body,attachLog:true
+            }
+        }
+    }
+}
