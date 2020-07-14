@@ -15,7 +15,7 @@ pipeline {
                   parameter2: parameter2
                 """
                     count = data.size()
-                    task = [:]
+                    tasks = [:]
                     def i = 0
                     for(i = 0; i < count; i = i + 1){
                         tasks[data[i].jobname] = {
@@ -29,7 +29,7 @@ pipeline {
                 }
             }
         }
-        stage(loop) {
+        stage('loop') {
             parallel tasks
         }
     }
