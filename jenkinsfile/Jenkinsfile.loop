@@ -5,26 +5,30 @@ if (env.node){
 
 pipeline {
     agent {label node}
-    script {
-        data = readYaml text: """
-    - jobname: job1
-      parameter1: parameter1
-      parameter2: parameter2
-    """
-        count = data.size()
-        task = [:]
-        def i = 0
-        for(i = 0; i < count; i = i + 1){
-            tasks[data[i].jobname] = {
-                stage("${data[i].jobname}") {
-                    echo "job is ${data[i].jobname}"
-                    echo "parameter1 is ${data[i].parameter1}"
-                    echo "parameter2 is ${data[i].parameter2}"
+    stages {
+        stage('read loop cfg') {
+            steps {
+                script {
+                    data = readYaml text: """
+                - jobname: job1
+                  parameter1: parameter1
+                  parameter2: parameter2
+                """
+                    count = data.size()
+                    task = [:]
+                    def i = 0
+                    for(i = 0; i < count; i = i + 1){
+                        tasks[data[i].jobname] = {
+                            stage("${data[i].jobname}") {
+                                echo "job is ${data[i].jobname}"
+                                echo "parameter1 is ${data[i].parameter1}"
+                                echo "parameter2 is ${data[i].parameter2}"
+                            }
+                        }
+                    }
                 }
             }
         }
-    }
-    stages {
         stage(loop) {
             parallel tasks
         }
