@@ -10,9 +10,9 @@ pipeline {
             steps {
                 script {
                     data = readYaml text: """
-                - jobname: job1
-                  parameter1: parameter1
-                  parameter2: parameter2
+- jobname: job1
+  parameter1: parameter1
+  parameter2: parameter2
                 """
                     count = data.size()
                     tasks = [:]
@@ -26,12 +26,8 @@ pipeline {
                             }
                         }
                     }
+                    parallel tasks
                 }
-            }
-        }
-        stage('loop') {
-            parallel {
-                tasks
             }
         }
     }
