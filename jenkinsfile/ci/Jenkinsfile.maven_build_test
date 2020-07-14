@@ -40,53 +40,33 @@ pipeline {
             steps{
                 deleteDir()
             }
-        }  
-        stage('deploy'){ 
-			when {
-                anyOf {
-                    environment name: 'remoteJenkins', value: 'aliyun'
-                    environment name: 'remoteJenkins', value: 'k8s-int'
-                }
-            }
+        }
+        stage('deploy'){
 			steps{
-				script{  
-//						echo "using shell:mvn "
-//						sh '''ImageVersion=$(mvn -q -N -Dexec.executable="echo"  -Dexec.args='${project.version}'  org.codehaus.mojo:exec-maven-plugin:1.3.1:exec)
-//echo ImageVersion=$ImageVersion >image.version'''
-						
-//						echo "read file "
-//						def props = readProperties file: 'image.version'
-//						if (props['ImageVersion']){
-//						    env.ImageVersion = props['ImageVersion'] 
-//						    echo("ImageVersion=${ImageVersion}")
-//                    } 
-
-						echo "using mvn "
-						//ImageVersion = readMavenPom().getVersion() 
-						ImageVersion = readMavenPom().version
-						echo("ImageVersion=${ImageVersion}")
-				}
-                // read loop cfg
-                data = readYaml text: "${remote_deploy_cfg}"
-                println(data)
-                count = data.size()
-                tasks = [:]
-                def i = 0
-                for(i = 0; i < count; i = i + 1){
-                    remoteJenkins = data[i].remoteJenkins
-                    remoteJob = data[i].remoteJob
-                    tasks[remoteJenkins] = {
-                        stage("${remoteJob}") {
-                            steps {
-                                echo "remoteJenkins is ${remoteJenkins}"
-                                echo "remoteJob is ${remoteJob}"
-                                triggerRemoteJob job: "${remoteJob}", maxConn: 1, parameters: '''DNET_PROFILE=${DNET_PROFILE}
-subsystem=${subsystem}
-skipversion=${skipversion}''', remoteJenkinsName: "${remoteJenkins}", useCrumbCache: true, useJobInfoCache: true
+				script{
+                    // read loop cfg
+                    data = readYaml text: "${remote_deploy_cfg}"
+                    println(data)
+                    count = data.size()
+                    tasks = [:]
+                    def i = 0
+                    for(i = 0; i < count; i = i + 1){
+                        remoteJenkins = data[i].remoteJenkins
+                        remoteJob = data[i].remoteJob
+                        tasks[remoteJenkins] = {
+                            stage("${remoteJob}") {
+                                steps {
+                                    echo "remoteJenkins is ${remoteJenkins}"
+                                    echo "remoteJob is ${remoteJob}"
+                                    triggerRemoteJob job: "${remoteJob}", maxConn: 1, parameters: '''DNET_PROFILE=${DNET_PROFILE}
+    subsystem=${subsystem}
+    skipversion=${skipversion}''', remoteJenkinsName: "${remoteJenkins}", useCrumbCache: true, useJobInfoCache: true
+                                }
                             }
                         }
                     }
-                }
+                    parallel tasks
+				}
 			}
 		}
     }
