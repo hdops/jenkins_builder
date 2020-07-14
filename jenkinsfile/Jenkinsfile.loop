@@ -30,7 +30,9 @@ pipeline {
             }
         }
         stage('loop') {
-            parallel tasks
+            parallel {
+                tasks
+            }
         }
     }
 }
