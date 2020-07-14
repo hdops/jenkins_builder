@@ -45,6 +45,7 @@ pipeline {
 			steps{
 				script{
                     // read loop cfg
+                    println("${remote_deploy_cfg}")
                     data = readYaml text: "${remote_deploy_cfg}"
                     println(data)
                     count = data.size()
@@ -69,26 +70,5 @@ pipeline {
 				}
 			}
 		}
-    }
-    post{
-        success{
-            script{
-                if (env.post_shell){
-                    sh """
-                    ${env.post_shell}
-                    """
-                }
-            }
-        }
-        failure{
-            script{
-
-                def subject = env.email_subject ? "${env.email_subject}" : "failure on Job ${env.JOB_NAME}"
-                def to = env.email_recipients ? "${env.email_recipients}" : "heweiwei@hd123.com"
-                def body = env.email_body ? "${env.email_body}" : "failure on Job ${env.JOB_NAME}"
-                // send email
-                emailext subject: subject, to: to, body:body,attachLog:true
-            }
-        }
     }
 }
