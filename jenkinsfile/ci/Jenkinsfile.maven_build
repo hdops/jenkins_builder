@@ -100,11 +100,9 @@ pipeline {
                         remoteJenkins = item[0]
                         remoteJob = item[1]
                         DNET_PROFILE = item[2]
-                        gitpath = item[3]
                         echo "remoteJenkins is ${remoteJenkins}"
                         echo "remoteJob is ${remoteJob}"
                         echo "DNET_PROFILE is ${DNET_PROFILE}"
-                        echo "gitpath is ${gitpath}"
                         // env
                         triggerRemoteJob job: "${remoteJob}", maxConn: 1, parameters: """DNET_PROFILE=${DNET_PROFILE}
 DNET_PRODUCT=${DNET_PRODUCT}
