@@ -46,7 +46,7 @@ pipeline {
 				script{
                     println(env.remote_deploy_cfg)
                     // data = env.remote_deploy_cfg.split('&')
-                    data = "k8s-int|BAAS_Integration_test/BAAS_Deploy_one_Int|integration_test&k8s-int|BAAS_Integration_test/BAAS_Deploy_one_Int|integration_test"
+                    data = "k8s-int|BAAS_Integration_test/BAAS_Deploy_one_Int|integration_test&k8s-int|BAAS_Integration_test/BAAS_Deploy_one_Int|integration_test".split('&')
                     println(data)
                     count = data.size()
                     tasks = [:]
