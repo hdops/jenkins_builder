@@ -61,13 +61,11 @@ pipeline {
                         remoteJob = data[i].remoteJob
                         tasks[remoteJenkins] = {
                             stage("${remoteJob}") {
-                                steps {
-                                    echo "remoteJenkins is ${remoteJenkins}"
-                                    echo "remoteJob is ${remoteJob}"
-                                    triggerRemoteJob job: "${remoteJob}", maxConn: 1, parameters: '''DNET_PROFILE=${DNET_PROFILE}
-    subsystem=${subsystem}
-    skipversion=${skipversion}''', remoteJenkinsName: "${remoteJenkins}", useCrumbCache: true, useJobInfoCache: true
-                                }
+                                echo "remoteJenkins is ${remoteJenkins}"
+                                echo "remoteJob is ${remoteJob}"
+                                triggerRemoteJob job: "${remoteJob}", maxConn: 1, parameters: '''DNET_PROFILE=${DNET_PROFILE}
+subsystem=${subsystem}
+skipversion=${skipversion}''', remoteJenkinsName: "${remoteJenkins}", useCrumbCache: true, useJobInfoCache: true
                             }
                         }
                     }
