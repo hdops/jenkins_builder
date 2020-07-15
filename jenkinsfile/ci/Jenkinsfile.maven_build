@@ -76,36 +76,56 @@ pipeline {
 				}
 			} 
 		}
-        stage('deploy'){ 
-// 			when {
-//                 anyOf {
-//                     environment name: 'remoteJenkins', value: 'aliyun'
-//                     environment name: 'remoteJenkins', value: 'k8s-int'
-//                 }
-//             }
+        stage('env'){
+            when {
+                not {
+                    environment name: 'remote_env_cfg', value: ''
+                }
+            }
+			steps{
+				script{
+                    echo "using mvn "
+                    //ImageVersion = readMavenPom().getVersion()
+                    ImageVersion = readMavenPom().version
+                    echo("ImageVersion=${ImageVersion}")
+                    // remote_env
+                    println(env.remote_env_cfg)
+                    String[] data = env.remote_env_cfg.split('&')
+                    println(data)
+                    count = data.size()
+                    tasks = [:]
+                    data.each{ i ->
+                        String[] item = i.split(';')
+                        println(item)
+                        remoteJenkins = item[0]
+                        remoteJob = item[1]
+                        DNET_PROFILE = item[2]
+                        image = item[3]
+                        gitpath = item[4]
+                        echo "remoteJenkins is ${remoteJenkins}"
+                        echo "remoteJob is ${remoteJob}"
+                        echo "DNET_PROFILE is ${DNET_PROFILE}"
+                        echo "image is ${image}"
+                        echo "gitpath is ${gitpath}"
+                        // env
+                        triggerRemoteJob job: "${remoteJob}", maxConn: 1, parameters: """DNET_PROFILE=${DNET_PROFILE}
+DNET_PRODUCT=${DNET_PRODUCT}
+image=${image}
+version=${ImageVersion}
+gitpath=${gitpath}
+""", remoteJenkinsName: "${remoteJenkins}", useCrumbCache: true, useJobInfoCache: true
+                    }
+				}
+			}
+		}
+        stage('deploy'){
             when {
                 not {
                     environment name: 'remote_deploy_cfg', value: ''
                 }
             }
 			steps{
-				script{  
-//						echo "using shell:mvn "
-//						sh '''ImageVersion=$(mvn -q -N -Dexec.executable="echo"  -Dexec.args='${project.version}'  org.codehaus.mojo:exec-maven-plugin:1.3.1:exec)
-//echo ImageVersion=$ImageVersion >image.version'''
-						
-//						echo "read file "
-//						def props = readProperties file: 'image.version'
-//						if (props['ImageVersion']){
-//						    env.ImageVersion = props['ImageVersion'] 
-//						    echo("ImageVersion=${ImageVersion}")
-//                    } 
-
-						echo "using mvn "
-						//ImageVersion = readMavenPom().getVersion() 
-						ImageVersion = readMavenPom().version
-						echo("ImageVersion=${ImageVersion}")
-
+				script{
 						// remote_deploy
                         println(env.remote_deploy_cfg)
                         String[] data = env.remote_deploy_cfg.split('&')
@@ -128,11 +148,6 @@ subsystem=${subsystem}
 skipversion=${skipversion}""", remoteJenkinsName: "${remoteJenkins}", useCrumbCache: true, useJobInfoCache: true
                         }
 				}
-// image env 
-//				triggerRemoteJob job: "${remoteJob}", maxConn: 1, parameters: '''DNET_PROFILE=${DNET_PROFILE}
-//image=${image} 
-//version=env.ImageVersion
-//GIT_BRANCH=develop''', remoteJenkinsName: "${remoteJenkins}", useCrumbCache: true, useJobInfoCache: true
 			}
 		}
     }
