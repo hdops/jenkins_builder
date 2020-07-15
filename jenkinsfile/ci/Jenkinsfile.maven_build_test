@@ -55,7 +55,7 @@ pipeline {
                         remoteJenkins = item[0]
                         remoteJob = item[1]
                         DNET_PROFILE = item[2]
-                        tasks[remoteJenkins] = {
+                        tasks["${remoteJenkins}_${remoteJob}"] = {
                             stage("${remoteJob}") {
                                 echo "remoteJenkins is ${remoteJenkins}"
                                 echo "remoteJob is ${remoteJob}"
