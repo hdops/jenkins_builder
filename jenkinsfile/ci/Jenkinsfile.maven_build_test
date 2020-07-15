@@ -46,23 +46,22 @@ pipeline {
 				script{
                     // read loop cfg
                     // data = readYaml text: "${remote_deploy_cfg}"
-                    data = readYaml text: """
-- remoteJenkins: k8s-int
-  remoteJob: BAAS_Integration_test/BAAS_Deploy_one_Int
-- remoteJenkins: k8s-int
-  remoteJob: BAAS_Integration_test/BAAS_Deploy_one_Int
-"""
-                    println(data)
+                    def remote_deploy_cfg = "${remote_deploy_cfg}"
+                    println(remote_deploy_cfg)
+                    data = remote_deploy_cfg.split('&')
                     count = data.size()
                     tasks = [:]
                     def i = 0
                     for(i = 0; i < count; i = i + 1){
-                        remoteJenkins = data[i].remoteJenkins
-                        remoteJob = data[i].remoteJob
+                        item = data[i].split('|')
+                        remoteJenkins = item[0]
+                        remoteJob = item[1]
+                        DNET_PROFILE = item[2]
                         tasks[remoteJenkins] = {
                             stage("${remoteJob}") {
                                 echo "remoteJenkins is ${remoteJenkins}"
                                 echo "remoteJob is ${remoteJob}"
+                                echo "DNET_PROFILE is ${DNET_PROFILE}"
                                 triggerRemoteJob job: "${remoteJob}", maxConn: 1, parameters: '''DNET_PROFILE=${DNET_PROFILE}
 subsystem=${subsystem}
 skipversion=${skipversion}''', remoteJenkinsName: "${remoteJenkins}", useCrumbCache: true, useJobInfoCache: true
