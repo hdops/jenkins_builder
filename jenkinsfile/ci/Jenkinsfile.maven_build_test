@@ -60,9 +60,9 @@ pipeline {
                                 echo "remoteJenkins is ${remoteJenkins}"
                                 echo "remoteJob is ${remoteJob}"
                                 echo "DNET_PROFILE is ${DNET_PROFILE}"
-                                triggerRemoteJob job: "${remoteJob}", maxConn: 1, parameters: '''DNET_PROFILE=${DNET_PROFILE}
+                                triggerRemoteJob job: "${remoteJob}", maxConn: 1, parameters: """DNET_PROFILE=${DNET_PROFILE}
 subsystem=${subsystem}
-skipversion=${skipversion}''', remoteJenkinsName: "${remoteJenkins}", useCrumbCache: true, useJobInfoCache: true
+skipversion=${skipversion}""", remoteJenkinsName: "${remoteJenkins}", useCrumbCache: true, useJobInfoCache: true
                             }
                         }
                     }
