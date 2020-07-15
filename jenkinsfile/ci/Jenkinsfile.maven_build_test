@@ -45,8 +45,13 @@ pipeline {
 			steps{
 				script{
                     // read loop cfg
-                    println("${remote_deploy_cfg}")
-                    data = readYaml text: "${remote_deploy_cfg}"
+                    // data = readYaml text: "${remote_deploy_cfg}"
+                    data = readYaml text: """
+- remoteJenkins: k8s-int
+  remoteJob: BAAS_Integration_test/BAAS_Deploy_one_Int
+- remoteJenkins: k8s-int
+  remoteJob: BAAS_Integration_test/BAAS_Deploy_one_Int
+"""
                     println(data)
                     count = data.size()
                     tasks = [:]
