@@ -123,6 +123,7 @@ pipeline {
                             echo "DNET_PROFILE is ${DNET_PROFILE}"
                             // deploy
                             triggerRemoteJob job: "${remoteJob}", maxConn: 1, parameters: """DNET_PROFILE=${DNET_PROFILE}
+DNET_PRODUCT=${DNET_PRODUCT}
 subsystem=${subsystem}
 skipversion=${skipversion}""", remoteJenkinsName: "${remoteJenkins}", useCrumbCache: true, useJobInfoCache: true
                         }
