@@ -100,16 +100,32 @@ pipeline {
 						//ImageVersion = readMavenPom().getVersion() 
 						ImageVersion = readMavenPom().version
 						echo("ImageVersion=${ImageVersion}")
+
+						// remote_deploy
+                        println(env.remote_deploy_cfg)
+                        String[] data = env.remote_deploy_cfg.split('&')
+                        println(data)
+                        count = data.size()
+                        tasks = [:]
+                        data.each{ i ->
+                            String[] item = i.split(';')
+                            println(item)
+                            remoteJenkins = item[0]
+                            remoteJob = item[1]
+                            DNET_PROFILE = item[2]
+                            echo "remoteJenkins is ${remoteJenkins}"
+                            echo "remoteJob is ${remoteJob}"
+                            echo "DNET_PROFILE is ${DNET_PROFILE}"
+                            // deploy
+                            triggerRemoteJob job: "${remoteJob}", maxConn: 1, parameters: """DNET_PROFILE=${DNET_PROFILE}
+subsystem=${subsystem}
+skipversion=${skipversion}""", remoteJenkinsName: "${remoteJenkins}", useCrumbCache: true, useJobInfoCache: true
 				}
 // image env 
 //				triggerRemoteJob job: "${remoteJob}", maxConn: 1, parameters: '''DNET_PROFILE=${DNET_PROFILE}
 //image=${image} 
 //version=env.ImageVersion
 //GIT_BRANCH=develop''', remoteJenkinsName: "${remoteJenkins}", useCrumbCache: true, useJobInfoCache: true
-				// deploy 
-				triggerRemoteJob job: "${remoteJob}", maxConn: 1, parameters: '''DNET_PROFILE=${DNET_PROFILE}
-subsystem=${subsystem} 
-skipversion=${skipversion}''', remoteJenkinsName: "${remoteJenkins}", useCrumbCache: true, useJobInfoCache: true
 			}
 		}
     }
