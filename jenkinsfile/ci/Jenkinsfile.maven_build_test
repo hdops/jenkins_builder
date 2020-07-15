@@ -49,7 +49,7 @@ pipeline {
                     println(data)
                     count = data.size()
                     tasks = [:]
-                    for(i in data){
+                    data.each{ i ->
                         String[] item = i.split(';')
                         println(item)
                         remoteJenkins = item[0]

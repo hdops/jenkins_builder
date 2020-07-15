@@ -25,15 +25,10 @@ pipeline {
                         jobname = data[i].jobname
                         parameter1 = data[i].parameter1
                         parameter2 = data[i].parameter2
-                        tasks[jobname] = {
-                            stage("${jobname}") {
-                                echo "job is ${jobname}"
-                                echo "parameter1 is ${parameter1}"
-                                echo "parameter2 is ${parameter2}"
-                            }
-                        }
+                        echo "job is ${jobname}"
+                        echo "parameter1 is ${parameter1}"
+                        echo "parameter2 is ${parameter2}"
                     }
-                    parallel tasks
                 }
             }
         }
