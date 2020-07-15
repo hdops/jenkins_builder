@@ -77,10 +77,15 @@ pipeline {
 			} 
 		}
         stage('deploy'){ 
-			when {
-                anyOf {
-                    environment name: 'remoteJenkins', value: 'aliyun'
-                    environment name: 'remoteJenkins', value: 'k8s-int'
+// 			when {
+//                 anyOf {
+//                     environment name: 'remoteJenkins', value: 'aliyun'
+//                     environment name: 'remoteJenkins', value: 'k8s-int'
+//                 }
+//             }
+            when {
+                not {
+                    environment name: 'remote_deploy_cfg', value: ''
                 }
             }
 			steps{
