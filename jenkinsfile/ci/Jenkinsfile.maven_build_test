@@ -49,6 +49,7 @@ pipeline {
                     data = "k8s-int|BAAS_Integration_test/BAAS_Deploy_one_Int|integration_test&k8s-int|BAAS_Integration_test/BAAS_Deploy_one_Int|integration_test".split('&')
                     println(data)
                     count = data.size()
+                    println(count)
                     tasks = [:]
                     def i = 0
                     for(i = 0; i < count; i = i + 1){
