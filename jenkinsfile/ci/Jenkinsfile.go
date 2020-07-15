@@ -1,4 +1,5 @@
 def credentialsId="qianfan"
+def harborPass="hoS9sTHXQhpGvwa2"
 
 //  主要需要 git + dokcer 环境
 def build_image= "harbor.qianfan123.com/base/node:v8.9.4"
@@ -38,14 +39,15 @@ pipeline {
          }  
 		stage('build') {
 		    steps{
-				script{  
+				script{
 					sh "  docker -v" 
-					if (env.docker_build_tag){
-						echo "docker_build_tag is ${docker_build_tag}"
-						docker_build_shell = "docker build -t " + env.docker_build_tag + " -f build/Dockerfile . && docker login -u admin -p hoS9sTHXQhpGvwa2  harbor.qianfan123.com && docker push " + env.docker_build_tag
+					ImageVersion = readFile "VERSION"
+                    echo "ImageVersion=${ImageVersion}" 
+					build_image = build_image_name + ":" + ImageVersion
+					echo "build_image is ${build_image}"
+					docker_build_shell = "docker build -t " + build_image + " -f build/Dockerfile . && docker login -u admin -p ${harborPass}  harbor.qianfan123.com && docker push " + build_image
 							//echo "docker_build_shell is ${docker_build_shell}"
-						sh "  ${docker_build_shell}"  
-					}
+					sh "  ${docker_build_shell}"  
 				}
 			} 
 		} 
