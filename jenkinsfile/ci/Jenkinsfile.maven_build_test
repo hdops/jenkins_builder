@@ -44,7 +44,7 @@ pipeline {
         stage('deploy'){
 			steps{
 				script{
-                    println(env.remote_deploy_cfg)
+                    // println(env.remote_deploy_cfg)
                     data = env.remote_deploy_cfg.split('&')
                     println(data)
                     count = data.size()
