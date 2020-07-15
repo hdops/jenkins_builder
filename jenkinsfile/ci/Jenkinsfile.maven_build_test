@@ -55,18 +55,13 @@ pipeline {
                         remoteJenkins = item[0]
                         remoteJob = item[1]
                         DNET_PROFILE = item[2]
-                        tasks["${remoteJenkins}_${remoteJob}"] = {
-                            stage("${remoteJenkins}_${remoteJob}") {
-                                echo "remoteJenkins is ${remoteJenkins}"
-                                echo "remoteJob is ${remoteJob}"
-                                echo "DNET_PROFILE is ${DNET_PROFILE}"
-                                triggerRemoteJob job: "${remoteJob}", maxConn: 1, parameters: """DNET_PROFILE=${DNET_PROFILE}
+                        echo "remoteJenkins is ${remoteJenkins}"
+                        echo "remoteJob is ${remoteJob}"
+                        echo "DNET_PROFILE is ${DNET_PROFILE}"
+                        triggerRemoteJob job: "${remoteJob}", maxConn: 1, parameters: """DNET_PROFILE=${DNET_PROFILE}
 subsystem=${subsystem}
 skipversion=${skipversion}""", remoteJenkinsName: "${remoteJenkins}", useCrumbCache: true, useJobInfoCache: true
-                            }
-                        }
                     }
-                    parallel tasks
 				}
 			}
 		}
