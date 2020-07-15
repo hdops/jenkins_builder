@@ -120,6 +120,7 @@ pipeline {
                             triggerRemoteJob job: "${remoteJob}", maxConn: 1, parameters: """DNET_PROFILE=${DNET_PROFILE}
 subsystem=${subsystem}
 skipversion=${skipversion}""", remoteJenkinsName: "${remoteJenkins}", useCrumbCache: true, useJobInfoCache: true
+                        }
 				}
 // image env 
 //				triggerRemoteJob job: "${remoteJob}", maxConn: 1, parameters: '''DNET_PROFILE=${DNET_PROFILE}
