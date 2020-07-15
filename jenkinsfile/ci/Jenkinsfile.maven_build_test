@@ -44,11 +44,8 @@ pipeline {
         stage('deploy'){
 			steps{
 				script{
-                    // read loop cfg
-                    // data = readYaml text: "${remote_deploy_cfg}"
-                    def remote_deploy_cfg = "${remote_deploy_cfg}"
-                    println(remote_deploy_cfg)
-                    data = remote_deploy_cfg.split('&')
+                    println(env.remote_deploy_cfg)
+                    data = env.remote_deploy_cfg.split('&')
                     println(data)
                     count = data.size()
                     tasks = [:]
