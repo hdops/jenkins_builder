@@ -119,7 +119,7 @@ gitpath=${gitpath}
         stage('deploy'){
 			steps{
 				script{
-				    if (env.remote_env_cfg != "") {
+				    if (env.remote_deploy_cfg != "") {
 						// remote_deploy
                         println(env.remote_deploy_cfg)
                         String[] data = env.remote_deploy_cfg.split('&')
