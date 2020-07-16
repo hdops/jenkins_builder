@@ -79,7 +79,7 @@ pipeline {
 		}
         stage('env'){
              when {
-                 expression { env.remote_env_cfg != '' }
+                 expression { env.remote_env_cfg != null }
              }
 			steps{
 				script{
