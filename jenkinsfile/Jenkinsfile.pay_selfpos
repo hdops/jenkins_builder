@@ -10,37 +10,38 @@ if (env.whether_post){
 
 pipeline {
     agent {label node}
-	options {
-        stages {
-            stage('下载toolset') {
-                steps{
-                    script {
-                        if (env.on_k8s) {
-                            container("hdtoolsetcore"){
-                                retry(2){
-                                    sh "DNET_PROFILE=integration_test DNET_PRODUCT=dnet hdops download_toolset --branch ${params.GIT_BRANCH} -p ."
-                                }
-                                sh "tar zxf toolset.tar.gz -C ${WORKSPACE}"
-                            }
-                        } else {
+    options {
+	    timeout(time: 3, unit: 'MINUTES')
+    }
+    stages {
+        stage('下载toolset') {
+            steps{
+                script {
+                    if (env.on_k8s) {
+                        container("hdtoolsetcore"){
                             retry(2){
                                 sh "DNET_PROFILE=integration_test DNET_PRODUCT=dnet hdops download_toolset --branch ${params.GIT_BRANCH} -p ."
                             }
-                            sh "tar zxf toolset.tar.gz -C $WORKSPACE"
+                            sh "tar zxf toolset.tar.gz -C ${WORKSPACE}"
                         }
+                    } else {
+                        retry(2){
+                            sh "DNET_PROFILE=integration_test DNET_PRODUCT=dnet hdops download_toolset --branch ${params.GIT_BRANCH} -p ."
+                        }
+                        sh "tar zxf toolset.tar.gz -C $WORKSPACE"
                     }
                 }
             }
-            stage('dft level one check') {
-                steps {
-                    script {
-                        if (env.on_k8s) {
-                            container("hdtoolsetcore") {
-                                sh "DNET_PRODUCT=${params.DNET_PRODUCT} DNET_PROFILE=${params.DNET_PROFILE}  hdmon pay_selfpos --cfgname ${params.cfgname}"
-                            }
-                        } else {
+        }
+        stage('dft level one check') {
+            steps {
+                script {
+                    if (env.on_k8s) {
+                        container("hdtoolsetcore") {
                             sh "DNET_PRODUCT=${params.DNET_PRODUCT} DNET_PROFILE=${params.DNET_PROFILE}  hdmon pay_selfpos --cfgname ${params.cfgname}"
                         }
+                    } else {
+                        sh "DNET_PRODUCT=${params.DNET_PRODUCT} DNET_PROFILE=${params.DNET_PROFILE}  hdmon pay_selfpos --cfgname ${params.cfgname}"
                     }
                 }
             }
