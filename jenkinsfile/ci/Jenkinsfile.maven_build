@@ -77,11 +77,11 @@ pipeline {
 			} 
 		}
         stage('env'){
-            when {
-                not {
-                    environment name: 'remote_env_cfg', value: ''
-                }
-            }
+//             when {
+//                 not {
+//                     environment name: 'remote_env_cfg', value: ''
+//                 }
+//             }
 			steps{
 				script{
                     echo "using mvn "
@@ -115,11 +115,11 @@ gitpath=${gitpath}
 			}
 		}
         stage('deploy'){
-            when {
-                not {
-                    environment name: 'remote_deploy_cfg', value: ''
-                }
-            }
+//             when {
+//                 not {
+//                     environment name: 'remote_deploy_cfg', value: ''
+//                 }
+//             }
 			steps{
 				script{
 						// remote_deploy
