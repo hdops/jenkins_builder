@@ -19,7 +19,7 @@ if (env.maven_repository){
     docker_args+=" -v /hdapp/java:/hdapp/java"
 }
 
-def mvn_configfile="jdk8"
+def mvn_configfile=""
 if (env.mvn_configfile){
     mvn_configfile =env.mvn_configfile
 }
