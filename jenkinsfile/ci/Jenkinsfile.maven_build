@@ -113,13 +113,9 @@ gitpath=${gitpath}
 			}
 		}
         stage('deploy'){
-//             when {
-//                 not {
-//                     environment name: 'remote_deploy_cfg', value: ''
-//                 }
-//             }
 			steps{
 				script{
+				    if (env.remote_env_cfg != "") {
 						// remote_deploy
                         println(env.remote_deploy_cfg)
                         String[] data = env.remote_deploy_cfg.split('&')
@@ -141,6 +137,7 @@ DNET_PRODUCT=${DNET_PRODUCT}
 subsystem=${subsystem}
 skipversion=${skipversion}""", remoteJenkinsName: "${remoteJenkins}", useCrumbCache: true, useJobInfoCache: true
                         }
+                    }
 				}
 			}
 		}
