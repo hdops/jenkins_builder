@@ -69,7 +69,7 @@ pipeline {
                             mvn_shell+=" -D"+env.mvn_options+"=true"
                             } 
                         echo "mvn_configfile is ${mvn_configfile}" 
-                        configFileProvider([configFile(fileId:env.mvn_configfile, targetLocation: '/hdapp/java/.m2/repository/settings.xml')]) {
+                        configFileProvider([configFile(fileId:${mvn_configfile}, targetLocation: '/hdapp/java/.m2/repository/settings.xml')]) {
                                 mvn_shell+="  -s /hdapp/java/.m2/repository/settings.xml"
                                 echo "mvn_shell is ${mvn_shell}" 
                                 sh "${mvn_shell}" 
