@@ -78,11 +78,9 @@ pipeline {
 			} 
 		}
         stage('env'){
-//             when {
-//                 not {
-//                     environment name: 'remote_env_cfg', value: ''
-//                 }
-//             }
+             when {
+                 expression { env.remote_env_cfg.trim()!='' }
+             }
 			steps{
 				script{
                     echo "using mvn "
