@@ -84,7 +84,7 @@ pipeline {
         stage('env'){
 			steps{
 				script{
-				    if (env.remote_env_cfg != "") {
+				    if (env.remote_env_cfg != "" && env.remote_env_cfg != null) {
                         echo "using mvn "
                         //ImageVersion = readMavenPom().getVersion()
                         ImageVersion = readMavenPom().version
@@ -119,7 +119,7 @@ gitpath=${gitpath}
         stage('deploy'){
 			steps{
 				script{
-				    if (env.remote_deploy_cfg != "") {
+				    if (env.remote_deploy_cfg != "" && env.remote_deploy_cfg != null) {
 						// remote_deploy
                         println(env.remote_deploy_cfg)
                         String[] data = env.remote_deploy_cfg.split('&')
