@@ -11,7 +11,7 @@ pipeline{
                 script{
                     echo "hello world"
                     checkout([$class: 'GitSCM', branches: [[name: '*/master']],
-						userRemoteConfigs: [[
+						userRemoteConfigs: [[credentialsId: 'qianfan',
 							url: "http://github.app.hd123.cn:10080/${git_repo}.git"]]])
                 }
                 
