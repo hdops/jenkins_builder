@@ -2,7 +2,7 @@ def worker = 'master'
 if (env.worker){
     worker= env.worker
 }
-
+def git_repo="test_git"
 pipeline{
     agent {label worker}
     stages{
@@ -12,7 +12,7 @@ pipeline{
                     echo "hello world"
                     checkout([$class: 'GitSCM', branches: [[name: '*/master']],
 						userRemoteConfigs: [[
-							url: 'https://gitee.com/hdops/test_git.git']]])
+							url: "https://gitee.com/hdops/${git_repo}}.git"]]])
                 }
                 
             }
