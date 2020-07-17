@@ -31,7 +31,7 @@ pipeline {
               agent {
 			    docker {
 			    image "${node_image}"
-			    args '-v /var/run/docker.sock:/var/run/docker.sock -v /usr/bin/docker:/usr/bin/docker'
+			    args '-v /var/run/docker.sock:/var/run/docker.sock -v /usr/bin/docker:/usr/bin/docker -v /hdapp/npm:/root/.npm'
 			    }
              }
              steps{ 
@@ -45,40 +45,13 @@ pipeline {
              }
          }  
         stage('createResourcePackage'){ 
-              agent {
-			    docker {
-			    image "harbor.qianfan123.com/toolset/toolsetcore:0.3.0"
-			    args '-v /var/run/docker.sock:/var/run/docker.sock -v /usr/bin/docker:/usr/bin/docker --add-host=hd-hz-public.oss-cn-hangzhou-internal.aliyuncs.com:47.110.23.37'
-			    }
-             }
 			steps{
-                            echo "active profile is ${DNET_PROFILE}"
-                            echo "workspace is $WORKSPACE"
-                            retry(2){
-                                //sh "DNET_PROFILE=integration_test DNET_PRODUCT=dnet hdops download_toolset --branch ${params.GIT_BRANCH} -p ."
-								sh "DNET_PROFILE=integration_test DNET_PRODUCT=dnet hdops download_toolset --branch develop -p ."
-                            }
-                            sh "tar zxf toolset.tar.gz -C $WORKSPACE"
-                            // sh "DNET_PRODUCT=${params.DNET_PRODUCT} DNET_PROFILE=${params.DNET_PROFILE} hdmon deploy_resource_package --download_package ${params.download_package} --subsystem ${params.subsystem}" 
-                            sh "DNET_PROFILE=${DNET_PROFILE} python createResourcePackage.py -download_url ${BUILD_URL} -fromVersion ${fromVersion} -toVersion ${toVersion} -alias ${alias} -subsystem ${subsystem}" 
+                            build job: 'createResourcePackage', parameters: [string(name: 'DNET_PROFILE', value: '${DNET_PROFILE}'), string(name: 'subsystem', value: '${subsystem}'), string(name: 'BUILD_URL', value: '${BUILD_URL}'), string(name: 'fromVersion', value: '${fromVersion}'), string(name: 'toVersion', value: '${toVersion}'), string(name: 'alias', value: '${alias}')], wait: false
 			}
 		}
         stage('qianfan-front-web-oss'){ 
-              agent {
-			    docker {
-			    image "harbor.qianfan123.com/toolset/toolsetcore:0.3.0"
-			    args '-v /var/run/docker.sock:/var/run/docker.sock -v /usr/bin/docker:/usr/bin/docker --add-host=hd-hz-public.oss-cn-hangzhou-internal.aliyuncs.com:47.110.23.37'
-			    }
-             }
 			steps{
-                            echo "active profile is ${DNET_PROFILE}"
-                            echo "workspace is $WORKSPACE"
-                            retry(2){
-                                //sh "DNET_PROFILE=integration_test DNET_PRODUCT=dnet hdops download_toolset --branch ${params.GIT_BRANCH} -p ."
-								sh "DNET_PROFILE=integration_test DNET_PRODUCT=dnet hdops download_toolset --branch develop -p ."
-                            }
-                            sh "tar zxf toolset.tar.gz -C $WORKSPACE"
-                            sh "DNET_CLOUD_VENDOR=${DNET_CLOUD_VENDOR} DNET_PROFILE=${DNET_PROFILE} python qf_front_backend.py -download_url ${subsystem}-${fromVersion}-${alias}.tar.gz -download_from_jenkins  ${download_from_jenkins}  -subsystem ${subsystem}" 
+                            build job: 'qianfan-front-web-oss', parameters: [string(name: 'DNET_PROFILE', value: '${DNET_PROFILE}'), string(name: 'DNET_CLOUD_VENDOR', value: '${DNET_CLOUD_VENDOR}'), string(name: 'subsystem', value: '${subsystem}'), string(name: 'oss_resources', value: '${subsystem}-${fromVersion}-${alias}.tar.gz')], wait: false
 			}
 		}
     }

@@ -39,9 +39,9 @@ pipeline {
             steps {
                 script{
                     if (env.dingding == "True") {
-                        sh "phoenix-tools healthcheck --dingding ${dingding}"
+                        sh "phoenix-tools healthcheck --dingding ${dingding} --tag ${params.tag}"
                     } else {
-                        sh "phoenix-tools healthcheck"
+                        sh "phoenix-tools healthcheck --tag ${params.tag}"
                     }
                 }
             }

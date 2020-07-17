@@ -19,6 +19,10 @@ if (env.maven_repository){
     docker_args+=" -v /hdapp/java:/hdapp/java"
 }
 
+def mvn_configfile="jdk8"
+if (env.mvn_configfile){
+    mvn_configfile =env.mvn_configfile
+}
 
 def credentialsId="qianfan"
  
@@ -44,7 +48,8 @@ pipeline {
         stage('checkout') {
             steps{
                 echo "checkout http://github.app.hd123.cn:10080/${git_project}.git  branch:${build_branch}"
-                git branch: "${build_branch}", credentialsId: "${credentialsId}", url: "http://github.app.hd123.cn:10080/${git_project}.git"
+           //     git branch: "${build_branch}", credentialsId: "${credentialsId}", url: "http://github.app.hd123.cn:10080/${git_project}.git"
+                checkout([$class: 'GitSCM', branches: [[name: '*/${build_branch}']], doGenerateSubmoduleConfigurations: false, extensions: [], submoduleCfg: [], userRemoteConfigs: [[credentialsId: 'qianfan', url: 'http://github.app.hd123.cn:10080/${git_project}.git']]])
             }
         }  
 		stage('build') {
@@ -61,55 +66,77 @@ pipeline {
                             echo "mvn_options is ${mvn_options}" 
                             mvn_shell+=" -D"+env.mvn_options+"=true"
                             } 
-                        if (env.mvn_configfile){
-                            echo "mvn_configfile is ${mvn_configfile}" 
-                            configFileProvider([configFile(fileId:env.mvn_configfile, targetLocation: '/hdapp/java/.m2/repository/settings.xml')]) {
-                                mvn_shell+="  -s /hdapp/java/.m2/repository/settings.xml"
+                        echo "mvn_configfile is ${mvn_configfile}" 
+                        configFileProvider([configFile(fileId:mvn_configfile, variable: 'maven_settings')]) {
+                                mvn_shell+="  -s $maven_settings"
                                 echo "mvn_shell is ${mvn_shell}" 
                                 sh "${mvn_shell}" 
-                                } 
-                            } 
-                        else{
-                            echo "mvn_shell is ${mvn_shell}" 
-                            sh "${mvn_shell}" 
                             }
 				}
 			} 
 		}
-        stage('deploy'){ 
-			when {
-                anyOf {
-                    environment name: 'remoteJenkins', value: 'aliyun'
-                    environment name: 'remoteJenkins', value: 'k8s-int'
-                }
-            }
+        stage('env'){
 			steps{
-				script{  
-//						echo "using shell:mvn "
-//						sh '''ImageVersion=$(mvn -q -N -Dexec.executable="echo"  -Dexec.args='${project.version}'  org.codehaus.mojo:exec-maven-plugin:1.3.1:exec)
-//echo ImageVersion=$ImageVersion >image.version'''
-						
-//						echo "read file "
-//						def props = readProperties file: 'image.version'
-//						if (props['ImageVersion']){
-//						    env.ImageVersion = props['ImageVersion'] 
-//						    echo("ImageVersion=${ImageVersion}")
-//                    } 
-
-						echo "using mvn "
-						//ImageVersion = readMavenPom().getVersion() 
-						ImageVersion = readMavenPom().version
-						echo("ImageVersion=${ImageVersion}")
+				script{
+				    if (env.remote_env_cfg != "" && env.remote_env_cfg != null) {
+                        echo "using mvn "
+                        //ImageVersion = readMavenPom().getVersion()
+                        ImageVersion = readMavenPom().version
+                        echo("ImageVersion=${ImageVersion}")
+                        // remote_env
+                        println(env.remote_env_cfg)
+                        String[] data = env.remote_env_cfg.split('&')
+                        println(data)
+                        count = data.size()
+                        tasks = [:]
+                        data.each{ i ->
+                            String[] item = i.split(';')
+                            println(item)
+                            remoteJenkins = item[0]
+                            remoteJob = item[1]
+                            DNET_PROFILE = item[2]
+                            echo "remoteJenkins is ${remoteJenkins}"
+                            echo "remoteJob is ${remoteJob}"
+                            echo "DNET_PROFILE is ${DNET_PROFILE}"
+                            // env
+                            triggerRemoteJob job: "${remoteJob}", maxConn: 1, parameters: """DNET_PROFILE=${DNET_PROFILE}
+DNET_PRODUCT=${DNET_PRODUCT}
+image=${image}
+version=${ImageVersion}
+gitpath=${gitpath}
+    """, remoteJenkinsName: "${remoteJenkins}", useCrumbCache: true, useJobInfoCache: true
+                        }
+				    }
 				}
-// image env 
-//				triggerRemoteJob job: "${remoteJob}", maxConn: 1, parameters: '''DNET_PROFILE=${DNET_PROFILE}
-//image=${image} 
-//version=env.ImageVersion
-//GIT_BRANCH=develop''', remoteJenkinsName: "${remoteJenkins}", useCrumbCache: true, useJobInfoCache: true
-				// deploy 
-				triggerRemoteJob job: "${remoteJob}", maxConn: 1, parameters: '''DNET_PROFILE=${DNET_PROFILE}
-subsystem=${subsystem} 
-skipversion=True''', remoteJenkinsName: "${remoteJenkins}", useCrumbCache: true, useJobInfoCache: true
+			}
+		}
+        stage('deploy'){
+			steps{
+				script{
+				    if (env.remote_deploy_cfg != "" && env.remote_deploy_cfg != null) {
+						// remote_deploy
+                        println(env.remote_deploy_cfg)
+                        String[] data = env.remote_deploy_cfg.split('&')
+                        println(data)
+                        count = data.size()
+                        tasks = [:]
+                        data.each{ i ->
+                            String[] item = i.split(';')
+                            println(item)
+                            remoteJenkins = item[0]
+                            remoteJob = item[1]
+                            DNET_PROFILE = item[2]
+                            echo "remoteJenkins is ${remoteJenkins}"
+                            echo "remoteJob is ${remoteJob}"
+                            echo "DNET_PROFILE is ${DNET_PROFILE}"
+                            // deploy
+                            triggerRemoteJob job: "${remoteJob}", maxConn: 1, parameters: """DNET_PROFILE=${DNET_PROFILE}
+DNET_PRODUCT=${DNET_PRODUCT}
+subsystem=${subsystem}
+skipversion=${skipversion}""", remoteJenkinsName: "${remoteJenkins}", useCrumbCache: true, useJobInfoCache: true
+                        }
+                    }
+				}
 			}
 		}
     }

@@ -1,0 +1,50 @@
+def node=""
+if (env.node){
+    node =env.node
+}else{
+    node ="master"
+}
+if (!env.GIT_GROUP){
+    env.GIT_GROUP="phoenix-config"
+}
+pipeline {
+    agent {label node}
+	options {
+	//     buildDiscarder(logRotator(numToKeepStr: '10'))
+	//     disableConcurrentBuilds()
+	//     disableResume()
+	    timeout(time: 15, unit: 'MINUTES')
+    }
+	// parameters {
+    //     string(name: 'GIT_REPONAME', defaultValue: 'heading', description: 'git repo url')
+    //     string(name: 'GIT_BRANCH', defaultValue: 'uat', description: 'git_url 的分支')
+    //     string(name: 'Jenkinshome', defaultValue: '/hdapp/jenkins', description: 'jenkins home')
+	// }
+
+    stages {
+        stage('delete workspace') {
+			steps{
+				deleteDir()
+			}
+        }
+        stage('下载phoenix config') {
+            steps{
+
+                checkout([$class: 'GitSCM', branches: [[name: "*/$GIT_BRANCH"]], doGenerateSubmoduleConfigurations: false, extensions: [[$class: 'PathRestriction', excludedRegions: '', includedRegions: 'jenkins/.*'], [$class: 'SubmoduleOption', disableSubmodules: false, parentCredentials: false, recursiveSubmodules: true, reference: '', trackingSubmodules: false]], submoduleCfg: [], userRemoteConfigs: [[url: "http://gitlab.app.hd123.cn:10080/${GIT_GROUP}/${GIT_REPONAME}.git", credentialsId: '17643215-09f8-4a9a-b0ea-c8e49777ce1d']]])
+            }
+        }
+        stage('update jenkins') {
+            steps {
+                sh """
+echo "http://offline:Go9jRQJxpwVuXfhcIVko3WgF@github.app.hd123.cn%3a10080" > /root/.git-credentials
+git config --global credential.helper store
+git submodule foreach "git pull origin master"
+
+docker login -u offline -p Go9jRQJxpwVuXfhcIVko3WgF harbor.qianfan123.com
+docker pull harbor.qianfan123.com/base/jenkins-job-builder:0.1.0
+docker run -i --rm -v $Jenkinshome/workspace/$JOB_NAME/jenkins:/root/jenkins harbor.qianfan123.com/base/jenkins-job-builder:0.1.0 jenkins-jobs --conf jenkins/jenkins_jobs.ini update jenkins/phoenix/project.yml
+                """
+            }
+        }
+    }
+}
