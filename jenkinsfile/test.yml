@@ -10,7 +10,7 @@ pipeline{
             steps{
                 script{
                     echo "hello world"
-                    checkout([$class: 'GitSCM', branches: [[name: '*/master']],
+                    checkout([$class: 'GitSCM', branches: [[name: "*/${build_branch}"]],
 						userRemoteConfigs: [[credentialsId: 'qianfan',
 							url: "http://github.app.hd123.cn:10080/${git_repo}.git"]]])
                 }
