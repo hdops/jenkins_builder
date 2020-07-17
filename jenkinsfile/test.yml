@@ -2,7 +2,7 @@ def worker = 'master'
 if (env.worker){
     worker= env.worker
 }
-def git_repo="test_git"
+#def git_repo="test_git"
 pipeline{
     agent {label worker}
     stages{
