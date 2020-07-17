@@ -12,7 +12,7 @@ pipeline{
                     echo "hello world"
                     checkout([$class: 'GitSCM', branches: [[name: '*/master']],
 						userRemoteConfigs: [[
-							url: "https://gitee.com/hdops/${git_repo}.git"]]])
+							url: "https://gitee.com/hdops/${env.git_repo}.git"]]])
                 }
                 
             }
