@@ -33,7 +33,7 @@ pipeline {
                 }
             }
         }
-        stage('dft level one check') {
+        stage('pay selfpos') {
             steps {
                 script {
                     if (env.on_k8s) {
