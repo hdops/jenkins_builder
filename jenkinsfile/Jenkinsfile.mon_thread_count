@@ -33,7 +33,7 @@ pipeline {
                 }
             }
         }
-        stage('dft level one check') {
+        stage('monitor thread count') {
             steps {
                 script {
                     if (env.on_k8s) {
