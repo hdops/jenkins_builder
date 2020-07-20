@@ -4,6 +4,9 @@ if (env.node){
 }else{
     node ="master"
 }
+if (env.build_branch == null){
+    env.build_branch = "develop"
+}
 if (env.releaseBranchName == null){
     env.releaseBranchName = "release"
 }
