@@ -58,7 +58,8 @@ pipeline {
             }
         }
         stage('switch') {
-            sh """export HOME=/root
+            steps{
+                sh """export HOME=/root
 git config --global credential.helper store
 
 git checkout ${releaseBranchName}
@@ -68,7 +69,7 @@ git branch -d ${releaseBranchName}
 git push origin :${releaseBranchName}
 
 git checkout develop"""
-        }
+            }
 		stage('build') {
 		    steps{
 				script{
