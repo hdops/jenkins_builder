@@ -60,9 +60,7 @@ pipeline {
         stage('switch') {
             steps{
                 sh """export HOME=/root
-git config --global credential.helper cache
-
-git remote set-url origin git@github.app.hd123.cn:10080:${git_project}.git
+git config credential.helper store
 git checkout ${releaseBranchName}
 git pull
 git checkout develop
