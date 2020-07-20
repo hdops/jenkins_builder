@@ -60,7 +60,7 @@ pipeline {
         stage('switch') {
             steps{
                 sh """export HOME=/root
-git config --global credential.helper store
+git config --global credential.helper cache
 
 git checkout ${releaseBranchName}
 git pull
