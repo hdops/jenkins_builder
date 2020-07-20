@@ -70,6 +70,7 @@ git push origin :${releaseBranchName}
 
 git checkout develop"""
             }
+        }
 		stage('build') {
 		    steps{
 				script{
