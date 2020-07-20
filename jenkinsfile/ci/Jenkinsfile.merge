@@ -1,0 +1,65 @@
+def node=""
+if (env.node){
+    node =env.node
+}else{
+    node ="master"
+}
+if (env.build_branch == null){
+    env.build_branch = "develop"
+}
+
+def credentialsId="qianfan"
+
+
+pipeline {
+    agent {label node}
+    options {
+	//     buildDiscarder(logRotator(numToKeepStr: '10'))
+	//     disableConcurrentBuilds()
+	//     disableResume()
+	    timeout(time: 1, unit: 'HOURS')
+    }
+    stages {
+        stage('delete workspace') {
+            steps{
+                deleteDir()
+            }
+        }
+        stage('checkout') {
+            steps{
+                echo "checkout http://github.app.hd123.cn:10080/${git_project}.git  branch:${build_branch}"
+                checkout([$class: 'GitSCM', branches: [[name: "*/${build_branch}"]],userRemoteConfigs: [[credentialsId: 'qianfan',url: "http://github.app.hd123.cn:10080/${git_project}.git"]]])
+            }
+        }
+        stage('merge') {
+            sh """git config --global credential.helper cache
+git checkout ${source}
+git pull
+git checkout ${target}
+git pull
+git merge -X theirs ${source} -m '版本发布'
+git push origin"""
+        }
+    }
+    post{
+        success{
+            script{
+                if (env.post_shell){
+                    sh """
+                    ${env.post_shell}
+                    """
+                }
+            }
+        }
+        failure{
+            script{
+
+                def subject = env.email_subject ? "${env.email_subject}" : "failure on Job ${env.JOB_NAME}"
+                def to = env.email_recipients ? "${env.email_recipients}" : "heweiwei@hd123.com"
+                def body = env.email_body ? "${env.email_body}" : "failure on Job ${env.JOB_NAME}"
+                // send email
+                emailext subject: subject, to: to, body:body,attachLog:true
+            }
+        }
+    }
+}

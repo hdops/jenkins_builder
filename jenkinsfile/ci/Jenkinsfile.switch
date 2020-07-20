@@ -83,7 +83,7 @@ git checkout develop"""
                         configFileProvider([configFile(fileId:mvn_configfile, variable: 'maven_settings')]) {
                                 mvn_shell+="  -s $maven_settings"
                                 echo "mvn_shell is ${mvn_shell}"
-                                sh "${mvn_shell}"
+                                // sh "${mvn_shell}"
                         }
 				}
 			}

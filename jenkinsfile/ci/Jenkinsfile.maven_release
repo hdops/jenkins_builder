@@ -19,6 +19,10 @@ if (env.maven_repository){
     docker_args+=" -v /hdapp/java:/hdapp/java"
 }
 
+def mvn_configfile="jdk8"
+if (env.mvn_configfile){
+    mvn_configfile =env.mvn_configfile
+}
 
 def credentialsId="qianfan"
  
@@ -43,12 +47,10 @@ pipeline {
         }  
         stage('checkout') {
             steps{
-                echo "branchName is ${params.branchName}"
-                echo "releaseVersion is ${params.releaseVersion}"
-                echo "developmentVersion is ${params.developmentVersion}"
-                git branch: "${params.branchName}", credentialsId: "${credentialsId}", url: "http://github.app.hd123.cn:10080/${git_project}.git"
+                echo "checkout http://github.app.hd123.cn:10080/${git_project}.git  branch:${build_branch}"
+                checkout([$class: 'GitSCM', branches: [[name: "*/${build_branch}"]],userRemoteConfigs: [[credentialsId: 'qianfan',url: "http://github.app.hd123.cn:10080/${git_project}.git"]]])
             }
-        }  
+        }
 		stage('build') {
 		    steps{
 				script{  
@@ -64,22 +66,16 @@ pipeline {
                         else{
                             mvn_shell+=mvn_goals
                             }
-                        if (env.mvn_release_options){
-                            echo "mvn_release_options is ${mvn_release_options}" 
-                            //  -Darguments="-Dmaven.test.skip=true -Dmaven.javadoc.skip=true"
-                            mvn_shell+=' -Darguments="-Dmaven.test.skip=true -Dmaven.javadoc.skip=true"'
-                            } 
-                        if (env.mvn_configfile){
-                            echo "mvn_configfile is ${mvn_configfile}" 
-                            configFileProvider([configFile(fileId:env.mvn_configfile, targetLocation: '/hdapp/java/.m2/repository/settings.xml')]) {
-                                mvn_shell+="  -s /hdapp/java/.m2/repository/settings.xml"
-                                echo "mvn_shell is ${mvn_shell}" 
-                                // sh "${mvn_shell}" 
-                                } 
-                            } 
-                        else{
-                            echo "mvn_shell is ${mvn_shell}" 
-                            // sh "${mvn_shell}" 
+                        if (env.mvn_release_options == null){
+                            env.mvn_release_options = '-Pdocker -Darguments="-Dmaven.test.skip=true -Dmaven.javadoc.skip=true'
+                            echo "mvn_release_options is ${mvn_release_options}"
+                            }
+                        mvn_shell+=env.mvn_release_options
+                        echo "mvn_configfile is ${mvn_configfile}"
+                        configFileProvider([configFile(fileId:mvn_configfile, variable: 'maven_settings')]) {
+                                mvn_shell+="  -s $maven_settings"
+                                echo "mvn_shell is ${mvn_shell}"
+                                sh "${mvn_shell}"
                             }
 				}
 			} 
