@@ -55,21 +55,13 @@ pipeline {
             steps{
                 echo "checkout http://github.app.hd123.cn:10080/${git_project}.git  branch:${build_branch}"
                 checkout([$class: 'GitSCM', branches: [[name: "*/${build_branch}"]],userRemoteConfigs: [[credentialsId: 'qianfan',url: "http://github.app.hd123.cn:10080/${git_project}.git"]]])
-                sh """export HOME=/root
-git config credential.helper store
-git checkout ${releaseBranchName}
-git pull
-git checkout develop
-git branch -d ${releaseBranchName}
-git push origin :${releaseBranchName}
-
-git checkout develop"""
             }
         }
         stage('switch') {
             steps{
                 sh """export HOME=/root
-git config credential.helper store
+echo "http://qianfan:headingqianfan@github.app.hd123.cn%3a10080" > /root/.git-credentials
+git config --global credential.helper store
 git checkout ${releaseBranchName}
 git pull
 git checkout develop
