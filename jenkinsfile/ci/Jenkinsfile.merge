@@ -33,7 +33,8 @@ pipeline {
         }
         stage('merge') {
             steps{
-                sh """git config --global credential.helper store
+                sh """git config --global user.email qianfan@hd123.com
+git config --global user.name qianfan
 git checkout ${source}
 git pull
 git checkout ${target}
