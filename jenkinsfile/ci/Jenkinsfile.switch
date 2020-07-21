@@ -60,7 +60,6 @@ pipeline {
         stage('switch') {
             steps{
                 sh """export HOME=/root
-echo "http://qianfan:headingqianfan@github.app.hd123.cn%3a10080" > /root/.git-credentials
 git config --global credential.helper store
 git checkout ${releaseBranchName}
 git pull
