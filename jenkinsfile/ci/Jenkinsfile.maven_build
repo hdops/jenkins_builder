@@ -98,13 +98,13 @@ pipeline {
                             echo "remoteJob is ${remoteJob}"
                             echo "DNET_PROFILE is ${DNET_PROFILE}"
                             // env
-                            triggerRemoteJob job: "${remoteJob}", maxConn: 1, parameters: """DNET_PROFILE=${DNET_PROFILE}
+                            triggerRemoteJob job: "${remoteJob}", maxConn: 3, parameters: """DNET_PROFILE=${DNET_PROFILE}
 DNET_PRODUCT=${DNET_PRODUCT}
 image=${image}
 version=${ImageVersion}
 gitpath=${gitpath}
 sourcefrom=git
-    """, remoteJenkinsName: "${remoteJenkins}", useCrumbCache: true, useJobInfoCache: true
+    """, remoteJenkinsName: "${remoteJenkins}", useCrumbCache: false, useJobInfoCache: true
                         }
 				    }
 				}
@@ -130,10 +130,10 @@ sourcefrom=git
                             echo "remoteJob is ${remoteJob}"
                             echo "DNET_PROFILE is ${DNET_PROFILE}"
                             // deploy
-                            triggerRemoteJob job: "${remoteJob}", maxConn: 1, parameters: """DNET_PROFILE=${DNET_PROFILE}
+                            triggerRemoteJob job: "${remoteJob}", maxConn: 3, parameters: """DNET_PROFILE=${DNET_PROFILE}
 DNET_PRODUCT=${DNET_PRODUCT}
 subsystem=${subsystem}
-skipversion=${skipversion}""", remoteJenkinsName: "${remoteJenkins}", useCrumbCache: true, useJobInfoCache: true
+skipversion=${skipversion}""", remoteJenkinsName: "${remoteJenkins}", useCrumbCache: false, useJobInfoCache: true
                         }
                     }
 				}
