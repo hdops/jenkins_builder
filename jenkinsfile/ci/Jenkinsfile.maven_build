@@ -2,7 +2,7 @@ def node=""
 if (env.node){
     node =env.node
 }else{
-    node ="master"
+    node ="develop"
 }
 
 def maven_image=""
@@ -31,6 +31,7 @@ pipeline {
     // agent {label node}
     agent {docker {
             image "${maven_image}"
+            label node
             args "${docker_args}"
           }}
     options {

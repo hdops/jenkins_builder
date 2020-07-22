@@ -2,7 +2,7 @@ def node=""
 if (env.node){
     node =env.node
 }else{
-    node ="master"
+    node ="develop"
 }
 if (env.build_branch == null){
     env.build_branch = "develop"
@@ -37,6 +37,7 @@ pipeline {
     // agent {label node}
     agent {docker {
             image "${maven_image}"
+            label node
             args "${docker_args}"
           }}
     options {
