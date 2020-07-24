@@ -2,7 +2,7 @@ def credentialsId="qianfan"
 def harborPass="hoS9sTHXQhpGvwa2"
 
 //  主要需要 git + dokcer 环境
-def build_image= "harbor.qianfan123.com/base/node:v8.9.4"
+def build_image= "harbor.qianfan123.com/base/golang:1.14.2"
 if (env.build_image){
     build_image =env.build_image
 }
@@ -40,14 +40,11 @@ pipeline {
 		stage('build') {
 		    steps{
 				script{
-					sh "  docker -v" 
-					ImageVersion = readFile "VERSION"
-                    echo "ImageVersion=${ImageVersion}" 
-					build_image = build_image_name + ":" + ImageVersion
+					sh "docker -v"
 					echo "build_image is ${build_image}"
-					docker_build_shell = "docker build -t " + build_image + " -f build/Dockerfile . && docker login -u admin -p ${harborPass}  harbor.qianfan123.com && docker push " + build_image
-							//echo "docker_build_shell is ${docker_build_shell}"
-					sh "  ${docker_build_shell}"  
+					docker_build_shell = "make all"
+					sh "docker login -u admin -p ${harborPass}  harbor.qianfan123.com && docker push"
+					sh "${docker_build_shell}"
 				}
 			} 
 		} 
