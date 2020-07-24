@@ -43,7 +43,7 @@ pipeline {
 					sh "docker -v"
 					echo "build_image is ${build_image}"
 					docker_build_shell = "make all"
-					sh "docker login -u admin -p ${harborPass}  harbor.qianfan123.com && docker push"
+					sh "docker login -u admin -p ${harborPass}  harbor.qianfan123.com"
 					sh "${docker_build_shell}"
 				}
 			} 
