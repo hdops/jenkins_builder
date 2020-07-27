@@ -38,10 +38,10 @@ pipeline {
 				script{
 					if(env.on_k8s){
 						container("hdtoolsetcore"){
-							sh "ssh -p 60501 dnet@{deploy_ip} 'sh /hdapp/${subsystem}/start.sh ${version}'"
+							sh "ssh -p 60501 dnet@${deploy_ip} 'sh /hdapp/${subsystem}/start.sh ${version}'"
 						}
 					}else {
-						sh "ssh -p 60501 dnet@{deploy_ip} 'sh /hdapp/${subsystem}/start.sh ${version}'"
+						sh "ssh -p 60501 dnet@${deploy_ip} 'sh /hdapp/${subsystem}/start.sh ${version}'"
 					}
 				}
 			}
