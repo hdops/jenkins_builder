@@ -12,6 +12,13 @@ if (env.maven_image){
     maven_image ="harbor.qianfan123.com/base/maven:3.3.9_jdk8"
 }
 
+def source_code_management=""
+if (env.source_code_management){
+    source_code_management =env.source_code_management
+}else{
+    source_code_management ="git"
+}
+
 def docker_args="-v /var/run/docker.sock:/var/run/docker.sock -v /usr/bin/docker:/usr/bin/docker"
 if (env.maven_repository){
     docker_args+=" -v "+env.maven_repository+":/hdapp/java"
@@ -48,8 +55,15 @@ pipeline {
         }  
         stage('checkout') {
             steps{
-                echo "checkout http://github.app.hd123.cn:10080/${git_project}.git  branch:${build_branch}"
-                checkout([$class: 'GitSCM', branches: [[name: "*/${build_branch}"]],userRemoteConfigs: [[credentialsId: 'qianfan',url: "http://github.app.hd123.cn:10080/${git_project}.git"]]])
+                script{
+                    if (source_code_management == "git"){
+                        echo "checkout http://github.app.hd123.cn:10080/${git_project}.git  branch:${build_branch}"
+                        checkout([$class: 'GitSCM', branches: [[name: "*/${build_branch}"]],userRemoteConfigs: [[credentialsId: 'qianfan',url: "http://github.app.hd123.cn:10080/${git_project}.git"]]])
+                    } else if (source_code_management == "svn"){
+                        echo "http://hddenv/svn/${svn_project}"
+                        checkout([$class: 'SubversionSCM', additionalCredentials: [], excludedCommitMessages: '', excludedRegions: '', excludedRevprop: '', excludedUsers: '', filterChangelog: false, ignoreDirPropChanges: false, includedRegions: '', locations: [[cancelProcessOnExternalsFail: false, credentialsId: 'hddenv', depthOption: 'infinity', ignoreExternalsOption: true, local: '.', remote: "http://hddenv/svn/${svn_project}"]], quietOperation: true, workspaceUpdater: [$class: 'CheckoutUpdater']])
+                    }
+                }
             }
         }  
 		stage('build') {
