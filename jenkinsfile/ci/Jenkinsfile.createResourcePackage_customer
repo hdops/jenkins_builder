@@ -24,7 +24,7 @@ pipeline {
 		}
         stage('createResourcePackage'){ 
 			steps{   
-                            sh "DNET_PRODUCT=${dnet_product} DNET_PROFILE=${params.DNET_PROFILE} hdmon create_resource_package -download_url ${params.BUILD_URL} -fromVersion ${params.fromVersion} -toVersion ${params.toVersion} -alias ${params.alias} -subsystem ${params.subsystem}" 
+                            sh "DNET_PRODUCT=${dnet_product} DNET_PROFILE=${params.DNET_PROFILE} hdmon create_resource_package --download_url ${params.BUILD_URL} --fromVersion ${params.fromVersion} --toVersion ${params.toVersion} --alias ${params.alias} --subsystem ${params.subsystem}" 
 			}
 		}
     }
