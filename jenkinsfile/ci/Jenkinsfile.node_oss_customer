@@ -86,12 +86,11 @@ pipeline {
 			}
 			steps{
 					script{
-							echo "DNET_CLOUD_VENDOR:${DNET_CLOUD_VENDOR}"
 							echo "subsystem:${subsystem}"
 							def oss_resources=""
 							oss_resources = env.subsystem + "-" + env.fromVersion+ "-" + env.alias + ".tar.gz"
 							echo "oss_resources:${oss_resources}" 
-							build job: 'upload_to_oss_customer', parameters: [string(name: 'DNET_PROFILE', value: DNET_PROFILE), string(name: 'DNET_CLOUD_VENDOR', value: DNET_CLOUD_VENDOR), string(name: 'subsystem', value: subsystem), string(name: 'oss_resources', value: oss_resources)], wait: false
+							build job: 'upload_to_oss_customer', parameters: [string(name: 'DNET_PROFILE', value: DNET_PROFILE), string(name: 'subsystem', value: subsystem), string(name: 'oss_resources', value: oss_resources)], wait: false
 				}
 			}
 		}
