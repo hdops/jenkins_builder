@@ -14,7 +14,7 @@ pipeline {
     agent {label node}
     options {
 	//     buildDiscarder(logRotator(numToKeepStr: '10'))
-	//     disableConcurrentBuilds()
+	    concurrentBuilds()
 	//     disableResume()
 	    timeout(time: 3, unit: 'HOURS')
     }
