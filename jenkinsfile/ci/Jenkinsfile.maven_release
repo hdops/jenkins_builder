@@ -14,7 +14,7 @@ if (env.maven_image){
 
 def docker_args="-v /var/run/docker.sock:/var/run/docker.sock -v /usr/bin/docker:/usr/bin/docker"
 if (env.maven_repository){
-    docker_args+=" -v "+env.maven_repository+":/hdapp/java"
+    docker_args+=" -v "+env.maven_repository
 }else{
     docker_args+=" -v /hdapp/java:/hdapp/java"
 }
