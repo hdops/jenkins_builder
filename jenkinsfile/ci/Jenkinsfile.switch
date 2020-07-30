@@ -62,7 +62,6 @@ pipeline {
             steps{
                 sh """git config --global user.email qianfan@hd123.com
 git config --global user.name qianfan
-cat /root/.git-credentials
 git checkout ${releaseBranchName}
 git pull
 git checkout develop
