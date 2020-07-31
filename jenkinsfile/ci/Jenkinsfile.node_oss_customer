@@ -16,7 +16,7 @@ if (params.build_branch){
 }
 
 pipeline {
-	agent none
+	agent {label node}
     options {
 	//     buildDiscarder(logRotator(numToKeepStr: '10'))
 	//     disableConcurrentBuilds()

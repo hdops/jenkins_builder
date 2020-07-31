@@ -1,3 +1,8 @@
+def node="master"
+if (env.node){
+    node =env.node
+}
+
 def credentialsId="qianfan"
 
 //  主要需要 git + dokcer 环境
@@ -12,6 +17,7 @@ pipeline {
     agent {
 		docker {
             image "${build_image}"
+            label node
             args '-v /var/run/docker.sock:/var/run/docker.sock -v /usr/bin/docker:/usr/bin/docker -v /root/.docker/config.json:/root/.docker/config.json'
           }
 	}
