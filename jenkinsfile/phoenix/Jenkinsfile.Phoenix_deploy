@@ -36,7 +36,13 @@ pipeline {
         }
         stage('部署') {
             steps {
-                sh "phoenix-tools ${params.action} ${params.skipversion} --skipupgrade ${params.skipupgrade} --tag ${params.tag}"
+                script {
+                    if (env.skipnochange) {
+                        sh "phoenix-tools ${params.action} ${params.skipversion} --skipupgrade ${params.skipupgrade} --skipnochange ${params.skipnochange} --tag ${params.tag}"
+                    } else {
+                        sh "phoenix-tools ${params.action} ${params.skipversion} --skipupgrade ${params.skipupgrade} --tag ${params.tag}"
+                    }
+                }
             }
         }
     }
