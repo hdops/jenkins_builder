@@ -49,7 +49,7 @@ pipeline {
         stage('checkout') {
             steps{
                 echo "checkout http://github.app.hd123.cn:10080/${git_project}.git  branch:${build_branch}"
-                checkout([$class: 'GitSCM', branches: [[name: "*/${build_branch}"]],userRemoteConfigs: [[credentialsId: 'qianfan',url: "http://github.app.hd123.cn:10080/${git_project}.git"]],extensions: [[$class: 'LocalBranch', localBranch: 'master']]])
+                checkout([$class: 'GitSCM', branches: [[name: "*/${build_branch}"]],userRemoteConfigs: [[credentialsId: 'qianfan',url: "http://github.app.hd123.cn:10080/${git_project}.git"]],extensions: [[$class: 'LocalBranch', localBranch: "${build_branch}"]]])
             }
         }
 		stage('build') {
