@@ -9,11 +9,11 @@ if (!env.GIT_GROUP){
 }
 pipeline {
     agent {label node}
-	options {
+	// options {
 	//     buildDiscarder(logRotator(numToKeepStr: '10'))
 	//     disableConcurrentBuilds()
 	//     disableResume()
-    }
+    // }
 	// parameters {
     //     string(name: 'GIT_REPONAME', defaultValue: 'heading', description: 'git repo url')
     //     string(name: 'GIT_BRANCH', defaultValue: 'uat', description: 'git_url 的分支')
