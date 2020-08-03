@@ -16,7 +16,7 @@ pipeline {
 		docker {
 		    label node
             image "${node_image}"
-            args '-v /var/run/docker.sock:/var/run/docker.sock -v /usr/bin/docker:/usr/bin/docker -v /root/.docker/config.json:/root/.docker/config.json'
+            args '-v /var/run/docker.sock:/var/run/docker.sock -v /usr/bin/docker:/usr/bin/docker -v /hdapp/npm:/root/.npm -v /root/.docker/config.json:/root/.docker/config.json'
           }
 	}
     options {
