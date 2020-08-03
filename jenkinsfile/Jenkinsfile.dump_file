@@ -45,7 +45,7 @@ pipeline {
                                 sh "DNET_PROFILE=integration_test DNET_PRODUCT=dnet hdops download_toolset --branch ${params.GIT_BRANCH} -p ."
                             }
                             sh "tar zxf toolset.tar.gz -C $WORKSPACE"
-                            sh "DNET_PRODUCT=${params.DNET_PRODUCT} DNET_PROFILE=${params.DNET_PROFILE} hdmon dump_file --container ${params.container} --domain ${params.domain}"
+                            sh "DNET_PRODUCT=${params.DNET_PRODUCT} DNET_PROFILE=${params.DNET_PROFILE} hdmon dump_file --container ${params.container} --domain ${params.domain} --download_jmap ${params.download_jmap}"
                         }
                     }else{
                         deleteDir()
@@ -56,7 +56,7 @@ pipeline {
                             sh "DNET_PROFILE=integration_test DNET_PRODUCT=dnet hdops download_toolset --branch ${params.GIT_BRANCH} -p ."
                         }
                         sh "tar zxf toolset.tar.gz -C $WORKSPACE"
-                        sh "DNET_PRODUCT=${params.DNET_PRODUCT} DNET_PROFILE=${params.DNET_PROFILE} hdmon dump_file --container ${params.container} --domain ${params.domain}"
+                        sh "DNET_PRODUCT=${params.DNET_PRODUCT} DNET_PROFILE=${params.DNET_PROFILE} hdmon dump_file --container ${params.container} --domain ${params.domain} --download_jmap ${params.download_jmap}"
                     }
                     
                 }

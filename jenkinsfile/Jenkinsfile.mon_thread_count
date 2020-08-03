@@ -11,7 +11,7 @@ if (env.whether_post){
 pipeline {
     agent {label node}
     options {
-	    timeout(time: 3, unit: 'MINUTES')
+	    timeout(time: 2, unit: 'MINUTES')
     }
     stages {
         stage('下载toolset') {
@@ -33,15 +33,15 @@ pipeline {
                 }
             }
         }
-        stage('pay selfpos') {
+        stage('monitor thread count') {
             steps {
                 script {
                     if (env.on_k8s) {
                         container("hdtoolsetcore") {
-                            sh "DNET_PRODUCT=${params.DNET_PRODUCT} DNET_PROFILE=${params.DNET_PROFILE}  hdmon pay_selfpos --cfgname ${params.cfgname}"
+                            sh "DNET_PRODUCT=${params.DNET_PRODUCT} DNET_PROFILE=${params.DNET_PROFILE}  hdmon mon_thread_count --cfgname ${params.cfgname}"
                         }
                     } else {
-                        sh "DNET_PRODUCT=${params.DNET_PRODUCT} DNET_PROFILE=${params.DNET_PROFILE}  hdmon pay_selfpos --cfgname ${params.cfgname}"
+                        sh "DNET_PRODUCT=${params.DNET_PRODUCT} DNET_PROFILE=${params.DNET_PROFILE}  hdmon mon_thread_count --cfgname ${params.cfgname}"
                     }
                 }
             }
