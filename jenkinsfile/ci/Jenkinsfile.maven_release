@@ -83,5 +83,41 @@ pipeline {
 				}
 			} 
 		}
+        stage('env'){
+			steps{
+				script{
+				    if (env.remote_env_cfg != "" && env.remote_env_cfg != null) {
+                        echo "using mvn "
+                        //ImageVersion = readMavenPom().getVersion()
+                        ImageVersion = readMavenPom().version
+                        echo("ImageVersion=${ImageVersion}")
+                        // remote_env
+                        println(env.remote_env_cfg)
+                        String[] data = env.remote_env_cfg.split('&')
+                        println(data)
+                        count = data.size()
+                        tasks = [:]
+                        data.each{ i ->
+                            String[] item = i.split(';')
+                            println(item)
+                            remoteJenkins = item[0]
+                            remoteJob = item[1]
+                            DNET_PROFILE = item[2]
+                            echo "remoteJenkins is ${remoteJenkins}"
+                            echo "remoteJob is ${remoteJob}"
+                            echo "DNET_PROFILE is ${DNET_PROFILE}"
+                            // env
+                            triggerRemoteJob job: "${remoteJob}", maxConn: 3, parameters: """DNET_PROFILE=${DNET_PROFILE}
+DNET_PRODUCT=${DNET_PRODUCT}
+image=${image}
+version=${ImageVersion}
+gitpath=${gitpath}
+sourcefrom=git
+    """, remoteJenkinsName: "${remoteJenkins}", useCrumbCache: false, useJobInfoCache: false, enhancedLogging: true
+                        }
+				    }
+				}
+			}
+		}
     }
 }
