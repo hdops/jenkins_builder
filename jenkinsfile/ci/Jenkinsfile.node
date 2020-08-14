@@ -84,7 +84,7 @@ image=${image}
 version=${imageVersion}
 gitpath=${gitpath}
 sourcefrom=git
-    """, remoteJenkinsName: "${remoteJenkins}", useCrumbCache: true, useJobInfoCache: true
+    """, remoteJenkinsName: "${remoteJenkins}", useCrumbCache: false, useJobInfoCache: true
                         }
 				    }
 				}
