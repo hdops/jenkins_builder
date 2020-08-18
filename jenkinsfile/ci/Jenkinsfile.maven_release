@@ -48,15 +48,17 @@ pipeline {
         }  
         stage('checkout') {
             steps{
-                if (source_code_management == "git"){
-                    echo "checkout http://github.app.hd123.cn:10080/${git_project}.git  branch:${build_branch}"
-                    checkout([$class: 'GitSCM', branches: [[name: "*/${build_branch}"]],userRemoteConfigs: [[credentialsId: 'qianfan',url: "http://github.app.hd123.cn:10080/${git_project}.git"]],extensions: [[$class: 'LocalBranch', localBranch: "${build_branch}"]]])
-                } else if (source_code_management == "svn"){
+                script{
+                    if (source_code_management == "git"){
+                        echo "checkout http://github.app.hd123.cn:10080/${git_project}.git  branch:${build_branch}"
+                        checkout([$class: 'GitSCM', branches: [[name: "*/${build_branch}"]],userRemoteConfigs: [[credentialsId: 'qianfan',url: "http://github.app.hd123.cn:10080/${git_project}.git"]]])
+                    } else if (source_code_management == "svn"){
                         echo "http://hddenv/svn/${svn_project}/${build_branch}"
                         checkout([$class: 'SubversionSCM', additionalCredentials: [], excludedCommitMessages: '', excludedRegions: '', excludedRevprop: '', excludedUsers: '', filterChangelog: false, ignoreDirPropChanges: false, includedRegions: '', locations: [[cancelProcessOnExternalsFail: false, credentialsId: 'hddenv', depthOption: 'infinity', ignoreExternalsOption: true, local: '.', remote: "http://hddenv/svn/${svn_project}/${build_branch}"]], quietOperation: true, workspaceUpdater: [$class: 'CheckoutUpdater']])
+                    }
                 }
             }
-        }
+        }  
 		stage('build') {
 		    steps{
 				script{  
