@@ -19,6 +19,13 @@ if (env.maven_repository){
     docker_args+=" -v /hdapp/java:/hdapp/java"
 }
 
+def source_code_management=""
+if (env.source_code_management){
+    source_code_management =env.source_code_management
+}else{
+    source_code_management ="git"
+}
+
 def mvn_configfile="jdk8"
 if (env.mvn_configfile){
     mvn_configfile =env.mvn_configfile
