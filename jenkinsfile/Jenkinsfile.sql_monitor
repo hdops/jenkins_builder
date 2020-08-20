@@ -15,7 +15,7 @@ pipeline {
 	    timeout(time: 2, unit: 'MINUTES')
     }
 	triggers {
-        cron '*/3 * * * *'
+        cron 'H/3 * * * *'
      }
     stages {
         stage('sql monitor') {
