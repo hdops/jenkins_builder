@@ -28,9 +28,6 @@ pipeline {
 	//    string(name: 'GIT_BRANCH', defaultValue: 'develop', description: '')
 	//    choice(name: 'DNET_CLOUD_VENDOR', choices:'tencent\naliyun', description: '')
 	// }
-	triggers {
-        cron '* * * * *'
-     }
     stages {
         stage('redis_monitor') {
 			steps{
