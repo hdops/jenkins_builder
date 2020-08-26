@@ -46,10 +46,10 @@ pipeline {
                 sh """git config --global user.email qianfan@hd123.com
 git config --global user.name qianfan
 git checkout ${releaseBranchName}
-git checkout master
+git checkout ${build_branch}
 git pull
 git merge -s recursive -X theirs ${releaseBranchName} -m '版本发布'
-git push origin master
+git push origin ${build_branch}
 git tag ${releaseVersion}
 git push --tags"""
 				echo "npm_shell is ${npm_shell}"
