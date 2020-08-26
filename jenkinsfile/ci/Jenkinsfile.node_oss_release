@@ -67,20 +67,5 @@ git push --tags"""
 				}
 			}
 		}
-        stage('qianfan-front-web-oss'){ 
-		    when {
-			    expression {'develop' == "${build_branch}"}
-			}
-			steps{
-					script{
-							echo "DNET_CLOUD_VENDOR:${DNET_CLOUD_VENDOR}"
-							echo "subsystem:${subsystem}"
-							def oss_resources=""
-							oss_resources = env.subsystem + "-" + env.fromVersion+ "-" + env.alias + ".tar.gz"
-							echo "oss_resources:${oss_resources}" 
-							build job: 'qianfan-front-web-oss', parameters: [string(name: 'DNET_PROFILE', value: DNET_PROFILE), string(name: 'DNET_CLOUD_VENDOR', value: DNET_CLOUD_VENDOR), string(name: 'subsystem', value: subsystem), string(name: 'oss_resources', value: oss_resources)], wait: false
-				}
-			}
-		}
     }
 }
