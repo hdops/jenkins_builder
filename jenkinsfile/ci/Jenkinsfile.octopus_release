@@ -39,7 +39,7 @@ pipeline {
          stage('checkout') {
              steps{ 
 				echo "checkout http://github.app.hd123.cn:10080/${git_project}.git  branch:${build_branch}"
-				git branch: "${build_branch}", credentialsId: "${credentialsId}", url: 'http://github.app.hd123.cn:10080/${git_project}.git'
+                checkout([$class: 'GitSCM', branches: [[name: '*/${build_branch}']],userRemoteConfigs: [[url: 'http://github.app.hd123.cn:10080/${git_project}.git',credentialsId: "${credentialsId}"]]])
                 sh """git config --global user.email qianfan@hd123.com
 git config --global user.name qianfan
 git checkout ${releaseBranchName}
