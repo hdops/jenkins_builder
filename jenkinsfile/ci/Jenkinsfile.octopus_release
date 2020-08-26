@@ -40,8 +40,6 @@ pipeline {
              steps{ 
 				echo "checkout http://github.app.hd123.cn:10080/${git_project}.git  branch:${build_branch}"
 				git branch: "${build_branch}", credentialsId: "${credentialsId}", url: 'http://github.app.hd123.cn:10080/${git_project}.git'
-             }
-            steps{
                 sh """git config --global user.email qianfan@hd123.com
 git config --global user.name qianfan
 git checkout ${releaseBranchName}
@@ -51,7 +49,7 @@ git merge -s recursive -X theirs ${releaseBranchName} -m '版本发布'
 git push origin master
 git tag ${releaseVersion}
 git push --tags"""
-            }
+             }
          }
 		stage('build') {
 		    steps{

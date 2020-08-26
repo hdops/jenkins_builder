@@ -39,7 +39,10 @@ pipeline {
 			    args '-v /var/run/docker.sock:/var/run/docker.sock -v /usr/bin/docker:/usr/bin/docker -v /hdapp/npm:/root/.npm'
 			    }
              }
-            steps{
+             steps{ 
+				echo "checkout http://github.app.hd123.cn:10080/${git_project}.git  branch:${build_branch}"
+				// git branch: "${build_branch}", credentialsId: "${credentialsId}", url: 'http://github.app.hd123.cn:10080/${git_project}.git'
+                checkout([$class: 'GitSCM', branches: [[name: '*/${build_branch}']],userRemoteConfigs: [[url: 'http://github.app.hd123.cn:10080/${git_project}.git',credentialsId: "${credentialsId}"]]])
                 sh """git config --global user.email qianfan@hd123.com
 git config --global user.name qianfan
 git checkout ${releaseBranchName}
@@ -49,14 +52,8 @@ git merge -s recursive -X theirs ${releaseBranchName} -m '版本发布'
 git push origin master
 git tag ${releaseVersion}
 git push --tags"""
-            }
-             steps{ 
-				echo "checkout http://github.app.hd123.cn:10080/${git_project}.git  branch:${build_branch}"
-				// git branch: "${build_branch}", credentialsId: "${credentialsId}", url: 'http://github.app.hd123.cn:10080/${git_project}.git'
-                checkout([$class: 'GitSCM', branches: [[name: '*/${build_branch}']],userRemoteConfigs: [[url: 'http://github.app.hd123.cn:10080/${git_project}.git',credentialsId: "${credentialsId}"]]])
-				
 				echo "npm_shell is ${npm_shell}"
-				sh "  ${npm_shell}" 
+				sh "${npm_shell}"
 				archiveArtifacts '*.tar.gz' 
              }
          }  
