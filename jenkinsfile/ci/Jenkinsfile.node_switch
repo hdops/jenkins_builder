@@ -63,12 +63,14 @@ pipeline {
                 sh """git config --global user.email qianfan@hd123.com
 git config --global user.name qianfan
 git checkout ${releaseBranchName}
-git pull
 git checkout develop
 git branch -d ${releaseBranchName}
 git push origin :${releaseBranchName}
-
-git checkout develop"""
+git checkout develop
+git pull
+git checkout -b ${releaseBranchName}
+git push origin ${releaseBranchName}
+"""
             }
         }
     }
