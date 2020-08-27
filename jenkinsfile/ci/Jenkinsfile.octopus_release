@@ -48,6 +48,7 @@ git checkout ${build_branch}
 git pull
 git merge -s recursive -X theirs ${releaseBranchName} -m '版本发布'
 make modify-ver
+git commit -m "${releaseVersion}"
 git push origin ${build_branch}
 git tag ${releaseVersion}
 git push --tags"""
