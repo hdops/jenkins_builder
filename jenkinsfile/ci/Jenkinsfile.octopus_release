@@ -57,7 +57,7 @@ git push --tags"""
 				script{
 					sh "docker -v"
 					echo "build_image is ${build_image}"
-					docker_build_shell = "make all"
+					docker_build_shell = "make release"
 					sh "${docker_build_shell}"
 				}
 			} 
