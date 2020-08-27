@@ -63,7 +63,7 @@ git push --tags"""
 				script{
 						echo "subsystem:${subsystem}"
 						echo "BUILD_URL:${BUILD_URL}"
-						build job: 'createResourcePackage', parameters: [string(name: 'DNET_PROFILE', value: DNET_PROFILE), string(name: 'subsystem', value: subsystem), string(name: 'BUILD_URL', value: BUILD_URL), string(name: 'fromVersion', value: "$releaseVersion"), string(name: 'toVersion', value: "$releaseVersion"), string(name: 'alias', value: "$releaseVersion")], wait: true
+						build job: 'createResourcePackage', parameters: [string(name: 'DNET_PROFILE', value: 'production'), string(name: 'subsystem', value: subsystem), string(name: 'BUILD_URL', value: BUILD_URL), string(name: 'fromVersion', value: "$releaseVersion"), string(name: 'toVersion', value: "$releaseVersion"), string(name: 'alias', value: "$releaseVersion")], wait: true
 				}
 			}
 		}
