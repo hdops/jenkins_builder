@@ -1,4 +1,4 @@
-def node="develop"
+def node="master"
 if (env.node){
     node =env.node
 }
