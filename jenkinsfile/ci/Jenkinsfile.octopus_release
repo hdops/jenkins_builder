@@ -50,7 +50,7 @@ git merge -s recursive -X theirs ${releaseBranchName} -m '版本发布'
 git push origin ${build_branch}
 make modify-ver
 git add .
-git commit -m "${releaseVersion}"
+git commit -m "${releaseVersion}" || echo "${releaseVersion}"
 git push
 git tag ${releaseVersion}
 git push --tags"""
