@@ -47,6 +47,7 @@ git checkout ${releaseBranchName}
 git checkout ${build_branch}
 git pull
 git merge -s recursive -X theirs ${releaseBranchName} -m '版本发布'
+make modify-ver
 git push origin ${build_branch}
 git tag ${releaseVersion}
 git push --tags"""
@@ -57,7 +58,7 @@ git push --tags"""
 				script{
 					sh "docker -v"
 					echo "build_image is ${build_image}"
-					docker_build_shell = "make release"
+					docker_build_shell = "make all"
 					sh "${docker_build_shell}"
 				}
 			} 
