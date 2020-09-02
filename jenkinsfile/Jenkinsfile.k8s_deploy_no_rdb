@@ -35,7 +35,7 @@ pipeline {
 							retry(2){
 								sh "DNET_PROFILE=integration_test DNET_PRODUCT=dnet hdopsctl download_toolset --project toolset-k8s-config --branch ${params.GIT_BRANCH} -p ."
 							}
-							sh "tar zxf toolset.tar.gz -C ${WORKSPACE}"
+							sh "tar zxf toolset-k8s-config.tar.gz -C ${WORKSPACE}"
 						}
 					}else {
 						echo "active profile is ${params.DNET_PROFILE}"
@@ -46,7 +46,7 @@ pipeline {
 						retry(2){
 							sh "DNET_PROFILE=integration_test DNET_PRODUCT=dnet hdopsctl download_toolset --project toolset-k8s-config --branch ${params.GIT_BRANCH} -p ."
 						}
-						sh "tar zxf toolset.tar.gz -C ${WORKSPACE}"
+						sh "tar zxf toolset-k8s-config.tar.gz -C ${WORKSPACE}"
 					}
 				}
 			}
