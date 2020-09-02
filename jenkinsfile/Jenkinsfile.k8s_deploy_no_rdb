@@ -16,6 +16,11 @@ pipeline {
 	    timeout(time: 3, unit: 'HOURS')
     }
     stages {
+        stage('delete workspace') {
+            steps{
+                deleteDir()
+            }
+        }
 		stage('download toolset') {
 			steps{
 				script{
