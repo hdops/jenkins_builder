@@ -57,8 +57,6 @@ pipeline {
 				script{
 				    if (env.remote_deploy_cfg != "" && env.remote_deploy_cfg != null) {
 						// remote_deploy
-						version=readFile 'VERSION'
-						println(version)
                         println(env.remote_deploy_cfg)
                         String[] data = env.remote_deploy_cfg.split('&')
                         println(data)
@@ -72,8 +70,7 @@ pipeline {
                             echo "remoteJenkins is ${remoteJenkins}"
                             echo "remoteJob is ${remoteJob}"
                             // deploy
-                            triggerRemoteJob job: "${remoteJob}", maxConn: 3, parameters: """subsystem=${subsystem}
-version=${version}""", remoteJenkinsName: "${remoteJenkins}", useCrumbCache: false, useJobInfoCache: false, enhancedLogging: true
+                            triggerRemoteJob job: "${remoteJob}", maxConn: 3, parameters: """subsystem=${subsystem}""", remoteJenkinsName: "${remoteJenkins}", useCrumbCache: false, useJobInfoCache: false, enhancedLogging: true
                         }
                     }
 				}
