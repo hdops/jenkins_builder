@@ -26,10 +26,11 @@ pipeline {
 							echo "sub systems are ${params.subsystem}"
 							echo "skip version is ${params.skipversion}"
 							echo "upstream URL is ${params.upurl}"
-							retry(2){
-								sh "DNET_PROFILE=integration_test DNET_PRODUCT=dnet hdops download_toolset --project toolset_k8s_config --branch ${params.GIT_BRANCH} -p ."
-							}
-							sh "tar zxf toolset.tar.gz -C ${WORKSPACE}"
+							sh "git clone http://qianfan:headingqianfan@github.app.hd123.cn:10080/qianfanops/toolset-k8s-config.git -b develop ."
+					//		retry(2){
+					//			sh "DNET_PROFILE=integration_test DNET_PRODUCT=dnet hdops download_toolset --project toolset_k8s_config --branch ${params.GIT_BRANCH} -p ."
+					//		}
+					//		sh "tar zxf toolset.tar.gz -C ${WORKSPACE}"
 						}
 					}else {
 						echo "active profile is ${params.DNET_PROFILE}"
