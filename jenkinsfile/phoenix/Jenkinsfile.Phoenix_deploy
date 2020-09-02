@@ -38,9 +38,17 @@ pipeline {
             steps {
                 script {
                     if (env.skipnochange) {
-                        sh "phoenix-tools ${params.action} ${params.skipversion} --skipupgrade ${params.skipupgrade} --skipnochange ${params.skipnochange} --tag ${params.tag}"
+                        if (env.tag) {
+                           sh "phoenix-tools ${params.action} ${params.skipversion} --skipupgrade ${params.skipupgrade} --skipnochange ${params.skipnochange} --tag ${params.tag}"
+                        } else {
+                            sh "phoenix-tools ${params.action} ${params.skipversion} --skipupgrade ${params.skipupgrade} --skipnochange ${params.skipnochange}"
+                        }
                     } else {
-                        sh "phoenix-tools ${params.action} ${params.skipversion} --skipupgrade ${params.skipupgrade} --tag ${params.tag}"
+                        if (env.tag) {
+                            sh "phoenix-tools ${params.action} ${params.skipversion} --skipupgrade ${params.skipupgrade} --tag ${params.tag}"
+                        } else {
+                            sh "phoenix-tools ${params.action} ${params.skipversion} --skipupgrade ${params.skipupgrade}"
+                        }
                     }
                 }
             }
