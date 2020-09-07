@@ -41,7 +41,7 @@ pipeline {
                                 sh "DNET_PROFILE=integration_test DNET_PRODUCT=dnet hdops download_toolset --branch ${params.GIT_BRANCH} -p ."
                             }
                             sh "tar zxf toolset.tar.gz -C ${WORKSPACE}"
-                            sh "DINGTALK_TOKEN=${DINGTALK_TOKEN} hdmon es_index_check --cfgname ${params.cfgname} --receivers ${params.receivers}"
+                            sh "DINGTALK_TOKEN=${DINGTALK_TOKEN} DNET_PRODUCT=${params.DNET_PRODUCT} DNET_PROFILE=${params.DNET_PROFILE} hdmon es_index_check --cfgname ${params.cfgname} --receivers ${params.receivers}"
                         }
                     }else {
                         docker.image("harbor.qianfan123.com/toolset/toolsetcore:0.3.0").pull()
@@ -51,7 +51,7 @@ pipeline {
                                 sh "DNET_PROFILE=integration_test DNET_PRODUCT=dnet hdops download_toolset --branch ${params.GIT_BRANCH} -p ."
                             }
                             sh "tar zxf toolset.tar.gz -C ${WORKSPACE}"
-                            sh "DINGTALK_TOKEN=${DINGTALK_TOKEN} hdmon es_index_check --cfgname ${params.cfgname} --receivers ${params.receivers}"
+                            sh "DINGTALK_TOKEN=${DINGTALK_TOKEN} DNET_PRODUCT=${params.DNET_PRODUCT} DNET_PROFILE=${params.DNET_PROFILE} hdmon es_index_check --cfgname ${params.cfgname} --receivers ${params.receivers}"
                         }
                     }
                 }
