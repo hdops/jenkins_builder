@@ -14,7 +14,7 @@ pipeline {
 	//     buildDiscarder(logRotator(numToKeepStr: '10'))
 	//     disableConcurrentBuilds()
 	//     disableResume()
-	    timeout(time: 3, unit: 'HOURS')
+	    timeout(time: 15, unit: 'MINUTES')
     }
 	// environment{
     //     DNET_PRIVATE_AK="$DNET_PRIVATE_AK"
