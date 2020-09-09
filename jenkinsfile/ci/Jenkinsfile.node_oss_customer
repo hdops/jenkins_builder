@@ -20,7 +20,7 @@ if (env.packageRemoteJob){
     packageRemoteJob = env.packageRemoteJob
 }
 
-def uploadRemoteJob="qianfan-front-web-oss"
+def uploadRemoteJob="upload_to_oss_customer"
 if (env.uploadRemoteJob){
     uploadRemoteJob = env.uploadRemoteJob
 }
