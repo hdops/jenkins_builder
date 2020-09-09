@@ -59,7 +59,7 @@ pipeline {
 				archiveArtifacts '*.tar.gz' 
              }
          }  
-        stage("${packageRemoteJob}"){
+        stage('打包'){
 			steps{
 				script{
 						echo "subsystem:${subsystem}"
@@ -90,7 +90,7 @@ pipeline {
 				}
 			}
 		}
-        stage("${uploadRemoteJob}"){
+        stage('部署'){
 		    when {
 			    expression {'develop' == "${build_branch}"}
 			}
@@ -100,7 +100,7 @@ pipeline {
 							def oss_resources=""
 							oss_resources = env.subsystem + "-" + env.fromVersion+ "-" + env.alias + ".tar.gz"
 							echo "oss_resources:${oss_resources}" 
-							build job: "${uploadRemoteJob}", parameters: [string(name: 'DNET_PROFILE', value: DNET_PROFILE), string(name: 'subsystem', value: subsystem), string(name: 'oss_resources', value: oss_resources)], wait: false
+							build job: '部署', parameters: [string(name: 'DNET_PROFILE', value: DNET_PROFILE), string(name: 'subsystem', value: subsystem), string(name: 'oss_resources', value: oss_resources)], wait: false
 				}
 			}
 		}

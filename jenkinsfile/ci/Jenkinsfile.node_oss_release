@@ -68,7 +68,7 @@ git push --tags"""
 				archiveArtifacts '*.tar.gz' 
              }
          }  
-        stage("${packageRemoteJob}"){
+        stage('打包'){
 			steps{
 				script{
 						echo "subsystem:${subsystem}"
