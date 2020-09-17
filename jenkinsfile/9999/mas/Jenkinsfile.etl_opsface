@@ -7,6 +7,7 @@ def whether_post="False"
 if (env.whether_post){
     whether_post =env.whether_post
 }
+
 pipeline {
     agent {label node}
 	options {
@@ -20,18 +21,17 @@ pipeline {
     //     DNET_PRIVATE_AS="$DNET_PRIVATE_AS"
  	// }
 	// parameters {
-	//    choice(name:'DNET_PROFILE', choices:'production\nintegration_test')
+	//    choice(name:'DNET_PROFILE', choices:'integration_test\nbranch_test\nuat\nproduction')
 	//    string(name: 'DNET_PRODUCT', defaultValue: 'pay', description: '')
-	//    string(name: 'cfgname', defaultValue: 'pay', description: '配置')
-	//    string(name: 'receivers', defaultValue: 'wangfei1@hd123.com,buhaiqing@hd123.com,gaoweizong@hd123.com', description: '邮件接收人')
 	//    string(name: 'GIT_BRANCH', defaultValue: 'develop', description: 'release/release\ndevelop')
+	//    string(name: 'cfgname', defaultValue: 'etl/member/quasirealtime.yaml', description: 'cfgname')
 	//   // string(name: 'DINGTALK_TOKEN', defaultValue: '1e93162cec116308ffb29fe19ba83b0f57121cc79cfb9b0958e1b1025e55a445', description: '钉钉token')
 	// }
 	// triggers {
-    //     cron 'H * * * *'
+    //     cron '*/2 * * * *'
     //  }
     stages {
-        stage('es索引检查') {
+        stage('etl') {
 			steps{
 				script {
                     if (env.on_k8s){
@@ -41,18 +41,18 @@ pipeline {
                                 sh "DNET_PROFILE=integration_test DNET_PRODUCT=dnet hdops download_toolset --branch ${params.GIT_BRANCH} -p ."
                             }
                             sh "tar zxf toolset.tar.gz -C ${WORKSPACE}"
-                            sh "DINGTALK_TOKEN=${DINGTALK_TOKEN} DNET_PRODUCT=${params.DNET_PRODUCT} DNET_PROFILE=${params.DNET_PROFILE} hdmon es_index_check --cfgname ${params.cfgname} --receivers ${params.receivers}"
+                            sh "DINGTALK_TOKEN=${DINGTALK_TOKEN} hdmon mas_etl_opsface --cfgname ${params.cfgname}"
                         }
                     }else {
-                        docker.image("harbor.qianfan123.com/toolset/toolsetcore:0.3.0").pull()
                         docker.image("harbor.qianfan123.com/toolset/toolsetcore:0.3.0").withRun('-v /var/run/docker.sock:/var/run/docker.sock') {
                             echo "profile is ${params.DNET_PROFILE}"
                             retry(2){
                                 sh "DNET_PROFILE=integration_test DNET_PRODUCT=dnet hdops download_toolset --branch ${params.GIT_BRANCH} -p ."
                             }
                             sh "tar zxf toolset.tar.gz -C ${WORKSPACE}"
-                            sh "DINGTALK_TOKEN=${DINGTALK_TOKEN} DNET_PRODUCT=${params.DNET_PRODUCT} DNET_PROFILE=${params.DNET_PROFILE} hdmon es_index_check --cfgname ${params.cfgname} --receivers ${params.receivers}"
+                            sh "DINGTALK_TOKEN=${DINGTALK_TOKEN} hdmon mas_etl_opsface --cfgname ${params.cfgname}"
                         }
+
                     }
                 }
 			}
