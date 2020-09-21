@@ -1,0 +1,104 @@
+def node=""
+if (env.node){
+    node =env.node
+}else{
+    node ="master"
+}
+def whether_post=""
+if (env.whether_post){
+    whether_post =env.whether_post
+}else{
+    whether_post ="True"
+}
+pipeline {
+    agent {label node}
+    options {
+	    timeout(time: 3, unit: 'HOURS')
+    }
+    stages {
+        stage('delete workspace') {
+            steps{
+                deleteDir()
+            }
+        }
+		stage('download toolset') {
+			steps{
+				script{
+					if(env.on_k8s){
+						container("toolsetcore-k8s"){
+							echo "active profile is ${params.DNET_PROFILE}"
+							echo "toolset path is ${WORKSPACE}"
+							echo "sub systems are ${params.subsystem}"
+							echo "skip version is ${params.skipversion}"
+							echo "upstream URL is ${params.upurl}"
+					//		sh "git clone http://qianfan:headingqianfan@github.app.hd123.cn:10080/qianfanops/toolset-k8s-config.git -b develop ."
+							retry(2){
+								sh "DNET_PROFILE=integration_test DNET_PRODUCT=dnet hdopsctl download_toolset --project toolset-k8s-config --branch ${params.GIT_BRANCH} -p ."
+							}
+							sh "tar zxf toolset-k8s-config.tar.gz -C ${WORKSPACE}"
+						}
+					}else {
+						echo "active profile is ${params.DNET_PROFILE}"
+						echo "toolset path is ${WORKSPACE}"
+						echo "sub systems are ${params.subsystem}"
+						echo "skip version is ${params.skipversion}"
+						echo "upstream URL is ${params.upurl}"
+						retry(2){
+							sh "DNET_PROFILE=integration_test DNET_PRODUCT=dnet hdopsctl download_toolset --project toolset-k8s-config --branch ${params.GIT_BRANCH} -p ."
+						}
+						sh "tar zxf toolset-k8s-config.tar.gz -C ${WORKSPACE}"
+					}
+				}
+			}
+        }
+		stage('validate docker image') {
+			steps{
+				script{
+					if(env.on_k8s){
+						container("toolsetcore-k8s"){
+							sh "DNET_AK=${params.DNET_AK} DNET_PRODUCT=${params.DNET_PRODUCT} DNET_PROFILE=${params.DNET_PROFILE} PRESET_IMAGE_VERSION=${params.PRESET_IMAGE_VERSION} hdopsctl validateImage  --subsystem  ${params.subsystem}"
+						}
+					}else {
+						sh "DNET_AK=${params.DNET_AK} DNET_PRODUCT=${params.DNET_PRODUCT} DNET_PROFILE=${params.DNET_PROFILE} PRESET_IMAGE_VERSION=${params.PRESET_IMAGE_VERSION} hdopsctl validateImage --subsystem  ${params.subsystem}"
+					}
+				}
+			}
+        }
+		stage('deploy') {
+		    steps{
+				script{
+					if (env.on_k8s){
+						container("toolsetcore-k8s"){
+		        			sh "DNET_AK=${params.DNET_AK} DNET_PRODUCT=${params.DNET_PRODUCT} DNET_PROFILE=${params.DNET_PROFILE} PRESET_IMAGE_VERSION=${params.PRESET_IMAGE_VERSION} hdopsctl deploy --subsystem ${params.subsystem} --stackids ${params.stackIds}"
+						}
+					}else {
+						sh "DNET_AK=${params.DNET_AK} DNET_PRODUCT=${params.DNET_PRODUCT} DNET_PROFILE=${params.DNET_PROFILE} PRESET_IMAGE_VERSION=${params.PRESET_IMAGE_VERSION} hdopsctl deploy --subsystem ${params.subsystem} --stackids ${params.stackIds}"
+					}
+				}
+			}
+		}
+    }
+	post {
+    // 构建失败之后钉钉通知
+        failure {
+            script {
+                if (whether_post == "True") {
+                    dingTalk accessToken: "${DINGTALK_TOKEN}", imageUrl: '', jenkinsUrl: "${jenkinsUrl}", message: "构建失败 ${new Date().format("yyyy-MM-dd HH:mm:ss")}", notifyPeople: ''
+                }
+            }
+        }
+	// 失败转成功之后钉钉通知
+        fixed {
+            script {
+                if (whether_post == "True") {
+                    dingTalk accessToken: "${DINGTALK_TOKEN}", imageUrl: '', jenkinsUrl: "${jenkinsUrl}", message: "恢复正常 ${new Date().format("yyyy-MM-dd HH:mm:ss")}", notifyPeople: ''
+                }
+            }
+        }
+        always {
+			script {
+				currentBuild.description = "${params.DNET_PROFILE}:${params.subsystem}:${params.skipversion}"
+			}
+		}
+    }
+}
