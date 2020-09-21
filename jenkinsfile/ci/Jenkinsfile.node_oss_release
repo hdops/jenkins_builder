@@ -3,7 +3,7 @@ if (env.node){
     node =env.node
 }
 
-def node_image= "harbor.qianfan123.com/base/node:9-alpine"
+def node_image= "harbor.qianfan123.com/base/node:9.11.2"
 if (env.node_image){
     node_image =env.node_image
 }
