@@ -3,7 +3,7 @@ if (env.node){
     node =env.node
 }
 
-def node_image= "harbor.qianfan123.com/base/node:9-alpine"
+def node_image= "harbor.qianfan123.com/base/node:9.11.2"
 if (env.node_image){
     node_image =env.node_image
 }
@@ -13,6 +13,16 @@ def credentialsId="qianfan"
 def build_branch="develop"
 if (params.build_branch){
     build_branch =params.build_branch
+}
+
+def packageRemoteJob="createResourcePackage"
+if (env.packageRemoteJob){
+    packageRemoteJob = env.packageRemoteJob
+}
+
+def uploadRemoteJob="qianfan-front-web-oss"
+if (env.uploadRemoteJob){
+    uploadRemoteJob = env.uploadRemoteJob
 }
 
 pipeline {
@@ -58,12 +68,12 @@ git push --tags"""
 				archiveArtifacts '*.tar.gz' 
              }
          }  
-        stage('createResourcePackage'){ 
+        stage('打包'){
 			steps{
 				script{
 						echo "subsystem:${subsystem}"
 						echo "BUILD_URL:${BUILD_URL}"
-						build job: 'createResourcePackage', parameters: [string(name: 'DNET_PROFILE', value: 'production'), string(name: 'subsystem', value: subsystem), string(name: 'BUILD_URL', value: BUILD_URL), string(name: 'fromVersion', value: "$releaseVersion"), string(name: 'toVersion', value: "$releaseVersion"), string(name: 'alias', value: "$releaseVersion")], wait: true
+						build job: "${packageRemoteJob}", parameters: [string(name: 'DNET_PROFILE', value: 'production'), string(name: 'subsystem', value: subsystem), string(name: 'BUILD_URL', value: BUILD_URL), string(name: 'fromVersion', value: "$releaseVersion"), string(name: 'toVersion', value: "$releaseVersion"), string(name: 'alias', value: "$alias")], wait: true
 				}
 			}
 		}

@@ -15,6 +15,16 @@ if (params.build_branch){
     build_branch =params.build_branch
 }
 
+def packageRemoteJob="createResourcePackage"
+if (env.packageRemoteJob){
+    packageRemoteJob = env.packageRemoteJob
+}
+
+def uploadRemoteJob="qianfan-front-web-oss"
+if (env.uploadRemoteJob){
+    uploadRemoteJob = env.uploadRemoteJob
+}
+
 pipeline {
 	agent {label node}
     options {
@@ -49,7 +59,7 @@ pipeline {
 				archiveArtifacts '*.tar.gz' 
              }
          }  
-        stage('createResourcePackage'){ 
+        stage('打包'){
 			steps{
 				script{
 						echo "subsystem:${subsystem}"
@@ -76,11 +86,11 @@ pipeline {
 						    alias =build_branch
 						}
 						echo "alias:${alias}"
-						build job: 'createResourcePackage', parameters: [string(name: 'DNET_PROFILE', value: DNET_PROFILE), string(name: 'subsystem', value: subsystem), string(name: 'BUILD_URL', value: BUILD_URL), string(name: 'fromVersion', value: fromVersion), string(name: 'toVersion', value: toVersion), string(name: 'alias', value: alias)], wait: true
+						build job: "${packageRemoteJob}", parameters: [string(name: 'DNET_PROFILE', value: DNET_PROFILE), string(name: 'subsystem', value: subsystem), string(name: 'BUILD_URL', value: BUILD_URL), string(name: 'fromVersion', value: fromVersion), string(name: 'toVersion', value: toVersion), string(name: 'alias', value: alias)], wait: true
 				}
 			}
 		}
-        stage('qianfan-front-web-oss'){ 
+        stage('部署'){
 		    when {
 			    expression {'develop' == "${build_branch}"}
 			}
@@ -91,7 +101,7 @@ pipeline {
 							def oss_resources=""
 							oss_resources = env.subsystem + "-" + env.fromVersion+ "-" + env.alias + ".tar.gz"
 							echo "oss_resources:${oss_resources}" 
-							build job: 'qianfan-front-web-oss', parameters: [string(name: 'DNET_PROFILE', value: DNET_PROFILE), string(name: 'DNET_CLOUD_VENDOR', value: DNET_CLOUD_VENDOR), string(name: 'subsystem', value: subsystem), string(name: 'oss_resources', value: oss_resources)], wait: false
+							build job: "${uploadRemoteJob}", parameters: [string(name: 'DNET_PROFILE', value: DNET_PROFILE), string(name: 'DNET_CLOUD_VENDOR', value: DNET_CLOUD_VENDOR), string(name: 'subsystem', value: subsystem), string(name: 'oss_resources', value: oss_resources)], wait: false
 				}
 			}
 		}
