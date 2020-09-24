@@ -54,12 +54,13 @@ pipeline {
 				script{
 						echo "subsystem:${subsystem}"
 						echo "BUILD_URL:${BUILD_URL}"
-						def now = new Date() 
+						// def now = new Date() 
+						// fromVersion =now.format("yyyyMMdd", TimeZone.getTimeZone('UTC'))
 						def fromVersion = ""
 						if (env.fromVersion){
 						    fromVersion =env.fromVersion
 						}else{
-						    fromVersion =now.format("yyyyMMdd", TimeZone.getTimeZone('UTC'))
+						    fromVersion =build_branch
 						}
 						echo "fromVersion:${fromVersion}"
 						def toVersion=""
@@ -88,7 +89,19 @@ pipeline {
 					script{
 							echo "subsystem:${subsystem}"
 							def oss_resources=""
-							oss_resources = env.subsystem + "-" + env.fromVersion+ "-" + env.alias + ".tar.gz"
+							def fromVersion = ""
+							if (env.fromVersion){
+							    fromVersion =env.fromVersion
+							}else{
+							    fromVersion =build_branch
+							}
+							def alias=""
+							if (env.alias){
+							    alias =env.alias
+							}else{
+							    alias =build_branch
+							}
+							oss_resources = env.subsystem + "-" + fromVersion+ "-" + alias + ".tar.gz"
 							echo "oss_resources:${oss_resources}" 
 							build job: 'upload_to_oss_customer', parameters: [string(name: 'DNET_PROFILE', value: DNET_PROFILE), string(name: 'subsystem', value: subsystem), string(name: 'oss_resources', value: oss_resources)], wait: false
 				}
