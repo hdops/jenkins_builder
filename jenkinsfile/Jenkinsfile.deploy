@@ -101,7 +101,7 @@ pipeline {
 							sh "DNET_PRODUCT=${params.DNET_PRODUCT} DNET_PROFILE=${params.DNET_PROFILE} PRESET_IMAGE_VERSION=${params.PRESET_IMAGE_VERSION} hdops deploy db_upgrade --subsystem ${params.subsystem} --stackids ${params.stackIds} --dblist ${params.dblist} ${params.skipversion} ${params.skipversionupdate} --receivers ${params.receivers} --timeout ${params.timeout} --threadcount ${params.threadcount} --tag ${params.tag} --nodethreadcount ${params.nodethreadcount}"
 						}
 					}else {
-						sh "DNET_PRODUCT=${params.DNET_PRODUCT} DNET_PROFILE=${params.DNET_PROFILE} PRESET_IMAGE_VERSION=${params.PRESET_IMAGE_VERSION} hdops deploy db_upgrade --subsystem ${params.subsystem} --stackids ${params.stackIds} --dblist ${params.dblist} ${params.skipversion} ${params.skipversionupdate} --receivers ${params.receivers} --timeout ${params.timeout} --threadcount ${params.threadcount} --tag ${params.tag} --nodethreadcount ${params.nodethreadcount"
+						sh "DNET_PRODUCT=${params.DNET_PRODUCT} DNET_PROFILE=${params.DNET_PROFILE} PRESET_IMAGE_VERSION=${params.PRESET_IMAGE_VERSION} hdops deploy db_upgrade --subsystem ${params.subsystem} --stackids ${params.stackIds} --dblist ${params.dblist} ${params.skipversion} ${params.skipversionupdate} --receivers ${params.receivers} --timeout ${params.timeout} --threadcount ${params.threadcount} --tag ${params.tag} --nodethreadcount ${params.nodethreadcount}"
 					}
 				}
 			}
