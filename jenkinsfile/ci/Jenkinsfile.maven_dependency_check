@@ -18,15 +18,6 @@ pipeline {
 	    timeout(time: 1, unit: 'HOURS')
     } 
     stages {
-        stage('download_toolset'){ 
-			steps{
-                            echo "workspace is $WORKSPACE"
-                            retry(2){
-                                sh "DNET_CLOUD_VENDOR=${dnet_cloud_vendor} DNET_PRIVATE_URL=${dnet_private_url}  DNET_PRIVATE_BUCKET=${dnet_private_bucket} DNET_PRIVATE_AK=${dnet_private_ak} DNET_PRIVATE_AS=${dnet_private_as} DNET_PRIVATE_REGION=${dnet_private_region} hdops download_toolset --branch ${build_branch} -p ."
-                            }
-                            sh "tar zxf toolset.tar.gz -C $WORKSPACE"
-			}
-		}
         stage('maven_dependency_check'){ 
 			steps{   
                             echo "upurl is ${params.upurl}"
