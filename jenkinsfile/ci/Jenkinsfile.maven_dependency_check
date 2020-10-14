@@ -30,6 +30,8 @@ pipeline {
 		}
         stage('maven_dependency_check'){ 
 			steps{   
+                            echo "upurl is ${params.upurl}"
+                            echo "isrelease  ${params.isrelease}"
 							sh "hdmon maven_dependency_check --jenkins_url ${params.upurl} --isrelease ${params.isrelease}" 
 			}
 		}
