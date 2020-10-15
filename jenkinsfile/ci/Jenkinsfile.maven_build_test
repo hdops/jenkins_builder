@@ -95,7 +95,7 @@ pipeline {
 			steps{
 				script{
 					echo "BUILD_URL:${BUILD_URL}"
-				    build job: 'Maven_Denpendency_Check', parameters: [string(name: 'upurl', value: BUILD_URL), string(name: 'isrelease', value: 'False')]
+				    build job: 'Maven_Denpendency_Check', parameters: [string(name: 'upurl', value: BUILD_URL), string(name: 'isrelease', value: 'False')], wait: false
 				}
 			}
 		}
