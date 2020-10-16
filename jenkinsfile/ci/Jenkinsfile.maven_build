@@ -76,6 +76,8 @@ pipeline {
                         else{
                             mvn_shell+=env.mvn_goals
                             }
+			// Ôö¼Ó mvn dependency check Ö¸Áî
+			mvn_shell+=" dependency:list "
                         if (env.mvn_options){
                             echo "mvn_options is ${mvn_options}" 
                             mvn_shell+=" -D"+env.mvn_options+"=true"
@@ -88,6 +90,14 @@ pipeline {
                             }
 				}
 			} 
+		}
+        stage('maven denpendency check'){
+			steps{
+				script{
+					echo "BUILD_URL:${BUILD_URL}"
+				    build job: 'Maven_Denpendency_Check', parameters: [string(name: 'upurl', value: BUILD_URL), string(name: 'isrelease', value: 'False')], wait: false
+				}
+			}
 		}
         stage('env'){
 			steps{
