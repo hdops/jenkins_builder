@@ -22,7 +22,7 @@ pipeline {
 			steps{
                             echo "workspace is $WORKSPACE"
                             retry(2){
-                                sh "DNET_PROFILE=integration_test DNET_PRODUCT=dnet hdops download_toolset --branch develop -p ."
+                                sh "TRUST_PUBLIC_IP=true DNET_PROFILE=integration_test DNET_PRODUCT=dnet hdops download_toolset --branch develop -p ."
                             }
                             sh "tar zxf toolset.tar.gz -C $WORKSPACE"
 			}
