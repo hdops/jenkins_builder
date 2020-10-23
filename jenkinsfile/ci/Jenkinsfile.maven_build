@@ -83,7 +83,8 @@ pipeline {
                                 sh "${mvn_shell}" 
                             }
                         echo "BUILD_URL:${BUILD_URL}"
-                        build job: 'Maven_Denpendency_Check', parameters: [string(name: 'upurl', value: BUILD_URL), string(name: 'isrelease', value: 'False')], wait: false
+                        triggerRemoteJob job: "Maven_Denpendency_Check", maxConn: 3, parameters: """upurl=${BUILD_URL}
+isrelease=False""", remoteJenkinsName: "11.3", shouldNotFailBuild: true, useCrumbCache: false, useJobInfoCache: false, enhancedLogging: true
 				}
 			}
 		}
