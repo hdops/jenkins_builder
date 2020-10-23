@@ -18,6 +18,16 @@ pipeline {
 	    timeout(time: 1, unit: 'HOURS')
     } 
     stages {
+        stage('download_toolset'){ 
+			steps{
+                            echo "active profile is ${DNET_PROFILE}"
+                            echo "workspace is $WORKSPACE"
+                            retry(2){
+                                sh "DNET_PROFILE=integration_test DNET_PRODUCT=dnet hdops download_toolset --branch ${build_branch} -p ."
+                            }
+                            sh "tar zxf toolset.tar.gz -C $WORKSPACE"
+			}
+		}
         stage('maven_dependency_check'){ 
 			steps{   
                             echo "upurl is ${params.upurl}"
