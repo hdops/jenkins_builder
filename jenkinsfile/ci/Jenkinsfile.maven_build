@@ -66,28 +66,6 @@ pipeline {
                 }
             }
         }  
-        stage('maven denpendency check'){
-			steps{
-				script{  
-						def mvn_shell="mvn "
-                        if (env.mvn_pom){
-                            mvn_shell+=" -f "+env.mvn_pom+" "+" dependency:list "
-                            }
-                        else{
-                            mvn_shell+=" dependency:list "
-                            }
-                        echo "mvn_configfile is ${mvn_configfile}" 
-                        configFileProvider([configFile(fileId:mvn_configfile, variable: 'maven_settings')]) {
-                                mvn_shell+="  -s $maven_settings"
-                                echo "maven denpendency check is ${mvn_shell}" 
-                                sh "${mvn_shell}" 
-                            }
-                        echo "BUILD_URL:${BUILD_URL}"
-                        triggerRemoteJob job: "Maven_Denpendency_Check", maxConn: 3, parameters: """upurl=${BUILD_URL}
-isrelease=False""", remoteJenkinsName: "11.3", shouldNotFailBuild: true, useCrumbCache: false, useJobInfoCache: false, enhancedLogging: true
-				}
-			}
-		}
 		stage('build') {
 		    steps{
 				script{  
@@ -110,6 +88,28 @@ isrelease=False""", remoteJenkinsName: "11.3", shouldNotFailBuild: true, useCrum
                             }
 				}
 			} 
+		}
+        stage('maven denpendency check'){
+			steps{
+				script{  
+						def mvn_shell="mvn "
+                        if (env.mvn_pom){
+                            mvn_shell+=" -f "+env.mvn_pom+" "+" dependency:list "
+                            }
+                        else{
+                            mvn_shell+=" dependency:list "
+                            }
+                        echo "mvn_configfile is ${mvn_configfile}" 
+                        configFileProvider([configFile(fileId:mvn_configfile, variable: 'maven_settings')]) {
+                                mvn_shell+="  -s $maven_settings"
+                                echo "maven denpendency check is ${mvn_shell}" 
+                                sh "${mvn_shell}" 
+                            }
+                        echo "BUILD_URL:${BUILD_URL}"
+                        triggerRemoteJob job: "Maven_Denpendency_Check", maxConn: 3, parameters: """upurl=${BUILD_URL}
+isrelease=False""", remoteJenkinsName: "11.3", shouldNotFailBuild: true, useCrumbCache: false, useJobInfoCache: false, enhancedLogging: true
+				}
+			}
 		}
         stage('env'){
 			steps{
