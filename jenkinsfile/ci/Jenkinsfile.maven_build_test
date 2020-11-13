@@ -103,7 +103,7 @@ pipeline {
 		}
 		stage('unite test') {
             when {
-                expression {'Y' == "${unite_test}"}
+                expression {'Y' == env.unite_test}
             }
 		    steps{
 				script{
