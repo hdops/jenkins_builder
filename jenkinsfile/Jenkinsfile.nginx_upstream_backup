@@ -9,7 +9,6 @@ if (env.ng_path){
     ng_path=env.ng_path
 } else {
     ng_path=env.path
-    env.ng_path=env.path
 }
 def whether_post=""
 if (env.whether_post){
