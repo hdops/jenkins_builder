@@ -103,6 +103,9 @@ pipeline {
 		}
 		stage('unite test') {
 		    steps{
+                when {
+                    expression {'Y' == "${unite_test}"}
+                }
 				script{
 						def mvn_shell="mvn "
                         if (env.mvn_pom){
