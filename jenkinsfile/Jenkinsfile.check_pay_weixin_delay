@@ -39,7 +39,7 @@ pipeline {
                                 sh "DNET_PROFILE=integration_test DNET_PRODUCT=dnet hdops download_toolset --branch ${params.GIT_BRANCH} -p ."
                             }
                             sh "tar zxf toolset.tar.gz -C ${WORKSPACE}"
-                            sh "hdmon check_pay_weixin_delay --cfgname ${params.cfgname}"
+                            sh "DINGTALK_TOKEN=${params.DINGTALK_TOKEN} hdmon check_pay_weixin_delay --cfgname ${params.cfgname}"
                         }
                     }else {
                         echo "profile is ${params.DNET_PROFILE}"
