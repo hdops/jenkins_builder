@@ -80,7 +80,7 @@ pipeline {
         }
         always {
 			script {
-				currentBuild.description = "${params.DNET_PROFILE}:${params.subsystem}"
+				currentBuild.description = "${params.DNET_PRODUCT}:${params.DNET_PROFILE}:${params.subsystem}"
 			}
 		}
     }
