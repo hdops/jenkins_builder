@@ -33,7 +33,6 @@ pipeline {
                             echo "product  ${params.product}"
                             echo "image  ${params.image}"
                             echo "file_extensions  ${params.file_extensions}"
-							sh "hdmon maven_dependency_check --jenkins_url ${params.upurl} --isrelease ${params.isrelease}" 
 							sh label: '', script: '''echo python  sourcecode_scan.py -jenkins_url ${params.url}  -product ${params.product} -scan_build_url $BUILD_URL
 							if [[ ${params.file_extensions} == "none" ]]; then
 							    echo python  sourcecode_scan.py -jenkins_url ${params.url} -product ${params.product} -scan_build_url $BUILD_URL -image ${params.image} 
