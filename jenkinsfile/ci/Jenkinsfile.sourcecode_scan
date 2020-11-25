@@ -20,31 +20,37 @@ pipeline {
     stages {
         stage('download_toolset'){ 
 			steps{
-                            echo "workspace is $WORKSPACE"
-                            retry(2){
-                                sh "TRUST_PUBLIC_IP=true DNET_PROFILE=integration_test DNET_PRODUCT=dnet hdops download_toolset --branch develop -p ."
-                            }
-                            sh "tar zxf toolset.tar.gz -C $WORKSPACE"
+			    echo "workspace is $WORKSPACE"
+                retry(2){
+                    sh "TRUST_PUBLIC_IP=true DNET_PROFILE=integration_test DNET_PRODUCT=dnet hdops download_toolset --branch develop -p ."
+                }
+                sh "tar zxf toolset.tar.gz -C $WORKSPACE"
 			}
 		}
         stage('sourcecode_scan'){ 
-			steps{   
-                            echo "url is ${params.url}"
-                            echo "product  ${params.product}"
-                            echo "image  ${params.image}"
-                            echo "file_extensions  ${params.file_extensions}"
-							sh label: '', script: '''echo python  sourcecode_scan.py -jenkins_url ${params.url}  -product ${params.product} -scan_build_url $BUILD_URL
-							if [[ ${params.file_extensions} == "none" ]]; then
-							    echo python  sourcecode_scan.py -jenkins_url ${params.url} -product ${params.product} -scan_build_url $BUILD_URL -image ${params.image} 
-								python  sourcecode_scan.py -jenkins_url ${params.url} -product ${params.product} -scan_build_url $BUILD_URL -image ${params.image} 
-							else
-							    echo python  sourcecode_scan.py -jenkins_url ${params.url} -product ${params.product} -scan_build_url $BUILD_URL -image ${params.image} -file_extensions ${params.file_extensions} 
-								python  sourcecode_scan.py -jenkins_url ${params.url} -product ${params.product} -scan_build_url $BUILD_URL -image ${params.image} -file_extensions ${params.file_extensions} 
-							fi
-							
-							echo "echo $?"
-							echo $?'''
+            when { expression { params.file_extensions == 'none' }}
+			steps{
+			    script{
+			        echo "url is ${params.url}"
+			        echo "product  ${params.product}"
+			        echo "image  ${params.image}"
+			        echo "file_extensions  ${params.file_extensions}"
+			        sh "python  sourcecode_scan.py -jenkins_url ${params.url} -product ${params.product} -scan_build_url $BUILD_URL -image ${params.image} "
+			        }
+                }
 			}
+        stage('sourcecode_scan_file_extensions'){
+            when { expression { params.file_extensions != 'none' }}
+			steps{
+			    script{
+			        echo "url is ${params.url}"
+			        echo "product  ${params.product}"
+			        echo "image  ${params.image}"
+			        echo "file_extensions  ${params.file_extensions}"
+			        sh "python  sourcecode_scan.py -jenkins_url ${params.url} -product ${params.product} -scan_build_url $BUILD_URL -image ${params.image} -file_extensions ${params.file_extensions} "
+			        }
+                }
+
 		}
     }
 }
