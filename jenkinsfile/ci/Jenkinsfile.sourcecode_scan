@@ -35,12 +35,14 @@ pipeline {
 			        echo "product  ${params.product}"
 			        echo "image  ${params.image}"
 			        echo "file_extensions  ${params.file_extensions}"
+			        catchError(buildResult: 'SUCCESS', stageResult: 'FAILURE'){
 			        sh "python  sourcecode_scan.py -jenkins_url ${params.url} -product ${params.product} -scan_build_url $BUILD_URL -image ${params.image} "
 			        }
 					archiveArtifacts 'external_resource.json' 
-					build job: 'etl_external_resource', parameters: [string(name: 'jenkins_build_url', value: $BUILD_URL)], wait: false
+					build job: 'etl_external_resource', parameters: [string(name: 'jenkins_build_url', value: BUILD_URL)], wait: false
                 }
 			}
+		}
         stage('sourcecode_scan_file_extensions'){
             when { expression { params.file_extensions != 'none' }}
 			steps{
@@ -50,9 +52,8 @@ pipeline {
 			        echo "image  ${params.image}"
 			        echo "file_extensions  ${params.file_extensions}"
 			        sh "python  sourcecode_scan.py -jenkins_url ${params.url} -product ${params.product} -scan_build_url $BUILD_URL -image ${params.image} -file_extensions ${params.file_extensions} "
-			        }
                 }
-
+			}
 		}
-    }
+    } 
 }

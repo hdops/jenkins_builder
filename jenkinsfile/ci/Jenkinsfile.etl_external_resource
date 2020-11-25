@@ -29,9 +29,8 @@ pipeline {
 		}
         stage('etl_external_resource'){ 
 			steps{
-			    script{
-			        echo "jenkins_build_url is ${params.jenkins_build_url}"
-			        sh "hdmon etl_external_resource --jenkins_url ${params.jenkins_build_url} " 
+			    echo "jenkins_build_url is ${params.jenkins_build_url}"
+			    sh "hdmon etl_external_resource --jenkins_url ${params.jenkins_build_url} " 
 			}  
 		}
     }
