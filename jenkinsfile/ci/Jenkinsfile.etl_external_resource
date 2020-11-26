@@ -18,20 +18,39 @@ pipeline {
 	    timeout(time: 1, unit: 'HOURS')
     } 
     stages {
-        stage('download_toolset'){ 
+        stage('download_toolset'){
 			steps{
-			    echo "workspace is $WORKSPACE"
-                retry(2){
-                    sh "TRUST_PUBLIC_IP=true DNET_PROFILE=integration_test DNET_PRODUCT=dnet hdops download_toolset --branch develop -p ."
-                }
-                sh "tar zxf toolset.tar.gz -C $WORKSPACE"
+			    script{
+					if(env.on_k8s){
+						container("hdtoolsetcore"){
+							retry(2){
+								sh "TRUST_PUBLIC_IP=true DNET_PROFILE=integration_test DNET_PRODUCT=dnet hdops download_toolset --branch develop -p ."
+							}
+							sh "tar zxf toolset.tar.gz -C $WORKSPACE"
+						}
+					}else {
+						retry(2){
+							sh "TRUST_PUBLIC_IP=true DNET_PROFILE=integration_test DNET_PRODUCT=dnet hdops download_toolset --branch develop -p ."
+						}
+						sh "tar zxf toolset.tar.gz -C $WORKSPACE"
+					}
+				}
 			}
 		}
         stage('etl_external_resource'){ 
 			steps{
-			    echo "jenkins_build_url is ${params.jenkins_build_url}"
-			    sh "hdmon etl_external_resource --jenkins_url ${params.jenkins_build_url} " 
-			}  
+			    script{
+					if(env.on_k8s){
+						container("hdtoolsetcore"){
+							echo "jenkins_build_url is ${params.jenkins_build_url}"
+							sh "hdmon etl_external_resource --jenkins_url ${params.jenkins_build_url} " 
+						}
+					}else {
+						echo "jenkins_build_url is ${params.jenkins_build_url}"
+						sh "hdmon etl_external_resource --jenkins_url ${params.jenkins_build_url} " 
+					}
+				}
+			}
 		}
     }
 }

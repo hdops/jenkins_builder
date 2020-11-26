@@ -18,28 +18,44 @@ pipeline {
 	    timeout(time: 1, unit: 'HOURS')
     } 
     stages {
-        stage('download_toolset'){ 
+        stage('download_toolset'){
 			steps{
-			    echo "workspace is $WORKSPACE"
-                retry(2){
-                    sh "TRUST_PUBLIC_IP=true DNET_PROFILE=integration_test DNET_PRODUCT=dnet hdops download_toolset --branch develop -p ."
-                }
-                sh "tar zxf toolset.tar.gz -C $WORKSPACE"
+			    script{
+					if(env.on_k8s){
+						container("hdtoolsetcore"){
+							retry(2){
+								sh "TRUST_PUBLIC_IP=true DNET_PROFILE=integration_test DNET_PRODUCT=dnet hdops download_toolset --branch develop -p ."
+							}
+							sh "tar zxf toolset.tar.gz -C $WORKSPACE"
+						}
+					}else {
+						retry(2){
+							sh "TRUST_PUBLIC_IP=true DNET_PROFILE=integration_test DNET_PRODUCT=dnet hdops download_toolset --branch develop -p ."
+						}
+						sh "tar zxf toolset.tar.gz -C $WORKSPACE"
+					}
+				}
 			}
 		}
         stage('sourcecode_scan'){
 			steps{
 			    script{
-			        echo "url is ${params.url}"
-			        echo "product  ${params.product}"
-			        echo "image  ${params.image}"
-			        echo "file_extensions  ${params.file_extensions}"
-			        catchError(buildResult: 'SUCCESS', stageResult: 'FAILURE'){
-			        //sh "python  sourcecode_scan.py -jenkins_url ${params.url} -product ${params.product} -scan_build_url $BUILD_URL -image ${params.image} "
-			        sh "hdmon sourcecode_scan --jenkins_url ${params.url} --product ${params.product} --scan_build_url $BUILD_URL --image ${params.image} --file_extensions ${params.file_extensions}"
-			        }
-					
-                }
+					if(env.on_k8s){
+						container("hdtoolsetcore"){
+							echo "url is ${params.url}"
+							echo "product  ${params.product}"
+							echo "image  ${params.image}"
+							echo "file_extensions  ${params.file_extensions}"
+							sh "hdmon sourcecode_scan --jenkins_url ${params.url} --product ${params.product} --scan_build_url $BUILD_URL --image ${params.image} --file_extensions ${params.file_extensions}"
+						}
+					}else {
+						echo "url is ${params.url}"
+						echo "product  ${params.product}"
+						echo "image  ${params.image}"
+						echo "file_extensions  ${params.file_extensions}"
+						sh "hdmon sourcecode_scan --jenkins_url ${params.url} --product ${params.product} --scan_build_url $BUILD_URL --image ${params.image} --file_extensions ${params.file_extensions}"
+					}
+				}
 			}
 		}
     } 
