@@ -8,7 +8,7 @@ def whether_post=""
 if (env.whether_post){
     whether_post =env.whether_post
 }else{
-    whether_post ="True"
+    whether_post ="False"
 }
 pipeline {
     agent {label node}
