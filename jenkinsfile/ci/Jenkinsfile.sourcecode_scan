@@ -27,8 +27,7 @@ pipeline {
                 sh "tar zxf toolset.tar.gz -C $WORKSPACE"
 			}
 		}
-        stage('sourcecode_scan'){ 
-            when { expression { params.file_extensions == 'none' }}
+        stage('sourcecode_scan'){
 			steps{
 			    script{
 			        echo "url is ${params.url}"
@@ -36,24 +35,20 @@ pipeline {
 			        echo "image  ${params.image}"
 			        echo "file_extensions  ${params.file_extensions}"
 			        catchError(buildResult: 'SUCCESS', stageResult: 'FAILURE'){
-			        sh "python  sourcecode_scan.py -jenkins_url ${params.url} -product ${params.product} -scan_build_url $BUILD_URL -image ${params.image} "
+			        //sh "python  sourcecode_scan.py -jenkins_url ${params.url} -product ${params.product} -scan_build_url $BUILD_URL -image ${params.image} "
+			        sh "hdmon sourcecode_scan --jenkins_url ${params.url} --product ${params.product} --scan_build_url $BUILD_URL --image ${params.image} --file_extensions ${params.file_extensions}"
 			        }
-					archiveArtifacts 'external_resource.json' 
-					build job: 'etl_external_resource', parameters: [string(name: 'jenkins_build_url', value: BUILD_URL)], wait: false
-                }
-			}
-		}
-        stage('sourcecode_scan_file_extensions'){
-            when { expression { params.file_extensions != 'none' }}
-			steps{
-			    script{
-			        echo "url is ${params.url}"
-			        echo "product  ${params.product}"
-			        echo "image  ${params.image}"
-			        echo "file_extensions  ${params.file_extensions}"
-			        sh "python  sourcecode_scan.py -jenkins_url ${params.url} -product ${params.product} -scan_build_url $BUILD_URL -image ${params.image} -file_extensions ${params.file_extensions} "
+					
                 }
 			}
 		}
     } 
+    post{
+        always{
+            script{
+                archiveArtifacts 'external_resource.json'
+				build job: 'etl_external_resource', parameters: [string(name: 'jenkins_build_url', value: BUILD_URL)], wait: false
+            }
+        }
+    }
 }
