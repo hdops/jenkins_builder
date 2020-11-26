@@ -49,14 +49,16 @@ pipeline {
 							sh "DNET_CLOUD_VENDOR=${params.DNET_CLOUD_VENDOR} DNET_AK=${params.DNET_AK} DNET_PROFILE=${params.DNET_PROFILE} hdmon mysql_slow_sql --dbinstanceid ${params.dbinstanceid} --receivers ${params.receivers} --start_time ${params.start_time} --end_time ${params.end_time}"
 						}
 					}else {
-						echo "active profile is ${params.DNET_PROFILE}"
-						echo "product is ${params.DNET_PRODUCT}"
-						echo "workspace is $WORKSPACE"
-						retry(2){
-							sh "DNET_PROFILE=integration_test DNET_PRODUCT=dnet hdops download_toolset --branch ${params.GIT_BRANCH} -p ."
-						}
-						sh "tar zxf toolset.tar.gz -C $WORKSPACE"
-						sh "DNET_CLOUD_VENDOR=${params.DNET_CLOUD_VENDOR} DNET_AK=${params.DNET_AK} DNET_PROFILE=${params.DNET_PROFILE} hdmon mysql_slow_sql --dbinstanceid ${params.dbinstanceid} --receivers ${params.receivers} --start_time ${params.start_time} --end_time ${params.end_time}"
+					    docker.image("harbor.qianfan123.com/toolset/toolsetcore:0.3.0").withRun('-v /var/run/docker.sock:/var/run/docker.sock') {
+                            echo "active profile is ${params.DNET_PROFILE}"
+                            echo "product is ${params.DNET_PRODUCT}"
+                            echo "workspace is $WORKSPACE"
+                            retry(2){
+                                sh "DNET_PROFILE=integration_test DNET_PRODUCT=dnet hdops download_toolset --branch ${params.GIT_BRANCH} -p ."
+                            }
+                            sh "tar zxf toolset.tar.gz -C $WORKSPACE"
+                            sh "DNET_CLOUD_VENDOR=${params.DNET_CLOUD_VENDOR} DNET_AK=${params.DNET_AK} DNET_PROFILE=${params.DNET_PROFILE} hdmon mysql_slow_sql --dbinstanceid ${params.dbinstanceid} --receivers ${params.receivers} --start_time ${params.start_time} --end_time ${params.end_time}"
+                        }
 					}
 				}
 			}

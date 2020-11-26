@@ -46,15 +46,17 @@ pipeline {
                             archiveArtifacts 'envs/**/*'
                         }
                     }else {
-                        echo "active profile is ${params.DNET_PROFILE}"
-                        echo "product is ${params.DNET_PRODUCT}"
-                        echo "workspace is $WORKSPACE"
-                        retry(2){
-                            sh "DNET_PROFILE=integration_test DNET_PRODUCT=dnet hdops download_toolset --branch ${params.GIT_BRANCH} -p ."
+                        docker.image("harbor.qianfan123.com/toolset/toolsetcore:0.3.0").withRun('-v /var/run/docker.sock:/var/run/docker.sock') {
+                            echo "active profile is ${params.DNET_PROFILE}"
+                            echo "product is ${params.DNET_PRODUCT}"
+                            echo "workspace is $WORKSPACE"
+                            retry(2){
+                                sh "DNET_PROFILE=integration_test DNET_PRODUCT=dnet hdops download_toolset --branch ${params.GIT_BRANCH} -p ."
+                            }
+                            sh "tar zxf toolset.tar.gz -C $WORKSPACE"
+                            sh "DNET_AK=${params.DNET_AK} DNET_PRODUCT=${params.DNET_PRODUCT} DNET_PROFILE=${params.DNET_PROFILE}  hdops generate_env_file --subsystem ${params.subsystem}  -S ${params.stackids}"
+                            archiveArtifacts 'envs/**/*'
                         }
-                        sh "tar zxf toolset.tar.gz -C $WORKSPACE"
-                        sh "DNET_AK=${params.DNET_AK} DNET_PRODUCT=${params.DNET_PRODUCT} DNET_PROFILE=${params.DNET_PROFILE}  hdops generate_env_file --subsystem ${params.subsystem}  -S ${params.stackids}"
-                        archiveArtifacts 'envs/**/*'
                     }
                 }
 			}

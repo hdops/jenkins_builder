@@ -31,16 +31,24 @@ pipeline {
     stages {
         stage('download toolset') {
 			steps{
-				echo "profile is ${params.DNET_PROFILE}"
-                retry(2){
-				    sh "DNET_PROFILE=integration_test DNET_PRODUCT=dnet hdops download_toolset --branch ${params.GIT_BRANCH} -p ."
+                script{
+                    echo "profile is ${params.DNET_PROFILE}"
+                    docker.image("harbor.qianfan123.com/toolset/toolsetcore:0.3.0").withRun('-v /var/run/docker.sock:/var/run/docker.sock') {
+                        retry(2){
+                            sh "DNET_PROFILE=integration_test DNET_PRODUCT=dnet hdops download_toolset --branch ${params.GIT_BRANCH} -p ."
+                        }
+                        sh "tar zxf toolset.tar.gz -C ${WORKSPACE}"
+                    }
                 }
-				sh "tar zxf toolset.tar.gz -C ${WORKSPACE}"
 			}
         }
         stage('jenkins连续失败job预警') {
 			steps{
-				sh "DINGTALK_TOKEN=${DINGTALK_TOKEN} hdmon jenkins_job_monitor failure --cfgname ${params.cfgname} --receivers ${params.receivers}"
+                script{
+                    docker.image("harbor.qianfan123.com/toolset/toolsetcore:0.3.0").withRun('-v /var/run/docker.sock:/var/run/docker.sock') {
+                        sh "DINGTALK_TOKEN=${DINGTALK_TOKEN} hdmon jenkins_job_monitor failure --cfgname ${params.cfgname} --receivers ${params.receivers}"
+                    }
+                }
 			}
         }
     }

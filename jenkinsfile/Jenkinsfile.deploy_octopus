@@ -41,7 +41,9 @@ pipeline {
 							sh "ssh -p 60501 dnet@${deploy_ip} 'sh /hdapp/${subsystem}/start.sh ${version}'"
 						}
 					}else {
-						sh "ssh -p 60501 dnet@${deploy_ip} 'sh /hdapp/${subsystem}/start.sh ${version}'"
+					    docker.image("harbor.qianfan123.com/toolset/toolsetcore:0.3.0").withRun('-v /var/run/docker.sock:/var/run/docker.sock') {
+					    	sh "ssh -p 60501 dnet@${deploy_ip} 'sh /hdapp/${subsystem}/start.sh ${version}'"
+						}
 					}
 				}
 			}

@@ -31,11 +31,13 @@ pipeline {
                         echo "active profile is ${params.DNET_PROFILE}"
                         echo "product is ${params.DNET_PRODUCT}"
                         echo "workspace is $WORKSPACE"
-                        retry(2){
-                            sh "DNET_PROFILE=integration_test DNET_PRODUCT=dnet hdops download_toolset --branch ${params.GIT_BRANCH} -p ."
+                        docker.image("harbor.qianfan123.com/toolset/toolsetcore:0.3.0").withRun('-v /var/run/docker.sock:/var/run/docker.sock') {
+                            retry(2){
+                                sh "DNET_PROFILE=integration_test DNET_PRODUCT=dnet hdops download_toolset --branch ${params.GIT_BRANCH} -p ."
+                            }
+                            sh "tar zxf toolset.tar.gz -C $WORKSPACE"
+                            sh "DNET_PRODUCT=${params.DNET_PRODUCT} DNET_PROFILE=${params.DNET_PROFILE}  hdmon deregister_consul --consul_name ${params.consul_name} --consul_service_name ${params.consul_service_name}"
                         }
-                        sh "tar zxf toolset.tar.gz -C $WORKSPACE"
-                        sh "DNET_PRODUCT=${params.DNET_PRODUCT} DNET_PROFILE=${params.DNET_PROFILE}  hdmon deregister_consul --consul_name ${params.consul_name} --consul_service_name ${params.consul_service_name}"
                     }
                 }
 			}

@@ -44,13 +44,15 @@ pipeline {
 							sh "DNET_PRODUCT=${params.DNET_PRODUCT} DNET_PROFILE=${params.DNET_PROFILE} hdops export_cmdb --toolset_x ${params.toolset_x}"
 						}
 					}else {
-						echo "active profile is ${params.DNET_PROFILE}"
-						echo "product is ${params.DNET_PRODUCT}"
-						echo "workspace is $WORKSPACE"
-						sh "git clone http://${GIT_USER}:${GIT_PASSWORD}@github.app.hd123.cn:10080/qianfanops/toolset.git -b ${params.GIT_BRANCH} ."
-						sh "git config --global user.email qianfan@hd123.com"
-						sh "git config --global user.name qianfan"
-						sh "DNET_PRODUCT=${params.DNET_PRODUCT} DNET_PROFILE=${params.DNET_PROFILE} hdops export_cmdb --toolset_x ${params.toolset_x}"
+					    docker.image("harbor.qianfan123.com/toolset/toolsetcore:0.3.0").withRun('-v /var/run/docker.sock:/var/run/docker.sock') {
+                            echo "active profile is ${params.DNET_PROFILE}"
+                            echo "product is ${params.DNET_PRODUCT}"
+                            echo "workspace is $WORKSPACE"
+                            sh "git clone http://${GIT_USER}:${GIT_PASSWORD}@github.app.hd123.cn:10080/qianfanops/toolset.git -b ${params.GIT_BRANCH} ."
+                            sh "git config --global user.email qianfan@hd123.com"
+                            sh "git config --global user.name qianfan"
+                            sh "DNET_PRODUCT=${params.DNET_PRODUCT} DNET_PROFILE=${params.DNET_PROFILE} hdops export_cmdb --toolset_x ${params.toolset_x}"
+                        }
 					}
 				}
 			}
