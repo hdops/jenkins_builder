@@ -89,6 +89,14 @@ pipeline {
 				}
 			}
             post{
+                always{
+                    script{
+                        if (env.DNET_PRODUCT){
+                            build job: 'sourcecode_scan', parameters: [string(name: 'url', value: BUILD_URL),string(name: 'DNET_PRODUCT', value: DNET_PRODUCT)], wait: false
+                        }
+                    }
+                }
+        
                 failure{
                     script{
 
