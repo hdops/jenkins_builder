@@ -52,6 +52,37 @@ pipeline {
 				}
 			} 
 		}
+        stage('env'){
+			steps{
+				script{
+				    if (env.remote_env_cfg != "" && env.remote_env_cfg != null) {
+                        File file = new File('VERSION')
+                        ImageVersion = file.text
+                        echo("ImageVersion=${ImageVersion}")
+                        // remote_env
+                        println(env.remote_env_cfg)
+                        String[] data = env.remote_env_cfg.split('&')
+                        println(data)
+                        count = data.size()
+                        tasks = [:]
+                        data.each{ i ->
+                            String[] item = i.split(';')
+                            println(item)
+                            remoteJenkins = item[0]
+                            remoteJob = item[1]
+                            DNET_PROFILE = item[2]
+                            echo "remoteJenkins is ${remoteJenkins}"
+                            echo "remoteJob is ${remoteJob}"
+                            echo "DNET_PROFILE is ${DNET_PROFILE}"
+                            // env
+                            triggerRemoteJob job: "${remoteJob}", maxConn: 3, parameters: """image=${image}
+version=${ImageVersion}
+    """, remoteJenkinsName: "${remoteJenkins}", useCrumbCache: false, useJobInfoCache: false, enhancedLogging: true
+                        }
+				    }
+				}
+			}
+		}
         stage('deploy'){
 			steps{
 				script{
