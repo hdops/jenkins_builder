@@ -56,7 +56,7 @@ pipeline {
 			steps{
 				script{
 				    if (env.remote_env_cfg != "" && env.remote_env_cfg != null) {
-                        File file = new File('VERSION')
+                        File file = new File("${WORKSPACE}/VERSION")
                         ImageVersion = file.text
                         echo("ImageVersion=${ImageVersion}")
                         // remote_env
