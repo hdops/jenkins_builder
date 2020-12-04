@@ -92,7 +92,7 @@ pipeline {
 		}
         stage('部署'){
 		    when {
-			    expression {'develop' == "${build_branch}"}
+			    expression {build_branch ==~ /(develop|ph-operate-web)/ }
 			}
 			steps{
 					script{
