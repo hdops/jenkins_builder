@@ -3,7 +3,7 @@ if (env.node){
     node =env.node
 }
 
-def whether_post="False"
+def whether_post="True"
 if (env.whether_post){
     whether_post =env.whether_post
 }
