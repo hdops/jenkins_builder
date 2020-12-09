@@ -1,0 +1,68 @@
+def node=""
+if (env.node){
+    node =env.node
+}else{
+    node ="master"
+}
+def whether_post=""
+if (env.whether_post){
+    whether_post =env.whether_post
+}else{
+    whether_post ="True"
+}
+pipeline {
+    agent {label node}
+    options {
+	//     buildDiscarder(logRotator(numToKeepStr: '10'))
+	//     disableResume()
+	    timeout(time: 3, unit: 'HOURS')
+    }
+	// environment{
+        // DNET_PRIVATE_AK="$DNET_PRIVATE_AK"
+        // DNET_PRIVATE_AS="$DNET_PRIVATE_AS"
+ 	// }
+    stages {
+        stage('changeeureka_down_up blue') {
+            steps{
+                build job: "${params.changeeureka_down_up_job}", parameters: [string(name: 'DNET_PROFILE', value: "${params.DNET_PROFILE}"), string(name: 'subsystem', value: "${params.subsystem}"), string(name: 'tag', value: "blue"),string(name: 'dryrun', value: "False")]
+            }
+        }
+		stage('changeeureka blue') {
+			steps{ 
+				sleep time: 1, unit: 'MINUTES'
+				 build job: "${params.changeeureka_job}", parameters: [string(name: 'DNET_PROFILE', value: "${params.DNET_PROFILE}"), string(name: 'subsystem', value: "${params.subsystem}"), string(name: 'tag', value: "blue"),string(name: 'dryrun', value: "False")]
+			}
+        }
+		stage('deploy blue') {
+			steps{ 
+				build job: "${params.deploy_job}", parameters: [string(name: 'DNET_PROFILE', value: "${params.DNET_PROFILE}"), string(name: 'subsystem', value: "${params.subsystem}"), string(name: 'tag', value: "blue")]
+			}
+			post {
+			    success{
+				    build job: "${params.healthcheck_job}", parameters: [string(name: 'DNET_PROFILE', value: "${params.DNET_PROFILE}"), string(name: 'subsystem', value: "${params.subsystem}"), string(name: 'tag', value: "blue")]
+				}
+			}
+        }  
+        stage('changeeureka_down_up green') {
+            steps{
+                build job: "${params.changeeureka_down_up_job}", parameters: [string(name: 'DNET_PROFILE', value: "${params.DNET_PROFILE}"), string(name: 'subsystem', value: "${params.subsystem}"), string(name: 'tag', value: "green"),string(name: 'dryrun', value: "False")]
+            }
+        }
+		stage('changeeureka green') {
+			steps{ 
+				sleep time: 1, unit: 'MINUTES'
+				 build job: "${params.changeeureka_job}", parameters: [string(name: 'DNET_PROFILE', value: "${params.DNET_PROFILE}"), string(name: 'subsystem', value: "${params.subsystem}"), string(name: 'tag', value: "green"),string(name: 'dryrun', value: "False")]
+			}
+        }
+		stage('deploy green') {
+			steps{ 
+				build job: "${params.deploy_job}", parameters: [string(name: 'DNET_PROFILE', value: "${params.DNET_PROFILE}"), string(name: 'subsystem', value: "${params.subsystem}"), string(name: 'tag', value: "green")]
+			}
+			post {
+			    success{
+				    build job: "${params.healthcheck_job}", parameters: [string(name: 'DNET_PROFILE', value: "${params.DNET_PROFILE}"), string(name: 'subsystem', value: "${params.subsystem}"), string(name: 'tag', value: "green")]
+				}
+			}
+        }  
+    } 
+}
