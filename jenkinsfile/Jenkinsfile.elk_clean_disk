@@ -59,7 +59,7 @@ pipeline {
                             sh "DINGTALK_TOKEN=${DINGTALK_TOKEN} hdmon clean_es_data --host ${params.host} --port ${params.port} --username ${params.username} --password ${params.password} --keepday ${params.keepday}"
                         }
                     }else {
-                        docker.image("harbor.qianfan123.com/toolset/toolsetcore:0.3.0").withRun('-v /var/run/docker.sock:/var/run/docker.sock') {
+                        //docker.image("harbor.qianfan123.com/toolset/toolsetcore:0.3.0").withRun('-v /var/run/docker.sock:/var/run/docker.sock') {
                             echo "active profile is ${params.DNET_PROFILE}"
                             echo "toolset path is ${WORKSPACE}"
                             echo "sub systems are ${params.subsystem}"
@@ -71,7 +71,7 @@ pipeline {
                             }
                             sh "tar zxf toolset.tar.gz -C ${WORKSPACE}"
                             sh "DINGTALK_TOKEN=${DINGTALK_TOKEN} hdmon clean_es_data --host ${params.host} --port ${params.port} --username ${params.username} --password ${params.password} --keepday ${params.keepday}"
-                        }
+                        //}
 
                     }
                 }
