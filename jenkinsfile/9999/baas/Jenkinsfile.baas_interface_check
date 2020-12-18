@@ -37,7 +37,7 @@ pipeline {
                             }
                         }
                     }else{
-                        docker.image("harbor.qianfan123.com/toolset/toolsetcore:0.3.0").withRun('-v /var/run/docker.sock:/var/run/docker.sock') {
+                        //docker.image("harbor.qianfan123.com/toolset/toolsetcore:0.3.0").withRun('-v /var/run/docker.sock:/var/run/docker.sock') {
                             echo "profile is ${params.DNET_PROFILE}"
                             echo "sub systems are ${params.subsystem}"
                             echo "upstream URL is ${params.upurl}"
@@ -48,7 +48,7 @@ pipeline {
                             retry(2){
                                 sh "DINGTALK_TOKEN=${DINGTALK_TOKEN} DNET_PROFILE=${params.DNET_PROFILE} DNET_PRODUCT=${params.DNET_PRODUCT}  hdmon baas_interface_check --cfgname ${params.cfgname}"
                             }
-                        }
+                        //}
 
                     }
                 }
