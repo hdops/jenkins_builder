@@ -61,7 +61,7 @@ pipeline {
                             }
                         }
                     }else {
-                        docker.image("harbor.qianfan123.com/toolset/toolsetcore:0.3.0").pull()
+                        //docker.image("harbor.qianfan123.com/toolset/toolsetcore:0.3.0").pull()
                         //docker.image("harbor.qianfan123.com/toolset/toolsetcore:0.3.0").withRun('-v /var/run/docker.sock:/var/run/docker.sock') {
                             echo "profile is ${params.DNET_PROFILE}"
                             echo "sub systems are ${params.subsystem}"
