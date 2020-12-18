@@ -49,12 +49,7 @@ pipeline {
         }
         stage('check fielbeat') {
 		   agent {
-               docker{
-                 label   node
-                 image "harbor.qianfan123.com/toolset/toolsetcore:0.3.0"
-                 args "-v /var/run/docker.sock:/var/run/docker.sock"
-               }
-
+               label node
            }
 			steps{
                 script{
