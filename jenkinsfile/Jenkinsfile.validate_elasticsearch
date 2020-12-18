@@ -9,7 +9,13 @@ if (env.whether_post){
 }
 
 pipeline {
-    agent {label node}
+    agent {
+       docker{
+         label  node
+         image "harbor.qianfan123.com/toolset/toolsetcore:0.3.0"
+         args "-v /var/run/docker.sock:/var/run/docker.sock"
+       }
+   }
 	options {
 	//    buildDiscarder(logRotator(numToKeepStr: '20'))
 	//    disableConcurrentBuilds()
