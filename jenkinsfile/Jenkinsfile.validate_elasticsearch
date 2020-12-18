@@ -37,7 +37,7 @@ pipeline {
     stages {  
 		stage('validate elasticsearch') {
 		    when {
-		        expression{ env.on_k8s != null }
+		        expression{ env.on_k8s }
 		    }
             steps {
                 script{
@@ -59,7 +59,7 @@ pipeline {
 
 		stage('validate elasticsearch1') {
 		    when {
-		        expression{ env.on_k8s == null }
+		        expression{ not env.on_k8s  }
 		    }
 		    agent {
                docker{
