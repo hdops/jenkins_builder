@@ -33,7 +33,7 @@ pipeline {
 		stage('check fielbeat on k8s') {
 		   agent {label node}
 		   when{
-		      environment name: 'DEPLOY_TO', value: 'true'
+		      environment name: 'on_k8s', value: 'true'
 		   }
 			steps{
                 script{
@@ -60,7 +60,7 @@ pipeline {
         }
         stage('check fielbeat') {
 		   when{
-		      environment name: 'DEPLOY_TO', value: 'true'
+		      environment name: 'on_k8s', value: 'false'
 		   }
 		   agent {
                docker{
