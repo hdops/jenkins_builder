@@ -32,22 +32,11 @@ pipeline {
 	    
 		stage('check fielbeat on k8s') {
 		   agent {label node}
-		   when{
-		      environment name: 'on_k8s', value: 'true'
-		   }
+
 			steps{
                 script{
                     if (env.on_k8s){
                         container("hdtoolsetcore"){
-                            retry(2){
-                                sh "DNET_PROFILE=integration_test DNET_PRODUCT=dnet hdops download_toolset --branch ${params.GIT_BRANCH} -p ."
-                            }
-                            sh "tar zxf toolset.tar.gz -C ${WORKSPACE}"
-                            sh "DNET_PROFILE=${params.DNET_PROFILE} DNET_PRODUCT=${params.DNET_PRODUCT} hdmon check_filebeat "
-                        }
-                    }else {
-                        docker.image("harbor.qianfan123.com/toolset/toolsetcore:0.3.0").pull()
-                        docker.image("harbor.qianfan123.com/toolset/toolsetcore:0.3.0").withRun('-v /var/run/docker.sock:/var/run/docker.sock') {
                             retry(2){
                                 sh "DNET_PROFILE=integration_test DNET_PRODUCT=dnet hdops download_toolset --branch ${params.GIT_BRANCH} -p ."
                             }
@@ -59,9 +48,6 @@ pipeline {
 			}
         }
         stage('check fielbeat') {
-		   when{
-		      environment name: 'on_k8s', value: false
-		   }
 		   agent {
                docker{
                  label   node
@@ -73,22 +59,13 @@ pipeline {
 			steps{
                 script{
                     if (env.on_k8s){
-                        container("hdtoolsetcore"){
-                            retry(2){
-                                sh "DNET_PROFILE=integration_test DNET_PRODUCT=dnet hdops download_toolset --branch ${params.GIT_BRANCH} -p ."
-                            }
-                            sh "tar zxf toolset.tar.gz -C ${WORKSPACE}"
-                            sh "DNET_PROFILE=${params.DNET_PROFILE} DNET_PRODUCT=${params.DNET_PRODUCT} hdmon check_filebeat "
-                        }
+
                     }else {
-                        //docker.image("harbor.qianfan123.com/toolset/toolsetcore:0.3.0").pull()
-                        //docker.image("harbor.qianfan123.com/toolset/toolsetcore:0.3.0").withRun('-v /var/run/docker.sock:/var/run/docker.sock') {
-                            retry(2){
-                                sh "DNET_PROFILE=integration_test DNET_PRODUCT=dnet hdops download_toolset --branch ${params.GIT_BRANCH} -p ."
-                            }
-                            sh "tar zxf toolset.tar.gz -C ${WORKSPACE}"
-                            sh "DNET_PROFILE=${params.DNET_PROFILE} DNET_PRODUCT=${params.DNET_PRODUCT} hdmon check_filebeat "
-                        //}
+                        retry(2){
+                            sh "DNET_PROFILE=integration_test DNET_PRODUCT=dnet hdops download_toolset --branch ${params.GIT_BRANCH} -p ."
+                        }
+                        sh "tar zxf toolset.tar.gz -C ${WORKSPACE}"
+                        sh "DNET_PROFILE=${params.DNET_PROFILE} DNET_PRODUCT=${params.DNET_PRODUCT} hdmon check_filebeat "
                     }
                 }
 			}
