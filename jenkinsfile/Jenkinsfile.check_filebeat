@@ -60,7 +60,7 @@ pipeline {
         }
         stage('check fielbeat') {
 		   when{
-		      environment name: 'on_k8s', value: 'false'
+		      environment name: 'on_k8s', value: false
 		   }
 		   agent {
                docker{
