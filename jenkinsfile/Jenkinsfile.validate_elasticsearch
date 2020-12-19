@@ -68,7 +68,7 @@ pipeline {
 		        }
 		    }
 		    when{
-		      expression {env.on_k8s!=null}
+		      expression {env.on_k8s == null}
 		    }
 		    steps{
 		        retry(2){
