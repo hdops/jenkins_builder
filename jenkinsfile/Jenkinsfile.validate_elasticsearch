@@ -36,29 +36,47 @@ pipeline {
     //  }
     stages {  
 		stage('validate elasticsearch') {
-
+		    when{
+		      expression {env.on_k8s!=null}
+		    }
             steps {
-                script{
-                    // 判定是否运行在Kubernetes环境里
-                    if (env.on_k8s){
-                        container("hdtoolsetcore"){
-                            retry(2){
-                                sh "DNET_PROFILE=integration_test DNET_PRODUCT=dnet hdops download_toolset --branch ${params.GIT_BRANCH} -p ."
-                            }
-                            sh "tar zxf toolset.tar.gz -C ${WORKSPACE}"
-                            sh "DINGTALK_TOKEN=${DINGTALK_TOKEN} DNET_PRODUCT=${params.DNET_PRODUCT} DNET_PROFILE=${params.DNET_PROFILE} hdops valiate_elasticsearch --job_name ${params.job_name} --disk_space_usage ${params.disk_space_usage}"
-                        }
-                    }else{
+                // 判定是否运行在Kubernetes环境里
+                if (env.on_k8s){
+                    container("hdtoolsetcore"){
                         retry(2){
                             sh "DNET_PROFILE=integration_test DNET_PRODUCT=dnet hdops download_toolset --branch ${params.GIT_BRANCH} -p ."
                         }
                         sh "tar zxf toolset.tar.gz -C ${WORKSPACE}"
                         sh "DINGTALK_TOKEN=${DINGTALK_TOKEN} DNET_PRODUCT=${params.DNET_PRODUCT} DNET_PROFILE=${params.DNET_PROFILE} hdops valiate_elasticsearch --job_name ${params.job_name} --disk_space_usage ${params.disk_space_usage}"
                     }
-
+                }else{
+                    retry(2){
+                        sh "DNET_PROFILE=integration_test DNET_PRODUCT=dnet hdops download_toolset --branch ${params.GIT_BRANCH} -p ."
+                    }
+                    sh "tar zxf toolset.tar.gz -C ${WORKSPACE}"
+                    sh "DINGTALK_TOKEN=${DINGTALK_TOKEN} DNET_PRODUCT=${params.DNET_PRODUCT} DNET_PROFILE=${params.DNET_PROFILE} hdops valiate_elasticsearch --job_name ${params.job_name} --disk_space_usage ${params.disk_space_usage}"
                 }
-
             }
+		}
+
+		stage("validate elasticsearch on no k8s"){
+		    agent {
+		        docker {
+		            label node
+		            image "harbor.qianfan123.com/toolset/toolsetcore:0.3.0"
+		            args "-v /var/run/docker.sock:/var/run/docker.sock"
+		        }
+		    }
+		    when{
+		      expression {env.on_k8s!=null}
+		    }
+		    steps{
+		        retry(2){
+                    sh "DNET_PROFILE=integration_test DNET_PRODUCT=dnet hdops download_toolset --branch ${params.GIT_BRANCH} -p ."
+                }
+                sh "tar zxf toolset.tar.gz -C ${WORKSPACE}"
+                sh "DINGTALK_TOKEN=${DINGTALK_TOKEN} DNET_PRODUCT=${params.DNET_PRODUCT} DNET_PROFILE=${params.DNET_PROFILE} hdops valiate_elasticsearch --job_name ${params.job_name} --disk_space_usage ${params.disk_space_usage}"
+		    }
 		}
 
 
