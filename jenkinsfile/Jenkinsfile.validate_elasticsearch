@@ -35,7 +35,7 @@ pipeline {
     //     cron 'H/15 * * * *'
     //  }
     stages {  
-		stage('validate elasticsearch') {
+		stage('validate elasticsearch on k8s') {
 		    when{
 		      expression {env.on_k8s != null}
 		    }
@@ -53,7 +53,7 @@ pipeline {
             }
 		}
 
-		stage("validate elasticsearch on no k8s"){
+		stage("validate elasticsearch"){
 		    agent {
 		        docker {
 		            label node
