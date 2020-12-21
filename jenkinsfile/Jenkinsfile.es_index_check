@@ -61,7 +61,7 @@ pipeline {
 	post {
     // 构建失败之后钉钉通知
         failure {
-            scriptes_index_check {
+            script {
                 if (whether_post == "True") {
                     dingTalk accessToken: "${DINGTALK_TOKEN}", imageUrl: '', jenkinsUrl: "${jenkinsUrl}", message: "构建失败 ${new Date().format("yyyy-MM-dd HH:mm:ss")}", notifyPeople: ''
                 }
