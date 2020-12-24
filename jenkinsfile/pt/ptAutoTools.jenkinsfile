@@ -40,9 +40,13 @@ pipeline {
 					if (env.on_k8s){
 						container("pt-auto-tools"){
 		        			sh "pt-auto-tools clean"
+		        			sh "pt-auto-tools jmeter"
+		        			sh "pt-auto-tools analysis"
 						}
 					}else {
-						sh "pt-auto-tools clean"
+						    sh "pt-auto-tools clean"
+		        			sh "pt-auto-tools jmeter"
+		        			sh "pt-auto-tools analysis"
 					}
 				}
 			}
