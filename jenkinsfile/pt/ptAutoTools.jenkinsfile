@@ -1,0 +1,51 @@
+def node=""
+if (env.node){
+    node =env.node
+}else{
+    node ="master"
+}
+def whether_post=""
+if (env.whether_post){
+    whether_post =env.whether_post
+}else{
+    whether_post ="True"
+}
+pipeline {
+    agent {label node}
+    options {
+	    timeout(time: 3, unit: 'MINUTES')
+    }
+    stages {
+        stage('delete workspace') {
+            steps{
+                deleteDir()
+            }
+        }
+		stage('download toolset') {
+			steps{
+				script{
+					if(env.on_k8s){
+						container("pt-auto-tools"){
+							sh "git clone ${params.GIT_REPO} -b ${params.GIT_BRANCH}"
+						}
+					}else {
+						sh "git clone ${params.GIT_REPO} -b ${params.GIT_BRANCH}"
+					}
+				}
+			}
+        }
+		stage('run task') {
+		    steps{
+				script{
+					if (env.on_k8s){
+						container("pt-auto-tools"){
+		        			sh "pt-auto-tools clean"
+						}
+					}else {
+						sh "pt-auto-tools clean"
+					}
+				}
+			}
+		}
+    }
+}
