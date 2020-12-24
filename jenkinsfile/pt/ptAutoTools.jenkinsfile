@@ -26,10 +26,10 @@ pipeline {
 				script{
 					if(env.on_k8s){
 						container("pt-auto-tools"){
-							sh "git clone ${params.GIT_REPO} -b ${params.GIT_BRANCH}"
+							sh "pt-auto-tools download --cfgurl ${params.cfgurl}"
 						}
 					}else {
-						sh "git clone ${params.GIT_REPO} -b ${params.GIT_BRANCH}"
+						sh "pt-auto-tools download --cfgurl ${params.cfgurl}"
 					}
 				}
 			}
