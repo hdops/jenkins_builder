@@ -1,0 +1,74 @@
+def node=""
+if (env.node){
+    node =env.node
+}else{
+    node ="master"
+}
+def whether_post=""
+if (env.whether_post){
+    whether_post =env.whether_post
+}else{
+    whether_post ="True"
+}
+pipeline {
+   agent {label node}
+    options {
+	//    buildDiscarder(logRotator(numToKeepStr: '30'))
+	//    disableConcurrentBuilds()
+	//    disableResume()
+	    timeout(time: 15, unit: 'MINUTES')
+    }
+	// environment{
+    //     DNET_PRIVATE_AK="$DNET_PRIVATE_AK"
+    //     DNET_PRIVATE_AS="$DNET_PRIVATE_AS"
+ 	// }
+	// parameters {
+	// 	choice(name: 'DNET_PRODUCT', choices:'dly')
+	//     choice(name:'DNET_PROFILE', choices:'branch_test\nproduction')
+	//     choice(name:'action', choices:'down\nup\nrestart')
+	//     string(name: 'container', defaultValue: '', description: 'containerid',trim: true)
+	//     choice(name:'dryrun', choices:'True\nFalse')
+	//     string(name: 'receivers', defaultValue: 'wangfei1@hd123.com', description: '收件人列表',trim: true)
+	//     string(name: 'GIT_BRANCH', defaultValue: 'develop', description: 'git branch',trim: true)
+	//     string(name: 'DINGTALK_TOKEN', defaultValue:'268f9a602050e395b131c90ba947fc595048f4c1dfd5ef996a77e533114d2002')
+	// }
+    stages {
+	    stage('下载toolset') {
+			steps{
+				echo "active profile is ${params.DNET_PROFILE}"
+				echo "product is ${params.DNET_PRODUCT}"
+				echo "workspace is $WORKSPACE"
+                retry(2){
+				    sh "DNET_PROFILE=integration_test DNET_PRODUCT=dnet hdops download_toolset --branch ${params.GIT_BRANCH} -p ."
+                }
+                sh "tar zxf toolset.tar.gz -C $WORKSPACE"
+			}
+        }
+        stage('up down nodes eureka') {
+			steps{
+			    sh "DNET_PRODUCT=${params.DNET_PRODUCT} DNET_PROFILE=${params.DNET_PROFILE} DINGTALK_TOKEN=${DINGTALK_TOKEN} hdops up_down_nodes_eureka --action ${params.action} --container ${params.container} --receivers ${params.receivers} --dryrun ${params.dryrun}
+			}
+		}
+    }
+	post {
+    // 构建失败之后钉钉通知
+        failure {
+            script {
+                if (whether_post == "True") {
+                    dingTalk accessToken: "${DINGTALK_TOKEN}", imageUrl: '', jenkinsUrl: "${jenkinsUrl}", message: "构建失败 ${new Date().format("yyyy-MM-dd HH:mm:ss")}", notifyPeople: ''
+                }
+            }
+        }
+	// 失败转成功之后钉钉通知
+        fixed {
+            script {
+                if (whether_post == "True") {
+                    dingTalk accessToken: "${DINGTALK_TOKEN}", imageUrl: '', jenkinsUrl: "${jenkinsUrl}", message: "恢复正常 ${new Date().format("yyyy-MM-dd HH:mm:ss")}", notifyPeople: ''
+                }
+            }
+        }
+		aborted {
+            dingTalk accessToken: "${DINGTALK_TOKEN}", imageUrl: '', jenkinsUrl:  "${jenkinsUrl}", message: "被取消了(${new Date().format("yyyy-MM-dd HH:mm:ss")})", notifyPeople: '13370268139'
+        }
+    }
+}
