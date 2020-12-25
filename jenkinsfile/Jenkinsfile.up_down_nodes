@@ -46,7 +46,7 @@ pipeline {
         }
         stage('up down nodes') {
 			steps{
-			    sh "DNET_PRODUCT=${params.DNET_PRODUCT} DNET_PROFILE=${params.DNET_PROFILE} DINGTALK_TOKEN=${DINGTALK_TOKEN} hdops up_down_nodes --action ${params.action} --container ${params.container} --receivers ${params.receivers} --dryrun ${params.dryrun}
+			    sh "DNET_PRODUCT=${params.DNET_PRODUCT} DNET_PROFILE=${params.DNET_PROFILE} DINGTALK_TOKEN=${DINGTALK_TOKEN} hdops up_down_nodes --action ${params.action} --container ${params.container} --receivers ${params.receivers} --dryrun ${params.dryrun}"
 			}
 		}
     }
