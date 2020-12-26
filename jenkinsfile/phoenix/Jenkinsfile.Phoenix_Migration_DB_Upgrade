@@ -7,7 +7,7 @@ if (env.node){
 if (!env.GIT_GROUP){
     env.GIT_GROUP="phoenix-config"
 }
-f (params.JENS_HOME){
+if (params.JENS_HOME){
     env.jen_home = params.JENS_HOME
 }else{
     env.jen_home = "/hdapp/jenkins"
