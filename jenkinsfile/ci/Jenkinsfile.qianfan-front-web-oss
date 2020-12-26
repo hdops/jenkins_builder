@@ -5,12 +5,12 @@ if (env.node){
 
 pipeline {
 	agent {
-			    docker {
-			    label node
-			    image "harbor.qianfan123.com/toolset/toolsetcore:0.3.0"
-			    args '-v /var/run/docker.sock:/var/run/docker.sock -v /usr/bin/docker:/usr/bin/docker --add-host=hd-hz-public.oss-cn-hangzhou-internal.aliyuncs.com:47.110.23.37'
-			    }
-             }
+        docker {
+        label node
+        image "harbor.qianfan123.com/toolset/toolsetcore:0.3.0"
+        args '-v /var/run/docker.sock:/var/run/docker.sock -v /usr/bin/docker:/usr/bin/docker --add-host=hd-hz-public.oss-cn-hangzhou-internal.aliyuncs.com:47.110.23.37'
+        }
+     }
     options {
 	//     buildDiscarder(logRotator(numToKeepStr: '10'))
 	//     disableConcurrentBuilds()
@@ -20,23 +20,25 @@ pipeline {
     stages {
         stage('download_toolset'){ 
 			steps{
-                            echo "active profile is ${DNET_PROFILE}"
-                            echo "workspace is $WORKSPACE"
-                            retry(2){
-                                sh "DNET_PROFILE=integration_test DNET_PRODUCT=dnet hdops download_toolset --branch ${build_branch} -p ."
-                            }
-                            sh "tar zxf toolset.tar.gz -C $WORKSPACE"
+                echo "active profile is ${DNET_PROFILE}"
+                echo "workspace is $WORKSPACE"
+                retry(2){
+                    sh "DNET_PROFILE=integration_test DNET_PRODUCT=dnet hdops download_toolset --branch ${build_branch} -p ."
+                }
+                sh "tar zxf toolset.tar.gz -C $WORKSPACE"
 			}
 		}
         stage('qianfan-front-web-oss'){ 
 			steps{   
-							sh "DNET_CLOUD_VENDOR=${params.DNET_CLOUD_VENDOR} DNET_PROFILE=${params.DNET_PROFILE} python qf_front_backend.py -download_url ${params.oss_resources} -download_from_jenkins  ${env.download_from_jenkins}  -subsystem ${params.subsystem}" 
+			    sh "DNET_CLOUD_VENDOR=${params.DNET_CLOUD_VENDOR} DNET_PROFILE=${params.DNET_PROFILE} python qf_front_backend.py -download_url ${params.oss_resources} -download_from_jenkins  ${env.download_from_jenkins}  -subsystem ${params.subsystem}"
 			}
 		}
     }
     post{
         always{
-            currentBuild.description = "${params.subsystem}"
+            script{
+                currentBuild.description = "${params.subsystem}"
+            }
         }
     }
 }
