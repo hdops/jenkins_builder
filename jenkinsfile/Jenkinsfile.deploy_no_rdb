@@ -129,7 +129,7 @@ pipeline {
         }
         always {
 			script {
-				currentBuild.description = "${params.DNET_PROFILE}:${params.subsystem}:${params.skipversion}"
+				currentBuild.description = "${params.DNET_PROFILE}:${params.subsystem}"
 			}
 		}
     }
