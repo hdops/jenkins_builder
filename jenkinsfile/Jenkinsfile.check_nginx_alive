@@ -14,7 +14,7 @@ pipeline {
 	    timeout(time: 5, unit: 'MINUTES')
     }
     stages {
-		stage('check nginx alive') {
+		stage('检查Nginx实例存活状态') {
 			steps{
 				script {
                     if (env.on_k8s){

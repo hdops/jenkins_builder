@@ -30,7 +30,7 @@ pipeline {
 
 	stages {
 	    
-		stage('check fielbeat') {
+		stage('Filebeat巡检') {
 		   agent {label node}
 
 			steps{
