@@ -16,7 +16,7 @@ pipeline {
 	    timeout(time: 5, unit: 'MINUTES')
     }
     stages {
-		stage('check zookeeper alive') {
+		stage('检查Zookeeper存活') {
 			steps{
 				script {
                     if (env.on_k8s){

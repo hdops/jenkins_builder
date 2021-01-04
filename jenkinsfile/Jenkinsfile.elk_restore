@@ -39,14 +39,14 @@ pipeline {
                             sh "DINGTALK_TOKEN=${DINGTALK_TOKEN} hdmon restore_es --index ${params.index} --cfgname ${params.cfgname}"
                         }
                     }else {
-                        docker.image("harbor.qianfan123.com/toolset/toolsetcore:0.3.0").withRun('-v /var/run/docker.sock:/var/run/docker.sock') {
+                        //docker.image("harbor.qianfan123.com/toolset/toolsetcore:0.3.0").withRun('-v /var/run/docker.sock:/var/run/docker.sock') {
                             echo "profile is ${params.DNET_PROFILE}"
                             retry(2){
                                 sh "DNET_PROFILE=integration_test DNET_PRODUCT=dnet hdops download_toolset --branch ${params.GIT_BRANCH} -p ."
                             }
                             sh "tar zxf toolset.tar.gz -C ${WORKSPACE}"
                             sh "DINGTALK_TOKEN=${DINGTALK_TOKEN} hdmon restore_es --index ${params.index} --cfgname ${params.cfgname}"
-                        }
+                        //}
                     }
                 }
 			}
