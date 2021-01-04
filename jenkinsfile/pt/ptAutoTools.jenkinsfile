@@ -42,11 +42,13 @@ pipeline {
 		        			sh "pt-auto-tools clean"
 		        			sh "pt-auto-tools jmeter"
 		        			sh "pt-auto-tools analysis"
+		        			sh "pt-auto-tools report"
 						}
 					}else {
 						    sh "pt-auto-tools clean"
 		        			sh "pt-auto-tools jmeter"
 		        			sh "pt-auto-tools analysis"
+		        			sh "pt-auto-tools report"
 					}
 				}
 			}
