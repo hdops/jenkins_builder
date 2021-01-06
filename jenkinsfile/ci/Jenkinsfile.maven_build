@@ -31,6 +31,11 @@ if (env.mvn_configfile){
     mvn_configfile =env.mvn_configfile
 }
 
+def skipversionupdate="--no-skipversionupdate"
+if (env.skipversionupdate){
+    skipversionupdate =env.skipversionupdate
+}
+
 def credentialsId="qianfan"
 
 
@@ -228,7 +233,8 @@ sourcefrom=git
                             triggerRemoteJob job: "${remoteJob}", maxConn: 3, parameters: """DNET_PROFILE=${DNET_PROFILE}
 DNET_PRODUCT=${DNET_PRODUCT}
 subsystem=${subsystem}
-skipversion=${skipversion}""", remoteJenkinsName: "${remoteJenkins}", useCrumbCache: false, useJobInfoCache: false, enhancedLogging: true
+skipversion=${skipversion}
+skipversionupdate=${skipversionupdate}""", remoteJenkinsName: "${remoteJenkins}", useCrumbCache: false, useJobInfoCache: false, enhancedLogging: true
                         }
                     }
 				}
