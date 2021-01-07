@@ -30,9 +30,9 @@ pipeline {
                             sh "tar zxf toolset.tar.gz -C $WORKSPACE"
 			}
 		}
-        stage('deployMFResourcePackage'){
+        stage('createMFResourcePackage'){
 			steps{   
-                            sh "DNET_PROFILE=${params.DNET_PROFILE} python dpos_front_backend.py -download_url ${params.BUILD_URL}"
+                            sh "DNET_PROFILE=${params.DNET_PROFILE} python createMFResourcePackage.py -download_url ${params.BUILD_URL} -fromVersion ${params.fromVersion} -toVersion ${params.toVersion} -alias ${params.alias}"
 			}
 		}
     }
