@@ -57,6 +57,7 @@ pipeline {
 git config --global user.name qianfan
 git checkout ${releaseBranchName}
 cat /root/.git-credentials
+sleep 1000
 git pull
 git checkout ${build_branch}
 git pull
