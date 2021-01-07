@@ -209,7 +209,7 @@ isrelease=False""", remoteJenkinsName: "11.3", shouldNotFailBuild: true, useCrum
 					    if (env.uploadRemoteJob != "" && env.uploadRemoteJob != null) {
 							echo "subsystem:${subsystem}"
 							def oss_resources=""
-							oss_resources = env.subsystem + "_resources_" + env.fromVersion+ "_" + env.toVersion + "_" + env.branch + ".zip"
+							oss_resources = env.subsystem + "_resources_" + env.fromVersion+ "_" + env.toVersion + "_" + env.build_branch + ".zip"
 							echo "oss_resources:${oss_resources}"
 							build job: "${uploadRemoteJob}", parameters: [string(name: 'DNET_PROFILE', value: DNET_PROFILE), string(name: 'subsystem', value: subsystem), string(name: 'oss_resources', value: oss_resources)], wait: false
 						}
