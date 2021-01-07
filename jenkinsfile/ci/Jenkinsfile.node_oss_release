@@ -56,8 +56,6 @@ pipeline {
                 sh """git config --global user.email qianfan@hd123.com
 git config --global user.name qianfan
 git checkout ${releaseBranchName}
-sleep 1000
-cat /root/.git-credentials
 git pull
 git checkout ${build_branch}
 git pull
