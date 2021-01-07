@@ -32,7 +32,7 @@ pipeline {
 		}
         stage('deployMFResourcePackage'){
 			steps{   
-                            sh "DNET_PROFILE=${params.DNET_PROFILE} python dpos_front_backend.py -download_url ${params.BUILD_URL}"
+                            sh "DNET_PROFILE=${params.DNET_PROFILE} python dpos_front_backend.py -download_url ${params.oss_resources}"
 			}
 		}
     }
