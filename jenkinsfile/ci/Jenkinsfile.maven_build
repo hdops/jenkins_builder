@@ -195,7 +195,6 @@ isrelease=False""", remoteJenkinsName: "11.3", shouldNotFailBuild: true, useCrum
 						    toVersion =build_branch
 						}
 						echo "toVersion:${toVersion}"
-						echo "alias:${alias}"
 						build job: "${packageRemoteJob}", parameters: [string(name: 'DNET_PRODUCT', value: DNET_PRODUCT), string(name: 'DNET_PROFILE', value: DNET_PROFILE), string(name: 'subsystem', value: subsystem), string(name: 'BUILD_URL', value: BUILD_URL), string(name: 'fromVersion', value: fromVersion), string(name: 'toVersion', value: toVersion), string(name: 'branch', value: build_branch)], wait: true
 					}
 				}
