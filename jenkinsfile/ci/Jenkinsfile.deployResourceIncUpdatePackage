@@ -32,7 +32,7 @@ pipeline {
 		}
         stage('deployResourceIncUpdatePackage'){
 			steps{   
-                            sh "DNET_PRODUCT=${params.DNET_PRODUCT} DNET_PROFILE=${params.DNET_PROFILE} python deployResourcesIncUpdatePackageGit.py -resouce_file ${params.resouce_file}"
+                            sh "DNET_PRODUCT=${params.DNET_PRODUCT} DNET_PROFILE=${params.DNET_PROFILE} python deployResourcesIncUpdatePackageGit.py -resouce_file ${params.oss_resources}"
 			}
 		}
     }
