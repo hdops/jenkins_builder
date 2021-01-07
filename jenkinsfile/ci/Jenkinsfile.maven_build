@@ -195,7 +195,12 @@ isrelease=False""", remoteJenkinsName: "11.3", shouldNotFailBuild: true, useCrum
 						    toVersion =build_branch
 						}
 						echo "toVersion:${toVersion}"
-						build job: "${packageRemoteJob}", parameters: [string(name: 'DNET_PRODUCT', value: DNET_PRODUCT), string(name: 'DNET_PROFILE', value: DNET_PROFILE), string(name: 'subsystem', value: subsystem), string(name: 'BUILD_URL', value: BUILD_URL), string(name: 'fromVersion', value: fromVersion), string(name: 'toVersion', value: toVersion), string(name: 'branch', value: build_branch)], wait: true
+						if (env.__subsystem){
+						    build job: "${packageRemoteJob}", parameters: [string(name: 'DNET_PRODUCT', value: DNET_PRODUCT), string(name: 'DNET_PROFILE', value: DNET_PROFILE), string(name: 'subsystem', value: __subsystem), string(name: 'BUILD_URL', value: BUILD_URL), string(name: 'fromVersion', value: fromVersion), string(name: 'toVersion', value: toVersion), string(name: 'branch', value: build_branch)], wait: true
+						}else{
+						    build job: "${packageRemoteJob}", parameters: [string(name: 'DNET_PRODUCT', value: DNET_PRODUCT), string(name: 'DNET_PROFILE', value: DNET_PROFILE), string(name: 'subsystem', value: subsystem), string(name: 'BUILD_URL', value: BUILD_URL), string(name: 'fromVersion', value: fromVersion), string(name: 'toVersion', value: toVersion), string(name: 'branch', value: build_branch)], wait: true
+						}
+
 					}
 				}
 			}
@@ -211,7 +216,11 @@ isrelease=False""", remoteJenkinsName: "11.3", shouldNotFailBuild: true, useCrum
 							def oss_resources=""
 							oss_resources = env.subsystem + "_resources_" + env.fromVersion+ "_" + env.toVersion + "_" + env.build_branch + ".zip"
 							echo "oss_resources:${oss_resources}"
-							build job: "${uploadRemoteJob}", parameters: [string(name: 'DNET_PROFILE', value: DNET_PROFILE), string(name: 'subsystem', value: subsystem), string(name: 'oss_resources', value: oss_resources)], wait: false
+                            if (env.__subsystem){
+                                build job: "${uploadRemoteJob}", parameters: [string(name: 'DNET_PROFILE', value: DNET_PROFILE), string(name: 'subsystem', value: __subsystem), string(name: 'oss_resources', value: oss_resources)], wait: false
+                            }else{
+                                build job: "${uploadRemoteJob}", parameters: [string(name: 'DNET_PROFILE', value: DNET_PROFILE), string(name: 'subsystem', value: subsystem), string(name: 'oss_resources', value: oss_resources)], wait: false
+                            }
 						}
 				}
 			}
