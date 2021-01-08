@@ -11,6 +11,10 @@ if (env.build_image){
     build_image =env.build_image
 }
 
+def git_base_rul="http://github.app.hd123.cn:10080"
+if (env.git_base_rul){
+    git_base_rul =env.git_base_rul
+}
 
 pipeline {
     // agent {label node}
@@ -37,9 +41,11 @@ pipeline {
 			}
 		}
          stage('checkout') {
-             steps{ 
-				echo "checkout http://github.app.hd123.cn:10080/${git_project}.git  branch:${build_branch}"
-                checkout([$class: 'GitSCM', branches: [[name: '*/${build_branch}']],userRemoteConfigs: [[url: 'http://github.app.hd123.cn:10080/${git_project}.git',credentialsId: "${credentialsId}"]]])
+             steps{
+                script {
+                    echo "checkout ${git_base_rul}/${git_project}.git  branch:${build_branch}"
+                    checkout([$class: 'GitSCM', branches: [[name: '*/${build_branch}']],userRemoteConfigs: [[url: '${git_base_rul}/${git_project}.git',credentialsId: "${credentialsId}"]]])
+                }
              }
          }  
 		stage('build') {
