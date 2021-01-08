@@ -26,7 +26,12 @@ if (env.uploadRemoteJob){
 }
 
 pipeline {
-	agent {label node}
+	//     agent {label node}
+    agent {docker {
+            image "${node_image}"
+            label node
+            args '-v /var/run/docker.sock:/var/run/docker.sock -v /usr/bin/docker:/usr/bin/docker -v /hdapp/npm:/root/.npm -v /root/.npmrc:/root/.npmrc'
+          }}
     options {
 	//     buildDiscarder(logRotator(numToKeepStr: '10'))
 	//     disableConcurrentBuilds()
@@ -43,12 +48,6 @@ pipeline {
 			}
 		}
          stage('checkout & build') {
-              agent {
-			    docker {
-			    image "${node_image}"
-			    args '-v /var/run/docker.sock:/var/run/docker.sock -v /usr/bin/docker:/usr/bin/docker -v /hdapp/npm:/root/.npm -v /root/.npmrc:/root/.npmrc'
-			    }
-             }
              steps{ 
 				echo "checkout http://github.app.hd123.cn:10080/${git_project}.git  branch:${build_branch}"
 				// git branch: "${build_branch}", credentialsId: "${credentialsId}", url: 'http://github.app.hd123.cn:10080/${git_project}.git'
