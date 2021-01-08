@@ -11,9 +11,9 @@ if (env.build_image){
     build_image =env.build_image
 }
 
-def git_base_rul= "http://github.app.hd123.cn:10080"
-if (env.git_base_rul){
-    git_base_rul =env.git_base_rul
+def git_base_url="http://github.app.hd123.cn:10080"
+if (env.git_base_url){
+    git_base_url =env.git_base_url
 }
 
 pipeline {
@@ -43,8 +43,8 @@ pipeline {
          stage('checkout') {
              steps{
                 script {
-                    echo "checkout ${git_base_rul}/${git_project}.git  branch:${build_branch}"
-                    checkout([$class: 'GitSCM', branches: [[name: '*/${build_branch}']],userRemoteConfigs: [[url: '${git_base_rul}/${git_project}.git',credentialsId: "${credentialsId}"]]])
+                    echo "checkout ${git_base_url}/${git_project}.git  branch:${build_branch}"
+                    checkout([$class: 'GitSCM', branches: [[name: '*/${build_branch}']],userRemoteConfigs: [[url: '${git_base_url}/${git_project}.git',credentialsId: "${credentialsId}"]]])
                 }
              }
          }  
