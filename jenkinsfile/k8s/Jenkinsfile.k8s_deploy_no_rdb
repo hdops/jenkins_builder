@@ -36,7 +36,6 @@ pipeline {
 							echo "sub systems are ${params.subsystem}"
 							echo "skip version is ${params.skipversion}"
 							echo "upstream URL is ${params.upurl}"
-					//		sh "git clone http://qianfan:headingqianfan@github.app.hd123.cn:10080/qianfanops/toolset-k8s-config.git -b develop ."
 							retry(2){
 								sh "DNET_PROFILE=integration_test DNET_PRODUCT=dnet hdopsctl download_toolset --project ${GIT_PROJECT} --branch ${params.GIT_BRANCH} -p ."
 							}
