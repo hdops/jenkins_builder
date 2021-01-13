@@ -10,6 +10,10 @@ if (env.whether_post){
 }else{
     whether_post ="True"
 }
+def GIT_PROJECT="toolset-k8s-config"
+if (env.GIT_PROJECT){
+    GIT_PROJECT =env.GIT_PROJECT
+}
 pipeline {
     agent {label node}
     options {
