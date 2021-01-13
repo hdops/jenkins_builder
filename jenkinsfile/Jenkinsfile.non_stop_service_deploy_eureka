@@ -1,0 +1,165 @@
+def node=""
+if (env.node){
+    node =env.node
+}else{
+    node ="master"
+}
+def whether_post=""
+if (env.whether_post){
+    whether_post =env.whether_post
+}else{
+    whether_post ="True"
+}
+pipeline {
+    agent {label node}
+    options {
+	//     buildDiscarder(logRotator(numToKeepStr: '10'))
+	//     disableResume()
+	    timeout(time: 3, unit: 'HOURS')
+    }
+	// environment{
+        // DNET_PRIVATE_AK="$DNET_PRIVATE_AK"
+        // DNET_PRIVATE_AS="$DNET_PRIVATE_AS"
+ 	// }
+	// parameters {
+	    // choice(name:'DNET_PROFILE', choices:'integration_test\nessp_branch\nbranch_test\nperformance_test\ntencent-int')
+	    // string(name: 'subsystem', defaultValue: 'dss', description: '子系统，多值以逗号分隔，例如ras,sas,sas_config,tlsp-web,waltz_account,tlsp,spms_web_ui,spms,spms_h3_transfer,pas,zuul,eureka,mq,account,config,sequence',trim: true)
+	    // string(name: 'GIT_BRANCH', defaultValue: 'develop', description: 'git branch',trim: true)
+	    // choice(name: 'DNET_PRODUCT', choices:'baas')
+	    // choice(name: 'tag', choices:'None\nblue\ngreen')
+	    // string(name: 'DNET_AK', defaultValue: 'resource/aliyun_access_key.yaml', description: 'ak peizhi',trim: true)
+	// }
+    stages {
+        stage('delete workspace') {
+            steps{
+                deleteDir()
+            }
+        }
+		stage('download toolset') {
+			steps{
+				script{
+					if(env.on_k8s){
+					    echo "======下载toolset======"
+						container("hdtoolsetcore"){
+							retry(2){
+								sh "DNET_PROFILE=integration_test DNET_PRODUCT=dnet hdops download_toolset --branch ${params.GIT_BRANCH} -p ."
+							}
+							sh "tar zxf toolset.tar.gz -C ${WORKSPACE}"
+						}
+					}else {
+					    echo "======下载toolset======"
+						retry(2){
+							sh "DNET_PROFILE=integration_test DNET_PRODUCT=dnet hdops download_toolset --branch ${params.GIT_BRANCH} -p ."
+						}
+						sh "tar zxf toolset.tar.gz -C ${WORKSPACE}"
+					}
+				}
+			}
+        }
+		stage('change eureka down up') {
+		    steps{
+				script{
+					if (env.on_k8s){
+					    echo "======下线 ${params.tag} 节点======"
+						container("hdtoolsetcore"){
+						    sh "DNET_PRODUCT=${params.DNET_PRODUCT} DNET_PROFILE=${params.DNET_PROFILE} hdops change_eureka_down_up --subsystem ${params.subsystem} --tag ${params.tag}"
+						    echo "等待60s用于配置刷新"
+						    sleep time: 1, unit: 'MINUTES'
+						}
+					}else {
+					    echo "======下线 ${params.tag} 节点======"
+                        sh "DNET_PRODUCT=${params.DNET_PRODUCT} DNET_PROFILE=${params.DNET_PROFILE} hdops change_eureka_down_up --subsystem ${params.subsystem} --tag ${params.tag}"
+                        echo "等待60s用于配置刷新"
+                        sleep time: 1, unit: 'MINUTES'                        
+					}
+				}
+			}
+		}
+		stage('change eureka') {
+		    steps{
+				script{
+					if (env.on_k8s){
+					    echo "======shutdown ${params.tag} 节点======"
+						container("hdtoolsetcore"){
+						    sh "DNET_PRODUCT=${params.DNET_PRODUCT} DNET_PROFILE=${params.DNET_PROFILE} hdops change_eureka --subsystem ${params.subsystem} --tag ${params.tag}"
+						}
+					}else {
+					    echo "======shutdown ${params.tag} 节点======"
+                        sh "DNET_PRODUCT=${params.DNET_PRODUCT} DNET_PROFILE=${params.DNET_PROFILE} hdops change_eureka --subsystem ${params.subsystem} --tag ${params.tag}"                     
+					}
+				}
+			}
+		}  		   
+		stage('validate docker image && image download && appinstall') {
+		    steps{
+				script{
+					if (env.on_k8s){
+					    echo "======${params.tag}：验证镜像、下载镜像、部署应用======"
+						container("hdtoolsetcore"){
+						    sh "DNET_PRODUCT=${params.DNET_PRODUCT} DNET_PROFILE=${params.DNET_PROFILE} hdops deploy validate --subsystem  ${params.subsystem}"
+							sh "DNET_PRODUCT=${params.DNET_PRODUCT} DNET_PROFILE=${params.DNET_PROFILE} hdops deploy image_download --subsystem ${params.subsystem} --tag ${params.tag}"
+		        			sh "DNET_AK=${params.DNET_AK} DNET_PRODUCT=${params.DNET_PRODUCT} DNET_PROFILE=${params.DNET_PROFILE} hdops deploy appinstall --subsystem ${params.subsystem} --tag ${params.tag}"
+						}
+					}else {
+					    echo "======${params.tag}：验证镜像、下载镜像、部署应用======"
+					    sh "DNET_PRODUCT=${params.DNET_PRODUCT} DNET_PROFILE=${params.DNET_PROFILE} hdops deploy validate --subsystem  ${params.subsystem}"
+						sh "DNET_PRODUCT=${params.DNET_PRODUCT} DNET_PROFILE=${params.DNET_PROFILE} hdops deploy image_download --subsystem ${params.subsystem} --tag ${params.tag}"
+		        		sh "DNET_AK=${params.DNET_AK} DNET_PRODUCT=${params.DNET_PRODUCT} DNET_PROFILE=${params.DNET_PROFILE} hdops deploy appinstall --subsystem ${params.subsystem} --tag ${params.tag}"
+					}
+				}
+			}
+	    }
+		stage('healthcheck') {
+			steps{
+				script {
+                    if (env.on_k8s){
+                        echo "======健康检查 ${params.tag} 节点======"
+                        container('hdtoolsetcore'){
+                            if(env.retry_num){
+                                def n ="${retry_num}".toInteger()
+                                retry(n){
+                                    sh "DINGTALK_TOKEN=${DINGTALK_TOKEN} DNET_PRODUCT=${params.DNET_PRODUCT} DNET_PROFILE=${params.DNET_PROFILE} hdops health_check --subsystem ${params.subsystem}  --tag ${params.tag}"
+                                }
+                            }else{
+                                sh "DINGTALK_TOKEN=${DINGTALK_TOKEN} DNET_PRODUCT=${params.DNET_PRODUCT} DNET_PROFILE=${params.DNET_PROFILE} hdops health_check --subsystem ${params.subsystem}  --tag ${params.tag}"
+                            }
+                        }
+                    }else {
+                        echo "======健康检查 ${params.tag} 节点======"
+                        if(env.retry_num){
+                            def n ="${retry_num}".toInteger()
+                            retry(n){
+                                sh "DINGTALK_TOKEN=${DINGTALK_TOKEN} DNET_PRODUCT=${params.DNET_PRODUCT} DNET_PROFILE=${params.DNET_PROFILE} hdops health_check --subsystem ${params.subsystem}  --tag ${params.tag}"
+                            }
+                        }else{
+                            sh "DINGTALK_TOKEN=${DINGTALK_TOKEN} DNET_PRODUCT=${params.DNET_PRODUCT} DNET_PROFILE=${params.DNET_PROFILE} hdops health_check --subsystem ${params.subsystem}  --tag ${params.tag}"
+                        }
+                    }
+                }
+			}
+        }
+    }
+	post {
+    // 构建失败之后钉钉通知
+        failure {
+            script {
+                if (whether_post == "True") {
+                    dingTalk accessToken: "${DINGTALK_TOKEN}", imageUrl: '', jenkinsUrl: "${jenkinsUrl}", message: "构建失败 ${new Date().format("yyyy-MM-dd HH:mm:ss")}", notifyPeople: ''
+                }
+            }
+        }
+	// 失败转成功之后钉钉通知
+        fixed {
+            script {
+                if (whether_post == "True") {
+                    dingTalk accessToken: "${DINGTALK_TOKEN}", imageUrl: '', jenkinsUrl: "${jenkinsUrl}", message: "恢复正常 ${new Date().format("yyyy-MM-dd HH:mm:ss")}", notifyPeople: ''
+                }
+            }
+        }
+        always {
+			script {
+				currentBuild.description = "${params.DNET_PROFILE}:${params.subsystem}:${params.skipversion}"
+			}
+		}
+    }
+}
