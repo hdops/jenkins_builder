@@ -94,7 +94,7 @@ pipeline {
 				}
 			}
 		}  		   
-		stage('blue：validate docker image || image download || appinstall') {
+		stage('blue：validate docker image && image download && appinstall') {
 		    steps{
 				script{
 				    if (tag == 'blue' || tag == 'None'){
@@ -184,7 +184,7 @@ pipeline {
 				}
 			}
 		}
-		stage('green：validate docker image || image download || appinstall') {
+		stage('green：validate docker image && image download && appinstall') {
 		    steps{
 				script{
 				    if (tag == 'green' || tag == 'None'){
