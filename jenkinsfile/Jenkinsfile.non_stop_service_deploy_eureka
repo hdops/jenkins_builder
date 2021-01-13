@@ -59,7 +59,7 @@ pipeline {
 		stage('blue：change eureka down up') {
 		    steps{
 				script{
-				    if (tag == 'blue' && tag == 'None'){
+				    if (tag == 'blue' || tag == 'None'){
                         if (env.on_k8s){
                             echo "======下线blue节点======"
                             container("hdtoolsetcore"){
@@ -80,7 +80,7 @@ pipeline {
 		stage('blue：change eureka') {
 		    steps{
 				script{
-				    if (tag == 'blue' && tag == 'None'){
+				    if (tag == 'blue' || tag == 'None'){
                         if (env.on_k8s){
                             echo "======shutdown blue节点======"
                             container("hdtoolsetcore"){
@@ -94,10 +94,10 @@ pipeline {
 				}
 			}
 		}  		   
-		stage('blue：validate docker image && image download && appinstall') {
+		stage('blue：validate docker image || image download || appinstall') {
 		    steps{
 				script{
-				    if (tag == 'blue' && tag == 'None'){
+				    if (tag == 'blue' || tag == 'None'){
                         if (env.on_k8s){
                             echo "======blue节点：验证镜像、下载镜像、部署应用======"
                             container("hdtoolsetcore"){
@@ -118,7 +118,7 @@ pipeline {
 		stage('blue：healthcheck') {
 			steps{
 				script {
-				    if (tag == 'blue' && tag == 'None'){
+				    if (tag == 'blue' || tag == 'None'){
                         if (env.on_k8s){
                             echo "======健康检查blue节点======"
                             container('hdtoolsetcore'){
@@ -149,7 +149,7 @@ pipeline {
 		stage('green：change eureka down up') {
 		    steps{
 				script{
-				    if (tag == 'green' && tag == 'None'){
+				    if (tag == 'green' || tag == 'None'){
                         if (env.on_k8s){
                             echo "======下线green节点======"
                             container("hdtoolsetcore"){
@@ -170,7 +170,7 @@ pipeline {
 		stage('green：change eureka') {
 		    steps{
 				script{
-				    if (tag == 'green' && tag == 'None'){
+				    if (tag == 'green' || tag == 'None'){
                         if (env.on_k8s){
                             echo "======shutdown green节点======"
                             container("hdtoolsetcore"){
@@ -184,10 +184,10 @@ pipeline {
 				}
 			}
 		}
-		stage('green：validate docker image && image download && appinstall') {
+		stage('green：validate docker image || image download || appinstall') {
 		    steps{
 				script{
-				    if (tag == 'green' && tag == 'None'){
+				    if (tag == 'green' || tag == 'None'){
                         if (env.on_k8s){
                             echo "======green节点：验证镜像、下载镜像、部署应用======"
                             container("hdtoolsetcore"){
@@ -208,7 +208,7 @@ pipeline {
 		stage('green：healthcheck') {
 			steps{
 				script {
-				    if (tag == 'green' && tag == 'None'){
+				    if (tag == 'green' || tag == 'None'){
                         if (env.on_k8s){
                             echo "======健康检查green节点======"
                             container('hdtoolsetcore'){
