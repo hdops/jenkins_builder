@@ -94,7 +94,7 @@ pipeline {
 		    steps{
 				script{
 					if (env.on_k8s){
-					    echo "======${params.tag}：验证镜像、下载镜像、部署应用======"
+					    echo "======${params.tag}节点：验证镜像、下载镜像、部署应用======"
 						container("hdtoolsetcore"){
 						    sh "DNET_PRODUCT=${params.DNET_PRODUCT} DNET_PROFILE=${params.DNET_PROFILE} hdops deploy validate --subsystem  ${params.subsystem}"
 							sh "DNET_PRODUCT=${params.DNET_PRODUCT} DNET_PROFILE=${params.DNET_PROFILE} hdops deploy image_download --subsystem ${params.subsystem} --tag ${params.tag}"
