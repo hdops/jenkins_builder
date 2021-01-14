@@ -199,10 +199,10 @@ pipeline {
                         if (env.on_k8s){
                             echo "======上线所有节点======"
                             container("hdtoolsetcore"){
-                                sh "DNET_PRODUCT=$DNET_PRODUCT DNET_PROFILE=$DNET_PROFILE DNET_AK=$DNET_AK hdops change_slb --tag ${params.tag} --image ${params.image}"
+                                sh "DNET_PRODUCT=$DNET_PRODUCT DNET_PROFILE=$DNET_PROFILE DNET_AK=$DNET_AK hdops change_slb --tag None --image ${params.image}"
                             }
                         }else {
-                            sh "DNET_PRODUCT=$DNET_PRODUCT DNET_PROFILE=$DNET_PROFILE DNET_AK=$DNET_AK hdops change_slb --tag ${params.tag} --image ${params.image}"
+                            sh "DNET_PRODUCT=$DNET_PRODUCT DNET_PROFILE=$DNET_PROFILE DNET_AK=$DNET_AK hdops change_slb --tag None --image ${params.image}"
                         }
 				    }
 				}
