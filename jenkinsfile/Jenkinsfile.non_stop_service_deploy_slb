@@ -56,44 +56,23 @@ pipeline {
 				}
 			}
         }
-		stage('blue：change eureka down up') {
+		stage('blue：change slb') {
 		    steps{
 				script{
 				    if (tag == 'blue' || tag == 'None'){
                         if (env.on_k8s){
                             echo "======下线blue节点======"
                             container("hdtoolsetcore"){
-                                sh "DNET_PRODUCT=$DNET_PRODUCT DNET_PROFILE=$DNET_PROFILE hdops change_eureka_down_up --subsystem ${params.subsystem} --tag blue"
-                                echo "等待60s用于配置刷新"
-                                sleep time: 1, unit: 'MINUTES'
+                                sh "DNET_PRODUCT=$DNET_PRODUCT DNET_PROFILE=$DNET_PROFILE DNET_AK=$DNET_AK hdops change_slb --tag blue --image ${params.image}"
                             }
                         }else {
                             echo "======下线blue节点======"
-                            sh "DNET_PRODUCT=$DNET_PRODUCT DNET_PROFILE=$DNET_PROFILE hdops change_eureka_down_up --subsystem ${params.subsystem} --tag blue"
-                            echo "等待60s用于配置刷新"
-                            sleep time: 1, unit: 'MINUTES'
+                            sh "DNET_PRODUCT=$DNET_PRODUCT DNET_PROFILE=$DNET_PROFILE DNET_AK=$DNET_AK hdops change_slb --tag blue --image ${params.image}"
                         }
 				    }
 				}
 			}
 		}
-		stage('blue：change eureka') {
-		    steps{
-				script{
-				    if (tag == 'blue' || tag == 'None'){
-                        if (env.on_k8s){
-                            echo "======shutdown blue节点======"
-                            container("hdtoolsetcore"){
-                                sh "DNET_PRODUCT=$DNET_PRODUCT DNET_PROFILE=$DNET_PROFILE hdops change_eureka --subsystem ${params.subsystem} --tag blue"
-                            }
-                        }else {
-                            echo "======shutdown blue节点======"
-                            sh "DNET_PRODUCT=$DNET_PRODUCT DNET_PROFILE=$DNET_PROFILE hdops change_eureka --subsystem ${params.subsystem} --tag blue"
-                        }
-				    }
-				}
-			}
-		}  		   
 		stage('blue：validate docker image && image download && appinstall') {
 		    steps{
 				script{
@@ -101,15 +80,15 @@ pipeline {
                         if (env.on_k8s){
                             echo "======blue节点：验证镜像、下载镜像、部署应用======"
                             container("hdtoolsetcore"){
-                                sh "DNET_PRODUCT=$DNET_PRODUCT DNET_PROFILE=$DNET_PROFILE hdops deploy validate --subsystem  ${params.subsystem}"
-                                sh "DNET_PRODUCT=$DNET_PRODUCT DNET_PROFILE=$DNET_PROFILE hdops deploy image_download --subsystem ${params.subsystem} --tag blue"
-                                sh "DNET_AK=$DNET_AK DNET_PRODUCT=$DNET_PRODUCT DNET_PROFILE=$DNET_PROFILE hdops deploy appinstall --subsystem ${params.subsystem} --tag blue"
+                                sh "DNET_PRODUCT=$DNET_PRODUCT DNET_PROFILE=$DNET_PROFILE hdops deploy validate --subsystem  ${params.image}"
+                                sh "DNET_PRODUCT=$DNET_PRODUCT DNET_PROFILE=$DNET_PROFILE hdops deploy image_download --subsystem ${params.image} --tag blue"
+                                sh "DNET_AK=$DNET_AK DNET_PRODUCT=$DNET_PRODUCT DNET_PROFILE=$DNET_PROFILE hdops deploy appinstall --subsystem ${params.image} --tag blue"
                             }
                         }else {
                             echo "======blue节点：验证镜像、下载镜像、部署应用======"
-                            sh "DNET_PRODUCT=$DNET_PRODUCT DNET_PROFILE=$DNET_PROFILE hdops deploy validate --subsystem  ${params.subsystem}"
-                            sh "DNET_PRODUCT=$DNET_PRODUCT DNET_PROFILE=$DNET_PROFILE hdops deploy image_download --subsystem ${params.subsystem} --tag blue"
-                            sh "DNET_AK=$DNET_AK DNET_PRODUCT=$DNET_PRODUCT DNET_PROFILE=$DNET_PROFILE hdops deploy appinstall --subsystem ${params.subsystem} --tag blue"
+                            sh "DNET_PRODUCT=$DNET_PRODUCT DNET_PROFILE=$DNET_PROFILE hdops deploy validate --subsystem  ${params.image}"
+                            sh "DNET_PRODUCT=$DNET_PRODUCT DNET_PROFILE=$DNET_PROFILE hdops deploy image_download --subsystem ${params.image} --tag blue"
+                            sh "DNET_AK=$DNET_AK DNET_PRODUCT=$DNET_PRODUCT DNET_PROFILE=$DNET_PROFILE hdops deploy appinstall --subsystem ${params.image} --tag blue"
                         }
 				    }
 				}
@@ -125,10 +104,10 @@ pipeline {
                                 if(env.retry_num){
                                     def n ="${retry_num}".toInteger()
                                     retry(n){
-                                        sh "DINGTALK_TOKEN=$DINGTALK_TOKEN DNET_PRODUCT=$DNET_PRODUCT DNET_PROFILE=$DNET_PROFILE hdops health_check --subsystem ${params.subsystem}  --tag blue"
+                                        sh "DINGTALK_TOKEN=$DINGTALK_TOKEN DNET_PRODUCT=$DNET_PRODUCT DNET_PROFILE=$DNET_PROFILE hdops health_check --subsystem ${params.image}  --tag blue"
                                     }
                                 }else{
-                                    sh "DINGTALK_TOKEN=$DINGTALK_TOKEN DNET_PRODUCT=$DNET_PRODUCT DNET_PROFILE=$DNET_PROFILE hdops health_check --subsystem ${params.subsystem}  --tag blue"
+                                    sh "DINGTALK_TOKEN=$DINGTALK_TOKEN DNET_PRODUCT=$DNET_PRODUCT DNET_PROFILE=$DNET_PROFILE hdops health_check --subsystem ${params.image}  --tag blue"
                                 }
                             }
                         }else {
@@ -136,49 +115,28 @@ pipeline {
                             if(env.retry_num){
                                 def n ="${retry_num}".toInteger()
                                 retry(n){
-                                    sh "DINGTALK_TOKEN=$DINGTALK_TOKEN DNET_PRODUCT=$DNET_PRODUCT DNET_PROFILE=$DNET_PROFILE hdops health_check --subsystem ${params.subsystem}  --tag blue"
+                                    sh "DINGTALK_TOKEN=$DINGTALK_TOKEN DNET_PRODUCT=$DNET_PRODUCT DNET_PROFILE=$DNET_PROFILE hdops health_check --subsystem ${params.image}  --tag blue"
                                 }
                             }else{
-                                sh "DINGTALK_TOKEN=$DINGTALK_TOKEN DNET_PRODUCT=$DNET_PRODUCT DNET_PROFILE=$DNET_PROFILE hdops health_check --subsystem ${params.subsystem}  --tag blue"
+                                sh "DINGTALK_TOKEN=$DINGTALK_TOKEN DNET_PRODUCT=$DNET_PRODUCT DNET_PROFILE=$DNET_PROFILE hdops health_check --subsystem ${params.image}  --tag blue"
                             }
                         }
 				    }
                 }
 			}
         }
-		stage('green：change eureka down up') {
+		stage('green：change slb') {
 		    steps{
 				script{
 				    if (tag == 'green' || tag == 'None'){
                         if (env.on_k8s){
                             echo "======下线green节点======"
                             container("hdtoolsetcore"){
-                                sh "DNET_PRODUCT=$DNET_PRODUCT DNET_PROFILE=$DNET_PROFILE hdops change_eureka_down_up --subsystem ${params.subsystem} --tag green"
-                                echo "等待60s用于配置刷新"
-                                sleep time: 1, unit: 'MINUTES'
+                                sh "DNET_PRODUCT=$DNET_PRODUCT DNET_PROFILE=$DNET_PROFILE DNET_AK=$DNET_AK hdops change_slb --tag green --image ${params.image}"
                             }
                         }else {
                             echo "======下线green节点======"
-                            sh "DNET_PRODUCT=$DNET_PRODUCT DNET_PROFILE=$DNET_PROFILE hdops change_eureka_down_up --subsystem ${params.subsystem} --tag green"
-                            echo "等待60s用于配置刷新"
-                            sleep time: 1, unit: 'MINUTES'
-                        }
-				    }
-				}
-			}
-		}
-		stage('green：change eureka') {
-		    steps{
-				script{
-				    if (tag == 'green' || tag == 'None'){
-                        if (env.on_k8s){
-                            echo "======shutdown green节点======"
-                            container("hdtoolsetcore"){
-                                sh "DNET_PRODUCT=$DNET_PRODUCT DNET_PROFILE=$DNET_PROFILE hdops change_eureka --subsystem ${params.subsystem} --tag green"
-                            }
-                        }else {
-                            echo "======shutdown green节点======"
-                            sh "DNET_PRODUCT=$DNET_PRODUCT DNET_PROFILE=$DNET_PROFILE hdops change_eureka --subsystem ${params.subsystem} --tag green"
+                            sh "DNET_PRODUCT=$DNET_PRODUCT DNET_PROFILE=$DNET_PROFILE DNET_AK=$DNET_AK hdops change_slb --tag green --image ${params.image}"
                         }
 				    }
 				}
@@ -191,15 +149,15 @@ pipeline {
                         if (env.on_k8s){
                             echo "======green节点：验证镜像、下载镜像、部署应用======"
                             container("hdtoolsetcore"){
-                                sh "DNET_PRODUCT=$DNET_PRODUCT DNET_PROFILE=$DNET_PROFILE hdops deploy validate --subsystem  ${params.subsystem}"
-                                sh "DNET_PRODUCT=$DNET_PRODUCT DNET_PROFILE=$DNET_PROFILE hdops deploy image_download --subsystem ${params.subsystem} --tag green"
-                                sh "DNET_AK=$DNET_AK DNET_PRODUCT=$DNET_PRODUCT DNET_PROFILE=$DNET_PROFILE hdops deploy appinstall --subsystem ${params.subsystem} --tag green"
+                                sh "DNET_PRODUCT=$DNET_PRODUCT DNET_PROFILE=$DNET_PROFILE hdops deploy validate --subsystem  ${params.image}"
+                                sh "DNET_PRODUCT=$DNET_PRODUCT DNET_PROFILE=$DNET_PROFILE hdops deploy image_download --subsystem ${params.image} --tag green"
+                                sh "DNET_AK=$DNET_AK DNET_PRODUCT=$DNET_PRODUCT DNET_PROFILE=$DNET_PROFILE hdops deploy appinstall --subsystem ${params.image} --tag green"
                             }
                         }else {
                             echo "======green节点：验证镜像、下载镜像、部署应用======"
-                            sh "DNET_PRODUCT=$DNET_PRODUCT DNET_PROFILE=$DNET_PROFILE hdops deploy validate --subsystem  ${params.subsystem}"
-                            sh "DNET_PRODUCT=$DNET_PRODUCT DNET_PROFILE=$DNET_PROFILE hdops deploy image_download --subsystem ${params.subsystem} --tag green"
-                            sh "DNET_AK=$DNET_AK DNET_PRODUCT=$DNET_PRODUCT DNET_PROFILE=$DNET_PROFILE hdops deploy appinstall --subsystem ${params.subsystem} --tag green"
+                            sh "DNET_PRODUCT=$DNET_PRODUCT DNET_PROFILE=$DNET_PROFILE hdops deploy validate --subsystem  ${params.image}"
+                            sh "DNET_PRODUCT=$DNET_PRODUCT DNET_PROFILE=$DNET_PROFILE hdops deploy image_download --subsystem ${params.image} --tag green"
+                            sh "DNET_AK=$DNET_AK DNET_PRODUCT=$DNET_PRODUCT DNET_PROFILE=$DNET_PROFILE hdops deploy appinstall --subsystem ${params.image} --tag green"
                         }
 				    }
 				}
@@ -215,10 +173,10 @@ pipeline {
                                 if(env.retry_num){
                                     def n ="${retry_num}".toInteger()
                                     retry(n){
-                                        sh "DINGTALK_TOKEN=$DINGTALK_TOKEN DNET_PRODUCT=$DNET_PRODUCT DNET_PROFILE=$DNET_PROFILE hdops health_check --subsystem ${params.subsystem}  --tag green"
+                                        sh "DINGTALK_TOKEN=$DINGTALK_TOKEN DNET_PRODUCT=$DNET_PRODUCT DNET_PROFILE=$DNET_PROFILE hdops health_check --subsystem ${params.image}  --tag green"
                                     }
                                 }else{
-                                    sh "DINGTALK_TOKEN=$DINGTALK_TOKEN DNET_PRODUCT=$DNET_PRODUCT DNET_PROFILE=$DNET_PROFILE hdops health_check --subsystem ${params.subsystem}  --tag green"
+                                    sh "DINGTALK_TOKEN=$DINGTALK_TOKEN DNET_PRODUCT=$DNET_PRODUCT DNET_PROFILE=$DNET_PROFILE hdops health_check --subsystem ${params.image}  --tag green"
                                 }
                             }
                         }else {
@@ -226,16 +184,33 @@ pipeline {
                             if(env.retry_num){
                                 def n ="${retry_num}".toInteger()
                                 retry(n){
-                                    sh "DINGTALK_TOKEN=$DINGTALK_TOKEN DNET_PRODUCT=$DNET_PRODUCT DNET_PROFILE=$DNET_PROFILE hdops health_check --subsystem ${params.subsystem}  --tag green"
+                                    sh "DINGTALK_TOKEN=$DINGTALK_TOKEN DNET_PRODUCT=$DNET_PRODUCT DNET_PROFILE=$DNET_PROFILE hdops health_check --subsystem ${params.image}  --tag green"
                                 }
                             }else{
-                                sh "DINGTALK_TOKEN=$DINGTALK_TOKEN DNET_PRODUCT=$DNET_PRODUCT DNET_PROFILE=$DNET_PROFILE hdops health_check --subsystem ${params.subsystem}  --tag green"
+                                sh "DINGTALK_TOKEN=$DINGTALK_TOKEN DNET_PRODUCT=$DNET_PRODUCT DNET_PROFILE=$DNET_PROFILE hdops health_check --subsystem ${params.image}  --tag green"
                             }
                         }
 				    }
                 }
 			}
         }
+		stage('None：change slb') {
+		    steps{
+				script{
+				    if (tag == 'green' || tag == 'None'){
+                        if (env.on_k8s){
+                            echo "======上线所有节点======"
+                            container("hdtoolsetcore"){
+                                sh "DNET_PRODUCT=$DNET_PRODUCT DNET_PROFILE=$DNET_PROFILE DNET_AK=$DNET_AK hdops change_slb --tag None --image ${params.image}"
+                            }
+                        }else {
+                            echo "======上线所有节点======"
+                            sh "DNET_PRODUCT=$DNET_PRODUCT DNET_PROFILE=$DNET_PROFILE DNET_AK=$DNET_AK hdops change_slb --tag None --image ${params.image}"
+                        }
+				    }
+				}
+			}
+		}
     }
 	post {
     // 构建失败之后钉钉通知
@@ -256,7 +231,7 @@ pipeline {
         }
         always {
 			script {
-				currentBuild.description = "$DNET_PROFILE:${params.subsystem}:${params.tag}"
+				currentBuild.description = "$DNET_PROFILE:${params.image}:${params.tag}"
 			}
 		}
     }
