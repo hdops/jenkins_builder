@@ -76,6 +76,7 @@ pipeline {
 			        String[] data = []
 			        if (PRESET_IMAGE_VERSION != 'None'){
                         data = PRESET_IMAGE_VERSION.split(',')
+                        println(PRESET_IMAGE_VERSION)
 			        }else{
                         data = [PRESET_IMAGE_VERSION]
 			        }
