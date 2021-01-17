@@ -56,7 +56,7 @@ pipeline {
 				}
 			}
         }
-		stage('blue：validate docker image) {
+		stage('blue：validate docker image') {
 		    steps{
 				script{
 				    if (tag == 'blue' || tag == 'None'){
