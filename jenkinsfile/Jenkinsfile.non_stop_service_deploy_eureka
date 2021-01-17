@@ -56,6 +56,40 @@ pipeline {
 				}
 			}
         }
+		stage('blue：validate docker image) {
+		    steps{
+				script{
+				    if (tag == 'blue' || tag == 'None'){
+                        if (env.on_k8s){
+                            echo "======blue节点：验证镜像======"
+                            container("hdtoolsetcore"){
+                                sh "DNET_PRODUCT=$DNET_PRODUCT DNET_PROFILE=$DNET_PROFILE hdops deploy validate --subsystem  ${params.subsystem}"
+                            }
+                        }else {
+                            echo "======blue节点：验证镜像======"
+                            sh "DNET_PRODUCT=$DNET_PRODUCT DNET_PROFILE=$DNET_PROFILE hdops deploy validate --subsystem  ${params.subsystem}"
+                        }
+				    }
+				}
+			}
+	    }
+		stage('blue：check envfile') {
+		    steps{
+				script{
+				    if (tag == 'blue' || tag == 'None'){
+                        if (env.on_k8s){
+                            echo "======检查blue节点的env======"
+                            container("hdtoolsetcore"){
+                                sh "DNET_AK=$DNET_AK DNET_PRODUCT=$DNET_PRODUCT DNET_PROFILE=$DNET_PROFILE hdops generate_env_file --subsystem ${params.subsystem}"
+                            }
+                        }else {
+                            echo "======检查blue节点的env======"
+                            sh "DNET_AK=$DNET_AK DNET_PRODUCT=$DNET_PRODUCT DNET_PROFILE=$DNET_PROFILE hdops generate_env_file --subsystem ${params.subsystem}"
+                        }
+				    }
+				}
+			}
+		}
 		stage('blue：change eureka down up') {
 		    steps{
 				script{
@@ -94,20 +128,18 @@ pipeline {
 				}
 			}
 		}  		   
-		stage('blue：validate docker image && image download && appinstall') {
+		stage('blue：image download && appinstall') {
 		    steps{
 				script{
 				    if (tag == 'blue' || tag == 'None'){
                         if (env.on_k8s){
-                            echo "======blue节点：验证镜像、下载镜像、部署应用======"
+                            echo "======blue节点：下载镜像、部署应用======"
                             container("hdtoolsetcore"){
-                                sh "DNET_PRODUCT=$DNET_PRODUCT DNET_PROFILE=$DNET_PROFILE hdops deploy validate --subsystem  ${params.subsystem}"
                                 sh "DNET_PRODUCT=$DNET_PRODUCT DNET_PROFILE=$DNET_PROFILE hdops deploy image_download --subsystem ${params.subsystem} --tag blue"
                                 sh "DNET_AK=$DNET_AK DNET_PRODUCT=$DNET_PRODUCT DNET_PROFILE=$DNET_PROFILE hdops deploy appinstall --subsystem ${params.subsystem} --tag blue"
                             }
                         }else {
-                            echo "======blue节点：验证镜像、下载镜像、部署应用======"
-                            sh "DNET_PRODUCT=$DNET_PRODUCT DNET_PROFILE=$DNET_PROFILE hdops deploy validate --subsystem  ${params.subsystem}"
+                            echo "======blue节点：下载镜像、部署应用======"
                             sh "DNET_PRODUCT=$DNET_PRODUCT DNET_PROFILE=$DNET_PROFILE hdops deploy image_download --subsystem ${params.subsystem} --tag blue"
                             sh "DNET_AK=$DNET_AK DNET_PRODUCT=$DNET_PRODUCT DNET_PROFILE=$DNET_PROFILE hdops deploy appinstall --subsystem ${params.subsystem} --tag blue"
                         }
