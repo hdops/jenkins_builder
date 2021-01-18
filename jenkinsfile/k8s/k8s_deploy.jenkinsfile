@@ -73,10 +73,10 @@ pipeline {
 				script{
 					if (env.on_k8s){
 						container("toolsetcore-k8s"){
-		        			sh "DNET_AK=${params.DNET_AK} DNET_PRODUCT=${params.DNET_PRODUCT} DNET_PROFILE=${params.DNET_PROFILE} PRESET_IMAGE_VERSION=${params.PRESET_IMAGE_VERSION} hdopsctl dbUpgrade --subsystem ${params.subsystem} --stackids ${params.stackIds} --dblist ${params.dblist} --skipversion ${params.skipversion} --skipversionupdate ${params.stackIds} --threadcount ${params.threadcount} --timeout ${params.timeout} "
+		        			sh "DNET_AK=${params.DNET_AK} DNET_PRODUCT=${params.DNET_PRODUCT} DNET_PROFILE=${params.DNET_PROFILE} PRESET_IMAGE_VERSION=${params.PRESET_IMAGE_VERSION} hdopsctl dbUpgrade --subsystem ${params.subsystem} --stackids ${params.stackIds} --dblist ${params.dblist} --skipversion ${params.skipversion} --skipversionupdate ${params.skipversionupdate} --threadcount ${params.threadcount} --timeout ${params.timeout} "
 						}
 					}else {
-						sh "DNET_AK=${params.DNET_AK} DNET_PRODUCT=${params.DNET_PRODUCT} DNET_PROFILE=${params.DNET_PROFILE} PRESET_IMAGE_VERSION=${params.PRESET_IMAGE_VERSION} hdopsctl dbUpgrade --subsystem ${params.subsystem} --stackids ${params.stackIds} --dblist ${params.dblist} --skipversion ${params.skipversion} --skipversionupdate ${params.stackIds} --threadcount ${params.threadcount} --timeout ${params.timeout} "
+						sh "DNET_AK=${params.DNET_AK} DNET_PRODUCT=${params.DNET_PRODUCT} DNET_PROFILE=${params.DNET_PROFILE} PRESET_IMAGE_VERSION=${params.PRESET_IMAGE_VERSION} hdopsctl dbUpgrade --subsystem ${params.subsystem} --stackids ${params.stackIds} --dblist ${params.dblist} --skipversion ${params.skipversion} --skipversionupdate ${params.skipversionupdate} --threadcount ${params.threadcount} --timeout ${params.timeout} "
 					}
 				}
 			}
