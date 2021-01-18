@@ -7,6 +7,11 @@ def whether_post="True"
 if (env.whether_post){
     whether_post =env.whether_post
 }
+
+def PRESET_IMAGE_VERSION="None"
+if (env.PRESET_IMAGE_VERSION){
+    PRESET_IMAGE_VERSION =env.PRESET_IMAGE_VERSION
+}
 pipeline {
     agent {label node}
     options {
@@ -28,10 +33,10 @@ pipeline {
                             if(env.retry_num){
                                 def n ="${retry_num}".toInteger()
                                 retry(n){
-                                    sh "DINGTALK_TOKEN=${DINGTALK_TOKEN} DNET_PRODUCT=${params.DNET_PRODUCT} DNET_PROFILE=${params.DNET_PROFILE} hdops health_check --subsystem ${params.subsystem}  --tag ${params.tag}"
+                                    sh "DINGTALK_TOKEN=${DINGTALK_TOKEN} DNET_PRODUCT=${params.DNET_PRODUCT} DNET_PROFILE=${params.DNET_PROFILE} PRESET_IMAGE_VERSION=${PRESET_IMAGE_VERSION} hdops health_check --subsystem ${params.subsystem}  --tag ${params.tag}"
                                 }
                             }else{
-                                sh "DINGTALK_TOKEN=${DINGTALK_TOKEN} DNET_PRODUCT=${params.DNET_PRODUCT} DNET_PROFILE=${params.DNET_PROFILE} hdops health_check --subsystem ${params.subsystem}  --tag ${params.tag}"  
+                                sh "DINGTALK_TOKEN=${DINGTALK_TOKEN} DNET_PRODUCT=${params.DNET_PRODUCT} DNET_PROFILE=${params.DNET_PROFILE} PRESET_IMAGE_VERSION=${PRESET_IMAGE_VERSION} hdops health_check --subsystem ${params.subsystem}  --tag ${params.tag}"
                             }
                         }
                     }else {
@@ -44,10 +49,10 @@ pipeline {
                         if(env.retry_num){
                             def n ="${retry_num}".toInteger()
                             retry(n){
-                                sh "DINGTALK_TOKEN=${DINGTALK_TOKEN} DNET_PRODUCT=${params.DNET_PRODUCT} DNET_PROFILE=${params.DNET_PROFILE} hdops health_check --subsystem ${params.subsystem}  --tag ${params.tag}"
+                                sh "DINGTALK_TOKEN=${DINGTALK_TOKEN} DNET_PRODUCT=${params.DNET_PRODUCT} DNET_PROFILE=${params.DNET_PROFILE} PRESET_IMAGE_VERSION=${PRESET_IMAGE_VERSION} hdops health_check --subsystem ${params.subsystem}  --tag ${params.tag}"
                             }
                         }else{
-                            sh "DINGTALK_TOKEN=${DINGTALK_TOKEN} DNET_PRODUCT=${params.DNET_PRODUCT} DNET_PROFILE=${params.DNET_PROFILE} hdops health_check --subsystem ${params.subsystem}  --tag ${params.tag}"
+                            sh "DINGTALK_TOKEN=${DINGTALK_TOKEN} DNET_PRODUCT=${params.DNET_PRODUCT} DNET_PROFILE=${params.DNET_PROFILE} PRESET_IMAGE_VERSION=${PRESET_IMAGE_VERSION} hdops health_check --subsystem ${params.subsystem}  --tag ${params.tag}"
                         }
                     }
                 }
