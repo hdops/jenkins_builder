@@ -121,7 +121,7 @@ pipeline {
     post{
         always {
 			script {
-				currentBuild.description = "${subsystem}:${oss_resources}"
+				currentBuild.description = "$DNET_PROFILE:${subsystem}:${oss_resources}"
 			}
 		}
     }
