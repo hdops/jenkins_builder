@@ -61,9 +61,10 @@ pipeline {
         stage('打包'){
 			steps{
 				script{
+				    if (env.packageRemoteJob != "" && env.packageRemoteJob != null){
 						echo "subsystem:${subsystem}"
 						echo "BUILD_URL:${BUILD_URL}"
-						def now = new Date() 
+						def now = new Date()
 						def fromVersion = ""
 						if (env.fromVersion){
 						    fromVersion =env.fromVersion
@@ -86,6 +87,7 @@ pipeline {
 						}
 						echo "alias:${alias}"
 						build job: "${packageRemoteJob}", parameters: [string(name: 'DNET_PROFILE', value: DNET_PROFILE), string(name: 'subsystem', value: subsystem), string(name: 'BUILD_URL', value: BUILD_URL), string(name: 'fromVersion', value: fromVersion), string(name: 'toVersion', value: toVersion), string(name: 'alias', value: alias)], wait: true
+				    }
 				}
 			}
 		}
@@ -94,13 +96,15 @@ pipeline {
 			    expression {build_branch ==~ /(develop|ph-operate-web)/ }
 			}
 			steps{
-					script{
+			    script{
+			        if (env.uploadRemoteJob != "" && env.uploadRemoteJob != null){
 							echo "DNET_CLOUD_VENDOR:${DNET_CLOUD_VENDOR}"
 							echo "subsystem:${subsystem}"
 							def oss_resources=""
 							oss_resources = env.subsystem + "-" + env.fromVersion+ "-" + env.alias + ".tar.gz"
-							echo "oss_resources:${oss_resources}" 
+							echo "oss_resources:${oss_resources}"
 							build job: "${uploadRemoteJob}", parameters: [string(name: 'DNET_PROFILE', value: DNET_PROFILE), string(name: 'DNET_CLOUD_VENDOR', value: DNET_CLOUD_VENDOR), string(name: 'subsystem', value: subsystem), string(name: 'oss_resources', value: oss_resources)], wait: false
+					}
 				}
 			}
 		}
