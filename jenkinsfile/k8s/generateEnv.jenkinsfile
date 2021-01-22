@@ -64,6 +64,11 @@ pipeline {
 				}
 			}
 		}
+		stage('archiveArtifacts') {
+            steps {
+                archiveArtifacts allowEmptyArchive: true, artifacts: 'envs/*', onlyIfSuccessful: true
+            }
+        }
     }
 	post {
     // 构建失败之后钉钉通知
