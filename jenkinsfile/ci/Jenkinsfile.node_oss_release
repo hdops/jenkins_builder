@@ -8,6 +8,11 @@ if (env.node_image){
     node_image =env.node_image
 }
 
+def ci_git_server_baseurl= "http://github.app.hd123.cn:10080"
+if (env.ci_git_server_baseurl){
+    ci_git_server_baseurl = env.ci_git_server_baseurl
+}
+
 def credentialsId="qianfanssh"
 
 def build_branch="develop"
@@ -50,9 +55,8 @@ pipeline {
 			    }
              }
              steps{ 
-				echo "checkout http://github.app.hd123.cn:10080/${git_project}.git  branch:${build_branch}"
-				// git branch: "${build_branch}", credentialsId: "${credentialsId}", url: 'http://github.app.hd123.cn:10080/${git_project}.git'
-                checkout([$class: 'GitSCM', branches: [[name: '*/${build_branch}']],userRemoteConfigs: [[url: 'ssh://git@github.app.hd123.cn:10022/${git_project}.git',credentialsId: "${credentialsId}"]]])
+				echo "checkout ${ci_git_server_baseurl}/${git_project}.git  branch:${build_branch}"
+                checkout([$class: 'GitSCM', branches: [[name: '*/${build_branch}']],userRemoteConfigs: [[url: '${ci_git_server_baseurl}/${git_project}.git',credentialsId: "${credentialsId}"]]])
                 sh """git config --global user.email qianfan@hd123.com
 git config --global user.name qianfan
 git checkout ${releaseBranchName}
