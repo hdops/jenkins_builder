@@ -55,7 +55,6 @@ pipeline {
          stage('checkout & build') {
              steps{ 
 				echo "checkout ${ci_git_server_baseurl}/${git_project}.git  branch:${build_branch}"
-				// git branch: "${build_branch}", credentialsId: "${credentialsId}", url: '${ci_git_server_baseurl}/${git_project}.git'
                 checkout([$class: 'GitSCM', branches: [[name: '*/${build_branch}']],userRemoteConfigs: [[url: "${ci_git_server_baseurl}/${git_project}.git",credentialsId: "${credentialsId}"]]])
 				
 				echo "npm_shell is ${npm_shell}"
