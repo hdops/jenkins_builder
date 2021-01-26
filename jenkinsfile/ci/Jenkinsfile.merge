@@ -11,6 +11,11 @@ if (env.releaseBranchName == null){
     env.releaseBranchName = "release"
 }
 
+def ci_git_server_baseurl= "http://github.app.hd123.cn:10080"
+if (env.ci_git_server_baseurl){
+    ci_git_server_baseurl = env.ci_git_server_baseurl
+}
+
 def maven_image=""
 if (env.maven_image){
     maven_image =env.maven_image
@@ -53,8 +58,8 @@ pipeline {
         }
         stage('checkout') {
             steps{
-                echo "checkout http://github.app.hd123.cn:10080/${git_project}.git  branch:${build_branch}"
-                checkout([$class: 'GitSCM', branches: [[name: "*/${build_branch}"]],userRemoteConfigs: [[credentialsId: 'qianfan',url: "http://github.app.hd123.cn:10080/${git_project}.git"]]])
+                echo "checkout ${ci_git_server_baseurl}/${git_project}.git  branch:${build_branch}"
+                checkout([$class: 'GitSCM', branches: [[name: "*/${build_branch}"]],userRemoteConfigs: [[credentialsId: 'qianfan',url: "${ci_git_server_baseurl}/${git_project}.git"]]])
             }
         }
         stage('merge') {
