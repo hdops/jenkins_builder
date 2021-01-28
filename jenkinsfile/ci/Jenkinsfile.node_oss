@@ -65,7 +65,7 @@ pipeline {
         stage('打包'){
 			steps{
 				script{
-				    if (env.packageRemoteJob != "" && env.packageRemoteJob != null){
+				    if (packageRemoteJob != "" && packageRemoteJob != null){
 						echo "subsystem:${subsystem}"
 						echo "BUILD_URL:${BUILD_URL}"
 						def now = new Date()
@@ -101,7 +101,7 @@ pipeline {
 			}
 			steps{
 			    script{
-			        if (env.uploadRemoteJob != "" && env.uploadRemoteJob != null){
+			        if (uploadRemoteJob != "" && uploadRemoteJob != null){
 							echo "DNET_CLOUD_VENDOR:${DNET_CLOUD_VENDOR}"
 							echo "subsystem:${subsystem}"
 							def oss_resources=""
