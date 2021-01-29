@@ -65,7 +65,6 @@ pipeline {
         stage('打包'){
 			steps{
 				script{
-				    if (packageRemoteJob != "" && packageRemoteJob != null){
 						echo "subsystem:${subsystem}"
 						echo "BUILD_URL:${BUILD_URL}"
 						def now = new Date()
@@ -91,7 +90,6 @@ pipeline {
 						}
 						echo "alias:${alias}"
 						build job: "${packageRemoteJob}", parameters: [string(name: 'DNET_PROFILE', value: DNET_PROFILE), string(name: 'subsystem', value: subsystem), string(name: 'BUILD_URL', value: BUILD_URL), string(name: 'fromVersion', value: fromVersion), string(name: 'toVersion', value: toVersion), string(name: 'alias', value: alias)], wait: true
-				    }
 				}
 			}
 		}
