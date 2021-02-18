@@ -8,6 +8,30 @@ if (env.whether_post){
     whether_post =env.whether_post
 }
 
+def docker_image='harbor.qianfan123.com/base/iac:0.1.0'
+if (env.docker_image){
+    docker_image = env.docker_image
+}
+
+def jenkins_home=''
+if (env.jenkins_home){
+  jenkins_home = env.jenkins_home
+}
+
+def inventory= 'elk_build_quickly/elk_inventory'
+if(env.inventory){
+    inventory = env.inventory
+}
+
+def ansible_playbook='hdiac/filebeat/filebeat7.yml'
+if (env.ansible_playbook){
+    ansible_playbook = env.ansible_playbook
+}
+def var_file='elk_build_quickly/filebeat_vars.yml'
+if (env.var_file){
+    var_file = env.var_file
+}
+
 pipeline {
     agent {label node}
 	options {
@@ -36,8 +60,8 @@ pipeline {
         }
         stage('install filebeat') {
 			steps{
-			    sh 'docker pull harbor.qianfan123.com/base/iac:0.1.0'
-				sh "docker run -i --rm -v /root/.ssh:/root/.ssh -v ${params.jenkins_home}/workspace/${JOB_NAME}/elk_build_quickly:/root/iac/elk_build_quickly harbor.qianfan123.com/base/iac:0.1.0 'ansible-playbook -i elk_build_quickly/elk_inventory hdiac/filebeat/filebeat7.yml -e @elk_build_quickly/filebeat_vars.yml'"
+			    sh "docker pull ${docker_image}"
+				sh "docker run -i --rm -v /root/.ssh:/root/.ssh -v ${params.jenkins_home}/workspace/${JOB_NAME}/elk_build_quickly:/root/iac/elk_build_quickly ${docker_image} 'ansible-playbook -i ${inventory} ${ansible_playbook} -e @${var_file}'"
 			}
         }
     }
