@@ -32,16 +32,33 @@ pipeline {
     stages {
         stage('download toolset') {
 			steps{
-				echo "profile is ${params.DNET_PROFILE}"
                 retry(2){
-				    sh "DNET_PROFILE=integration_test DNET_PRODUCT=dnet hdops download_toolset --branch ${params.GIT_BRANCH} -p ."
+				    sh "DNET_PROFILE=integration_test DNET_PRODUCT=dnet hdops download_toolset --branch ${GIT_BRANCH} -p ."
                 }
 				sh "tar zxf toolset.tar.gz -C ${WORKSPACE}"
 			}
         }
         stage('jenkins slave 节点监控和预警') {
 			steps{
-				sh "DINGTALK_TOKEN=${DINGTALK_TOKEN} hdmon jenkins_node_monitor slave_check --cfgname ${params.cfgname} --receivers ${params.receivers}"
+                script{
+                   deleteDir()
+                   if(env.on_k8s){
+                      container("hdtoolsetcore"){
+                        retry(2){
+                            sh "DNET_PROFILE=integration_test DNET_PRODUCT=dnet hdops download_toolset --branch ${GIT_BRANCH} -p ."
+                        }
+                        sh "tar zxf toolset.tar.gz -C ${WORKSPACE}"
+                        sh "DINGTALK_TOKEN=${DINGTALK_TOKEN} hdmon jenkins_node_monitor slave_check --cfgname ${cfgname} --receivers ${receivers}"
+                      }
+                   }else{
+                        retry(2){
+                            sh "DNET_PROFILE=integration_test DNET_PRODUCT=dnet hdops download_toolset --branch ${GIT_BRANCH} -p ."
+                        }
+                        sh "tar zxf toolset.tar.gz -C ${WORKSPACE}"
+                        sh "DINGTALK_TOKEN=${DINGTALK_TOKEN} hdmon jenkins_node_monitor slave_check --cfgname ${cfgname} --receivers ${receivers}"
+                   }
+
+                }
 			}
         }
     }
