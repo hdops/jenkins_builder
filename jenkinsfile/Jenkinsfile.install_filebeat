@@ -32,6 +32,21 @@ if (env.var_file){
     var_file = env.var_file
 }
 
+def GIT_BRANCH = 'develop'
+if (env.GIT_BRANCH){
+    GIT_BRANCH = env.GIT_BRANCH
+}
+
+def private_toolset_repo ="qianfanops/toolset_x"
+if (env.private_toolset_repo){
+    private_toolset_repo = env.private_toolset_repo
+}
+
+def git_server_base_url="github.app.hd123.cn:10080"
+if (env.git_server_base_url){
+    git_server_base_url = env.git_server_base_url
+}
+
 pipeline {
     agent {label node}
 	options {
@@ -49,19 +64,26 @@ pipeline {
 	//    string(name: 'jenkins_home', defaultValue: '/hdapp/jenkins_home', description: 'jenkins安装目录')
 	// }
     stages {
-        stage('download toolset') {
-			steps{
-				echo "profile is ${params.DNET_PROFILE}"
-                retry(2){
-				    sh "DNET_PROFILE=integration_test DNET_PRODUCT=dnet hdops download_toolset --branch ${params.GIT_BRANCH} -p ."
-                }
-				sh "tar zxf toolset.tar.gz -C ${WORKSPACE}"
-			}
-        }
+        // stage('download toolset') {
+		// 	steps{
+		// 		echo "profile is ${params.DNET_PROFILE}"
+        //         retry(2){
+		// 		    sh "DNET_PROFILE=integration_test DNET_PRODUCT=dnet hdops download_toolset --branch ${params.GIT_BRANCH} -p ."
+        //         }
+		// 		sh "tar zxf toolset.tar.gz -C ${WORKSPACE}"
+		// 	}
+        // }
+       
         stage('install filebeat') {
 			steps{
-			    sh "docker pull ${docker_image}"
-				sh "docker run -i --rm -v /root/.ssh:/root/.ssh -v ${params.jenkins_home}/workspace/${JOB_NAME}/elk_build_quickly:/root/iac/elk_build_quickly ${docker_image} 'ansible-playbook -i ${inventory} ${ansible_playbook} -e @${var_file}'"
+			    script{
+			        deleteDir()
+                    sh "git clone http://${GIT_USER}:${GIT_PASSWORD}@github.app.hd123.cn:10080/${private_toolset_repo}.git -b ${GIT_BRANCH} ."
+
+                    sh "docker pull ${docker_image}"
+				    sh "docker run -i --rm -v /root/.ssh:/root/.ssh -v ${params.jenkins_home}/workspace/${JOB_NAME}/elk_build_quickly:/root/iac/elk_build_quickly ${docker_image} 'ansible-playbook -i ${inventory} ${ansible_playbook} -e @${var_file}'"
+			    }
+
 			}
         }
     }
