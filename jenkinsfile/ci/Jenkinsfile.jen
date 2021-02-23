@@ -1,0 +1,75 @@
+def node=""
+if (env.node){
+    node =env.node
+}else{
+    node ="develop"
+}
+if (env.build_branch == null){
+    env.build_branch = "develop"
+}
+
+def ci_git_server_baseurl= "https://gitlab.hd123.com"
+if (env.ci_git_server_baseurl){
+    ci_git_server_baseurl = env.ci_git_server_baseurl
+}
+
+def build_image=""
+if (env.build_image){
+    build_image =env.build_image
+}else{
+    build_image ="harbor.qianfan123.com/base/maven:3.3.9_jdk8"
+}
+
+def docker_args="-v /var/run/docker.sock:/var/run/docker.sock -v /usr/bin/docker:/usr/bin/docker"
+
+def credentialsId="qianfan"
+
+pipeline {
+    agent {docker {
+            image "${build_image}"
+            label node
+            args "${docker_args}"
+          }}
+    options {
+	    timeout(time: 1, unit: 'HOURS')
+    }
+    stages {
+        stage('delete workspace') {
+            steps{
+                deleteDir()
+            }
+        }
+        stage('checkout') {
+            steps{
+                echo "checkout ${ci_git_server_baseurl}/${git_project}.git  branch:${build_branch}"
+                checkout([$class: 'GitSCM', branches: [[name: "*/${build_branch}"]],userRemoteConfigs: [[credentialsId: 'qianfan',url: "${ci_git_server_baseurl}/${git_project}.git"]]])
+            }
+        }
+        stage('build') {
+            steps{
+                sh "build.sh"
+            }
+        }
+    }
+    post{
+        success{
+            script{
+                if (env.post_shell){
+                    sh """
+                    ${env.post_shell}
+                    """
+                }
+            }
+        }
+        failure{
+            script{
+
+                def subject = env.email_subject ? "${env.email_subject}" : "failure on Job ${env.JOB_NAME}"
+                def to = env.email_recipients ? "${env.email_recipients}" : "heweiwei@hd123.com"
+                def body = env.email_body ? "${env.email_body}" : "failure on Job ${env.JOB_NAME}"
+                // send email
+                emailext subject: subject, to: to, body:body,attachLog:true
+            }
+        }
+    }
+}
