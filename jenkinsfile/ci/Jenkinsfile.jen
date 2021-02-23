@@ -48,8 +48,7 @@ pipeline {
         stage('build') {
             steps{
                 script{
-                    sh "pwd && ls -alh"
-                    sh "build.sh"
+                    sh "sh build.sh"
                 }
             }
         }
