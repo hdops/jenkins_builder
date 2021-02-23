@@ -17,10 +17,10 @@ def build_image=""
 if (env.build_image){
     build_image =env.build_image
 }else{
-    build_image ="harbor.qianfan123.com/base/maven:3.3.9_jdk8"
+    build_image ="harbor.qianfan123.com/base/node:v8.9.4"
 }
 
-def docker_args="-v /var/run/docker.sock:/var/run/docker.sock -v /usr/bin/docker:/usr/bin/docker"
+def docker_args="-v /var/run/docker.sock:/var/run/docker.sock -v /usr/bin/docker:/usr/bin/docker -v /root/.docker/config.json:/root/.docker/config.json"
 
 def credentialsId="qianfan"
 
