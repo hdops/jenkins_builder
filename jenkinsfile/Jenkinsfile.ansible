@@ -12,13 +12,13 @@ if (env.whether_post){
 }
 pipeline {
     agent {label node}
-	options {
+	// options {
 	//     buildDiscarder(logRotator(numToKeepStr: '10'))
 	//     disableConcurrentBuilds()
 	//     disableResume()
 	//     timeout(time: 3, unit: 'HOURS')
 
-    }
+    // }
 	// parameters {
 	   // string(name: 'inventory', defaultValue: '', description: '例如：ansible/baas/production/inventory/logstash', trim: true)
 	   // string(name: 'vars', defaultValue: '', description: '例如：ansible/baas/production/vars/logstash_cluster_vars.yml', trim: true)
