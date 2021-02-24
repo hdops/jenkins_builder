@@ -16,13 +16,14 @@ pipeline {
 	//     buildDiscarder(logRotator(numToKeepStr: '10'))
 	//     disableConcurrentBuilds()
 	//     disableResume()
-	    timeout(time: 3, unit: 'HOURS')
+	//     timeout(time: 3, unit: 'HOURS')
 
     }
 	// parameters {
 	   // string(name: 'inventory', defaultValue: '', description: '例如：ansible/baas/production/inventory/logstash', trim: true)
 	   // string(name: 'vars', defaultValue: '', description: '例如：ansible/baas/production/vars/logstash_cluster_vars.yml', trim: true)
 	   // string(name: 'playbook', defaultValue: '', description: '例如：hdiac/logstash/logstash_cluster_playbook.yml', trim: true)
+	   // string(name: 'tags', defaultValue: 'all', description: 'tags', trim: true)
 	// }
     // environment{
         // DNET_PRIVATE_AK="$DNET_PRIVATE_AK"
