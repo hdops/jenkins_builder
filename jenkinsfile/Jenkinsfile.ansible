@@ -10,6 +10,7 @@ if (env.whether_post){
 }else{
     whether_post ="False"
 }
+
 pipeline {
     agent {label node}
 	// options {
@@ -47,7 +48,12 @@ pipeline {
                                 sh "DNET_PROFILE=integration_test DNET_PRODUCT=dnet hdops download_toolset --branch ${params.GIT_BRANCH} -p ."
                             }
                             sh "tar zxf toolset.tar.gz -C $WORKSPACE"
-                            sh "ansible-playbook -i ${params.inventory} ${params.playbook} -e @${params.vars} --tags ${params.tags}"
+
+                            if ("${params.limits}"!=""){
+                                sh "ansible-playbook -i ${params.inventory} ${params.playbook} -e @${params.vars} --tags ${params.tags} --limits ${params.limits}"
+                            }else{
+                                sh "ansible-playbook -i ${params.inventory} ${params.playbook} -e @${params.vars} --tags ${params.tags}"
+                            }
                         }
                     }else{
                         deleteDir()
@@ -63,7 +69,13 @@ pipeline {
                                 sh "DNET_PROFILE=integration_test DNET_PRODUCT=dnet hdops download_toolset --branch ${params.GIT_BRANCH} -p ."
                             }
                             sh "tar zxf toolset.tar.gz -C $WORKSPACE"
-                            sh "ansible-playbook -i ${params.inventory} ${params.playbook} -e @${params.vars} --tags ${params.tags}"
+
+                            if ("${params.limits}"!=""){
+                                sh "ansible-playbook -i ${params.inventory} ${params.playbook} -e @${params.vars} --tags ${params.tags} --limits ${params.limits}"
+                            }else{
+                                sh "ansible-playbook -i ${params.inventory} ${params.playbook} -e @${params.vars} --tags ${params.tags}"
+                            }
+
                         }
                     }
                     
