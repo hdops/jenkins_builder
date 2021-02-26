@@ -50,7 +50,7 @@ pipeline {
                             sh "tar zxf toolset.tar.gz -C $WORKSPACE"
 
                             if ("${params.limits}"!=""){
-                                sh "ansible-playbook -i ${params.inventory} ${params.playbook} -e @${params.vars} --tags ${params.tags} --limits ${params.limits}"
+                                sh "ansible-playbook -i ${params.inventory} ${params.playbook} -e @${params.vars} --tags ${params.tags} --limit ${params.limits}"
                             }else{
                                 sh "ansible-playbook -i ${params.inventory} ${params.playbook} -e @${params.vars} --tags ${params.tags}"
                             }
@@ -71,7 +71,7 @@ pipeline {
                             sh "tar zxf toolset.tar.gz -C $WORKSPACE"
 
                             if ("${params.limits}"!=""){
-                                sh "ansible-playbook -i ${params.inventory} ${params.playbook} -e @${params.vars} --tags ${params.tags} --limits ${params.limits}"
+                                sh "ansible-playbook -i ${params.inventory} ${params.playbook} -e @${params.vars} --tags ${params.tags} --limit ${params.limits}"
                             }else{
                                 sh "ansible-playbook -i ${params.inventory} ${params.playbook} -e @${params.vars} --tags ${params.tags}"
                             }
