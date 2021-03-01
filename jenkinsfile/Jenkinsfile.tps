@@ -12,24 +12,8 @@ if (env.whether_post){
 pipeline {
     agent {label node}
 	options {
-	//    buildDiscarder(logRotator(numToKeepStr: '10'))
-	//    disableConcurrentBuilds()
-	//    disableResume()
 	    timeout(time: 2, unit: 'MINUTES')
     }
-	// environment{
-    //     DNET_PRIVATE_AK="$DNET_PRIVATE_AK"
-    //     DNET_PRIVATE_AS="$DNET_PRIVATE_AS"
- 	// }
-	// parameters {
-	//    choice(name:'DNET_PROFILE', choices:'integration_test\nbranch_test\nuat\nproduction')
-	//    string(name: 'DNET_PRODUCT', defaultValue: 'pay', description: '')
-	//    string(name: 'DNET_EXPORT_FILE', defaultValue: 'main-pay.yaml', description: '镜像名称')
-	//    string(name: 'GIT_BRANCH', defaultValue: 'develop', description: 'release/release\ndevelop')
-	// }
-	// triggers {
-    //     cron '* * * * *'
-    //  }
     stages {
         stage('tps-max') {
 			steps{
@@ -44,13 +28,13 @@ pipeline {
                         }
                     }else {
 
-                        //docker.image("harbor.qianfan123.com/toolset/toolsetcore:0.3.0").withRun('-v /var/run/docker.sock:/var/run/docker.sock') {
+                        docker.image("harbor.qianfan123.com/toolset/toolsetcore:0.3.0").withRun('-v /var/run/docker.sock:/var/run/docker.sock') {
                             retry(2){
                                 sh "DNET_PROFILE=integration_test DNET_PRODUCT=dnet hdops download_toolset --branch ${params.GIT_BRANCH} -p ."
                             }
                             sh "tar zxf toolset.tar.gz -C ${WORKSPACE}"
                             sh "DNET_EXPORT_FILE=${params.DNET_EXPORT_FILE} hdmon statistic --action elktps"
-                        //}
+                        }
                     }
                 }
 			}
