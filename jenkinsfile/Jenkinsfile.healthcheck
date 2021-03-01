@@ -40,19 +40,21 @@ pipeline {
                             }
                         }
                     }else {
-                        echo "profile is ${params.DNET_PROFILE}"
-                        echo "sub systems are ${params.subsystem}"
-                        retry(2){
-                            sh "DNET_PROFILE=integration_test DNET_PRODUCT=dnet hdops download_toolset --branch ${params.GIT_BRANCH} -p ."
-                        }
-                        sh "tar zxf toolset.tar.gz -C ${WORKSPACE}"
-                        if(env.retry_num){
-                            def n ="${retry_num}".toInteger()
-                            retry(n){
+                        docker.image("harbor.qianfan123.com/toolset/toolsetcore:0.3.0").withRun('-v /var/run/docker.sock:/var/run/docker.sock') {
+                            echo "profile is ${params.DNET_PROFILE}"
+                            echo "sub systems are ${params.subsystem}"
+                            retry(2){
+                                sh "DNET_PROFILE=integration_test DNET_PRODUCT=dnet hdops download_toolset --branch ${params.GIT_BRANCH} -p ."
+                            }
+                            sh "tar zxf toolset.tar.gz -C ${WORKSPACE}"
+                            if(env.retry_num){
+                                def n ="${retry_num}".toInteger()
+                                retry(n){
+                                    sh "DINGTALK_TOKEN=${DINGTALK_TOKEN} DNET_PRODUCT=${params.DNET_PRODUCT} DNET_PROFILE=${params.DNET_PROFILE} PRESET_IMAGE_VERSION=${PRESET_IMAGE_VERSION} hdops health_check --subsystem ${params.subsystem}  --tag ${params.tag}"
+                                }
+                            }else{
                                 sh "DINGTALK_TOKEN=${DINGTALK_TOKEN} DNET_PRODUCT=${params.DNET_PRODUCT} DNET_PROFILE=${params.DNET_PROFILE} PRESET_IMAGE_VERSION=${PRESET_IMAGE_VERSION} hdops health_check --subsystem ${params.subsystem}  --tag ${params.tag}"
                             }
-                        }else{
-                            sh "DINGTALK_TOKEN=${DINGTALK_TOKEN} DNET_PRODUCT=${params.DNET_PRODUCT} DNET_PROFILE=${params.DNET_PROFILE} PRESET_IMAGE_VERSION=${PRESET_IMAGE_VERSION} hdops health_check --subsystem ${params.subsystem}  --tag ${params.tag}"
                         }
                     }
                 }
