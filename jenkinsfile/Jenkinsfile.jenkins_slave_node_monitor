@@ -3,6 +3,11 @@ if (env.node){
     node =env.node
 }
 
+def download_toolset_cmd = "DNET_PROFILE=integration_test DNET_PRODUCT=dnet hdops download_toolset --branch ${GIT_BRANCH} -p ."
+if (env.download_toolset_cmd){
+    download_toolset_cmd = env.download_toolset_cmd
+}
+
 def whether_post="False"
 if (env.whether_post){
     whether_post =env.whether_post
@@ -33,7 +38,7 @@ pipeline {
         stage('download toolset') {
 			steps{
                 retry(2){
-				    sh "DNET_PROFILE=integration_test DNET_PRODUCT=dnet hdops download_toolset --branch ${GIT_BRANCH} -p ."
+				    sh "${download_toolset_cmd}"
                 }
 				sh "tar zxf toolset.tar.gz -C ${WORKSPACE}"
 			}
