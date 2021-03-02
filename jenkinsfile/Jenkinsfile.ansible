@@ -48,9 +48,9 @@ pipeline {
                                 sh "DNET_PROFILE=integration_test DNET_PRODUCT=dnet hdops download_toolset --branch ${params.GIT_BRANCH} -p ."
                             }
                             sh "tar zxf toolset.tar.gz -C $WORKSPACE"
-
-                            if ("${params.limits}"!=""){
-                                sh "ansible-playbook -i ${params.inventory} ${params.playbook} -e @${params.vars} --tags ${params.tags} --limit ${params.limits}"
+                            sh "chmod +x ansible/*/*/inventory/*.py"
+                            if ("${params.limit}"!=""){
+                                sh "ansible-playbook -i ${params.inventory} ${params.playbook} -e @${params.vars} --tags ${params.tags} --limit ${params.limit}"
                             }else{
                                 sh "ansible-playbook -i ${params.inventory} ${params.playbook} -e @${params.vars} --tags ${params.tags}"
                             }
@@ -69,9 +69,9 @@ pipeline {
                                 sh "DNET_PROFILE=integration_test DNET_PRODUCT=dnet hdops download_toolset --branch ${params.GIT_BRANCH} -p ."
                             }
                             sh "tar zxf toolset.tar.gz -C $WORKSPACE"
-
-                            if ("${params.limits}"!=""){
-                                sh "ansible-playbook -i ${params.inventory} ${params.playbook} -e @${params.vars} --tags ${params.tags} --limit ${params.limits}"
+                            sh "chmod +x ansible/*/*/inventory/*.py"
+                            if ("${params.limit}"!=""){
+                                sh "ansible-playbook -i ${params.inventory} ${params.playbook} -e @${params.vars} --tags ${params.tags} --limit ${params.limit}"
                             }else{
                                 sh "ansible-playbook -i ${params.inventory} ${params.playbook} -e @${params.vars} --tags ${params.tags}"
                             }
