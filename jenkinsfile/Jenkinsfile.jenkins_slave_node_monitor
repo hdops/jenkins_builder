@@ -72,11 +72,11 @@ pipeline {
                             }
                         }
                         sh "tar zxf toolset.tar.gz -C ${WORKSPACE}"
-                        if (env.DNET_PRIVATE_URL){
-                            sh "DNET_PRIVATE_URL=${DNET_PRIVATE_URL} DNET_PRIVATE_AK=${DNET_PRIVATE_AK} DNET_PRIVATE_AS=${DNET_PRIVATE_AS} DNET_PRIVATE_BUCKET=${DNET_PRIVATE_BUCKET} DNET_PRIVATE_REGION=${DNET_PRIVATE_REGION} DNET_CLOUD_VENDOR=${DNET_CLOUD_VENDOR} DINGTALK_TOKEN=${DINGTALK_TOKEN} hdmon jenkins_node_monitor slave_check --cfgname ${cfgname} --receivers ${receivers}"
-                        }else{
-                            sh "DINGTALK_TOKEN=${DINGTALK_TOKEN} hdmon jenkins_node_monitor slave_check --cfgname ${cfgname} --receivers ${receivers}"
-                        }
+                        //if (env.DNET_PRIVATE_URL){
+                        //    sh "DNET_PRIVATE_URL=${DNET_PRIVATE_URL} DNET_PRIVATE_AK=${DNET_PRIVATE_AK} DNET_PRIVATE_AS=${DNET_PRIVATE_AS} DNET_PRIVATE_BUCKET=${DNET_PRIVATE_BUCKET} DNET_PRIVATE_REGION=${DNET_PRIVATE_REGION} DNET_CLOUD_VENDOR=${DNET_CLOUD_VENDOR} DINGTALK_TOKEN=${DINGTALK_TOKEN} hdmon jenkins_node_monitor slave_check --cfgname ${cfgname} --receivers ${receivers}"
+                        //}else{
+                         sh "DINGTALK_TOKEN=${DINGTALK_TOKEN} hdmon jenkins_node_monitor slave_check --cfgname ${cfgname} --receivers ${receivers}"
+                        //}
                    // }
 
                 }
