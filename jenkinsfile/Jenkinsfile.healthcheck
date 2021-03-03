@@ -13,7 +13,7 @@ if (env.PRESET_IMAGE_VERSION){
     PRESET_IMAGE_VERSION =env.PRESET_IMAGE_VERSION
 }
 
-def toolset_image_version="0.3.0"
+def toolset_image_version="0.3.0-private"
 if (env.toolset_image_version){
     toolset_image_version = env.toolset_image_version
 }
@@ -47,7 +47,7 @@ pipeline {
                             }
                         }
                     }else {
-                        docker.image("harbor.qianfan123.com/toolset/toolsetcore:${toolset_image_version}").inside  {
+                        docker.image("harbor.qianfan123.com/toolset/toolsetcore:${toolset_image_version}").inside {
                             echo "profile is ${params.DNET_PROFILE}"
                             echo "sub systems are ${params.subsystem}"
 
