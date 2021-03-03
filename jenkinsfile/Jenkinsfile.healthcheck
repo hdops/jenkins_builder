@@ -12,6 +12,12 @@ def PRESET_IMAGE_VERSION="None"
 if (env.PRESET_IMAGE_VERSION){
     PRESET_IMAGE_VERSION =env.PRESET_IMAGE_VERSION
 }
+
+def toolset_image_version="0.3.0"
+if (env.toolset_image_version){
+    toolset_image_version = env.toolset_image_version
+}
+
 pipeline {
     agent {label node}
     options {
@@ -41,7 +47,7 @@ pipeline {
                             }
                         }
                     }else {
-                        docker.image("harbor.qianfan123.com/toolset/toolsetcore:0.3.0").inside  {
+                        docker.image("harbor.qianfan123.com/toolset/toolsetcore:${toolset_image_version}").inside  {
                             echo "profile is ${params.DNET_PROFILE}"
                             echo "sub systems are ${params.subsystem}"
 
