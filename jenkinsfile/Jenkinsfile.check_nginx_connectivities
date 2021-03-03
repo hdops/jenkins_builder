@@ -12,24 +12,9 @@ if (env.whether_post){
 }
 pipeline {
    agent {label node}
-    options {
-	//     buildDiscarder(logRotator(numToKeepStr: '10'))
-	//     disableConcurrentBuilds()
-	//     disableResume()
+    options {   
 	    timeout(time: 3, unit: 'HOURS')
-    }
-    // environment{
-    //     DNET_PRIVATE_AK="$DNET_PRIVATE_AK"
-    //     DNET_PRIVATE_AS="$DNET_PRIVATE_AS"
- 	// }
-	// parameters {
-	//     choice(name:'DNET_PROFILE', choices:'production\nintegration_test\nperformance_test\nbranch_test\nuat')
-	//     string(name: 'GIT_BRANCH', defaultValue: 'develop', description: 'git branch',trim: true)
-	//     string(name: 'image', defaultValue: 'crm-server', description: 'image',trim: true)
-	// }
-	// triggers {
-    //     cron 'H/5 * * * *'
-    //  }
+    }            
     stages {
 		stage('检查Nginx连通性') {
 			steps{

@@ -16,26 +16,9 @@ if (env.toolset_image_version){
 }
 pipeline {
     agent {label node}
-    options {
-	//    buildDiscarder(logRotator(numToKeepStr: '20'))
-	//    disableConcurrentBuilds()
-	//    disableResume()
+    options {   
 	    timeout(time: 1, unit: 'HOURS')
-    }
-	// environment{
-    //     DNET_PRIVATE_AK="$DNET_PRIVATE_AK"
-    //     DNET_PRIVATE_AS="$DNET_PRIVATE_AS"
- 	// }
-	// parameters {
-	//     choice(name:'DNET_PROFILE', choices:'performance_test\nbranch_test\nproduction\nprd-guoda\nuat')
-	//     choice(name:'DNET_PRODUCT', choices:'dnet\ndly\nscm\nbaas')
-	//     choice(name:'DNET_CLOUD_VENDOR', choices:'aliyun\ntencent')
-	//     string(name: 'dbinstanceid', defaultValue: 'None', description: 'rds实例id,默认从cmdb中获取性能测试环境的所有rds,如果想特殊指定则可以在此指定,但是必须在cmdb中配置,多个以逗号分割',trim: true)
-	//     string(name: 'host', defaultValue: 'None', description: 'falcon-agent所在的host,如果不传则从cmdb中获取',trim: true)
-	//     string(name: 'GIT_BRANCH', defaultValue: 'develop', description: 'git branch',trim: true)
-	//     string(name: 'DNET_AK', defaultValue: 'resource/aliyun_access_key.yaml', description: 'ak信息',trim: true)
-
-	// }
+    }             
 	triggers {
         cron '* * * * *'
      }

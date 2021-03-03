@@ -12,25 +12,9 @@ if (env.whether_post){
 }
 pipeline {
     agent {label node}
-    options {
-	//     buildDiscarder(logRotator(numToKeepStr: '10'))
-	//     disableConcurrentBuilds()
-	//     disableResume()
+    options {   
 	    timeout(time: 1, unit: 'HOURS')
-    }
-	// environment{
-    //     DNET_PRIVATE_AK="$DNET_PRIVATE_AK"
-    //     DNET_PRIVATE_AS="$DNET_PRIVATE_AS"
- 	// }
-	// parameters {
-	//     choice(name:'DNET_PROFILE', choices:'integration_test\ndev_test\nbranch_test\nproduction\nprd-guoda\nuat')
-	//     choice(name:'DNET_PRODUCT', choices:'baas')
-	//     string(name: 'image', defaultValue: 'None', description: '镜像名称',trim: true)
-	//     choice(name:'tag', choices:'--请选择\nNone\nblue\ngreen')
-	//     string(name:'subsystem', defaultValue:'None', description: '镜像名称',trim: true)
-	//     choice(name:'dryrun', choices:'True\nFalse')
-	//     string(name: 'GIT_BRANCH', defaultValue: 'develop', description: 'git branch',trim: true)
-	// }
+    }             
 	stages {
 	    stage('change eureka') {
 			steps{

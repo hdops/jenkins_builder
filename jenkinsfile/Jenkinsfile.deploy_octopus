@@ -12,21 +12,9 @@ if (env.whether_post){
 }
 pipeline {
     agent {label node}
-    options {
-	//     buildDiscarder(logRotator(numToKeepStr: '10'))
-	//     disableConcurrentBuilds()
-	//     disableResume()
+    options {   
 	    timeout(time: 3, unit: 'HOURS')
-    }
-	// environment{
-        // DNET_PRIVATE_AK="$DNET_PRIVATE_AK"
-        // DNET_PRIVATE_AS="$DNET_PRIVATE_AS"
- 	// }
-	// parameters {
-	    // string(name: 'deploy_ip', defaultValue: '172.16.9.102', description: '部署机器ip',trim: true)
-	    // string(name: 'subsystem', defaultValue: 'octopus-server', description: '子系统',trim: true)
-	    // string(name: 'version', defaultValue: '1.0.0-SNAPSHOT', description: '版本号',trim: true)
-	// }
+    }         
     stages {
         stage('delete workspace') {
             steps{

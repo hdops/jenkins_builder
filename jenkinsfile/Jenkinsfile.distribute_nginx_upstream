@@ -16,22 +16,9 @@ if (env.toolset_image_version){
 }
 pipeline {
    agent {label node}
-    options {
-	//     buildDiscarder(logRotator(numToKeepStr: '10'))
-	//     disableConcurrentBuilds()
-	//     disableResume()
+    options {   
 	    timeout(time: 3, unit: 'HOURS')
-    }
-	// environment{
-    //     DNET_PRIVATE_AK="$DNET_PRIVATE_AK"
-    //     DNET_PRIVATE_AS="$DNET_PRIVATE_AS"
- 	// }
-	// parameters {
-	//     choice(name:'DNET_PROFILE', choices:'production')
-	//     string(name: 'GIT_BRANCH', defaultValue: 'develop', description: 'git branch',trim: true)
-	//     string(name: 'nginx_hostid', defaultValue: 'dly-node-ecs1,dly-node-ecs3,dly-node-ecs10', description: 'nginx hostid',trim: true)
-	//     choice(name:'dryrun', choices:'True\nFalse')
-	// }
+    }          
     stages {
 		stage('download toolset') {
 			steps{

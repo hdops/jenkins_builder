@@ -13,21 +13,9 @@ if (env.whether_post){
 }
 pipeline {
     agent {label node}
-	options {
-	//     buildDiscarder(logRotator(numToKeepStr: '10'))
-	//     disableConcurrentBuilds()
-	//     disableResume()
+	options {   
 	    timeout(time: 20, unit: 'MINUTES')
-    }
-	// environment{
-    //     DNET_PRIVATE_AK="$DNET_PRIVATE_AK"
-    //     DNET_PRIVATE_AS="$DNET_PRIVATE_AS"
- 	// }
-	// parameters {
-	//    string(name: 'GIT_BRANCH', defaultValue: 'develop', description: 'release/release\ndevelop')
-	//    string(name: 'cfgname', defaultValue: 'elk_build_quickly/es_init.yml', description: '配置')
-	//    string(name: 'jenkins_home', defaultValue: '/hdapp/jenkins_home', description: 'jenkins安装目录')
-	// }
+    }         
     stages {
         stage('download toolset') {
 			steps{

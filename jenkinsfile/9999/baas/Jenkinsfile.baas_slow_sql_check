@@ -9,17 +9,7 @@ if (env.whether_post){
     whether_post =env.whether_post
 }
 pipeline {
-   agent {label node}
-    // options {
-	//     buildDiscarder(logRotator(numToKeepStr: '10'))
-    // }
-    // environment{
-    //     DNET_PRIVATE_AK="$DNET_PRIVATE_AK"
-    //     DNET_PRIVATE_AS="$DNET_PRIVATE_AS"
- 	// }
-	// triggers {
-    //     cron 'H/5 * * * *'
-    //  }
+   agent {label node}          
     stages {
         stage('baas_slow_sql_check') {
 			steps{
@@ -35,8 +25,7 @@ pipeline {
                             sh "tar zxf toolset.tar.gz -C ${WORKSPACE}"
                             sh "DINGTALK_TOKEN=${DINGTALK_TOKEN} DNET_PROFILE=${params.DNET_PROFILE} DNET_PRODUCT=${params.DNET_PRODUCT}  hdmon baas_slow_sql_check --cfgname ${params.cfgname}"
                         }
-                    }else{
-                       // docker.image("harbor.qianfan123.com/toolset/toolsetcore:0.3.0").withRun('-v /var/run/docker.sock:/var/run/docker.sock') {
+                    }else{ 
                             echo "profile is ${params.DNET_PROFILE}"
                             echo "sub systems are ${params.subsystem}"
                             echo "upstream URL is ${params.upurl}"
@@ -44,8 +33,7 @@ pipeline {
                                 sh "DNET_PROFILE=integration_test DNET_PRODUCT=dnet hdops download_toolset --branch ${params.GIT_BRANCH} -p ."
                             }
                             sh "tar zxf toolset.tar.gz -C ${WORKSPACE}"
-                            sh "DINGTALK_TOKEN=${DINGTALK_TOKEN} DNET_PROFILE=${params.DNET_PROFILE} DNET_PRODUCT=${params.DNET_PRODUCT}  hdmon baas_slow_sql_check --cfgname ${params.cfgname}"
-                       // }
+                            sh "DINGTALK_TOKEN=${DINGTALK_TOKEN} DNET_PROFILE=${params.DNET_PROFILE} DNET_PRODUCT=${params.DNET_PRODUCT}  hdmon baas_slow_sql_check --cfgname ${params.cfgname}" 
                     }
                     
                 }

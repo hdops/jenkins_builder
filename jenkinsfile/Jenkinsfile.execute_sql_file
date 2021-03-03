@@ -15,12 +15,7 @@ if (env.toolset_image_version){
     toolset_image_version = env.toolset_image_version
 }
 pipeline{
-  agent {label node}
-  // options{
-  //     disableConcurrentBuilds()
-  //     disableResume()
-  //     timeout(time:10, unit:"MINUTES")
-  // }
+  agent {label node}     
 
   stages{
    

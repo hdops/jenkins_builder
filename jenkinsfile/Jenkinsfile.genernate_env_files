@@ -16,23 +16,9 @@ if (env.toolset_image_version){
 }
 pipeline {
     agent {label node}
-	options {
-	//     buildDiscarder(logRotator(numToKeepStr: '10'))
-	//     disableConcurrentBuilds()
-	//     disableResume()
+	options {   
 	    timeout(time: 3, unit: 'HOURS')
-    }
-	// environment{
-    //     DNET_PRIVATE_AK="$DNET_PRIVATE_AK"
-    //     DNET_PRIVATE_AS="$DNET_PRIVATE_AS"
- 	// }
-	// parameters {
-	//    // choice(name:'DNET_PROFILE', choices:'integration_test\nperformance_test\nproduction\nbranch_test\nessp_branch')
-	//    // string(name: 'DNET_PRODUCT', defaultValue: 'baas', description: '')
-	//    // string(name: 'subsystem', defaultValue: '', description: '子系统名')
-	//    string(name: 'stackids', defaultValue: 'None', description: 'stackids')
-	//    // string(name: 'GIT_BRANCH', defaultValue: 'develop', description: 'release/release\ndevelop')
-	// }
+    }           
     stages {
         stage('更新envfile') {
 			steps{

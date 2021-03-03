@@ -22,21 +22,9 @@ if (env.toolset_image_version){
 }
 pipeline {
     agent {label node}
-    options {
-	//    buildDiscarder(logRotator(numToKeepStr: '10'))
-	//    disableConcurrentBuilds()
-	//    disableResume()
+    options {   
 	    timeout(time: 3, unit: 'HOURS')
-    }
-	// environment{
-    //     DNET_PRIVATE_AK="$DNET_PRIVATE_AK"
-    //     DNET_PRIVATE_AS="$DNET_PRIVATE_AS"
- 	// }
-	// parameters {
-	//     choice(name:'DNET_PROFILE', choices:'integration_test\ndev_test\nbranch_test\nproduction\nprd-guoda\nuat')
-	//     choice(name:'DNET_PRODUCT', choices:['dly' , 'baas', 'pluto' , 'scm'])
-	//     string(name: 'GIT_BRANCH', defaultValue: 'develop', description: 'git branch',trim: true)
-	// }
+    }         
 	stages {
 	    stage('nginx upstream backup') {
 			steps{

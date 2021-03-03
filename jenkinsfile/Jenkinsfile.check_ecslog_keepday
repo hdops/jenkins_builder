@@ -11,28 +11,9 @@ if (env.whether_post){
 
 pipeline {
     agent {label node}
-    options {
-	//     buildDiscarder(logRotator(numToKeepStr: '10'))
-	//     disableConcurrentBuilds()
-	//     disableResume()
+    options {   
 	    timeout(time: 3, unit: 'HOURS')
-    }
-	// environment{
-    //     DNET_PRIVATE_AK="$DNET_PRIVATE_AK"
-    //     DNET_PRIVATE_AS="$DNET_PRIVATE_AS"
- 	// }
-	// parameters {
-	//     choice(name:'DNET_PROFILE', choices:'integration_test\ndev_test\nbranch_test\nproduction\nprd-guoda\nuat')
-	//     choice(name:'DNET_PRODUCT', choices:'dnet')
-	//     string(name: 'filename', defaultValue: '/hdapp/*/logs/*', description: '日志文件路径',trim: true)
-	//     string(name: 'days', defaultValue: '30', description: '日志保留天数',trim: true)
-	//     string(name: 'logtype', defaultValue: 'access', description: '日志清理类型access or nginx or zookeeper',trim: true)
-	//     choice(name:'dryrun', choices:'True\nFalse')
-	//     string(name: 'GIT_BRANCH', defaultValue: 'develop', description: 'git branch',trim: true)
-	// }
-	// triggers {
-    //     cron 'H 1 * * *'
-    //  }
+    }                
 
 	stages {
 		stage('日志清理') {

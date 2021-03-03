@@ -14,27 +14,9 @@ if (env.toolset_image_version){
 }
 pipeline {
     agent {label node}
-    options {
-	//    buildDiscarder(logRotator(numToKeepStr: '20'))
-	//    disableConcurrentBuilds()
-	//    disableResume()
+    options {   
 	    timeout(time: 3, unit: 'HOURS')
-    }
-	// environment{
-    //     DNET_PRIVATE_AK="$DNET_PRIVATE_AK"
-    //     DNET_PRIVATE_AS="$DNET_PRIVATE_AS"
- 	// }
-	// parameters {
-	//     choice(name:'DNET_PROFILE', choices:'performance_test\nbranch_test\nproduction\nprd-guoda\nuat')
-	//     choice(name:'DNET_CLOUD_VENDOR', choices:'aliyun\ntencent')
-	//     string(name: 'dbinstanceid', description: 'rds实例id,多个以逗号分割',trim: true)
-	//     string(name: 'receivers', description: '收件人列表,多个以英文逗号分割',trim: true)
-	//     string(name: 'start_time', description: '查看时间段的开始时间,格式：yyyy-MM-dd ,如2019-05-20',trim: true)
-	//     string(name: 'end_time', description: '查看时间段的结束时间，不能小于查询开始日期，与查询开始日期间隔不超过31天。格式：yyyy-MM-dd，如2019-05-21',trim: true)
-	//     string(name: 'GIT_BRANCH', defaultValue: 'develop', description: 'git branch',trim: true)
-	//     string(name: 'DNET_AK', defaultValue: 'resource/aliyun_access_key.yaml', description: 'ak信息',trim: true)
-
-	// }
+    }              
 
 	stages {
 	    stage('get mysql slow sql') {

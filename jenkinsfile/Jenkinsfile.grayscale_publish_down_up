@@ -16,23 +16,9 @@ if (env.toolset_image_version){
 }
 pipeline {
     agent {label node}
-    options {
-	//     buildDiscarder(logRotator(numToKeepStr: '10'))
-	//     disableConcurrentBuilds()
-	//     disableResume()
+    options {   
 	    timeout(time: 3, unit: 'HOURS')
-    }
-	// environment{
-        // DNET_PRIVATE_AK="$DNET_PRIVATE_AK"
-        // DNET_PRIVATE_AS="$DNET_PRIVATE_AS"
- 	// }
-	// parameters {
-	    // choice(name: 'DNET_PRODUCT', choices:'baas')
-	    // choice(name:'DNET_PROFILE', choices:'integration_test\nessp_branch\nbranch_test\nperformance_test\ntencent-int')
-	    // string(name: 'GIT_BRANCH', defaultValue: 'develop', description: 'git branch',trim: true)
-	    // string(name: 'subsystem', defaultValue: 'dss', description: '子系统，多值以逗号分隔，例如ras,sas,sas_config,tlsp-web,waltz_account,tlsp,spms_web_ui,spms,spms_h3_transfer,pas,zuul,eureka,mq,account,config,sequence',trim: true)
-	    // string(name: 'action', choices: 'up\ndown', description: 'up or down',trim: true)
-	// }
+    }           
     stages {
         stage('delete workspace') {
             steps{

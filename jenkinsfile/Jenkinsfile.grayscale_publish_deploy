@@ -16,31 +16,9 @@ if (env.toolset_image_version){
 }
 pipeline {
     agent {label node}
-    options {
-	//     buildDiscarder(logRotator(numToKeepStr: '10'))
-	//     disableConcurrentBuilds()
-	//     disableResume()
+    options {   
 	    timeout(time: 3, unit: 'HOURS')
-    }
-	// environment{
-        // DNET_PRIVATE_AK="$DNET_PRIVATE_AK"
-        // DNET_PRIVATE_AS="$DNET_PRIVATE_AS"
- 	// }
-	// parameters {
-	    // choice(name:'DNET_PROFILE', choices:'integration_test\nessp_branch\nbranch_test\nperformance_test\ntencent-int')
-	    // string(name: 'subsystem', defaultValue: 'dss', description: '子系统，多值以逗号分隔，例如ras,sas,sas_config,tlsp-web,waltz_account,tlsp,spms_web_ui,spms,spms_h3_transfer,pas,zuul,eureka,mq,account,config,sequence',trim: true)
-	    // choice(name:'skipversion', choices:'--no-skipversion\n--skipversion')
-	    // choice(name:'skipversionupdate', choices:'--no-skipversionupdate\n--skipversionupdate')
-	    // string(name: 'GIT_BRANCH', defaultValue: 'develop', description: 'git branch',trim: true)
-	    // string(name: 'receivers', defaultValue: 'xuhao@hd123.com,yanghaixiao@hd123.com,wangweijun@hd123.com,chenrizhang@hd123.com,guanxiaobao@hd123.com', description: '邮件通知列表',trim: true)
-	    // string(name: 'timeout', defaultValue: '45', description: '这个job的超时时间，升级数据库的超时时间，必须是整数，单位是分钟',trim: true)
-	    // string(name: 'threadcount', defaultValue: '5', description: 'ecs上执行数据库升级的线程',trim: true)
-	    // string(name: 'action', defaultValue: 'deploy', description: 'deploy or delete',trim: true)
-	    // string(name: 'RECEIVERS_WHEN_SUCCEED', defaultValue: 'xuhao@hd123.com,yanghaixiao@hd123.com,wangweijun@hd123.com,chenrizhang@hd123.com,guanxiaobao@hd123.com', description: '数据库升级成功后，需要日志邮件的列表，多值以逗号分隔。',trim: true)
-	    // choice(name: 'TRUST_PUBLIC_IP', choices:'None\nTrue', description: 'None 表示用内网部署，True 表示用外网部署')
-	    // choice(name: 'DNET_PRODUCT', choices:'baas')
-	    // string(name: 'DNET_AK', defaultValue: 'resource/aliyun_access_key.yaml', description: 'ak peizhi',trim: true)
-	// }
+    }                   
     stages {
         stage('delete workspace') {
             steps{

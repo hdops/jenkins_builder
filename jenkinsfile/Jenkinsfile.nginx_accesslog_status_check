@@ -10,29 +10,9 @@ if (env.whether_post){
 
 pipeline {
     agent {label node}
-	options {
-	//    buildDiscarder(logRotator(numToKeepStr: '20'))
-	//    disableConcurrentBuilds()
-	//    disableResume()
+	options {   
 	    timeout(time: 3, unit: 'HOURS')
-    }
-	// environment{
-    //     DNET_PRIVATE_AK="$DNET_PRIVATE_AK"
-    //     DNET_PRIVATE_AS="$DNET_PRIVATE_AS"
- 	// }
-	// parameters {
-	//    choice(name:'DNET_PROFILE', choices:'production')
-	//    string(name: 'DNET_PRODUCT', defaultValue: 'dly')
-	//   // choice(name: 'DINGTALK_TOKEN', choices: ['36bbaea49f5af51cbf7cbdc4b99487981c900f24dffed03ba1834304b1c4a280'])
-	//    string(name: 'interval', defaultValue: '15m')
-	//    string(name: 'receivers', defaultValue: 'gaoweizong@hd123.com')
-	//    string(name: 'es_index', defaultValue: 'nginx_mbr')
-	//    string(name: 'es_type', defaultValue: 'nginx_mbr')
-	//    string(name: 'GIT_BRANCH', defaultValue: 'develop')
-	// }
-	// triggers {
-    //     cron 'H/15 * * * *'
-    //  }
+    }                 
     stages {
 		stage('download toolset') {
 			steps{

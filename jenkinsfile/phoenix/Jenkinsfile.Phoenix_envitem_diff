@@ -6,16 +6,9 @@ if (env.node){
 }
 pipeline {
     agent {label node}
-	options {
-	//     buildDiscarder(logRotator(numToKeepStr: '10'))
-	//     disableConcurrentBuilds()
-	//     disableResume()
+	options {   
 	    timeout(time: 3, unit: 'MINUTES')
-    }
-	// parameters {
-    //     string(name: 'oldversion', defaultValue: 'CRM-6.0.0', description: '当前部署的 phoenix版本，和phoenix 产品版本保持一致')
-    //     string(name: 'newversion', defaultValue: 'CRM-6.0.1', description: '计划部署的 phoenix版本，和phoenix 产品版本保持一致')
-	// }
+    }    
 
     stages {
         stage('delete workspace') {

@@ -11,17 +11,7 @@ if (env.whether_post){
     whether_post ="False"
 }
 pipeline {
-   agent {label node}
-    // options {
-	//     buildDiscarder(logRotator(numToKeepStr: '10'))
-    // }
-    // environment{
-    //     DNET_PRIVATE_AK="$DNET_PRIVATE_AK"
-    //     DNET_PRIVATE_AS="$DNET_PRIVATE_AS"
- 	// }
-	// triggers {
-    //     cron 'H/5 * * * *'
-    //  }
+   agent {label node}          
     stages {
         stage('mas_interface_check') {
 			steps{

@@ -12,25 +12,10 @@ if (env.toolset_image_version){
 }
 pipeline {
     agent {label node}
-	options {
-	//    buildDiscarder(logRotator(numToKeepStr: '10'))
-	//    disableConcurrentBuilds()
-	//    disableResume()
+	options {   
 	    timeout(time: 3, unit: 'HOURS')
-    }
-	// environment{
-    //     DNET_PRIVATE_AK="$DNET_PRIVATE_AK"
-    //     DNET_PRIVATE_AS="$DNET_PRIVATE_AS"
- 	// }
-	// parameters {
-	//    string(name: 'cfgname', defaultValue: 'pay', description: '配置')
-	//    string(name: 'receivers', defaultValue: 'wangfei1@hd123.com,buhaiqing@hd123.com,gaoweizong@hd123.com', description: '邮件接收人')
-	//    string(name: 'GIT_BRANCH', defaultValue: 'develop', description: 'release/release\ndevelop')
-	//   // string(name: 'DINGTALK_TOKEN', defaultValue: '1e93162cec116308ffb29fe19ba83b0f57121cc79cfb9b0958e1b1025e55a445', description: '钉钉token')
-	// }
-	//triggers {
-    //    cron 'H/10 * * * *'
-    // }
+    }          
+	//triggers {  
     stages {
         stage('jenkins连续失败job预警') {
 			steps{

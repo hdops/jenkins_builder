@@ -12,17 +12,9 @@ if (env.whether_post){
 }
 pipeline {
     agent {label node}
-	options {
-	//     buildDiscarder(logRotator(numToKeepStr: '10'))
-	//     disableConcurrentBuilds()
-	//     disableResume()
+	options {   
 	    timeout(time: 3, unit: 'HOURS')
-    }
-	// parameters {
-	//    choice(name:'DNET_PROFILE', choices:'integration_test\nperformance_test\nproduction\nbranch_test\nessp_branch')
-	//    string(name: 'DNET_PRODUCT', defaultValue: 'baas', description: '')
-	//    choice(name: 'DNET_CLOUD_VENDOR', choices: ['tencent','aliyun','jdcloud'])
-	// }
+    }     
     stages {
         stage('检查slb权重') {
 			steps{

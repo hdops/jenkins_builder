@@ -9,22 +9,9 @@ if (!env.GIT_GROUP){
 }
 pipeline {
     agent {label node}
-	options {
-	//     buildDiscarder(logRotator(numToKeepStr: '10'))
-	//     disableConcurrentBuilds()
-	//     disableResume()
+	options {   
 	    timeout(time: 60, unit: 'MINUTES')
-    }
-	// parameters {
-    //     string(name: 'GIT_REPONAME', defaultValue: 'heading', description: 'git repo name ,必须在 phoenix-tools group 下面')
-    //     string(name: 'GIT_BRANCH', defaultValue: 'uat', description: 'git_url 的分支')
-    //     string(name: 'customer', defaultValue: '海鼎', description: '客户简称')
-    //     string(name: 'profile', defaultValue: 'prd', description: '环境,例如int、uat、prd')
-    //     string(name: 'subsystem', defaultValue: 'config,account,gateway,pnx_dtask,login,invc,wxauth,mgate,pnx_promotion_adapter,pnx_mbr_adapter,pnx_crm_adapter,pnx_member,pnx_trade,pnx_points_web,pnx_mdata_web,pnx_coupon_web,pnx_promotion_web,pnx_mbr_man,h5,ucenter_web,mbr_web,crm_web,pnx_web_ui', description: 'phoenix-tools subsystem')
-    //     string(name: 'consul_url', defaultValue: '127.0.3.0-private:8500', description: 'consul的地址,例如127.0.3.0-private:8500')
-    //     choice(name: 'action', choices:'register\nderegister\ndestroy')
-    //     choice(name: 'dryrun', choices:'False\nTrue', description: 'True只打印命令，不执行 False执行命令')
-	// }
+    }          
 
     stages {
         stage('delete workspace') {

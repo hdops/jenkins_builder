@@ -13,22 +13,9 @@ if (env.toolset_image_version){
 }
 pipeline {
     agent {label node}
-	options {
-	//    buildDiscarder(logRotator(numToKeepStr: '10'))
-	//    disableConcurrentBuilds()
-	//    disableResume()
+	options {   
 	    timeout(time: 2, unit: 'MINUTES')
-    }
-	// environment{
-    //     DNET_PRIVATE_AK="$DNET_PRIVATE_AK"
-    //     DNET_PRIVATE_AS="$DNET_PRIVATE_AS"
- 	// }
-	// parameters {
-	//    choice(name: 'DNET_PROFILE', choices:'production')
-	//    string(name: 'DNET_PRODUCT', defaultValue: 'dly', description: '')
-	//    string(name: 'cfgname', defaultValue: 'elastic_search/fourNinecheck/soms/synchronismtask.yaml', description: '配置文件')
-	//    string(name: 'GIT_BRANCH', defaultValue: 'develop', description: '')
-	// }
+    }          
 	triggers {
         cron '* * * * *'
      }

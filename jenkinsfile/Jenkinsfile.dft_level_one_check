@@ -10,25 +10,9 @@ if (env.whether_post){
 
 pipeline {
     agent {label node}
-	options {
-	//     buildDiscarder(logRotator(numToKeepStr: '10'))
-	//     disableConcurrentBuilds()
-	//     disableResume()
+	options {   
 	    timeout(time: 5, unit: 'MINUTES')
-    }
-    // environment{
-    //     DNET_PRIVATE_AK="$DNET_PRIVATE_AK"
-    //     DNET_PRIVATE_AS="$DNET_PRIVATE_AS"
- 	// }
-	// parameters {
-	//    choice(name:'DNET_PROFILE', choices:'integration_test\nproduction')
-	//    string(name: 'DNET_PRODUCT', defaultValue: 'dnet', description: '')
-	//    string(name: 'receivers', defaultValue: 'qinliming@hd123.com,shujun@hd123.com,gonghaiwei@hd123.com,buhaiqing@hd123.com,liliangwei@hd123.com,liqi@hd123.com,gaoweizong@hd123.com', description: '邮件接受人')
-    //    string(name: 'GIT_BRANCH', defaultValue: 'develop', description: 'git branch')
-    // }
-    // triggers {
-    //     cron "H/2 * * * *"
-    // }
+    }             
     stages {
         stage('下载toolset') {
 			steps{

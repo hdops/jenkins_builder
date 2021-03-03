@@ -16,22 +16,8 @@ if (env.toolset_image_version){
 }
 pipeline {
     agent {label node}
-	//options {
-	//    buildDiscarder(logRotator(numToKeepStr: '10'))
-    //}
-    // environment{
-    //     DNET_PRIVATE_AK="$DNET_PRIVATE_AK"
-    //     DNET_PRIVATE_AS="$DNET_PRIVATE_AS"
- 	// }
-	// parameters {
-	//    choice(name:'DNET_PROFILE', choices:'production\nintegration_test')
-	//    string(name: 'DNET_PRODUCT', defaultValue: 'dnet', description: '')
-	//    string(name: 'GIT_BRANCH', defaultValue: 'develop', description: 'develop')
-	//   // string(name: 'DINGTALK_TOKEN', defaultValue: '9d304e1503e4e21aa7ecd9d30d8d0fab168901cbfc989310921c98e44bf07c47', description: '钉钉token')
-	// }
-	// triggers {
-    //     cron 'H/2 * * * *'
-    //  }
+	//options { 
+    //}             
     stages {
 		stage('restart logstash') {
 			steps{

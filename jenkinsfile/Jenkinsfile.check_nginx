@@ -12,18 +12,7 @@ pipeline {
    agent {label node}
     options {
 	    buildDiscarder(logRotator(numToKeepStr: '10'))
-    }
-	// parameters {
-	//     choice(name:'DNET_PROFILE', choices:'production\nintegration_test\nperformance_test\nbranch_test\nuat')
-	//     string(name: 'GIT_BRANCH', defaultValue: 'develop', description: 'git branch',trim: true)
-	// }
-    // environment{
-    //     DNET_PRIVATE_AK="$DNET_PRIVATE_AK"
-    //     DNET_PRIVATE_AS="$DNET_PRIVATE_AS"
- 	// }
-	// triggers {
-    //     cron 'H/5 * * * *'
-    //  }
+    }           
     stages {
 		stage('check nginx') {
 			steps{

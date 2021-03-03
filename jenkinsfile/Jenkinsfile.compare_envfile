@@ -12,25 +12,10 @@ if (env.whether_post){
 }
 pipeline {
     agent {label node}
-	options {
-	//     buildDiscarder(logRotator(numToKeepStr: '10'))
-	//     disableConcurrentBuilds()
-	//     disableResume()
+	options {   
 	    timeout(time: 3, unit: 'HOURS')
 
-    }
-	// parameters {
-	   // choice(name:'DNET_PROFILE', choices:'integration_test\nperformance_test\nproduction\nbranch_test\nessp_branch')
-	   // string(name: 'DNET_PRODUCT', defaultValue: 'baas', description: '')
-	   // string(name: 'source_gitbranch', defaultValue: 'master')
-	   // string(name: 'targit_gitbranch', defaultValue: 'release/release')
-	   // string(name: 'target_profile', defaultValue: 'branch_test')
-	   // string(name: 'subsystem', defaultValue: 'None', description: '子系统')
-	// }
-    // environment{
-        // DNET_PRIVATE_AK="$DNET_PRIVATE_AK"
-        // DNET_PRIVATE_AS="$DNET_PRIVATE_AS"
-    // }
+    }            
     stages {
 	    stage('compare_envfile') {
 			steps{

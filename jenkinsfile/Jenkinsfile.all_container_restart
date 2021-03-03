@@ -10,15 +10,9 @@ if (env.whether_post){
 
 pipeline {
     agent {label node}
-    options {
-	//    buildDiscarder(logRotator(numToKeepStr: '10'))
-	//    disableConcurrentBuilds()
-    //    disableResume()
+    options {   
         timeout(time: 10, unit: 'MINUTES')
-    }
-	// parameters {
-	//     string(name: 'container_restart_workspace', defaultValue: '/hdapp/workspace/MAS_healthcheck_production', description: 'workspace',trim: true)
-	// }
+    }   
 
 	stages {
 	    stage('重启所有容器') {

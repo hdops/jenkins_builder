@@ -12,17 +12,9 @@ if (!env.dingding){
 }
 pipeline {
     agent {label node}
-	options {
-	//     buildDiscarder(logRotator(numToKeepStr: '10'))
-	//     disableConcurrentBuilds()
-	//     disableResume()
+	options {   
 	    timeout(time: 15, unit: 'MINUTES')
-    }
-	// parameters {
-    //     string(name: 'GIT_REPONAME', defaultValue: 'heading', description: 'git repo name ,必须在 phoenix-tools group 下面')
-    //     string(name: 'GIT_BRANCH', defaultValue: 'develop', description: 'git_url 的分支')
-    //     string(name: 'version', defaultValue: 'CRM-6.0.1', description: 'phoenix-tools version, 和phoenix 产品版本保持一致')
-	// }
+    }     
 
     stages {
         stage('delete workspace') {

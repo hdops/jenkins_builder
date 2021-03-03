@@ -16,22 +16,8 @@ if (env.toolset_image_version){
 }
 pipeline {
     agent {label node}
-    //options {
-	//    buildDiscarder(logRotator(numToKeepStr: '10'))
-    //}
-	// environment{
-    //     DNET_PRIVATE_AK="$DNET_PRIVATE_AK"
-    //     DNET_PRIVATE_AS="$DNET_PRIVATE_AS"
- 	// }
-	// parameters {
-	//     choice(name:'DNET_PROFILE', choices:'integration_test\ndev_test\nbranch_test\nproduction\nprd-guoda\nuat')
-	//     choice(name:'DNET_PRODUCT', choices:'dnet\nbaas\ndly')
-	//     string(name: 'cfg_name', defaultValue: 'dly_global', description: '配置文件名',trim: true)
-	//     string(name: 'GIT_BRANCH', defaultValue: 'develop', description: 'git branch',trim: true)
-	// }
-	// triggers {
-    //     cron 'H/15 * * * *'
-    //  }
+    //options { 
+    //}             
 
 	stages {
 	    stage('表数据备份') {

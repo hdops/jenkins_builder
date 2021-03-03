@@ -13,20 +13,7 @@ if (params.JENS_HOME){
     env.jen_home = "/hdapp/jenkins"
 }
 pipeline {
-    agent {label node}
-    // options {
-	//     buildDiscarder(logRotator(numToKeepStr: '10'))
-    // }
-	// parameters {
-	//     string(name: 'VERSION', defaultValue: '1.0.0-SNAPSHOT', description: '版本号',trim: true)
-	//     string(name: 'GIT_REPO', defaultValue: 'heading', description: '配置文件所在git仓库名称',trim: true)
-	//     string(name: 'GIT_BRANCH', defaultValue: 'uat', description: '配置文件所在git 分支',trim: true)
-	//     string(name: 'DB_HOST', defaultValue: 'localhost', description: '数据库地址',trim: true)
-	//     string(name: 'DB_PORT', defaultValue: '3306', description: '数据库端口',trim: true)
-	//     string(name: 'DB_NAME', defaultValue: '3306', description: '数据库库名',trim: true)
-	//     string(name: 'DB_USER', defaultValue: '3306', description: '数据库用户名',trim: true)
-	//     string(name: 'DB_PASS', defaultValue: '3306', description: '数据库密码',trim: true)
-	// }
+    agent {label node}             
     stages {
         stage('删除workspace') {
             steps{

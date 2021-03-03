@@ -9,21 +9,9 @@ if (!env.GIT_GROUP){
 }
 pipeline {
     agent {label node}
-	options {
-	//     buildDiscarder(logRotator(numToKeepStr: '10'))
-	//     disableConcurrentBuilds()
-	//     disableResume()
+	options {   
 	    timeout(time: 60, unit: 'MINUTES')
-    }
-	// parameters {
-    //     string(name: 'GIT_REPONAME', defaultValue: 'heading', description: 'git repo name ,必须在 phoenix-tools group 下面')
-    //     string(name: 'GIT_BRANCH', defaultValue: 'uat', description: 'git_url 的分支')
-    //     choice(name:'action', choices:'upgrade\nsetup')
-    //     string(name: 'subsystem', defaultValue: 'config,account,gateway,pnx_dtask,login,invc,wxauth,mgate,pnx_promotion_adapter,pnx_mbr_adapter,pnx_crm_adapter,pnx_member,pnx_trade,pnx_points_web,pnx_mdata_web,pnx_coupon_web,pnx_promotion_web,pnx_mbr_man,h5,ucenter_web,mbr_web,crm_web,pnx_web_ui', description: 'phoenix-tools subsystem')
-    //     choice(name:'skipversion', choices:'--no-skipversion\n--skipversion',description: '升级数据库时是否跳过版本检查')
-    //     choice(name:'skipupgrade', choices:'False\nTrue', description: '是否跳过执行数据库升级镜像')
-
-	// }
+    }        
 
     stages {
         stage('delete workspace') {

@@ -16,25 +16,10 @@ if (env.toolset_image_version){
 }
 pipeline {
     agent {label node}
-	options {
-	//     buildDiscarder(logRotator(numToKeepStr: '10'))
-	//     disableConcurrentBuilds()
-	//     disableResume()
+	options {   
 	    timeout(time: 3, unit: 'HOURS')
 
-    }
-	// parameters {
-	   // choice(name: 'DNET_PRODUCT', choices:'dly')
-	   // choice(name:'DNET_PROFILE', choices:'production\nintegration_test\nbranch_test')
-	   // string(name: 'container', defaultValue: '', description: 'container name')
-	   // string(name: 'domain', defaultValue: 'http://download.qianfan123.com', description: 'oss绑定的域名，如果oss的endpoint能直接访问，则不需要传此参数')
-	   // string(name: 'GIT_BRANCH', defaultValue: 'develop', description: 'git分支')
-	   // string(name: 'DINGTALK_TOKEN', defaultValue: '1e93162cec116308ffb29fe19ba83b0f57121cc79cfb9b0958e1b1025e55a445', description: '钉钉token')
-	// }
-    // environment{
-        // DNET_PRIVATE_AK="$DNET_PRIVATE_AK"
-        // DNET_PRIVATE_AS="$DNET_PRIVATE_AS"
-    // }
+    }            
     stages {
 	    stage('dump file') {
 			steps{

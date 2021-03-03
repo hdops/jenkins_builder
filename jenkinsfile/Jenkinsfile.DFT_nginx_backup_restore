@@ -12,26 +12,9 @@ if (env.whether_post){
 }
 pipeline {
    agent {label node}
-    options {
-	//     buildDiscarder(logRotator(numToKeepStr: '30'))
-	//     disableConcurrentBuilds()
-	//     disableResume()
+    options {   
 	    timeout(time: 3, unit: 'HOURS')
-    }
-	// environment{
-    //     DNET_PRIVATE_AK="$DNET_PRIVATE_AK"
-    //     DNET_PRIVATE_AS="$DNET_PRIVATE_AS"
- 	// }
-	// parameters {
-	// 	choice(name: 'DNET_PRODUCT', choices:'pay')
-	//     choice(name:'DNET_PROFILE', choices:'branch_test\nproduction')
-	// 	choice(name: 'action_nginx', choices:'backup\nrestore')
-	// 	choice(name: 'action', choices:'--请选择\ndown\nrestart')
-	//     string(name: 'containerid', description: '异常节点name,异常节点以逗号分隔',trim: true)
-	//     string(name: 'GIT_BRANCH', defaultValue: 'develop', description: 'git branch',trim: true)
-	//     string(name: 'receivers', defaultValue: 'gaoweizong@hd123.com', description: '收件人列表,多个以逗号分割',trim: true)
-	//    // choice(name: 'DINGTALK_TOKEN', choices:'268f9a602050e395b131c90ba947fc595048f4c1dfd5ef996a77e533114d2002')
-	// }
+    }              
     stages {
 	    stage('DFT_nginx_backup_restore') {
 			steps{

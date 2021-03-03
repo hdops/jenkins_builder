@@ -9,18 +9,9 @@ if (!env.GIT_GROUP){
 }
 pipeline {
     agent {label node}
-	options {
-	//     buildDiscarder(logRotator(numToKeepStr: '10'))
-	//     disableConcurrentBuilds()
-	//     disableResume()
+	options {   
 	    timeout(time: 120, unit: 'MINUTES')
-    }
-	// parameters {
-	//     string(name: 'GIT_REPONAME', defaultValue: 'heading', description: 'phoenix_template git repo name',trim: true)
-	//     string(name: 'GIT_BRANCH', defaultValue: 'uat', description: 'phoenix_template git branch',trim: true)
-	//     string(name: 'middleware', defaultValue: '', description: '指定中间件部署, 以","分割',trim: true)
-	//     choice(name: 'dryrun', choices:'False\nTrue', description: 'True只打印命令，不执行 False执行命令')
-	// }
+    }      
     stages {
 	    stage('delete workspace') {
 			steps{

@@ -25,16 +25,14 @@ pipeline {
                             echo "active profile is ${params.DNET_PROFILE}"
                             echo "product is ${params.DNET_PRODUCT}"
                             echo "workspace is $WORKSPACE"
-                            sh "TRUST_PUBLIC_IP=${params.TRUST_PUBLIC_IP} pt-tools generate-report --configfile ${params.configfile}"
-                            // archiveArtifacts 'pt-tools-report-*/**/*'
+                            sh "TRUST_PUBLIC_IP=${params.TRUST_PUBLIC_IP} pt-tools generate-report --configfile ${params.configfile}" 
                         }
                     }else {
                         docker.image("harbor.qianfan123.com/toolset/toolsetcore:${toolset_image_version}").inside  {
                             echo "active profile is ${params.DNET_PROFILE}"
                             echo "product is ${params.DNET_PRODUCT}"
                             echo "workspace is $WORKSPACE"
-                            sh "TRUST_PUBLIC_IP=${params.TRUST_PUBLIC_IP} pt-tools generate-report --configfile ${params.configfile}"
-                            // archiveArtifacts 'pt-tools-report-*/**/*'
+                            sh "TRUST_PUBLIC_IP=${params.TRUST_PUBLIC_IP} pt-tools generate-report --configfile ${params.configfile}" 
                         }
                     }
                 }

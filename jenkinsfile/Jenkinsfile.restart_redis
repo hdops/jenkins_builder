@@ -14,23 +14,9 @@ if (env.toolset_image_version){
 }
 pipeline {
     agent {label node}
-	options {
-	//    buildDiscarder(logRotator(numToKeepStr: '10'))
-	//    disableConcurrentBuilds()
-	//    disableResume()
+	options {   
 	    timeout(time: 2, unit: 'MINUTES')
-    }
-	// environment{
-    //     DNET_PRIVATE_AK="$DNET_PRIVATE_AK"
-    //     DNET_PRIVATE_AS="$DNET_PRIVATE_AS"
- 	// }
-	// parameters {
-	//    choice(name:'DNET_PROFILE', choices:'integration_test\nbranch_test\nuat\nproduction')
-	//    string(name: 'DNET_PRODUCT', defaultValue: 'pay', description: '')
-	//    string(name: 'DNET_EXPORT_FILE', defaultValue: 'main.yaml', description: '配置文件')
-	//    string(name: 'GIT_BRANCH', defaultValue: 'develop', description: '')
-	//    choice(name: 'DNET_CLOUD_VENDOR', choices:'tencent\naliyun', description: '')
-	// }
+    }           
     stages {
         stage('redis_monitor') {
 			steps{

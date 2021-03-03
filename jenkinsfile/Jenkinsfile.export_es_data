@@ -15,22 +15,7 @@ if (env.toolset_image_version){
     toolset_image_version = env.toolset_image_version
 }
 pipeline {
-    agent {label node}
-    // options {
-	//     buildDiscarder(logRotator(numToKeepStr: '10'))
-    // }
-	// environment{
-    //     DNET_PRIVATE_AK="$DNET_PRIVATE_AK"
-    //     DNET_PRIVATE_AS="$DNET_PRIVATE_AS"
- 	// }
-	// parameters {
-	//     choice(name:'DNET_PROFILE', choices:'integration_test\ndev_test\nbranch_test\nproduction\nprd-guoda\nuat')
-	//     choice(name:'DNET_PRODUCT', choices:'dnet\nbaas\ndly')
-	//     string(name: 'query', defaultValue: 'level:"ERROR"', description: '查询条件,必须符合kibana的discover查询语法',trim: true)
-	//     string(name: 'fields', defaultValue: 'stack', description: '自定义关心的字段',trim: true)
-	//     string(name: 'time_span', defaultValue: '2019-07-06 13:00:00--2019-07-06 13:15:00', description: '查询指定时间间隔内的数据',trim: true)
-	//     string(name: 'GIT_BRANCH', defaultValue: 'develop', description: 'git branch',trim: true)
-	// }
+    agent {label node}               
 
 	stages {
 	    stage('日志巡检') {

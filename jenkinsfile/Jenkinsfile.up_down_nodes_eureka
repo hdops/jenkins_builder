@@ -16,26 +16,9 @@ if (env.toolset_image_version){
 }
 pipeline {
    agent {label node}
-    options {
-	//    buildDiscarder(logRotator(numToKeepStr: '30'))
-	//    disableConcurrentBuilds()
-	//    disableResume()
+    options {   
 	    timeout(time: 15, unit: 'MINUTES')
-    }
-	// environment{
-    //     DNET_PRIVATE_AK="$DNET_PRIVATE_AK"
-    //     DNET_PRIVATE_AS="$DNET_PRIVATE_AS"
- 	// }
-	// parameters {
-	// 	choice(name: 'DNET_PRODUCT', choices:'dly')
-	//     choice(name:'DNET_PROFILE', choices:'branch_test\nproduction')
-	//     choice(name:'action', choices:'down\nup\nrestart')
-	//     string(name: 'container', defaultValue: '', description: 'containerid',trim: true)
-	//     choice(name:'dryrun', choices:'True\nFalse')
-	//     string(name: 'receivers', defaultValue: 'wangfei1@hd123.com', description: '收件人列表',trim: true)
-	//     string(name: 'GIT_BRANCH', defaultValue: 'develop', description: 'git branch',trim: true)
-	//     string(name: 'DINGTALK_TOKEN', defaultValue:'268f9a602050e395b131c90ba947fc595048f4c1dfd5ef996a77e533114d2002')
-	// }
+    }              
     stages {
         stage('up down nodes eureka') {
             steps {

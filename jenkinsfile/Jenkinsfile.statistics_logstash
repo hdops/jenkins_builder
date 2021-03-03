@@ -14,15 +14,9 @@ if (env.toolset_image_version){
 }
 pipeline {
     agent {label node}
-    options {
-	//    buildDiscarder(logRotator(numToKeepStr: '10'))
-	//    disableConcurrentBuilds()
-    //    disableResume()
+    options {   
         timeout(time: 2, unit: 'MINUTES')
-    }
-	// parameters {
-	//     string(name: 'workspace_job', defaultValue: '/hdapp/workspace/logstash/restart_logstash_2m', description: 'workspace',trim: true)
-	// }
+    }   
 
 	stages {
 	    stage('统计logstash 重启次数') {
@@ -30,13 +24,11 @@ pipeline {
                 dir("${params.workspace_job}") {
                     script {
                         if (env.on_k8s){
-                            container('hdtoolsetcore'){
-                                // sh "cd ${params.workspace_job}"
+                            container('hdtoolsetcore'){ 
                                 sh "hdmon statistic --action restartlogstash"
                             }
                         }else {
-                            docker.image("harbor.qianfan123.com/toolset/toolsetcore:${toolset_image_version}").inside  {
-                            // sh "cd ${params.workspace_job}"
+                            docker.image("harbor.qianfan123.com/toolset/toolsetcore:${toolset_image_version}").inside  { 
                                 sh "hdmon statistic --action restartlogstash"
                             }
 

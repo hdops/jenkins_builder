@@ -10,19 +10,9 @@ if (env.whether_post){
 
 pipeline {
     agent {label node}
-	options {
-	//     buildDiscarder(logRotator(numToKeepStr: '10'))
-	//     disableConcurrentBuilds()
-	//     disableResume()
+	options {   
 	    timeout(time: 300, unit: 'MINUTES')
-    }
-	// parameters {
-	   // string(name:'hosts', description: 'inventory,format(hostname1:ip1,hostname2:ip2)')
-	   // string(name: 'port', defaultValue: '22', description: 'ssh port')
-	   // string(name: 'user', defaultValue: 'root', description: 'ssh user')
-	   // string(name: 'password', defaultValue: '123456', description: 'ssh user password')
-	   // string(name: 'filename', defaultValue: 'cenots_init', description: 'output to inventory/$filename')
-	// }
+    }       
     stages {
         stage('初始化机器') {
 			steps{
