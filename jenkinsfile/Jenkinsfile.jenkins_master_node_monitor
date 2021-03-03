@@ -38,20 +38,20 @@ pipeline {
 			steps{
 			    script{
                     deleteDir()
-                    if(env.on_k8s){
-                        container("hdtoolsetcore"){
-                            retry(2){
-                                sh "${download_toolset_cmd}"
-                            }
-                            sh "tar zxf toolset.tar.gz -C ${WORKSPACE}"
-                            if (env.DNET_PRIVATE_URL){
-                                sh "DNET_PRIVATE_URL=${DNET_PRIVATE_URL} DNET_PRIVATE_AK=${DNET_PRIVATE_AK} DNET_PRIVATE_AS=${DNET_PRIVATE_AS} DNET_PRIVATE_BUCKET=${DNET_PRIVATE_BUCKET} DNET_PRIVATE_REGION=${DNET_PRIVATE_REGION} DNET_CLOUD_VENDOR=${DNET_CLOUD_VENDOR} DINGTALK_TOKEN=${DINGTALK_TOKEN} hdmon jenkins_node_monitor master_check --cfgname ${cfgname} --receivers ${receivers}"
-                            }else{
-                                sh "DINGTALK_TOKEN=${DINGTALK_TOKEN} hdmon jenkins_node_monitor master_check --cfgname ${cfgname} --receivers ${receivers}"
-                            }
-                        }
+                    // if(env.on_k8s){
+                    //     container("hdtoolsetcore"){
+                    //         retry(2){
+                    //             sh "${download_toolset_cmd}"
+                    //         }
+                    //         sh "tar zxf toolset.tar.gz -C ${WORKSPACE}"
+                    //         if (env.DNET_PRIVATE_URL){
+                    //             sh "DNET_PRIVATE_URL=${DNET_PRIVATE_URL} DNET_PRIVATE_AK=${DNET_PRIVATE_AK} DNET_PRIVATE_AS=${DNET_PRIVATE_AS} DNET_PRIVATE_BUCKET=${DNET_PRIVATE_BUCKET} DNET_PRIVATE_REGION=${DNET_PRIVATE_REGION} DNET_CLOUD_VENDOR=${DNET_CLOUD_VENDOR} DINGTALK_TOKEN=${DINGTALK_TOKEN} hdmon jenkins_node_monitor master_check --cfgname ${cfgname} --receivers ${receivers}"
+                    //         }else{
+                    //             sh "DINGTALK_TOKEN=${DINGTALK_TOKEN} hdmon jenkins_node_monitor master_check --cfgname ${cfgname} --receivers ${receivers}"
+                    //         }
+                    //     }
 
-                    }else{
+                    // }else{
                         retry(2){
                             sh "DNET_PROFILE=integration_test DNET_PRODUCT=dnet hdops download_toolset --branch ${GIT_BRANCH} -p ."
                         }
@@ -61,7 +61,7 @@ pipeline {
                         }else{
                             sh "DINGTALK_TOKEN=${DINGTALK_TOKEN} hdmon jenkins_node_monitor master_check --cfgname ${cfgname} --receivers ${receivers}"
                         }
-                    }
+                    // }
                 }
 			}
         }
