@@ -10,6 +10,10 @@ if (env.whether_post){
 }else{
     whether_post ="True"
 }
+def toolset_image_version="0.3.0-private"
+if (env.toolset_image_version){
+    toolset_image_version = env.toolset_image_version
+}
 pipeline {
     agent {label node}
     options {   
@@ -32,14 +36,16 @@ pipeline {
 						}
 						
 					}else {
-						echo "active profile is ${params.DNET_PROFILE}"
-						echo "product is ${params.DNET_PRODUCT}"
-						echo "workspace is $WORKSPACE"
-						retry(2){
-							sh "DNET_PROFILE=integration_test DNET_PRODUCT=dnet hdops download_toolset --branch ${params.GIT_BRANCH} -p ."
-						}
-						sh "tar zxf toolset.tar.gz -C $WORKSPACE"
-						sh "DNET_PRODUCT=${params.DNET_PRODUCT} DNET_PROFILE=${params.DNET_PROFILE} hdops change_nginx --image ${params.image} --tag ${params.tag} --nginx_command ${params.nginx_command} --filename_nginx ${params.filename_nginx} --filename_template ${params.filename_template} --nginx_basedir ${params.nginx_basedir} --nginx_path ${params.nginx_path} --dryrun ${params.dryrun}"
+					    docker.image("harbor.qianfan123.com/toolset/toolsetcore:${toolset_image_version}").inside {
+					        echo "active profile is ${params.DNET_PROFILE}"
+                            echo "product is ${params.DNET_PRODUCT}"
+                            echo "workspace is $WORKSPACE"
+                            retry(2){
+                                sh "DNET_PROFILE=integration_test DNET_PRODUCT=dnet hdops download_toolset --branch ${params.GIT_BRANCH} -p ."
+                            }
+                            sh "tar zxf toolset.tar.gz -C $WORKSPACE"
+                            sh "DNET_PRODUCT=${params.DNET_PRODUCT} DNET_PROFILE=${params.DNET_PROFILE} hdops change_nginx --image ${params.image} --tag ${params.tag} --nginx_command ${params.nginx_command} --filename_nginx ${params.filename_nginx} --filename_template ${params.filename_template} --nginx_basedir ${params.nginx_basedir} --nginx_path ${params.nginx_path} --dryrun ${params.dryrun}"
+					    }
 					}
 				}
 			}

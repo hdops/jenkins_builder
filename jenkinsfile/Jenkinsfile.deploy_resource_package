@@ -10,6 +10,10 @@ if (env.whether_post){
 }else{
     whether_post ="True"
 }
+def toolset_image_version="0.3.0-private"
+if (env.toolset_image_version){
+    toolset_image_version = env.toolset_image_version
+}
 pipeline {
     agent {label node}              
 
@@ -29,7 +33,7 @@ pipeline {
                             sh "DNET_PRODUCT=${params.DNET_PRODUCT} DNET_PROFILE=${params.DNET_PROFILE} hdmon deploy_resource_package --download_package ${params.download_package} --subsystem ${params.subsystem}"
                         }
                     }else {
-                        //docker.image("harbor.qianfan123.com/toolset/toolsetcore:0.3.0").withRun('-v /var/run/docker.sock:/var/run/docker.sock') {
+                        docker.image("harbor.qianfan123.com/toolset/toolsetcore:${toolset_image_version}").inside {
                             echo "active profile is ${params.DNET_PROFILE}"
                             echo "product is ${params.DNET_PRODUCT}"
                             echo "workspace is $WORKSPACE"
@@ -38,7 +42,7 @@ pipeline {
                             }
                             sh "tar zxf toolset.tar.gz -C $WORKSPACE"
                             sh "DNET_PRODUCT=${params.DNET_PRODUCT} DNET_PROFILE=${params.DNET_PROFILE} hdmon deploy_resource_package --download_package ${params.download_package} --subsystem ${params.subsystem}"
-                        //}
+                        }
 
                     }
                 }

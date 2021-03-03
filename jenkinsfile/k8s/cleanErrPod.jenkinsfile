@@ -10,6 +10,10 @@ if (env.whether_post){
 }else{
     whether_post ="True"
 }
+def toolset_image_version="1.0.0"
+if (env.toolset_image_version){
+    toolset_image_version = env.toolset_image_version
+}
 pipeline {
     agent {label node}
     options {
@@ -37,12 +41,14 @@ pipeline {
 							sh "tar zxf toolset-k8s-config.tar.gz -C ${WORKSPACE}"
 						}
 					}else {
-						echo "active profile is ${params.DNET_PROFILE}"
-						echo "toolset path is ${WORKSPACE}"
-						retry(2){
-							sh "DNET_PROFILE=integration_test DNET_PRODUCT=dnet hdopsctl download_toolset --project toolset-k8s-config --branch ${params.GIT_BRANCH} -p ."
-						}
-						sh "tar zxf toolset-k8s-config.tar.gz -C ${WORKSPACE}"
+                        docker.image("harbor.qianfan123.com/toolset/toolsetcore-k8s:${toolset_image_version}").inside {
+                            echo "active profile is ${params.DNET_PROFILE}"
+                            echo "toolset path is ${WORKSPACE}"
+                            retry(2){
+                                sh "DNET_PROFILE=integration_test DNET_PRODUCT=dnet hdopsctl download_toolset --project toolset-k8s-config --branch ${params.GIT_BRANCH} -p ."
+                            }
+                            sh "tar zxf toolset-k8s-config.tar.gz -C ${WORKSPACE}"
+                        }
 					}
 				}
 			}
