@@ -66,7 +66,7 @@ pipeline {
                    // }else{
                          retry(2){
                             if (env.DNET_PRIVATE_URL){
-                                sh "DNET_PRIVATE_URL=${DNET_PRIVATE_URL} DNET_PRIVATE_AK=${DNET_PRIVATE_AK} DNET_PRIVATE_AS=${DNET_PRIVATE_AS} DNET_PRIVATE_BUCKET=${DNET_PRIVATE_BUCKET} DNET_PRIVATE_REGION=${DNET_PRIVATE_REGION} DNET_CLOUD_VENDOR=${DNET_CLOUD_VENDOR} DNET_PROFILE=integration_test DNET_PRODUCT=dnet hdops download_toolset --branch ${GIT_BRANCH} -p ."
+                                sh "DNET_PRIVATE_URL=${DNET_PRIVATE_URL} DNET_PRIVATE_AK=${DNET_PRIVATE_AK} DNET_PRIVATE_AS=${DNET_PRIVATE_AS} DNET_PRIVATE_BUCKET=${DNET_PRIVATE_BUCKET} DNET_PRIVATE_REGION=${DNET_PRIVATE_REGION} DNET_CLOUD_VENDOR=${DNET_CLOUD_VENDOR} hdops download_toolset --branch ${GIT_BRANCH} -p ."
                             }else{
                                 sh "DNET_PROFILE=integration_test DNET_PRODUCT=dnet hdops download_toolset --branch ${GIT_BRANCH} -p ."
                             }
