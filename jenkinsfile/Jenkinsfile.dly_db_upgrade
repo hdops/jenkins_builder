@@ -10,6 +10,10 @@ if (env.whether_post){
 }else{
     whether_post ="True"
 }
+def toolset_image_version="0.0.1"
+if (env.toolset_image_version){
+    toolset_image_version = env.toolset_image_version
+}
 pipeline {
    agent {label node}
     options {
@@ -39,17 +43,19 @@ pipeline {
                             sh "DNET_PRODUCT=${params.DNET_PRODUCT} DNET_PROFILE=${params.DNET_PROFILE} PRESET_IMAGE_VERSION=${params.PRESET_IMAGE_VERSION} hdops deploy validate --subsystem  ${params.subsystem}"
                         }
                     }else {
-                        echo "active profile is ${params.DNET_PROFILE}"
-                        echo "toolset path is ${WORKSPACE}"
-                        echo "sub systems are ${params.subsystem}"
-                        echo "skip version is ${params.skipversion}"
-                        echo "upstream URL is ${params.upurl}"
-                        echo "svnreversion is ${params.svnreversion}"
-                        retry(2){
-                            sh "DNET_PROFILE=integration_test DNET_PRODUCT=dnet hdops download_toolset --branch ${params.GIT_BRANCH} -p ."
+                        docker.image("harbor.qianfan123.com/toolset/toolsetcore:${toolset_image_version}").inside  {
+                            echo "active profile is ${params.DNET_PROFILE}"
+                            echo "toolset path is ${WORKSPACE}"
+                            echo "sub systems are ${params.subsystem}"
+                            echo "skip version is ${params.skipversion}"
+                            echo "upstream URL is ${params.upurl}"
+                            echo "svnreversion is ${params.svnreversion}"
+                            retry(2){
+                                sh "DNET_PROFILE=integration_test DNET_PRODUCT=dnet hdops download_toolset --branch ${params.GIT_BRANCH} -p ."
+                            }
+                            sh "tar zxf toolset.tar.gz -C ${WORKSPACE}"
+                            sh "DNET_PRODUCT=${params.DNET_PRODUCT} DNET_PROFILE=${params.DNET_PROFILE} PRESET_IMAGE_VERSION=${params.PRESET_IMAGE_VERSION} hdops deploy validate --subsystem  ${params.subsystem}"
                         }
-                        sh "tar zxf toolset.tar.gz -C ${WORKSPACE}"
-                        sh "DNET_PRODUCT=${params.DNET_PRODUCT} DNET_PROFILE=${params.DNET_PROFILE} PRESET_IMAGE_VERSION=${params.PRESET_IMAGE_VERSION} hdops deploy validate --subsystem  ${params.subsystem}"
                     }
                 }
 			}
@@ -64,8 +70,10 @@ pipeline {
                             sh "DNET_PRODUCT=${params.DNET_PRODUCT} DNET_PROFILE=${params.DNET_PROFILE} PRESET_IMAGE_VERSION=${params.PRESET_IMAGE_VERSION} RECEIVERS_WHEN_SUCCEED=${params.RECEIVERS_WHEN_SUCCEED}  hdops deploy db_upgrade_check --url ${env.BUILD_URL} --receivers ${params.receivers} --buildurl ${env.BUILD_URL}"
                         }
                     }else {
-                        sh "DNET_PRODUCT=${params.DNET_PRODUCT} DNET_PROFILE=${params.DNET_PROFILE} PRESET_IMAGE_VERSION=${params.PRESET_IMAGE_VERSION} hdops deploy db_upgrade --subsystem ${params.subsystem}  ${params.skipversion} --receivers ${params.receivers} --timeout ${params.timeout} --threadcount ${params.threadcount} --tag ${params.tag}"
-                        sh "DNET_PRODUCT=${params.DNET_PRODUCT} DNET_PROFILE=${params.DNET_PROFILE} PRESET_IMAGE_VERSION=${params.PRESET_IMAGE_VERSION} RECEIVERS_WHEN_SUCCEED=${params.RECEIVERS_WHEN_SUCCEED}  hdops deploy db_upgrade_check --url ${env.BUILD_URL} --receivers ${params.receivers} --buildurl ${env.BUILD_URL}"
+                        docker.image("harbor.qianfan123.com/toolset/toolsetcore:${toolset_image_version}").inside  {
+                            sh "DNET_PRODUCT=${params.DNET_PRODUCT} DNET_PROFILE=${params.DNET_PROFILE} PRESET_IMAGE_VERSION=${params.PRESET_IMAGE_VERSION} hdops deploy db_upgrade --subsystem ${params.subsystem}  ${params.skipversion} --receivers ${params.receivers} --timeout ${params.timeout} --threadcount ${params.threadcount} --tag ${params.tag}"
+                            sh "DNET_PRODUCT=${params.DNET_PRODUCT} DNET_PROFILE=${params.DNET_PROFILE} PRESET_IMAGE_VERSION=${params.PRESET_IMAGE_VERSION} RECEIVERS_WHEN_SUCCEED=${params.RECEIVERS_WHEN_SUCCEED}  hdops deploy db_upgrade_check --url ${env.BUILD_URL} --receivers ${params.receivers} --buildurl ${env.BUILD_URL}"
+                        }
                     }
                 }
 			}

@@ -10,6 +10,10 @@ if (env.whether_post){
 }else{
     whether_post ="True"
 }
+def toolset_image_version="0.0.1"
+if (env.toolset_image_version){
+    toolset_image_version = env.toolset_image_version
+}
 pipeline {
     agent {label node}
     stages {
@@ -25,11 +29,13 @@ pipeline {
                             // archiveArtifacts 'pt-tools-report-*/**/*'
                         }
                     }else {
-                        echo "active profile is ${params.DNET_PROFILE}"
-                        echo "product is ${params.DNET_PRODUCT}"
-                        echo "workspace is $WORKSPACE"
-                        sh "TRUST_PUBLIC_IP=${params.TRUST_PUBLIC_IP} pt-tools generate-report --configfile ${params.configfile}"
-                        // archiveArtifacts 'pt-tools-report-*/**/*'
+                        docker.image("harbor.qianfan123.com/toolset/toolsetcore:${toolset_image_version}").inside  {
+                            echo "active profile is ${params.DNET_PROFILE}"
+                            echo "product is ${params.DNET_PRODUCT}"
+                            echo "workspace is $WORKSPACE"
+                            sh "TRUST_PUBLIC_IP=${params.TRUST_PUBLIC_IP} pt-tools generate-report --configfile ${params.configfile}"
+                            // archiveArtifacts 'pt-tools-report-*/**/*'
+                        }
                     }
                 }
 			}

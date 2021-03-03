@@ -7,7 +7,10 @@ def whether_post="False"
 if (env.whether_post){
     whether_post =env.whether_post
 }
-
+def toolset_image_version="0.0.1"
+if (env.toolset_image_version){
+    toolset_image_version = env.toolset_image_version
+}
 pipeline {
     agent {label node}
     options {
@@ -28,15 +31,17 @@ pipeline {
                             sh "tar zxf toolset.tar.gz -C ${WORKSPACE}"
                         }
                     } else {
-                        retry(2){
-                            sh "DNET_PROFILE=integration_test DNET_PRODUCT=dnet hdops download_toolset --branch ${params.GIT_BRANCH} -p ."
+                        docker.image("harbor.qianfan123.com/toolset/toolsetcore:${toolset_image_version}").inside  {
+                            retry(2){
+                                sh "DNET_PROFILE=integration_test DNET_PRODUCT=dnet hdops download_toolset --branch ${params.GIT_BRANCH} -p ."
+                            }
+                            sh "tar zxf toolset.tar.gz -C $WORKSPACE"
                         }
-                        sh "tar zxf toolset.tar.gz -C $WORKSPACE"
                     }
                 }
             }
         }
-        stage('pay monitor thread count') {
+        stage('pay batch restart') {
             steps {
                 script {
                     if (env.on_k8s) {
@@ -44,7 +49,9 @@ pipeline {
                             sh "DNET_PRODUCT=${params.DNET_PRODUCT} DNET_PROFILE=${params.DNET_PROFILE}  hdops pay_batch_restart  --force ${params.force} --dryrun ${params.dryrun}"
                         }
                     } else {
-                        sh "DNET_PRODUCT=${params.DNET_PRODUCT} DNET_PROFILE=${params.DNET_PROFILE}  hdops pay_batch_restart --force ${params.force} --dryrun ${params.dryrun}"
+                        docker.image("harbor.qianfan123.com/toolset/toolsetcore:${toolset_image_version}").inside  {
+                            sh "DNET_PRODUCT=${params.DNET_PRODUCT} DNET_PROFILE=${params.DNET_PROFILE}  hdops pay_batch_restart --force ${params.force} --dryrun ${params.dryrun}"
+                        }
                     }
                 }
             }

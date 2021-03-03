@@ -8,6 +8,10 @@ if (env.whether_post){
     whether_post =env.whether_post
 }
 
+def toolset_image_version="0.0.1"
+if (env.toolset_image_version){
+    toolset_image_version = env.toolset_image_version
+}
 pipeline {
     agent {label node}
     options {
@@ -57,7 +61,7 @@ pipeline {
 							sh "DINGTALK_TOKEN=${DINGTALK_TOKEN} hdmon delete_esbakcup --day ${params.day} --cfgname ${params.cfgname}"
 						}
 					}else {
-                        //docker.image("harbor.qianfan123.com/toolset/toolsetcore:0.3.0").withRun('-v /var/run/docker.sock:/var/run/docker.sock') {
+                        docker.image("harbor.qianfan123.com/toolset/toolsetcore:${toolset_image_version}").inside  {
                             echo "active profile is ${params.DNET_PROFILE}"
                             echo "toolset path is ${WORKSPACE}"
                             echo "sub systems are ${params.subsystem}"
@@ -69,7 +73,7 @@ pipeline {
                             }
                             sh "tar zxf toolset.tar.gz -C ${WORKSPACE}"
                             sh "DINGTALK_TOKEN=${DINGTALK_TOKEN} hdmon delete_esbakcup --day ${params.day} --cfgname ${params.cfgname}"
-                        //}
+                        }
 
 					}
 				}

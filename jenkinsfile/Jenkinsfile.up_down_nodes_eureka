@@ -10,6 +10,10 @@ if (env.whether_post){
 }else{
     whether_post ="True"
 }
+def toolset_image_version="0.0.1"
+if (env.toolset_image_version){
+    toolset_image_version = env.toolset_image_version
+}
 pipeline {
    agent {label node}
     options {
@@ -56,21 +60,23 @@ pipeline {
                             }
                         }
                     }else {
-                        echo "profile is ${params.DNET_PROFILE}"
-                        echo "sub systems are ${params.subsystem}"
-                        echo "svnreversion is ${params.svnreversion}"
-                        echo "upstream URL is ${params.upurl}"
-                        retry(2){
-                            sh "DNET_PROFILE=integration_test DNET_PRODUCT=dnet hdops download_toolset --branch ${params.GIT_BRANCH} -p ."
-                        }
-                        sh "tar zxf toolset.tar.gz -C ${WORKSPACE}"
-                        if(env.retry_num){
-                            def n ="${retry_num}".toInteger()
-                            retry(n){
+                        docker.image("harbor.qianfan123.com/toolset/toolsetcore:${toolset_image_version}").inside  {
+                            echo "profile is ${params.DNET_PROFILE}"
+                            echo "sub systems are ${params.subsystem}"
+                            echo "svnreversion is ${params.svnreversion}"
+                            echo "upstream URL is ${params.upurl}"
+                            retry(2){
+                                sh "DNET_PROFILE=integration_test DNET_PRODUCT=dnet hdops download_toolset --branch ${params.GIT_BRANCH} -p ."
+                            }
+                            sh "tar zxf toolset.tar.gz -C ${WORKSPACE}"
+                            if(env.retry_num){
+                                def n ="${retry_num}".toInteger()
+                                retry(n){
+                                    sh "DNET_PRODUCT=${params.DNET_PRODUCT} DNET_PROFILE=${params.DNET_PROFILE} DINGTALK_TOKEN=${DINGTALK_TOKEN} hdops up_down_nodes_eureka --action ${params.action} --container ${params.container} --receivers ${params.receivers} --dryrun ${params.dryrun}"
+                                }
+                            }else{
                                 sh "DNET_PRODUCT=${params.DNET_PRODUCT} DNET_PROFILE=${params.DNET_PROFILE} DINGTALK_TOKEN=${DINGTALK_TOKEN} hdops up_down_nodes_eureka --action ${params.action} --container ${params.container} --receivers ${params.receivers} --dryrun ${params.dryrun}"
                             }
-                        }else{
-                            sh "DNET_PRODUCT=${params.DNET_PRODUCT} DNET_PROFILE=${params.DNET_PROFILE} DINGTALK_TOKEN=${DINGTALK_TOKEN} hdops up_down_nodes_eureka --action ${params.action} --container ${params.container} --receivers ${params.receivers} --dryrun ${params.dryrun}"
                         }
                     }
                 }

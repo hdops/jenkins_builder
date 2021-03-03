@@ -1,3 +1,4 @@
+// 该 pipeline 已过时
 def node="master"
 if (env.node){
     node =env.node

@@ -10,6 +10,10 @@ if (env.whether_post){
 }else{
     whether_post ="True"
 }
+def toolset_image_version="0.0.1"
+if (env.toolset_image_version){
+    toolset_image_version = env.toolset_image_version
+}
 pipeline {
     agent {label node}
     options {
@@ -58,14 +62,16 @@ pipeline {
 							sh "tar zxf toolset.tar.gz -C ${WORKSPACE}"
 						}
 					}else {
-						echo "active profile is ${params.DNET_PROFILE}"
-						echo "toolset path is ${WORKSPACE}"
-						echo "sub systems are ${params.subsystem}"
-						echo "skip version is ${params.skipversion}"
-						retry(2){
-							sh "DNET_PROFILE=integration_test DNET_PRODUCT=dnet hdops download_toolset --branch ${params.GIT_BRANCH} -p ."
-						}
-						sh "tar zxf toolset.tar.gz -C ${WORKSPACE}"
+					    docker.image("harbor.qianfan123.com/toolset/toolsetcore:${toolset_image_version}").inside  {
+                            echo "active profile is ${params.DNET_PROFILE}"
+                            echo "toolset path is ${WORKSPACE}"
+                            echo "sub systems are ${params.subsystem}"
+                            echo "skip version is ${params.skipversion}"
+                            retry(2){
+                                sh "DNET_PROFILE=integration_test DNET_PRODUCT=dnet hdops download_toolset --branch ${params.GIT_BRANCH} -p ."
+                            }
+                            sh "tar zxf toolset.tar.gz -C ${WORKSPACE}"
+					    }
 					}
 				}
 			}
@@ -90,7 +96,9 @@ pipeline {
 							sh "DNET_PRODUCT=${params.DNET_PRODUCT} DNET_PROFILE=${params.DNET_PROFILE} PRESET_IMAGE_VERSION=$PRESET_IMAGE_VERSION hdops deploy validate --subsystem  ${params.subsystem}"
 						}
 					}else {
-						sh "DNET_PRODUCT=${params.DNET_PRODUCT} DNET_PROFILE=${params.DNET_PROFILE} PRESET_IMAGE_VERSION=$PRESET_IMAGE_VERSION hdops deploy validate --subsystem  ${params.subsystem}"
+					    docker.image("harbor.qianfan123.com/toolset/toolsetcore:${toolset_image_version}").inside  {
+                            sh "DNET_PRODUCT=${params.DNET_PRODUCT} DNET_PROFILE=${params.DNET_PROFILE} PRESET_IMAGE_VERSION=$PRESET_IMAGE_VERSION hdops deploy validate --subsystem  ${params.subsystem}"
+					    }
 					}
 				}
 			}
@@ -103,7 +111,9 @@ pipeline {
 							sh "DNET_PRODUCT=${params.DNET_PRODUCT} DNET_PROFILE=${params.DNET_PROFILE} PRESET_IMAGE_VERSION=$PRESET_IMAGE_VERSION hdops deploy db_upgrade --subsystem ${params.subsystem} --stackids $stackIds --dblist $dblist ${params.skipversion} ${params.skipversionupdate} --receivers ${params.receivers} --timeout ${params.timeout} --threadcount ${params.threadcount}"
 						}
 					}else {
-						sh "DNET_PRODUCT=${params.DNET_PRODUCT} DNET_PROFILE=${params.DNET_PROFILE} PRESET_IMAGE_VERSION=$PRESET_IMAGE_VERSION hdops deploy db_upgrade --subsystem ${params.subsystem} --stackids $stackIds --dblist $dblist ${params.skipversion} ${params.skipversionupdate} --receivers ${params.receivers} --timeout ${params.timeout} --threadcount ${params.threadcount}"
+					    docker.image("harbor.qianfan123.com/toolset/toolsetcore:${toolset_image_version}").inside  {
+                            sh "DNET_PRODUCT=${params.DNET_PRODUCT} DNET_PROFILE=${params.DNET_PROFILE} PRESET_IMAGE_VERSION=$PRESET_IMAGE_VERSION hdops deploy db_upgrade --subsystem ${params.subsystem} --stackids $stackIds --dblist $dblist ${params.skipversion} ${params.skipversionupdate} --receivers ${params.receivers} --timeout ${params.timeout} --threadcount ${params.threadcount}"
+					    }
 					}
 				}
 			}
@@ -116,7 +126,9 @@ pipeline {
 							sh "DNET_PRODUCT=${params.DNET_PRODUCT} DNET_PROFILE=${params.DNET_PROFILE} PRESET_IMAGE_VERSION=$PRESET_IMAGE_VERSION RECEIVERS_WHEN_SUCCEED=${params.RECEIVERS_WHEN_SUCCEED}  hdops deploy db_upgrade_check --url ${env.BUILD_URL} --receivers ${params.receivers} --buildurl ${env.BUILD_URL}"
 						}
 					}else {
-						sh "DNET_PRODUCT=${params.DNET_PRODUCT} DNET_PROFILE=${params.DNET_PROFILE} PRESET_IMAGE_VERSION=$PRESET_IMAGE_VERSION RECEIVERS_WHEN_SUCCEED=${params.RECEIVERS_WHEN_SUCCEED}  hdops deploy db_upgrade_check --url ${env.BUILD_URL} --receivers ${params.receivers} --buildurl ${env.BUILD_URL}"
+					    docker.image("harbor.qianfan123.com/toolset/toolsetcore:${toolset_image_version}").inside  {
+                            sh "DNET_PRODUCT=${params.DNET_PRODUCT} DNET_PROFILE=${params.DNET_PROFILE} PRESET_IMAGE_VERSION=$PRESET_IMAGE_VERSION RECEIVERS_WHEN_SUCCEED=${params.RECEIVERS_WHEN_SUCCEED}  hdops deploy db_upgrade_check --url ${env.BUILD_URL} --receivers ${params.receivers} --buildurl ${env.BUILD_URL}"
+					    }
 					}
 				}
 			}
@@ -129,7 +141,9 @@ pipeline {
 							sh "DNET_PRODUCT=${params.DNET_PRODUCT} DNET_PROFILE=${params.DNET_PROFILE} hdops grayscale_publish --subsystem ${params.subsystem} --action modify_cmdb"
 						}
 					}else {
-						sh "DNET_PRODUCT=${params.DNET_PRODUCT} DNET_PROFILE=${params.DNET_PROFILE} hdops grayscale_publish --subsystem ${params.subsystem} --action modify_cmdb"
+					    docker.image("harbor.qianfan123.com/toolset/toolsetcore:${toolset_image_version}").inside  {
+                            sh "DNET_PRODUCT=${params.DNET_PRODUCT} DNET_PROFILE=${params.DNET_PROFILE} hdops grayscale_publish --subsystem ${params.subsystem} --action modify_cmdb"
+					    }
 					}
 				}
 			}
@@ -143,8 +157,10 @@ pipeline {
 		        			sh "DNET_AK=${params.DNET_AK} DNET_PRODUCT=${params.DNET_PRODUCT} DNET_PROFILE=${params.DNET_PROFILE} PRESET_IMAGE_VERSION=$PRESET_IMAGE_VERSION hdops deploy appinstall --subsystem ${params.subsystem} --stackids $stackIds  --operate ${params.action} --tag ${params.tag}"
 						}
 					}else {
-						sh "DNET_PRODUCT=${params.DNET_PRODUCT} DNET_PROFILE=${params.DNET_PROFILE} PRESET_IMAGE_VERSION=$PRESET_IMAGE_VERSION hdops deploy image_download --subsystem ${params.subsystem} --stackids $stackIds"
-		        		sh "DNET_AK=${params.DNET_AK} DNET_PRODUCT=${params.DNET_PRODUCT} DNET_PROFILE=${params.DNET_PROFILE} PRESET_IMAGE_VERSION=$PRESET_IMAGE_VERSION hdops deploy appinstall --subsystem ${params.subsystem} --stackids $stackIds  --operate ${params.action} --tag ${params.tag}"
+					    docker.image("harbor.qianfan123.com/toolset/toolsetcore:${toolset_image_version}").inside  {
+                            sh "DNET_PRODUCT=${params.DNET_PRODUCT} DNET_PROFILE=${params.DNET_PROFILE} PRESET_IMAGE_VERSION=$PRESET_IMAGE_VERSION hdops deploy image_download --subsystem ${params.subsystem} --stackids $stackIds"
+                            sh "DNET_AK=${params.DNET_AK} DNET_PRODUCT=${params.DNET_PRODUCT} DNET_PROFILE=${params.DNET_PROFILE} PRESET_IMAGE_VERSION=$PRESET_IMAGE_VERSION hdops deploy appinstall --subsystem ${params.subsystem} --stackids $stackIds  --operate ${params.action} --tag ${params.tag}"
+					    }
 					}
 				}
 			}

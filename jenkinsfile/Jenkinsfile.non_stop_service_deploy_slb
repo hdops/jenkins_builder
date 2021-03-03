@@ -10,6 +10,10 @@ if (env.whether_post){
 }else{
     whether_post ="True"
 }
+def toolset_image_version="0.0.1"
+if (env.toolset_image_version){
+    toolset_image_version = env.toolset_image_version
+}
 pipeline {
     agent {label node}
     options {
@@ -48,10 +52,12 @@ pipeline {
 						}
 					}else {
 					    echo "======下载toolset======"
-						retry(2){
-							sh "DNET_PROFILE=integration_test DNET_PRODUCT=dnet hdops download_toolset --branch ${params.GIT_BRANCH} -p ."
-						}
-						sh "tar zxf toolset.tar.gz -C ${WORKSPACE}"
+					    docker.image("harbor.qianfan123.com/toolset/toolsetcore:${toolset_image_version}").inside  {
+                            retry(2){
+                                sh "DNET_PROFILE=integration_test DNET_PRODUCT=dnet hdops download_toolset --branch ${params.GIT_BRANCH} -p ."
+                            }
+                            sh "tar zxf toolset.tar.gz -C ${WORKSPACE}"
+                        }
 					}
 				}
 			}
@@ -67,7 +73,9 @@ pipeline {
                             }
                         }else {
                             echo "======验证镜像======"
-                            sh "DNET_PRODUCT=$DNET_PRODUCT DNET_PROFILE=$DNET_PROFILE hdops deploy validate --subsystem  ${params.subsystem}"
+                            docker.image("harbor.qianfan123.com/toolset/toolsetcore:${toolset_image_version}").inside  {
+                                sh "DNET_PRODUCT=$DNET_PRODUCT DNET_PROFILE=$DNET_PROFILE hdops deploy validate --subsystem  ${params.subsystem}"
+                            }
                         }
 				    }
 				}
@@ -84,7 +92,9 @@ pipeline {
                             }
                         }else {
                             echo "======检查env======"
-                            sh "DNET_AK=$DNET_AK DNET_PRODUCT=$DNET_PRODUCT DNET_PROFILE=$DNET_PROFILE hdops generate_env_file --subsystem ${params.subsystem}"
+                            docker.image("harbor.qianfan123.com/toolset/toolsetcore:${toolset_image_version}").inside  {
+                                sh "DNET_AK=$DNET_AK DNET_PRODUCT=$DNET_PRODUCT DNET_PROFILE=$DNET_PROFILE hdops generate_env_file --subsystem ${params.subsystem}"
+                            }
                         }
 				    }
 				}
@@ -101,7 +111,9 @@ pipeline {
                             }
                         }else {
                             echo "======下线blue节点======"
-                            sh "DNET_PRODUCT=$DNET_PRODUCT DNET_PROFILE=$DNET_PROFILE DNET_AK=$DNET_AK hdops change_slb --tag blue --image ${params.image}"
+                            docker.image("harbor.qianfan123.com/toolset/toolsetcore:${toolset_image_version}").inside  {
+                                sh "DNET_PRODUCT=$DNET_PRODUCT DNET_PROFILE=$DNET_PROFILE DNET_AK=$DNET_AK hdops change_slb --tag blue --image ${params.image}"
+                            }
                         }
 				    }
 				}
@@ -119,8 +131,10 @@ pipeline {
                             }
                         }else {
                             echo "======blue节点：验证镜像、下载镜像、部署应用======"
-                            sh "DNET_PRODUCT=$DNET_PRODUCT DNET_PROFILE=$DNET_PROFILE hdops deploy image_download --subsystem ${params.image} --tag blue"
-                            sh "DNET_AK=$DNET_AK DNET_PRODUCT=$DNET_PRODUCT DNET_PROFILE=$DNET_PROFILE hdops deploy appinstall --subsystem ${params.image} --tag blue"
+                            docker.image("harbor.qianfan123.com/toolset/toolsetcore:${toolset_image_version}").inside  {
+                                sh "DNET_PRODUCT=$DNET_PRODUCT DNET_PROFILE=$DNET_PROFILE hdops deploy image_download --subsystem ${params.image} --tag blue"
+                                sh "DNET_AK=$DNET_AK DNET_PRODUCT=$DNET_PRODUCT DNET_PROFILE=$DNET_PROFILE hdops deploy appinstall --subsystem ${params.image} --tag blue"
+                            }
                         }
 				    }
 				}
@@ -144,13 +158,15 @@ pipeline {
                             }
                         }else {
                             echo "======健康检查blue节点======"
-                            if(env.retry_num){
-                                def n ="${retry_num}".toInteger()
-                                retry(n){
+                            docker.image("harbor.qianfan123.com/toolset/toolsetcore:${toolset_image_version}").inside  {
+                                if(env.retry_num){
+                                    def n ="${retry_num}".toInteger()
+                                    retry(n){
+                                        sh "DINGTALK_TOKEN=$DINGTALK_TOKEN DNET_PRODUCT=$DNET_PRODUCT DNET_PROFILE=$DNET_PROFILE hdops health_check --subsystem ${params.image}  --tag blue"
+                                    }
+                                }else{
                                     sh "DINGTALK_TOKEN=$DINGTALK_TOKEN DNET_PRODUCT=$DNET_PRODUCT DNET_PROFILE=$DNET_PROFILE hdops health_check --subsystem ${params.image}  --tag blue"
                                 }
-                            }else{
-                                sh "DINGTALK_TOKEN=$DINGTALK_TOKEN DNET_PRODUCT=$DNET_PRODUCT DNET_PROFILE=$DNET_PROFILE hdops health_check --subsystem ${params.image}  --tag blue"
                             }
                         }
 				    }
@@ -168,7 +184,9 @@ pipeline {
                             }
                         }else {
                             echo "======下线green节点======"
-                            sh "DNET_PRODUCT=$DNET_PRODUCT DNET_PROFILE=$DNET_PROFILE DNET_AK=$DNET_AK hdops change_slb --tag green --image ${params.image}"
+                            docker.image("harbor.qianfan123.com/toolset/toolsetcore:${toolset_image_version}").inside  {
+                                sh "DNET_PRODUCT=$DNET_PRODUCT DNET_PROFILE=$DNET_PROFILE DNET_AK=$DNET_AK hdops change_slb --tag green --image ${params.image}"
+                            }
                         }
 				    }
 				}
@@ -186,8 +204,10 @@ pipeline {
                             }
                         }else {
                             echo "======green节点：下载镜像、部署应用======"
-                            sh "DNET_PRODUCT=$DNET_PRODUCT DNET_PROFILE=$DNET_PROFILE hdops deploy image_download --subsystem ${params.image} --tag green"
-                            sh "DNET_AK=$DNET_AK DNET_PRODUCT=$DNET_PRODUCT DNET_PROFILE=$DNET_PROFILE hdops deploy appinstall --subsystem ${params.image} --tag green"
+                            docker.image("harbor.qianfan123.com/toolset/toolsetcore:${toolset_image_version}").inside  {
+                                sh "DNET_PRODUCT=$DNET_PRODUCT DNET_PROFILE=$DNET_PROFILE hdops deploy image_download --subsystem ${params.image} --tag green"
+                                sh "DNET_AK=$DNET_AK DNET_PRODUCT=$DNET_PRODUCT DNET_PROFILE=$DNET_PROFILE hdops deploy appinstall --subsystem ${params.image} --tag green"
+                            }
                         }
 				    }
 				}
@@ -211,13 +231,15 @@ pipeline {
                             }
                         }else {
                             echo "======健康检查green节点======"
-                            if(env.retry_num){
-                                def n ="${retry_num}".toInteger()
-                                retry(n){
+                            docker.image("harbor.qianfan123.com/toolset/toolsetcore:${toolset_image_version}").inside  {
+                                if(env.retry_num){
+                                    def n ="${retry_num}".toInteger()
+                                    retry(n){
+                                        sh "DINGTALK_TOKEN=$DINGTALK_TOKEN DNET_PRODUCT=$DNET_PRODUCT DNET_PROFILE=$DNET_PROFILE hdops health_check --subsystem ${params.image}  --tag green"
+                                    }
+                                }else{
                                     sh "DINGTALK_TOKEN=$DINGTALK_TOKEN DNET_PRODUCT=$DNET_PRODUCT DNET_PROFILE=$DNET_PROFILE hdops health_check --subsystem ${params.image}  --tag green"
                                 }
-                            }else{
-                                sh "DINGTALK_TOKEN=$DINGTALK_TOKEN DNET_PRODUCT=$DNET_PRODUCT DNET_PROFILE=$DNET_PROFILE hdops health_check --subsystem ${params.image}  --tag green"
                             }
                         }
 				    }
@@ -235,7 +257,9 @@ pipeline {
                             }
                         }else {
                             echo "======上线所有节点======"
-                            sh "DNET_PRODUCT=$DNET_PRODUCT DNET_PROFILE=$DNET_PROFILE DNET_AK=$DNET_AK hdops change_slb --tag None --image ${params.image}"
+                            docker.image("harbor.qianfan123.com/toolset/toolsetcore:${toolset_image_version}").inside  {
+                                sh "DNET_PRODUCT=$DNET_PRODUCT DNET_PROFILE=$DNET_PROFILE DNET_AK=$DNET_AK hdops change_slb --tag None --image ${params.image}"
+                            }
                         }
 				    }
 				}

@@ -10,6 +10,10 @@ if (env.whether_post){
 }else{
     whether_post ="True"
 }
+def toolset_image_version="0.0.1"
+if (env.toolset_image_version){
+    toolset_image_version = env.toolset_image_version
+}
 pipeline{
   agent {label node}
   // options{
@@ -36,11 +40,13 @@ pipeline{
                             sh "DNET_PROFILE=${params.DNET_PROFILE}  DNET_PRODUCT=${params.DNET_PRODUCT} hdops dataimport ptonline --jira ${params.JIRA} --dryrun ${params.dryrun} --max_load_threads ${params.MAX_LOAD_THREADS} --critical_load_threads ${params.CRITICAL_LOAD_THREADS}"
                         }
                     }else {
-                        retry(2){
-                            sh "DNET_PROFILE=integration_test DNET_PRODUCT=dnet hdops download_toolset --branch ${params.GIT_BRANCH} -p ."
+                        docker.image("harbor.qianfan123.com/toolset/toolsetcore:${toolset_image_version}").inside  {
+                            retry(2){
+                                sh "DNET_PROFILE=integration_test DNET_PRODUCT=dnet hdops download_toolset --branch ${params.GIT_BRANCH} -p ."
+                            }
+                            sh "tar zxf toolset.tar.gz -C ${WORKSPACE}"
+                            sh "DNET_PROFILE=${params.DNET_PROFILE}  DNET_PRODUCT=${params.DNET_PRODUCT} hdops dataimport ptonline --jira ${params.JIRA} --dryrun ${params.dryrun} --max_load_threads ${params.MAX_LOAD_THREADS} --critical_load_threads ${params.CRITICAL_LOAD_THREADS}"
                         }
-                        sh "tar zxf toolset.tar.gz -C ${WORKSPACE}"
-                        sh "DNET_PROFILE=${params.DNET_PROFILE}  DNET_PRODUCT=${params.DNET_PRODUCT} hdops dataimport ptonline --jira ${params.JIRA} --dryrun ${params.dryrun} --max_load_threads ${params.MAX_LOAD_THREADS} --critical_load_threads ${params.CRITICAL_LOAD_THREADS}"
                     }
                 }
 			}

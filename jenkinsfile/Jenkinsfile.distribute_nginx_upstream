@@ -10,6 +10,10 @@ if (env.whether_post){
 }else{
     whether_post ="True"
 }
+def toolset_image_version="0.0.1"
+if (env.toolset_image_version){
+    toolset_image_version = env.toolset_image_version
+}
 pipeline {
    agent {label node}
     options {
@@ -48,18 +52,20 @@ pipeline {
                             sh "DNET_PROFILE=${params.DNET_PROFILE} DNET_PRODUCT=${params.DNET_PRODUCT} hdops distribute_nginx_upstream --nginx_hostid ${params.nginx_hostid} --dryrun ${params.dryrun}"
                         }
                     }else {
-                        echo "profile is ${params.DNET_PROFILE}"
-                        echo "sub systems are ${params.subsystem}"
-                        echo "svnreversion is ${params.svnreversion}"
-                        echo "upstream URL is ${params.upurl}"
-                        retry(2){
-                            sh "DNET_PROFILE=integration_test DNET_PRODUCT=dnet hdops download_toolset --branch ${params.GIT_BRANCH} -p ."
+                        docker.image("harbor.qianfan123.com/toolset/toolsetcore:${toolset_image_version}").inside  {
+                            echo "profile is ${params.DNET_PROFILE}"
+                            echo "sub systems are ${params.subsystem}"
+                            echo "svnreversion is ${params.svnreversion}"
+                            echo "upstream URL is ${params.upurl}"
+                            retry(2){
+                                sh "DNET_PROFILE=integration_test DNET_PRODUCT=dnet hdops download_toolset --branch ${params.GIT_BRANCH} -p ."
+                            }
+                            sh "tar zxf toolset.tar.gz -C ${WORKSPACE}"
+                            sh "echo step1 -- check nginx upstream.conf"
+                            sh "DNET_PROFILE=${params.DNET_PROFILE} DNET_PRODUCT=${params.DNET_PRODUCT} hdops check_nginx --local_nginx_check True --local_nginx_path nginx/dly/production.yaml"
+                            sh "echo step2 -- distribute nginx upstream.conf"
+                            sh "DNET_PROFILE=${params.DNET_PROFILE} DNET_PRODUCT=${params.DNET_PRODUCT} hdops distribute_nginx_upstream --nginx_hostid ${params.nginx_hostid} --dryrun ${params.dryrun}"
                         }
-                        sh "tar zxf toolset.tar.gz -C ${WORKSPACE}"
-                        sh "echo step1 -- check nginx upstream.conf"
-                        sh "DNET_PROFILE=${params.DNET_PROFILE} DNET_PRODUCT=${params.DNET_PRODUCT} hdops check_nginx --local_nginx_check True --local_nginx_path nginx/dly/production.yaml"
-                        sh "echo step2 -- distribute nginx upstream.conf"
-                        sh "DNET_PROFILE=${params.DNET_PROFILE} DNET_PRODUCT=${params.DNET_PRODUCT} hdops distribute_nginx_upstream --nginx_hostid ${params.nginx_hostid} --dryrun ${params.dryrun}"
                     }
                 }
 			}

@@ -1,3 +1,4 @@
+// 该 pipeline 已过时
 def nodes=["master"]
 if (env.node){
     nodes =env.node.split(',')

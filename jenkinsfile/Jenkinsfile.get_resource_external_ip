@@ -10,6 +10,10 @@ if (env.whether_post){
 }else{
     whether_post ="True"
 }
+def toolset_image_version="0.0.1"
+if (env.toolset_image_version){
+    toolset_image_version = env.toolset_image_version
+}
 pipeline {
     agent {label node}
     stages {
@@ -37,23 +41,25 @@ pipeline {
                             parallel tasks
                         }
                     }else {
-                        def tasks = [ : ]
-                        tasks['aliyun-test'] = {
-                            stage('aliyun-test') {
-                                sh "DNET_CLOUD_VENDOR=aliyun hdmon get_resource_external_ip"
+                        docker.image("harbor.qianfan123.com/toolset/toolsetcore:${toolset_image_version}").inside  {
+                            def tasks = [ : ]
+                            tasks['aliyun-test'] = {
+                                stage('aliyun-test') {
+                                    sh "DNET_CLOUD_VENDOR=aliyun hdmon get_resource_external_ip"
+                                }
                             }
-                        }
-                        tasks['aliyun-pro'] = {
-                            stage('aliyun-pro') {
-                                sh "DNET_CLOUD_VENDOR=aliyun DNET_PROFILE=production hdmon get_resource_external_ip"
+                            tasks['aliyun-pro'] = {
+                                stage('aliyun-pro') {
+                                    sh "DNET_CLOUD_VENDOR=aliyun DNET_PROFILE=production hdmon get_resource_external_ip"
+                                }
                             }
-                        }
-                        tasks['tencent'] = {
-                            stage('tencent') {
-                                sh "DNET_CLOUD_VENDOR=tencent hdmon get_resource_external_ip "
+                            tasks['tencent'] = {
+                                stage('tencent') {
+                                    sh "DNET_CLOUD_VENDOR=tencent hdmon get_resource_external_ip "
+                                }
                             }
+                            parallel tasks
                         }
-                        parallel tasks
                     }
                 }
 			}
