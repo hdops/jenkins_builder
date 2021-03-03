@@ -26,7 +26,7 @@ pipeline {
 	//     choice(name: 'DNET_PROFILE', choices:'integration_test\ndev_test\nbranch_test\nproduction\nprd-guoda\nuat')
 	//     choice(name: 'DNET_PRODUCT', choices:'baas')
 	//     string(name: 'image', defaultValue: 'None', description: '镜像名称',trim: true)
-	//     string(name: 'consul_url', defaultValue: '', description: 'consul的地址，例如127.0.0.1:8500',trim: true)
+	//     string(name: 'consul_url', defaultValue: '', description: 'consul的地址，例如127.0.3.0-private:8500',trim: true)
 	//     choice(name: 'action', choices:'register\nderegister\ndestroy')
 	//     choice(name: 'dryrun', choices:'True\nFalse')
 	//     string(name: 'GIT_BRANCH', defaultValue: 'develop', description: 'git branch',trim: true)

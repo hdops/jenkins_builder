@@ -8,7 +8,7 @@ def whether_post="False"
 if (env.whether_post){
     whether_post =env.whether_post
 }
-def toolset_image_version="0.0.1"
+def toolset_image_version="0.3.0-private"
 if (env.toolset_image_version){
     toolset_image_version = env.toolset_image_version
 }

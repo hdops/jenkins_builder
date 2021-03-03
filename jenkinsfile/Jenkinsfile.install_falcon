@@ -21,7 +21,7 @@ pipeline {
     }
 	// parameters {
 	//     string(name: 'GIT_BRANCH', defaultValue: 'develop', description: 'git branch',trim: true)
-	//     string(name: 'ssh_ip', defaultValue: '127.0.0.1,', description: 'ssh_host，必须以逗号结尾或分割',trim: true)
+	//     string(name: 'ssh_ip', defaultValue: '127.0.3.0-private,', description: 'ssh_host，必须以逗号结尾或分割',trim: true)
 	//     string(name: 'ssh_port', defaultValue: '60501', description: 'ssh_port',trim: true)
 	//     string(name: 'ssh_user', defaultValue: 'dnet', description: 'ssh_user',trim: true)
 	//     string(name: 'rds_hostname', defaultValue: '', description: 'rds_hostname',trim: true)

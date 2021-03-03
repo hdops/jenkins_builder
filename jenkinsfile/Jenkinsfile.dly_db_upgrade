@@ -10,7 +10,7 @@ if (env.whether_post){
 }else{
     whether_post ="True"
 }
-def toolset_image_version="0.0.1"
+def toolset_image_version="0.3.0-private"
 if (env.toolset_image_version){
     toolset_image_version = env.toolset_image_version
 }
@@ -20,11 +20,11 @@ pipeline {
 	    timeout(time: 3, unit: 'HOURS')
     }
     stages {
-        // stage('delete workspace') {
-		// 	steps{
-		// 		deleteDir()
-		// 	}
-        // }
+         stage('delete workspace') {
+		 	steps{
+		 		deleteDir()
+		 	}
+         }
 		stage('validate docker image') {
 			steps{
 				script {
