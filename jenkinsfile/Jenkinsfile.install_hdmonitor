@@ -1,3 +1,4 @@
+// 该 pipeline 已过时
 def nodes=["master"]
 if (env.node){
     nodes =env.node.split(',')
@@ -11,53 +12,4 @@ nodes.each{ n->
         }
     }
 
-}
-// def node="master"
-// if (env.node){
-//     node =env.node
-// }
-
-// def whether_post="True"
-// if (env.whether_post){
-//     whether_post =env.whether_post
-// }
-
-// pipeline {
-//     agent {label node}
-// 	options {
-// 	//     buildDiscarder(logRotator(numToKeepStr: '10'))
-// 	//     disableConcurrentBuilds()
-// 	//     disableResume()
-// 	    timeout(time: 3, unit: 'HOURS')
-//     }
-// 	stages {
-//         stage('卸载') {
-// 			steps{
-// 				sh 'pip uninstall -y hdmonitor'
-// 			}
-//         }
-//         stage('安装') {
-// 			steps{
-// 				sh 'pip install -i http://mirrors.qianfan123.com/root/hdops --trusted-host mirrors.qianfan123.com hdmonitor'
-// 			}
-//         }
-//     }
-// 	post {
-//     // 构建失败之后钉钉通知
-//         failure {
-//             script {
-//                 if (whether_post == "True") {
-//                     dingTalk accessToken: "${DINGTALK_TOKEN}", imageUrl: '', jenkinsUrl: "${jenkinsUrl}", message: "构建失败 ${new Date().format("yyyy-MM-dd HH:mm:ss")}", notifyPeople: ''
-//                 }
-//             }
-//         }
-// 	// 失败转成功之后钉钉通知
-//         fixed {
-//             script {
-//                 if (whether_post == "True") {
-//                     dingTalk accessToken: "${DINGTALK_TOKEN}", imageUrl: '', jenkinsUrl: "${jenkinsUrl}", message: "恢复正常 ${new Date().format("yyyy-MM-dd HH:mm:ss")}", notifyPeople: ''
-//                 }
-//             }
-//         }
-//     }
-// }
+}                                               

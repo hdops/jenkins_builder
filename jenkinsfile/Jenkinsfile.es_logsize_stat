@@ -7,30 +7,15 @@ def whether_post="False"
 if (env.whether_post){
     whether_post =env.whether_post
 }
-
+def toolset_image_version="0.3.0-private"
+if (env.toolset_image_version){
+    toolset_image_version = env.toolset_image_version
+}
 pipeline {
     agent {label node}
-	options {
-	//     buildDiscarder(logRotator(numToKeepStr: '20'))
-	//     disableConcurrentBuilds()
-	//     disableResume()
+	options {   
 	    timeout(time: 3, unit: 'HOURS')
-    }
-	// environment{
-    //     DNET_PRIVATE_AK="$DNET_PRIVATE_AK"
-    //     DNET_PRIVATE_AS="$DNET_PRIVATE_AS"
- 	// }
-	// parameters {
-	//    choice(name:'DNET_PROFILE', choices:'production')
-	//    string(name: 'DNET_PRODUCT', defaultValue: 'dly')
-	//   // choice(name: 'DINGTALK_TOKEN', choices: ['36bbaea49f5af51cbf7cbdc4b99487981c900f24dffed03ba1834304b1c4a280'])
-	//    string(name: 'receivers', defaultValue: 'gaoweizong@hd123.com')
-	//    string(name: 'falon_host', defaultValue: 'localhost')
-	//    string(name: 'GIT_BRANCH', defaultValue: 'develop')
-	// }
-	// triggers {
-    //     cron 'H/15 * * * *'
-    //  }
+    }               
     stages {
 		stage('es logsize stat') {
 			steps{
@@ -44,13 +29,13 @@ pipeline {
 							sh "DINGTALK_TOKEN=${DINGTALK_TOKEN} DNET_PRODUCT=${params.DNET_PRODUCT} DNET_PROFILE=${params.DNET_PROFILE} hdmon es_logsize_stat --receivers ${params.receivers} --falon_host ${params.falon_host}"
 						}
 					}else {
-                        //docker.image("harbor.qianfan123.com/toolset/toolsetcore:0.3.0").withRun('-v /var/run/docker.sock:/var/run/docker.sock') {
+                        docker.image("harbor.qianfan123.com/toolset/toolsetcore:${toolset_image_version}").inside  {
                             retry(2){
                                 sh "DNET_PROFILE=integration_test DNET_PRODUCT=dnet hdops download_toolset --branch ${params.GIT_BRANCH} -p ."
                             }
                             sh "tar zxf toolset.tar.gz -C ${WORKSPACE}"
                             sh "DINGTALK_TOKEN=${DINGTALK_TOKEN} DNET_PRODUCT=${params.DNET_PRODUCT} DNET_PROFILE=${params.DNET_PROFILE} hdmon es_logsize_stat --receivers ${params.receivers} --falon_host ${params.falon_host}"
-                        //}
+                        }
 
 					}
 				}

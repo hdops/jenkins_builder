@@ -10,6 +10,10 @@ if (env.whether_post){
 }else{
     whether_post ="True"
 }
+def toolset_image_version="1.0.0"
+if (env.toolset_image_version){
+    toolset_image_version = env.toolset_image_version
+}
 pipeline {
     agent {label node}
     options {
@@ -45,10 +49,12 @@ pipeline {
 		        			sh "pt-auto-tools report"
 						}
 					}else {
-						    sh "pt-auto-tools clean"
+					    docker.image("harbor.qianfan123.com/toolset/pt-auto-tools:${toolset_image_version}").inside {
+					        sh "pt-auto-tools clean"
 		        			sh "pt-auto-tools jmeter"
 		        			sh "pt-auto-tools analysis"
 		        			sh "pt-auto-tools report"
+					    }
 					}
 				}
 			}

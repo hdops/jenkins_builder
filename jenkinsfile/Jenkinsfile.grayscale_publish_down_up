@@ -10,25 +10,15 @@ if (env.whether_post){
 }else{
     whether_post ="True"
 }
+def toolset_image_version="0.3.0-private"
+if (env.toolset_image_version){
+    toolset_image_version = env.toolset_image_version
+}
 pipeline {
     agent {label node}
-    options {
-	//     buildDiscarder(logRotator(numToKeepStr: '10'))
-	//     disableConcurrentBuilds()
-	//     disableResume()
+    options {   
 	    timeout(time: 3, unit: 'HOURS')
-    }
-	// environment{
-        // DNET_PRIVATE_AK="$DNET_PRIVATE_AK"
-        // DNET_PRIVATE_AS="$DNET_PRIVATE_AS"
- 	// }
-	// parameters {
-	    // choice(name: 'DNET_PRODUCT', choices:'baas')
-	    // choice(name:'DNET_PROFILE', choices:'integration_test\nessp_branch\nbranch_test\nperformance_test\ntencent-int')
-	    // string(name: 'GIT_BRANCH', defaultValue: 'develop', description: 'git branch',trim: true)
-	    // string(name: 'subsystem', defaultValue: 'dss', description: '子系统，多值以逗号分隔，例如ras,sas,sas_config,tlsp-web,waltz_account,tlsp,spms_web_ui,spms,spms_h3_transfer,pas,zuul,eureka,mq,account,config,sequence',trim: true)
-	    // string(name: 'action', choices: 'up\ndown', description: 'up or down',trim: true)
-	// }
+    }           
     stages {
         stage('delete workspace') {
             steps{
@@ -50,14 +40,16 @@ pipeline {
 							sh "tar zxf toolset.tar.gz -C ${WORKSPACE}"
 						}
 					}else {
-						echo "active profile is ${params.DNET_PROFILE}"
-						echo "toolset path is ${WORKSPACE}"
-						echo "sub systems are ${params.subsystem}"
-						echo "skip version is ${params.skipversion}"
-						retry(2){
-							sh "DNET_PROFILE=integration_test DNET_PRODUCT=dnet hdops download_toolset --branch ${params.GIT_BRANCH} -p ."
-						}
-						sh "tar zxf toolset.tar.gz -C ${WORKSPACE}"
+					    docker.image("harbor.qianfan123.com/toolset/toolsetcore:${toolset_image_version}").inside  {
+                            echo "active profile is ${params.DNET_PROFILE}"
+                            echo "toolset path is ${WORKSPACE}"
+                            echo "sub systems are ${params.subsystem}"
+                            echo "skip version is ${params.skipversion}"
+                            retry(2){
+                                sh "DNET_PROFILE=integration_test DNET_PRODUCT=dnet hdops download_toolset --branch ${params.GIT_BRANCH} -p ."
+                            }
+                            sh "tar zxf toolset.tar.gz -C ${WORKSPACE}"
+					    }
 					}
 				}
 			}
@@ -70,7 +62,9 @@ pipeline {
 							sh "DNET_PRODUCT=${params.DNET_PRODUCT} DNET_PROFILE=${params.DNET_PROFILE} hdops grayscale_publish --subsystem ${params.subsystem} --action ${params.action}"
 						}
 					}else {
-						sh "DNET_PRODUCT=${params.DNET_PRODUCT} DNET_PROFILE=${params.DNET_PROFILE} hdops grayscale_publish --subsystem ${params.subsystem} --action ${params.action}"
+					    docker.image("harbor.qianfan123.com/toolset/toolsetcore:${toolset_image_version}").inside  {
+                            sh "DNET_PRODUCT=${params.DNET_PRODUCT} DNET_PROFILE=${params.DNET_PROFILE} hdops grayscale_publish --subsystem ${params.subsystem} --action ${params.action}"
+					    }
 					}
 				}
 			}

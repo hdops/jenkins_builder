@@ -10,25 +10,16 @@ if (env.whether_post){
 }else{
     whether_post ="True"
 }
+def toolset_image_version="0.3.0-private"
+if (env.toolset_image_version){
+    toolset_image_version = env.toolset_image_version
+}
 pipeline {
-    agent {label node}
-    // options {
-	//     buildDiscarder(logRotator(numToKeepStr: '10'))
-    // }
+    agent {label node}   
 	environment{
         DNET_PRIVATE_AK="$DNET_PRIVATE_AK"
         DNET_PRIVATE_AS="$DNET_PRIVATE_AS"
- 	}
-	// parameters {
-	//     // choice(name:'DNET_PROFILE', choices:'integration_test\nuat\nproduction')
-	//     // choice(name:'DNET_PRODUCT', choices:'pay')
-	//     // string(name: 'download_url', defaultValue: '', description: '编译构建记录的jenkins url',trim: true)
-	//     // string(name: 'fromversion', defaultValue: '', description: 'fromversion，用于命名包名',trim: true)
-	//     // string(name: 'toversion', defaultValue: '', description: 'toversion，用于命名包名',trim: true)
-	//     // string(name: 'alias', defaultValue: 'develop', description: 'alias，用于命名包名',trim: true)
-	//     // string(name: 'subsystem', defaultValue: 'pay-h5', description: '子系统，例如pay-h5',trim: true)
-	//     // string(name: 'GIT_BRANCH', defaultValue: 'develop', description: 'git branch',trim: true)
-	// }
+ 	}          
 
 	stages {
 	    stage('生成静态资源包并上传到oss上') {
@@ -49,13 +40,13 @@ pipeline {
                         echo "active profile is ${params.DNET_PROFILE}"
                         echo "product is ${params.DNET_PRODUCT}"
                         echo "workspace is $WORKSPACE"
-                        //docker.image("harbor.qianfan123.com/toolset/toolsetcore:0.3.0").withRun('-v /var/run/docker.sock:/var/run/docker.sock') {
+                        docker.image("harbor.qianfan123.com/toolset/toolsetcore:${toolset_image_version}").inside {
                             retry(2){
                                 sh "DNET_PROFILE=integration_test DNET_PRODUCT=dnet hdops download_toolset --branch ${params.GIT_BRANCH} -p ."
                             }
                             sh "tar zxf toolset.tar.gz -C $WORKSPACE"
                             sh "DNET_PRODUCT=${params.DNET_PRODUCT} DNET_PROFILE=${params.DNET_PROFILE} hdmon create_resource_package --download_url ${params.download_url} --fromversion ${params.fromversion} --toversion ${params.toversion} --alias ${params.alias} --subsystem ${params.subsystem}"
-                        //}
+                        }
                     }
                 }
 			}

@@ -10,19 +10,15 @@ if (env.whether_post){
 }else{
     whether_post ="True"
 }
+def toolset_image_version="0.3.0-private"
+if (env.toolset_image_version){
+    toolset_image_version = env.toolset_image_version
+}
 pipeline {
     agent {label node}
-	options {
-	//     buildDiscarder(logRotator(numToKeepStr: '10'))
-	//     disableConcurrentBuilds()
-	//     disableResume()
+	options {   
 	    timeout(time: 3, unit: 'HOURS')
-    }
-	// parameters {
-	//    choice(name:'DNET_PROFILE', choices:'integration_test\nperformance_test\nproduction\nbranch_test\nessp_branch')
-	//    string(name: 'DNET_PRODUCT', defaultValue: 'baas', description: '')
-	//    choice(name: 'DNET_CLOUD_VENDOR', choices: ['tencent','aliyun','jdcloud'])
-	// }
+    }     
     stages {
         stage('检查slb权重') {
 			steps{
@@ -37,12 +33,14 @@ pipeline {
                             sh "DNET_AK=${params.DNET_AK} DINGTALK_TOKEN=${DINGTALK_TOKEN} DNET_PRODUCT=${params.DNET_PRODUCT} DNET_PROFILE=${params.DNET_PROFILE} DNET_CLOUD_VENDOR=${params.DNET_CLOUD_VENDOR} hdmon checkslb_weight"
                         }
                     }else{
-                        echo "profile is ${params.DNET_PROFILE}"
-                        retry(2){
-                            sh "DNET_PROFILE=integration_test DNET_PRODUCT=dnet hdops download_toolset --branch ${params.GIT_BRANCH} -p ."
+                        docker.image("harbor.qianfan123.com/toolset/toolsetcore:${toolset_image_version}").inside {
+                            echo "profile is ${params.DNET_PROFILE}"
+                            retry(2){
+                                sh "DNET_PROFILE=integration_test DNET_PRODUCT=dnet hdops download_toolset --branch ${params.GIT_BRANCH} -p ."
+                            }
+                            sh "tar zxf toolset.tar.gz -C ${WORKSPACE}"
+                            sh "DNET_AK=${params.DNET_AK} DINGTALK_TOKEN=${DINGTALK_TOKEN} DNET_PRODUCT=${params.DNET_PRODUCT} DNET_PROFILE=${params.DNET_PROFILE} DNET_CLOUD_VENDOR=${params.DNET_CLOUD_VENDOR} hdmon checkslb_weight"
                         }
-                        sh "tar zxf toolset.tar.gz -C ${WORKSPACE}"
-                        sh "DNET_AK=${params.DNET_AK} DINGTALK_TOKEN=${DINGTALK_TOKEN} DNET_PRODUCT=${params.DNET_PRODUCT} DNET_PROFILE=${params.DNET_PROFILE} DNET_CLOUD_VENDOR=${params.DNET_CLOUD_VENDOR} hdmon checkslb_weight"
                     }
                 }
 				

@@ -10,29 +10,16 @@ if (env.whether_post){
 }else{
     whether_post ="False"
 }
+def toolset_image_version="0.3.0-private"
+if (env.toolset_image_version){
+    toolset_image_version = env.toolset_image_version
+}
 pipeline {
     agent {label node}
-	options {
-	//     buildDiscarder(logRotator(numToKeepStr: '10'))
-	//     disableConcurrentBuilds()
-	//     disableResume()
+	options {   
 	    timeout(time: 3, unit: 'HOURS')
 
-    }
-	// parameters {
-	   // choice(name:'DNET_PROFILE', choices:'integration_test\nperformance_test\nproduction\nbranch_test\nessp_branch')
-	   // string(name: 'DNET_PRODUCT', defaultValue: 'baas', description: '')
-	   // choice(name: 'DNET_CLOUD_VENDOR', choices: ['tencent','aliyun','jdcloud'])
-	   // string(name: 'image', defaultValue: 'None', description: '镜像名称')
-	   // choice(name: 'tag', choices:'None\nblue\ngreen')
-	   // choice(name: 'dryrun', choices:'True\nFalse')
-	   // string(name: 'GIT_BRANCH', defaultValue: 'develop')
-	   // string(name: 'DNET_AK', defaultValue: 'resource/aliyun_access_key.yaml', description: 'ak peizhi',trim: true)
-	// }
-    // environment{
-        // DNET_PRIVATE_AK="$DNET_PRIVATE_AK"
-        // DNET_PRIVATE_AS="$DNET_PRIVATE_AS"
-    // }
+    }              
     stages {
 	    stage('change slb') {
 			steps{
@@ -54,7 +41,7 @@ pipeline {
                         echo "active profile is ${params.DNET_PROFILE}"
                         echo "product is ${params.DNET_PRODUCT}"
                         echo "workspace is $WORKSPACE"
-                        docker.image("harbor.qianfan123.com/toolset/toolsetcore:0.3.0").withRun('-v /var/run/docker.sock:/var/run/docker.sock') {
+                        docker.image("harbor.qianfan123.com/toolset/toolsetcore:${toolset_image_version}").inside {
                             retry(2){
                                 sh "DNET_PROFILE=integration_test DNET_PRODUCT=dnet hdops download_toolset --branch ${params.GIT_BRANCH} -p ."
                             }

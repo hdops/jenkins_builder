@@ -7,18 +7,12 @@ def whether_post="False"
 if (env.whether_post){
     whether_post =env.whether_post
 }
+def toolset_image_version="0.3.0-private"
+if (env.toolset_image_version){
+    toolset_image_version = env.toolset_image_version
+}
 pipeline {
-   agent {label node}
-    // options {
-	//     buildDiscarder(logRotator(numToKeepStr: '10'))
-    // }
-    // environment{
-    //     DNET_PRIVATE_AK="$DNET_PRIVATE_AK"
-    //     DNET_PRIVATE_AS="$DNET_PRIVATE_AS"
- 	// }
-	// triggers {
-    //     cron 'H/5 * * * *'
-    //  }
+   agent {label node}          
     stages {
         stage('baas_interface_check') {
 			steps{
@@ -37,7 +31,7 @@ pipeline {
                             }
                         }
                     }else{
-                        //docker.image("harbor.qianfan123.com/toolset/toolsetcore:0.3.0").withRun('-v /var/run/docker.sock:/var/run/docker.sock') {
+                        docker.image("harbor.qianfan123.com/toolset/toolsetcore:${toolset_image_version}").inside {
                             echo "profile is ${params.DNET_PROFILE}"
                             echo "sub systems are ${params.subsystem}"
                             echo "upstream URL is ${params.upurl}"
@@ -48,7 +42,7 @@ pipeline {
                             retry(2){
                                 sh "DINGTALK_TOKEN=${DINGTALK_TOKEN} DNET_PROFILE=${params.DNET_PROFILE} DNET_PRODUCT=${params.DNET_PRODUCT}  hdmon baas_interface_check --cfgname ${params.cfgname}"
                             }
-                        //}
+                        }
 
                     }
                 }

@@ -7,18 +7,15 @@ def whether_post="False"
 if (env.whether_post){
     whether_post =env.whether_post
 }
-
+def toolset_image_version="0.3.0-private"
+if (env.toolset_image_version){
+    toolset_image_version = env.toolset_image_version
+}
 pipeline {
     agent {label node}
-    options {
-	//    buildDiscarder(logRotator(numToKeepStr: '10'))
-	//    disableConcurrentBuilds()
-    //    disableResume()
+    options {   
         timeout(time: 10, unit: 'MINUTES')
-    }
-	// parameters {
-	//     string(name: 'container_restart_workspace', defaultValue: '/hdapp/workspace/MAS_healthcheck_production', description: 'workspace',trim: true)
-	// }
+    }   
 
 	stages {
 	    stage('重启健康失败的容器') {
@@ -27,17 +24,13 @@ pipeline {
 
                     script {
                         if (env.on_k8s){
-                            container('hdtoolsetcore'){
-                                // sh "cd ${params.container_restart_workspace}"
-                                // sh "cat need_restart_container.json"
+                            container('hdtoolsetcore'){  
                                 sh "DINGTALK_TOKEN=${DINGTALK_TOKEN} DNET_PRODUCT=${params.DNET_PRODUCT} DNET_PROFILE=${params.DNET_PROFILE} hdops container_restart --need_restart_container ${params.need_restart_container}"
                             }
                         }else {
-                            //docker.image("harbor.qianfan123.com/toolset/toolsetcore:0.3.0").withRun('-v /var/run/docker.sock:/var/run/docker.sock') {
-                                // sh "cd ${params.container_restart_workspace}"
-                                // sh "cat need_restart_container.json"
+                            docker.image("harbor.qianfan123.com/toolset/toolsetcore:${toolset_image_version}").inside {
                                 sh "DINGTALK_TOKEN=${DINGTALK_TOKEN} DNET_PRODUCT=${params.DNET_PRODUCT} DNET_PROFILE=${params.DNET_PROFILE} hdops container_restart --need_restart_container ${params.need_restart_container}"
-                            //}
+                            }
 
                         }
                     }

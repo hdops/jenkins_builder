@@ -12,10 +12,7 @@ def credentialsId="qianfan"
 
 pipeline {
 	agent none
-    options {
-	//     buildDiscarder(logRotator(numToKeepStr: '10'))
-	//     disableConcurrentBuilds()
-	//     disableResume()
+    options {   
 	    timeout(time: 1, unit: 'HOURS')
     } 
     stages {
@@ -35,8 +32,7 @@ pipeline {
 			    }
              }
              steps{ 
-				echo "checkout http://github.app.hd123.cn:10080/${git_project}.git  branch:${build_branch}"
-				// git branch: "${build_branch}", credentialsId: "${credentialsId}", url: 'http://github.app.hd123.cn:10080/${git_project}.git'
+				echo "checkout http://github.app.hd123.cn:10080/${git_project}.git  branch:${build_branch}" 
                 checkout([$class: 'GitSCM', branches: [[name: '*/${build_branch}']],userRemoteConfigs: [[url: 'http://github.app.hd123.cn:10080/${git_project}.git',credentialsId: "${credentialsId}"]]])
 				
 				echo "npm_shell is ${npm_shell}"

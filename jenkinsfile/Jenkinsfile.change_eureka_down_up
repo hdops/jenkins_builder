@@ -10,27 +10,15 @@ if (env.whether_post){
 }else{
     whether_post ="True"
 }
+def toolset_image_version="0.3.0-private"
+if (env.toolset_image_version){
+    toolset_image_version = env.toolset_image_version
+}
 pipeline {
     agent {label node}
-    options {
-	//     buildDiscarder(logRotator(numToKeepStr: '10'))
-	//     disableConcurrentBuilds()
-	//     disableResume()
+    options {   
 	    timeout(time: 1, unit: 'HOURS')
-    }
-	// environment{
-    //     DNET_PRIVATE_AK="$DNET_PRIVATE_AK"
-    //     DNET_PRIVATE_AS="$DNET_PRIVATE_AS"
- 	// }
-	// parameters {
-	//     choice(name:'DNET_PROFILE', choices:'integration_test\ndev_test\nbranch_test\nproduction\nprd-guoda\nuat')
-	//     choice(name:'DNET_PRODUCT', choices:'baas')
-	//     string(name: 'image', defaultValue: 'None', description: '镜像名称',trim: true)
-	//     choice(name:'tag', choices:'--请选择\nNone\nblue\ngreen')
-	//     string(name:'subsystem', defaultValue:'None', description: '镜像名称',trim: true)
-	//     choice(name:'dryrun', choices:'True\nFalse')
-	//     string(name: 'GIT_BRANCH', defaultValue: 'develop', description: 'git branch',trim: true)
-	// }
+    }             
 	stages {
 	    stage('change eureka') {
 			steps{
@@ -47,14 +35,16 @@ pipeline {
 							sh "DNET_PRODUCT=${params.DNET_PRODUCT} DNET_PROFILE=${params.DNET_PROFILE} hdops change_eureka_down_up --subsystem ${params.subsystem} --tag ${params.tag} --dryrun ${params.dryrun}"
 						}
 					}else {
-						echo "active profile is ${params.DNET_PROFILE}"
-						echo "product is ${params.DNET_PRODUCT}"
-						echo "workspace is $WORKSPACE"
-						retry(2){
-							sh "DNET_PROFILE=integration_test DNET_PRODUCT=dnet hdops download_toolset --branch ${params.GIT_BRANCH} -p ."
-						}
-						sh "tar zxf toolset.tar.gz -C $WORKSPACE"
-						sh "DNET_PRODUCT=${params.DNET_PRODUCT} DNET_PROFILE=${params.DNET_PROFILE} hdops change_eureka_down_up --subsystem ${params.subsystem} --tag ${params.tag} --dryrun ${params.dryrun}"
+					    docker.image("harbor.qianfan123.com/toolset/toolsetcore:${toolset_image_version}").inside {
+					        echo "active profile is ${params.DNET_PROFILE}"
+                            echo "product is ${params.DNET_PRODUCT}"
+                            echo "workspace is $WORKSPACE"
+                            retry(2){
+                                sh "DNET_PROFILE=integration_test DNET_PRODUCT=dnet hdops download_toolset --branch ${params.GIT_BRANCH} -p ."
+                            }
+                            sh "tar zxf toolset.tar.gz -C $WORKSPACE"
+                            sh "DNET_PRODUCT=${params.DNET_PRODUCT} DNET_PROFILE=${params.DNET_PROFILE} hdops change_eureka_down_up --subsystem ${params.subsystem} --tag ${params.tag} --dryrun ${params.dryrun}"
+					    }
 					}
 				}
 			}

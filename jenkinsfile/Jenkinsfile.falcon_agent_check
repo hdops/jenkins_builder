@@ -1,3 +1,4 @@
+// 该 pipeline 已过时
 def node="master"
 if (env.node){
     node =env.node
@@ -10,26 +11,9 @@ if (env.whether_post){
 
 pipeline {
     agent {label node}
-	options {
-	//     buildDiscarder(logRotator(numToKeepStr: '10'))
-	//     disableConcurrentBuilds()
-	//     disableResume()
+	options {   
 	    timeout(time: 3, unit: 'HOURS')
-    }
-    // environment{
-    //     DNET_PRIVATE_AK="$DNET_PRIVATE_AK"
-    //     DNET_PRIVATE_AS="$DNET_PRIVATE_AS"
- 	// }
-	// parameters {
-	//    choice(name:'DNET_PROFILE', choices:['integration_test'])
-	//    string(name: 'DNET_PRODUCT', defaultValue: 'pay', description: '')
-	//    string(name: 'GIT_BRANCH', defaultValue: 'develop', description: 'develop')
-	//    string(name: 'receivers', defaultValue: 'gaoweizong@hd123.com,lishuaiqi@hd123.com,buhaiqing@hd123.com', description: 'develop')
-	//   // string(name: 'DINGTALK_TOKEN', defaultValue: '7d09ce0ee780c81299dd790940f78c5c5fa8f4b73a8d8c31f25a7b5f4be87e58', description: '钉钉token')
-	// }
-	// triggers {
-    //     cron 'H/15 * * * *'
-    //  }
+    }              
     stages {
         stage('删除workspace') {
             steps{
@@ -54,8 +38,7 @@ pipeline {
                                 sh "DNET_PROFILE=integration_test DNET_PRODUCT=dnet hdops download_toolset --branch ${params.GIT_BRANCH} -p ."
                             }
                             sh "tar zxf toolset.tar.gz -C ${WORKSPACE}"
-                            sh "DNET_PROFILE=${params.DNET_PROFILE}  DNET_PRODUCT=${params.DNET_PRODUCT} hdops falcon_agent_check"
-			           // }
+                            sh "DNET_PROFILE=${params.DNET_PROFILE}  DNET_PRODUCT=${params.DNET_PRODUCT} hdops falcon_agent_check" 
 
 			        }
 

@@ -10,27 +10,16 @@ if (env.whether_post){
 }else{
     whether_post ="True"
 }
+def toolset_image_version="0.3.0-private"
+if (env.toolset_image_version){
+    toolset_image_version = env.toolset_image_version
+}
 pipeline {
     agent {label node}
-	options {
-	//     buildDiscarder(logRotator(numToKeepStr: '10'))
-	//     disableConcurrentBuilds()
-	//     disableResume()
+	options {   
 	    timeout(time: 3, unit: 'HOURS')
 
-    }
-	// parameters {
-	   // choice(name: 'DNET_PRODUCT', choices:'dly')
-	   // choice(name:'DNET_PROFILE', choices:'production\nintegration_test\nbranch_test')
-	   // string(name: 'container', defaultValue: '', description: 'container name')
-	   // string(name: 'domain', defaultValue: 'http://download.qianfan123.com', description: 'oss绑定的域名，如果oss的endpoint能直接访问，则不需要传此参数')
-	   // string(name: 'GIT_BRANCH', defaultValue: 'develop', description: 'git分支')
-	   // string(name: 'DINGTALK_TOKEN', defaultValue: '1e93162cec116308ffb29fe19ba83b0f57121cc79cfb9b0958e1b1025e55a445', description: '钉钉token')
-	// }
-    // environment{
-        // DNET_PRIVATE_AK="$DNET_PRIVATE_AK"
-        // DNET_PRIVATE_AS="$DNET_PRIVATE_AS"
-    // }
+    }            
     stages {
 	    stage('dump file') {
 			steps{
@@ -48,15 +37,17 @@ pipeline {
                             sh "DNET_PRODUCT=${params.DNET_PRODUCT} DNET_PROFILE=${params.DNET_PROFILE} hdmon dump_file --container ${params.container} --domain ${params.domain} --download_jmap ${params.download_jmap}"
                         }
                     }else{
-                        deleteDir()
-                        echo "active profile is ${params.DNET_PROFILE}"
-                        echo "product is ${params.DNET_PRODUCT}"
-                        echo "workspace is $WORKSPACE"
-                        retry(2){
-                            sh "DNET_PROFILE=integration_test DNET_PRODUCT=dnet hdops download_toolset --branch ${params.GIT_BRANCH} -p ."
+                        docker.image("harbor.qianfan123.com/toolset/toolsetcore:${toolset_image_version}").inside  {
+                            deleteDir()
+                            echo "active profile is ${params.DNET_PROFILE}"
+                            echo "product is ${params.DNET_PRODUCT}"
+                            echo "workspace is $WORKSPACE"
+                            retry(2){
+                                sh "DNET_PROFILE=integration_test DNET_PRODUCT=dnet hdops download_toolset --branch ${params.GIT_BRANCH} -p ."
+                            }
+                            sh "tar zxf toolset.tar.gz -C $WORKSPACE"
+                            sh "DNET_PRODUCT=${params.DNET_PRODUCT} DNET_PROFILE=${params.DNET_PROFILE} hdmon dump_file --container ${params.container} --domain ${params.domain} --download_jmap ${params.download_jmap}"
                         }
-                        sh "tar zxf toolset.tar.gz -C $WORKSPACE"
-                        sh "DNET_PRODUCT=${params.DNET_PRODUCT} DNET_PROFILE=${params.DNET_PROFILE} hdmon dump_file --container ${params.container} --domain ${params.domain} --download_jmap ${params.download_jmap}"
                     }
                     
                 }

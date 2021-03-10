@@ -10,6 +10,10 @@ if (env.whether_post){
 }else{
     whether_post ="True"
 }
+def toolset_image_version="1.0.0"
+if (env.toolset_image_version){
+    toolset_image_version = env.toolset_image_version
+}
 pipeline {
     agent {label node}
     options {
@@ -21,12 +25,12 @@ pipeline {
                 deleteDir()
             }
         }
-		stage('download toolset') {
-			steps{
+		stage('image envfile') {
+		    steps{
 				script{
-					if(env.on_k8s){
+					if (env.on_k8s){
 						container("toolsetcore-k8s"){
-							echo "active profile is ${params.DNET_PROFILE}"
+						    echo "active profile is ${params.DNET_PROFILE}"
 							echo "toolset path is ${WORKSPACE}"
 							echo "sub systems are ${params.subsystem}"
 							echo "skip version is ${params.skipversion}"
@@ -35,27 +39,19 @@ pipeline {
 								sh "DNET_PROFILE=integration_test DNET_PRODUCT=dnet hdopsctl download_toolset --project toolset-k8s-config --branch ${params.GIT_BRANCH} -p ."
 							}
 							sh "tar zxf toolset-k8s-config.tar.gz -C ${WORKSPACE}"
-						}
-					}else {
-						echo "active profile is ${params.DNET_PROFILE}"
-						echo "toolset path is ${WORKSPACE}"
-						retry(2){
-							sh "DNET_PROFILE=integration_test DNET_PRODUCT=dnet hdopsctl download_toolset --project toolset-k8s-config --branch ${params.GIT_BRANCH} -p ."
-						}
-						sh "tar zxf toolset-k8s-config.tar.gz -C ${WORKSPACE}"
-					}
-				}
-			}
-        }
-		stage('image envfile') {
-		    steps{
-				script{
-					if (env.on_k8s){
-						container("toolsetcore-k8s"){
 		        			sh "DNET_AK=${params.DNET_AK} DNET_PRODUCT=${params.DNET_PRODUCT} DNET_PROFILE=${params.DNET_PROFILE} PRESET_IMAGE_VERSION=${params.PRESET_IMAGE_VERSION} hdopsctl envfile --image ${params.image} --version ${params.version}"
 						}
 					}else {
-						sh "DNET_AK=${params.DNET_AK} DNET_PRODUCT=${params.DNET_PRODUCT} DNET_PROFILE=${params.DNET_PROFILE} PRESET_IMAGE_VERSION=${params.PRESET_IMAGE_VERSION} hdopsctl envfile --image ${params.image} --version ${params.version}"
+                        docker.image("harbor.qianfan123.com/toolset/toolsetcore-k8s:${toolset_image_version}").inside {
+                            echo "active profile is ${params.DNET_PROFILE}"
+                            echo "toolset path is ${WORKSPACE}"
+                            retry(2){
+                                sh "DNET_PROFILE=integration_test DNET_PRODUCT=dnet hdopsctl download_toolset --project toolset-k8s-config --branch ${params.GIT_BRANCH} -p ."
+                            }
+                            sh "tar zxf toolset-k8s-config.tar.gz -C ${WORKSPACE}"
+                            sh "DNET_AK=${params.DNET_AK} DNET_PRODUCT=${params.DNET_PRODUCT} DNET_PROFILE=${params.DNET_PROFILE} PRESET_IMAGE_VERSION=${params.PRESET_IMAGE_VERSION} hdopsctl envfile --image ${params.image} --version ${params.version}"
+
+                        }
 					}
 				}
 			}

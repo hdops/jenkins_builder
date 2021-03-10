@@ -7,31 +7,15 @@ def whether_post="False"
 if (env.whether_post){
     whether_post =env.whether_post
 }
-
+def toolset_image_version="0.3.0-private"
+if (env.toolset_image_version){
+    toolset_image_version = env.toolset_image_version
+}
 pipeline {
     agent {label node}
-    options {
-	//     buildDiscarder(logRotator(numToKeepStr: '10'))
-	//     disableConcurrentBuilds()
-	//     disableResume()
+    options {   
 	    timeout(time: 15, unit: 'MINUTES')
-    }
-	// environment{
-    //     DNET_PRIVATE_AK="$DNET_PRIVATE_AK"
-    //     DNET_PRIVATE_AS="$DNET_PRIVATE_AS"
- 	// }
-	// parameters {
-	//     choice(name:'DNET_PROFILE', choices:'integration_test\ndev_test\nbranch_test\nproduction\nprd-guoda\nuat')
-	//     choice(name:'DNET_PRODUCT', choices:'baas')
-	//     string(name: 'query', defaultValue: 'level=ERROR', description: '查询条件,以逗号分隔（目前只支持query url方式） -- 例如a=1,b=2 多个选项之间是AND关系',trim: true)
-	//     string(name: 'fields', defaultValue: 'stack', description: '自定义关心的字段',trim: true)
-	//     string(name: 'receivers', defaultValue: 'xuhao@hd123.com,yanghaixiao@hd123.com,wangweijun@hd123.com,wanghao@hd123.com,chenrizhang@hd123.com', description: '收件人列表，多值以逗号分隔',trim: true)
-	//     string(name: 'interval', defaultValue: '15m', description: '查询指定时间间隔内的数据，1h标识1小时前, 1d一天前,15m标识15分钟前',trim: true)
-	//     string(name: 'GIT_BRANCH', defaultValue: 'develop', description: 'git branch',trim: true)
-	// }
-	// triggers {
-    //     cron 'H/15 * * * *'
-    //  }
+    }                
 
 	stages {
 	    stage('日志巡检') {
@@ -49,7 +33,7 @@ pipeline {
 							sh "DNET_PRODUCT=${params.DNET_PRODUCT} DNET_PROFILE=${params.DNET_PROFILE} hdmon es_dailycheck --whitelist_file ${params.whitelist_file} --index_and_type ${params.index_and_type} --fields ${params.fields} --query ${params.query} --receivers ${params.receivers} --interval ${params.interval}"
 						}
 					}else {
-					    //docker.image("harbor.qianfan123.com/toolset/toolsetcore:0.3.0").withRun('-v /var/run/docker.sock:/var/run/docker.sock') {
+					    docker.image("harbor.qianfan123.com/toolset/toolsetcore:${toolset_image_version}").inside {
                             echo "active profile is ${params.DNET_PROFILE}"
                             echo "product is ${params.DNET_PRODUCT}"
                             echo "workspace is $WORKSPACE"
@@ -58,7 +42,7 @@ pipeline {
                             }
                             sh "tar zxf toolset.tar.gz -C $WORKSPACE"
                             sh "DNET_PRODUCT=${params.DNET_PRODUCT} DNET_PROFILE=${params.DNET_PROFILE} hdmon es_dailycheck --whitelist_file ${params.whitelist_file} --index_and_type ${params.index_and_type} --fields ${params.fields} --query ${params.query} --receivers ${params.receivers} --interval ${params.interval}"
-					    //}
+					    }
 
 					}
 				}

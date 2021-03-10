@@ -10,24 +10,14 @@ if (env.whether_post){
 }else{
     whether_post ="True"
 }
+def toolset_image_version="0.3.0-private"
+if (env.toolset_image_version){
+    toolset_image_version = env.toolset_image_version
+}
 pipeline {
     agent {label node}
-	//options {
-	//    buildDiscarder(logRotator(numToKeepStr: '10'))
-    //}
-    // environment{
-    //     DNET_PRIVATE_AK="$DNET_PRIVATE_AK"
-    //     DNET_PRIVATE_AS="$DNET_PRIVATE_AS"
- 	// }
-	// parameters {
-	//    choice(name:'DNET_PROFILE', choices:'production\nintegration_test')
-	//    string(name: 'DNET_PRODUCT', defaultValue: 'dnet', description: '')
-	//    string(name: 'GIT_BRANCH', defaultValue: 'develop', description: 'develop')
-	//   // string(name: 'DINGTALK_TOKEN', defaultValue: '9d304e1503e4e21aa7ecd9d30d8d0fab168901cbfc989310921c98e44bf07c47', description: '钉钉token')
-	// }
-	// triggers {
-    //     cron 'H/2 * * * *'
-    //  }
+	//options { 
+    //}             
     stages {
 		stage('restart logstash') {
 			steps{
@@ -47,8 +37,7 @@ pipeline {
                             archiveArtifacts 'statistics_faild_logstash.json'
                         }
                     }else {
-                        docker.image("harbor.qianfan123.com/toolset/toolsetcore:0.3.0").pull()
-                        docker.image("harbor.qianfan123.com/toolset/toolsetcore:0.3.0").withRun('-v /var/run/docker.sock:/var/run/docker.sock') {
+                        docker.image("harbor.qianfan123.com/toolset/toolsetcore:${toolset_image_version}").inside  {
                             echo "active profile is ${params.DNET_PROFILE}"
                             echo "toolset path is ${WORKSPACE}"
                             echo "sub systems are ${params.subsystem}"

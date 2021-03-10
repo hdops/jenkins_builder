@@ -10,27 +10,16 @@ if (env.whether_post){
 }else{
     whether_post ="True"
 }
+def toolset_image_version="0.3.0-private"
+if (env.toolset_image_version){
+    toolset_image_version = env.toolset_image_version
+}
 pipeline {
     agent {label node}
-	options {
-	//     buildDiscarder(logRotator(numToKeepStr: '10'))
-	//     disableConcurrentBuilds()
-	//     disableResume()
+	options {   
 	    timeout(time: 3, unit: 'HOURS')
 
-    }
-	// parameters {
-	   // choice(name:'DNET_PROFILE', choices:'integration_test\nperformance_test\nproduction\nbranch_test\nessp_branch')
-	   // string(name: 'DNET_PRODUCT', defaultValue: 'baas', description: '')
-	   // string(name: 'source_gitbranch', defaultValue: 'master')
-	   // string(name: 'targit_gitbranch', defaultValue: 'release/release')
-	   // string(name: 'target_profile', defaultValue: 'branch_test')
-	   // string(name: 'subsystem', defaultValue: 'None', description: '子系统')
-	// }
-    // environment{
-        // DNET_PRIVATE_AK="$DNET_PRIVATE_AK"
-        // DNET_PRIVATE_AS="$DNET_PRIVATE_AS"
-    // }
+    }            
     stages {
 	    stage('compare_envfile') {
 			steps{
@@ -52,13 +41,13 @@ pipeline {
                         echo "active profile is ${params.DNET_PROFILE}"
                         echo "product is ${params.DNET_PRODUCT}"
                         echo "workspace is $WORKSPACE"
-                        //docker.image("harbor.qianfan123.com/toolset/toolsetcore:0.3.0").withRun('-v /var/run/docker.sock:/var/run/docker.sock') {
+                        docker.image("harbor.qianfan123.com/toolset/toolsetcore:${toolset_image_version}").inside {
                             retry(2){
                                 sh "DNET_PROFILE=integration_test DNET_PRODUCT=dnet hdops download_toolset --branch ${params.GIT_BRANCH} -p ."
                             }
                             sh "tar zxf toolset.tar.gz -C $WORKSPACE"
                             sh "DNET_PRODUCT=${params.DNET_PRODUCT} DNET_PROFILE=${params.DNET_PROFILE} hdops compare_envfiles --source_gitbranch ${params.source_gitbranch} --target_gitbranch ${params.target_gitbranch} --subsystem ${params.subsystem} --target_profile ${params.target_profile}"
-                        //}
+                        }
                     }
                     
                 }

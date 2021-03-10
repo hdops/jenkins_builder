@@ -10,24 +10,12 @@ if (env.whether_post){
 }else{
     whether_post ="True"
 }
+def toolset_image_version="0.3.0-private"
+if (env.toolset_image_version){
+    toolset_image_version = env.toolset_image_version
+}
 pipeline {
-    agent {label node}
-	// options {
-	//     buildDiscarder(logRotator(numToKeepStr: '10'))
-	//     disableConcurrentBuilds()
-	//     disableResume()
-	//   timeout(time: 3, unit: 'HOURS')
-    // }
-	// environment{
-    //     DNET_PRIVATE_AK="$DNET_PRIVATE_AK"
-    //     DNET_PRIVATE_AS="$DNET_PRIVATE_AS"
- 	// }
-	// parameters {
-	//    choice(name:'DNET_PROFILE', choices:'integration_test\nproduction')
-	//    string(name: 'DNET_PRODUCT', defaultValue: 'dnet', description: '')
-	//    string(name: 'jira')
-	//    string(name: 'GIT_BRANCH', defaultValue: 'develop', description: 'git branch')
-	// }
+    agent {label node}                
     stages {
         stage('dts synchronization') {
 			steps{
@@ -44,14 +32,16 @@ pipeline {
                             sh "DNET_PRODUCT=${params.DNET_PRODUCT} DNET_PROFILE=${params.DNET_PROFILE}  hdops dts_sync --jira ${params.jira}"
                         }
                     }else {
-                        echo "active profile is ${params.DNET_PROFILE}"
-                        echo "product is ${params.DNET_PRODUCT}"
-                        echo "workspace is $WORKSPACE"
-                        retry(2){
-                            sh "DNET_PROFILE=integration_test DNET_PRODUCT=dnet hdops download_toolset --branch ${params.GIT_BRANCH} -p ."
+                        docker.image("harbor.qianfan123.com/toolset/toolsetcore:${toolset_image_version}").inside  {
+                            echo "active profile is ${params.DNET_PROFILE}"
+                            echo "product is ${params.DNET_PRODUCT}"
+                            echo "workspace is $WORKSPACE"
+                            retry(2){
+                                sh "DNET_PROFILE=integration_test DNET_PRODUCT=dnet hdops download_toolset --branch ${params.GIT_BRANCH} -p ."
+                            }
+                            sh "tar zxf toolset.tar.gz -C $WORKSPACE"
+                            sh "DNET_PRODUCT=${params.DNET_PRODUCT} DNET_PROFILE=${params.DNET_PROFILE}  hdops dts_sync --jira ${params.jira}"
                         }
-                        sh "tar zxf toolset.tar.gz -C $WORKSPACE"
-                        sh "DNET_PRODUCT=${params.DNET_PRODUCT} DNET_PROFILE=${params.DNET_PROFILE}  hdops dts_sync --jira ${params.jira}"
                     }
                 }
 			}

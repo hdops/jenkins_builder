@@ -7,18 +7,15 @@ def whether_post="True"
 if (env.whether_post){
     whether_post =env.whether_post
 }
-
+def toolset_image_version="0.3.0-private"
+if (env.toolset_image_version){
+    toolset_image_version = env.toolset_image_version
+}
 pipeline {
     agent {label node}
-    options {
-	//     buildDiscarder(logRotator(numToKeepStr: '10'))
-	//     disableResume()
+    options {  
 	    timeout(time: 3, unit: 'HOURS')
-    }
-	// environment{
-        // DNET_PRIVATE_AK="$DNET_PRIVATE_AK"
-        // DNET_PRIVATE_AS="$DNET_PRIVATE_AS"
- 	// }
+    }    
     stages {
         stage('changeeureka_down_up blue') {
             steps{

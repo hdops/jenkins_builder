@@ -8,31 +8,15 @@ def whether_post="False"
 if (env.whether_post){
     whether_post =env.whether_post
 }
-
+def toolset_image_version="0.3.0-private"
+if (env.toolset_image_version){
+    toolset_image_version = env.toolset_image_version
+}
 pipeline {
     agent {label node}
-    options {
-	//     buildDiscarder(logRotator(numToKeepStr: '10'))
-	//     disableConcurrentBuilds()
-	//     disableResume()
+    options {   
 	    timeout(time: 3, unit: 'HOURS')
-    }
-	// environment{
-    //     DNET_PRIVATE_AK="$DNET_PRIVATE_AK"
-    //     DNET_PRIVATE_AS="$DNET_PRIVATE_AS"
- 	// }
-	// parameters {
-	//     choice(name:'DNET_PROFILE', choices:'integration_test\ndev_test\nbranch_test\nproduction\nprd-guoda\nuat')
-	//     choice(name:'DNET_PRODUCT', choices:'dnet')
-	//     string(name: 'filename', defaultValue: '/hdapp/*/logs/*', description: '日志文件路径',trim: true)
-	//     string(name: 'days', defaultValue: '30', description: '日志保留天数',trim: true)
-	//     string(name: 'logtype', defaultValue: 'access', description: '日志清理类型access or nginx or zookeeper',trim: true)
-	//     choice(name:'dryrun', choices:'True\nFalse')
-	//     string(name: 'GIT_BRANCH', defaultValue: 'develop', description: 'git branch',trim: true)
-	// }
-	// triggers {
-    //     cron 'H 1 * * *'
-    //  }
+    }                
 
 	stages {
 		stage('日志清理') {
@@ -53,7 +37,7 @@ pipeline {
 							sh "DNET_PRODUCT=${params.DNET_PRODUCT} DNET_PROFILE=${params.DNET_PROFILE} hdmon check_ecslog_keepday --filename $filename --days ${params.days} --logtype ${params.logtype} --dryrun ${params.dryrun}"
 						}
 					}else {
-                        //docker.image("harbor.qianfan123.com/toolset/toolsetcore:0.3.0").withRun('-v /var/run/docker.sock:/var/run/docker.sock') {
+                        docker.image("harbor.qianfan123.com/toolset/toolsetcore:${toolset_image_version}").inside {
                             echo "active profile is ${params.DNET_PROFILE}"
                             echo "toolset path is ${WORKSPACE}"
                             echo "sub systems are ${params.subsystem}"
@@ -65,7 +49,7 @@ pipeline {
                             }
                             sh "tar zxf toolset.tar.gz -C ${WORKSPACE}"
                             sh "DNET_PRODUCT=${params.DNET_PRODUCT} DNET_PROFILE=${params.DNET_PROFILE} hdmon check_ecslog_keepday --filename $filename --days ${params.days} --logtype ${params.logtype} --dryrun ${params.dryrun}"
-                        //}
+                        }
 					}
 				}
 

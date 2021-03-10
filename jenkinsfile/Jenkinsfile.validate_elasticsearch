@@ -8,28 +8,17 @@ if (env.whether_post){
     whether_post =env.whether_post
 }
 
+def toolset_image_version="0.3.0-private"
+if (env.toolset_image_version){
+    toolset_image_version = env.toolset_image_version
+}
 pipeline {
     agent {
        label  node
    }
-	options {
-	//    buildDiscarder(logRotator(numToKeepStr: '20'))
-	//    disableConcurrentBuilds()
-	//    disableResume()
+	options {   
 	    timeout(time: 5, unit: 'MINUTES')
-    }
-	// environment{
-    //     DNET_PRIVATE_AK="$DNET_PRIVATE_AK"
-    //     DNET_PRIVATE_AS="$DNET_PRIVATE_AS"
- 	// }
-	// parameters {
-	//    choice(name:'DNET_PROFILE', choices:'production')
-	//   // choice(name: 'DINGTALK_TOKEN', choices: ['9d304e1503e4e21aa7ecd9d30d8d0fab168901cbfc989310921c98e44bf07c47'])
-	//    string(name: 'GIT_BRANCH', defaultValue: 'develop')
-	// }
-	// triggers {
-    //     cron 'H/15 * * * *'
-    //  }
+    }            
     stages {  
 		stage('validate elasticsearch') {
             steps {
@@ -44,11 +33,13 @@ pipeline {
                             sh "DINGTALK_TOKEN=${DINGTALK_TOKEN} DNET_PRODUCT=${params.DNET_PRODUCT} DNET_PROFILE=${params.DNET_PROFILE} hdops valiate_elasticsearch --job_name ${params.job_name} --disk_space_usage ${params.disk_space_usage}"
                         }
                     }else{
-                        retry(2){
-                            sh "DNET_PROFILE=integration_test DNET_PRODUCT=dnet hdops download_toolset --branch ${params.GIT_BRANCH} -p ."
+                        docker.image("harbor.qianfan123.com/toolset/toolsetcore:${toolset_image_version}").inside  {
+                            retry(2){
+                                sh "DNET_PROFILE=integration_test DNET_PRODUCT=dnet hdops download_toolset --branch ${params.GIT_BRANCH} -p ."
+                            }
+                            sh "tar zxf toolset.tar.gz -C ${WORKSPACE}"
+                            sh "DINGTALK_TOKEN=${DINGTALK_TOKEN} DNET_PRODUCT=${params.DNET_PRODUCT} DNET_PROFILE=${params.DNET_PROFILE} hdops valiate_elasticsearch --job_name ${params.job_name} --disk_space_usage ${params.disk_space_usage}"
                         }
-                        sh "tar zxf toolset.tar.gz -C ${WORKSPACE}"
-                        sh "DINGTALK_TOKEN=${DINGTALK_TOKEN} DNET_PRODUCT=${params.DNET_PRODUCT} DNET_PROFILE=${params.DNET_PROFILE} hdops valiate_elasticsearch --job_name ${params.job_name} --disk_space_usage ${params.disk_space_usage}"
                     }
                 }
             }

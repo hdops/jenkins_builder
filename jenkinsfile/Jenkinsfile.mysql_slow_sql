@@ -8,30 +8,15 @@ def whether_post="False"
 if (env.whether_post){
     whether_post =env.whether_post
 }
-
+def toolset_image_version="0.3.0-private"
+if (env.toolset_image_version){
+    toolset_image_version = env.toolset_image_version
+}
 pipeline {
     agent {label node}
-    options {
-	//    buildDiscarder(logRotator(numToKeepStr: '20'))
-	//    disableConcurrentBuilds()
-	//    disableResume()
+    options {   
 	    timeout(time: 3, unit: 'HOURS')
-    }
-	// environment{
-    //     DNET_PRIVATE_AK="$DNET_PRIVATE_AK"
-    //     DNET_PRIVATE_AS="$DNET_PRIVATE_AS"
- 	// }
-	// parameters {
-	//     choice(name:'DNET_PROFILE', choices:'performance_test\nbranch_test\nproduction\nprd-guoda\nuat')
-	//     choice(name:'DNET_CLOUD_VENDOR', choices:'aliyun\ntencent')
-	//     string(name: 'dbinstanceid', description: 'rds实例id,多个以逗号分割',trim: true)
-	//     string(name: 'receivers', description: '收件人列表,多个以英文逗号分割',trim: true)
-	//     string(name: 'start_time', description: '查看时间段的开始时间,格式：yyyy-MM-dd ,如2019-05-20',trim: true)
-	//     string(name: 'end_time', description: '查看时间段的结束时间，不能小于查询开始日期，与查询开始日期间隔不超过31天。格式：yyyy-MM-dd，如2019-05-21',trim: true)
-	//     string(name: 'GIT_BRANCH', defaultValue: 'develop', description: 'git branch',trim: true)
-	//     string(name: 'DNET_AK', defaultValue: 'resource/aliyun_access_key.yaml', description: 'ak信息',trim: true)
-
-	// }
+    }              
 
 	stages {
 	    stage('get mysql slow sql') {
@@ -49,7 +34,7 @@ pipeline {
 							sh "DNET_CLOUD_VENDOR=${params.DNET_CLOUD_VENDOR} DNET_AK=${params.DNET_AK} DNET_PROFILE=${params.DNET_PROFILE} hdmon mysql_slow_sql --dbinstanceid ${params.dbinstanceid} --receivers ${params.receivers} --start_time ${params.start_time} --end_time ${params.end_time}"
 						}
 					}else {
-					    //docker.image("harbor.qianfan123.com/toolset/toolsetcore:0.3.0").withRun('-v /var/run/docker.sock:/var/run/docker.sock') {
+					    docker.image("harbor.qianfan123.com/toolset/toolsetcore:${toolset_image_version}").inside  {
                             echo "active profile is ${params.DNET_PROFILE}"
                             echo "product is ${params.DNET_PRODUCT}"
                             echo "workspace is $WORKSPACE"
@@ -58,7 +43,7 @@ pipeline {
                             }
                             sh "tar zxf toolset.tar.gz -C $WORKSPACE"
                             sh "DNET_CLOUD_VENDOR=${params.DNET_CLOUD_VENDOR} DNET_AK=${params.DNET_AK} DNET_PROFILE=${params.DNET_PROFILE} hdmon mysql_slow_sql --dbinstanceid ${params.dbinstanceid} --receivers ${params.receivers} --start_time ${params.start_time} --end_time ${params.end_time}"
-                        //}
+                        }
 					}
 				}
 			}

@@ -10,22 +10,12 @@ if (env.whether_post){
 }else{
     whether_post ="True"
 }
+def toolset_image_version="0.3.0-private"
+if (env.toolset_image_version){
+    toolset_image_version = env.toolset_image_version
+}
 pipeline {
-    agent {label node}
-    // options {
-	//     buildDiscarder(logRotator(numToKeepStr: '10'))
-    // }
-	// environment{
-    //     DNET_PRIVATE_AK="$DNET_PRIVATE_AK"
-    //     DNET_PRIVATE_AS="$DNET_PRIVATE_AS"
- 	// }
-	// parameters {
-	//     choice(name:'DNET_PROFILE', choices:'integration_test\nuat\nproduction')
-	//     choice(name:'DNET_PRODUCT', choices:'pay')
-	//     string(name: 'download_package', defaultValue: '', description: '需要部署的包名',trim: true)
-	//     string(name: 'subsystem', defaultValue: 'pay-h5', description: '子系统，例如pay-h5',trim: true)
-	//     string(name: 'GIT_BRANCH', defaultValue: 'develop', description: 'git branch',trim: true)
-	// }
+    agent {label node}              
 
 	stages {
 	    stage('从oss下载静态资源包解压上传到指定的oss路径下') {
@@ -43,7 +33,7 @@ pipeline {
                             sh "DNET_PRODUCT=${params.DNET_PRODUCT} DNET_PROFILE=${params.DNET_PROFILE} hdmon deploy_resource_package --download_package ${params.download_package} --subsystem ${params.subsystem}"
                         }
                     }else {
-                        //docker.image("harbor.qianfan123.com/toolset/toolsetcore:0.3.0").withRun('-v /var/run/docker.sock:/var/run/docker.sock') {
+                        docker.image("harbor.qianfan123.com/toolset/toolsetcore:${toolset_image_version}").inside {
                             echo "active profile is ${params.DNET_PROFILE}"
                             echo "product is ${params.DNET_PRODUCT}"
                             echo "workspace is $WORKSPACE"
@@ -52,7 +42,7 @@ pipeline {
                             }
                             sh "tar zxf toolset.tar.gz -C $WORKSPACE"
                             sh "DNET_PRODUCT=${params.DNET_PRODUCT} DNET_PROFILE=${params.DNET_PROFILE} hdmon deploy_resource_package --download_package ${params.download_package} --subsystem ${params.subsystem}"
-                        //}
+                        }
 
                     }
                 }

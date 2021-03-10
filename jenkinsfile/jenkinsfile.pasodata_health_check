@@ -12,20 +12,9 @@ if (env.whether_post){
 }
 pipeline {
     agent {label node}
-    options {
-	//    buildDiscarder(logRotator(numToKeepStr: '10'))
-	//    disableConcurrentBuilds()
-	//    disableResume()
+    options {   
 	    timeout(time: 3, unit: 'MINUTES')
-    }
-    
-    // parameters {
-    //     string(name: 'url',  defaultValue: 'http://172.20.226.67:8848/actuator/health/',description: '健康检查的url')
-    //     string(name: 'receivers', defaultValue: 'taojin@hd123.com,shiming@hd123.com,panwei@hd123.com', description: '检查结果收件人')
-    // }
-    // triggers {
-    //     cron 'H/30 * * * *'
-    // }
+    }       
     stages {
         stage('pasodata_health_check') {
 			steps{

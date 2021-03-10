@@ -7,29 +7,16 @@ def whether_post="False"
 if (env.whether_post){
     whether_post =env.whether_post
 }
+def toolset_image_version="0.3.0-private"
+if (env.toolset_image_version){
+    toolset_image_version = env.toolset_image_version
+}
 
 pipeline {
     agent {label node}
-    options {
-	//     buildDiscarder(logRotator(numToKeepStr: '10'))
-	//     disableConcurrentBuilds()
-	//     disableResume()
+    options {   
 	    timeout(time: 3, unit: 'HOURS')
-    }
-	// environment{
-    //     DNET_PRIVATE_AK="$DNET_PRIVATE_AK"
-    //     DNET_PRIVATE_AS="$DNET_PRIVATE_AS"
- 	// }
-	// parameters {
-	//     choice(name:'DNET_PROFILE', choices:'integration_test\nproduction\nbranch_test\nperformance_test\ntencent-int')
-	//     string(name: 'image', defaultValue: 'sas-service', description: '镜像名称，多值以逗号分隔，例如sas-zuul,config-service,mcs-service,pas-service,ras-service,sas-service,spms-console-server,spms-engine-server,spms-gateway,spms-h3-transfer',trim: true)
-	//     string(name: 'configuration', defaultValue: 'configuredLevel', description: '',trim: true)
-	//     string(name: 'GIT_BRANCH', defaultValue: 'develop', description: 'git branch',trim: true)
-	// 	string(name: 'level', defaultValue: 'INFO', description: '日志级别',trim: true)
-	// 	string(name: 'package', defaultValue: '', description: '包路径',trim: true)
-	//     choice(name: 'dryrun', choices:'False\nTrue')
-	//     choice(name: 'DNET_PRODUCT', choices:'baas')
-	// }
+    }              
     stages {
 		stage('change_log_level') {
 			steps{
@@ -47,15 +34,17 @@ pipeline {
                             sh "DNET_PROFILE=${params.DNET_PROFILE} DNET_PRODUCT=${params.DNET_PRODUCT}  hdops change_log_level --image ${params.image} --configuration ${params.configuration} --package ${params.package}   --level ${params.level} --dryrun ${params.dryrun}"
                         }
                     }else{
-                        echo "profile is ${params.DNET_PROFILE}"
-                        echo "sub systems are ${params.subsystem}"
-                        echo "svnreversion is ${params.svnreversion}"
-                        echo "upstream URL is ${params.upurl}"
-                        retry(2){
-                            sh "DNET_PROFILE=integration_test DNET_PRODUCT=dnet hdops download_toolset --branch ${params.GIT_BRANCH} -p ."
+                        docker.image("harbor.qianfan123.com/toolset/toolsetcore:${toolset_image_version}").inside {
+                            echo "profile is ${params.DNET_PROFILE}"
+                            echo "sub systems are ${params.subsystem}"
+                            echo "svnreversion is ${params.svnreversion}"
+                            echo "upstream URL is ${params.upurl}"
+                            retry(2){
+                                sh "DNET_PROFILE=integration_test DNET_PRODUCT=dnet hdops download_toolset --branch ${params.GIT_BRANCH} -p ."
+                            }
+                            sh "tar zxf toolset.tar.gz -C ${WORKSPACE}"
+                            sh "DNET_PROFILE=${params.DNET_PROFILE} DNET_PRODUCT=${params.DNET_PRODUCT}  hdops change_log_level --image ${params.image} --configuration ${params.configuration} --package ${params.package}   --level ${params.level} --dryrun ${params.dryrun}"
                         }
-                        sh "tar zxf toolset.tar.gz -C ${WORKSPACE}"
-                        sh "DNET_PROFILE=${params.DNET_PROFILE} DNET_PRODUCT=${params.DNET_PRODUCT}  hdops change_log_level --image ${params.image} --configuration ${params.configuration} --package ${params.package}   --level ${params.level} --dryrun ${params.dryrun}"
                     }
                 }
 			}

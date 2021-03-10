@@ -12,64 +12,38 @@ def whether_post="False"
 if (env.whether_post){
     whether_post =env.whether_post
 }
+def toolset_image_version="0.3.0-private"
+if (env.toolset_image_version){
+    toolset_image_version = env.toolset_image_version
+}
 pipeline {
-    agent {docker {
-            image "harbor.qianfan123.com/toolset/toolsetcore:0.3.0"
-            label node
-            args "-v /var/run/docker.sock:/var/run/docker.sock -v /usr/bin/docker:/usr/bin/docker"
-          }}
+    agent {label node}
 	options {
-	//    buildDiscarder(logRotator(numToKeepStr: '10'))
-	//    disableConcurrentBuilds()
-	//    disableResume()
 	    timeout(time: 3, unit: 'HOURS')
     }
-	// environment{
-    //     DNET_PRIVATE_AK="$DNET_PRIVATE_AK"
-    //     DNET_PRIVATE_AS="$DNET_PRIVATE_AS"
- 	// }
-	// parameters {
-	//    string(name: 'cfgname', defaultValue: 'pay', description: '配置')
-	//    string(name: 'receivers', defaultValue: 'wangfei1@hd123.com,buhaiqing@hd123.com,gaoweizong@hd123.com', description: '邮件接收人')
-	//    string(name: 'GIT_BRANCH', defaultValue: 'develop', description: 'release/release\ndevelop')
-	//   // string(name: 'DINGTALK_TOKEN', defaultValue: '1e93162cec116308ffb29fe19ba83b0f57121cc79cfb9b0958e1b1025e55a445', description: '钉钉token')
-	// }
-	//triggers {
-    //    cron 'H/10 * * * *'
-    // }
     stages {
         stage('jenkins master 节点监控和预警') {
 			steps{
 			    script{
                     deleteDir()
-                    // if(env.on_k8s){
-                    //     container("hdtoolsetcore"){
-                    //         retry(2){
-                    //             sh "${download_toolset_cmd}"
-                    //         }
-                    //         sh "tar zxf toolset.tar.gz -C ${WORKSPACE}"
-                    //         if (env.DNET_PRIVATE_URL){
-                    //             sh "DNET_PRIVATE_URL=${DNET_PRIVATE_URL} DNET_PRIVATE_AK=${DNET_PRIVATE_AK} DNET_PRIVATE_AS=${DNET_PRIVATE_AS} DNET_PRIVATE_BUCKET=${DNET_PRIVATE_BUCKET} DNET_PRIVATE_REGION=${DNET_PRIVATE_REGION} DNET_CLOUD_VENDOR=${DNET_CLOUD_VENDOR} DINGTALK_TOKEN=${DINGTALK_TOKEN} hdmon jenkins_node_monitor master_check --cfgname ${cfgname} --receivers ${receivers}"
-                    //         }else{
-                    //             sh "DINGTALK_TOKEN=${DINGTALK_TOKEN} hdmon jenkins_node_monitor master_check --cfgname ${cfgname} --receivers ${receivers}"
-                    //         }
-                    //     }
-
-                    // }else{
-                        retry(2){
-                            if (env.DNET_PRIVATE_URL){
-                                sh "DNET_PROFILE=integration_test DNET_PRODUCT=dnet DNET_PRIVATE_URL=${DNET_PRIVATE_URL} DNET_PRIVATE_AK=${DNET_PRIVATE_AK} DNET_PRIVATE_AS=${DNET_PRIVATE_AS} DNET_PRIVATE_BUCKET=${DNET_PRIVATE_BUCKET} DNET_PRIVATE_REGION=${DNET_PRIVATE_REGION} DNET_CLOUD_VENDOR=${DNET_CLOUD_VENDOR} hdops download_toolset --branch ${params.GIT_BRANCH} -p ."
-                            }else{
-                                sh "DNET_PROFILE=integration_test DNET_PRODUCT=dnet hdops download_toolset --branch ${params.GIT_BRANCH} -p ."
+                    if(env.on_k8s){
+                        container("hdtoolsetcore"){
+                            retry(2){
+                                sh "DNET_PROFILE=integration_test DNET_PRODUCT=dnet hdops download_toolset --branch ${GIT_BRANCH} -p ."
                             }
+                            sh "tar zxf toolset.tar.gz -C ${WORKSPACE}"
+                            sh "DINGTALK_TOKEN=${DINGTALK_TOKEN} hdmon jenkins_node_monitor master_check --cfgname ${cfgname} --receivers ${receivers}"
                         }
-                        sh "tar zxf toolset.tar.gz -C ${WORKSPACE}"
-                        //if (env.DNET_PRIVATE_URL){
-                          //      sh "DNET_PRIVATE_URL=${DNET_PRIVATE_URL} DNET_PRIVATE_AK=${DNET_PRIVATE_AK} DNET_PRIVATE_AS=${DNET_PRIVATE_AS} DNET_PRIVATE_BUCKET=${DNET_PRIVATE_BUCKET} DNET_PRIVATE_REGION=${DNET_PRIVATE_REGION} DNET_CLOUD_VENDOR=${DNET_CLOUD_VENDOR} DINGTALK_TOKEN=${DINGTALK_TOKEN} hdmon jenkins_node_monitor master_check --cfgname ${cfgname} --receivers ${receivers}"
-                        //}else{
-                         sh "DINGTALK_TOKEN=${DINGTALK_TOKEN} hdmon jenkins_node_monitor master_check --cfgname ${cfgname} --receivers ${receivers}"
-                        //}
-                    // }
+
+                    }else{
+                        docker.image("harbor.qianfan123.com/toolset/toolsetcore:${toolset_image_version}").inside  {
+                            retry(2){
+                                sh "DNET_PROFILE=integration_test DNET_PRODUCT=dnet hdops download_toolset --branch ${GIT_BRANCH} -p ."
+                            }
+                            sh "tar zxf toolset.tar.gz -C ${WORKSPACE}"
+                            sh "DINGTALK_TOKEN=${DINGTALK_TOKEN} hdmon jenkins_node_monitor master_check --cfgname ${cfgname} --receivers ${receivers}"
+                        }
+                    }
                 }
 			}
         }

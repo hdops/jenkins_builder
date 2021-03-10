@@ -7,33 +7,15 @@ def whether_post="False"
 if (env.whether_post){
     whether_post =env.whether_post
 }
-
+def toolset_image_version="0.3.0-private"
+if (env.toolset_image_version){
+    toolset_image_version = env.toolset_image_version
+}
 pipeline {
     agent {label node}
-	options {
-	//     buildDiscarder(logRotator(numToKeepStr: '10'))
-	//     disableConcurrentBuilds()
-	//     disableResume()
+	options {   
 	    timeout(time: 5, unit: 'HOURS')
-    }
-	// environment{
-    //     DNET_PRIVATE_AK="$DNET_PRIVATE_AK"
-    //     DNET_PRIVATE_AS="$DNET_PRIVATE_AS"
- 	// }
-	// parameters {
-	//    choice(name:'DNET_PROFILE', choices:'integration_test\nproduction')
-	//    string(name: 'DNET_PRODUCT', defaultValue: 'baas', description: '')
-	//    string(name: 'host', defaultValue: '172.20.235.134', description: 'host')
-	//    string(name: 'port', defaultValue: '9200', description: 'port')
-	//    string(name: 'username', defaultValue: 'elastic', description: 'username')
-	//    string(name: 'password', defaultValue: 'Koq1tqQD', description: 'password')
-	//    string(name: 'keepday', defaultValue: '7', description: 'keepday')
-	//    string(name: 'GIT_BRANCH', defaultValue: 'develop', description: 'develop')
-	//   // string(name: 'DINGTALK_TOKEN', defaultValue: '5dce188d27a762b3c2518c9b2e3a96b9a3da6564a6a679dd34e0b587600576ba', description: '钉钉token')
-	// }
-	// triggers {
-    //     cron 'H 1 * * *'
-    //  }
+    }                  
     stages {
         stage('删除workspace') {
             steps{
@@ -41,8 +23,7 @@ pipeline {
             }
         }
 		stage('es磁盘清理') {
-			steps{
-			    // sh 'rm -fr ./*'
+			steps{ 
 				script{
                     if (env.on_k8s){
                         container("hdtoolsetcore"){
@@ -59,7 +40,7 @@ pipeline {
                             sh "DINGTALK_TOKEN=${DINGTALK_TOKEN} hdmon clean_es_data --host ${params.host} --port ${params.port} --username ${params.username} --password ${params.password} --keepday ${params.keepday}"
                         }
                     }else {
-                        //docker.image("harbor.qianfan123.com/toolset/toolsetcore:0.3.0").withRun('-v /var/run/docker.sock:/var/run/docker.sock') {
+                        docker.image("harbor.qianfan123.com/toolset/toolsetcore:${toolset_image_version}").inside  {
                             echo "active profile is ${params.DNET_PROFILE}"
                             echo "toolset path is ${WORKSPACE}"
                             echo "sub systems are ${params.subsystem}"
@@ -71,7 +52,7 @@ pipeline {
                             }
                             sh "tar zxf toolset.tar.gz -C ${WORKSPACE}"
                             sh "DINGTALK_TOKEN=${DINGTALK_TOKEN} hdmon clean_es_data --host ${params.host} --port ${params.port} --username ${params.username} --password ${params.password} --keepday ${params.keepday}"
-                        //}
+                        }
 
                     }
                 }
