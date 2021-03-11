@@ -10,7 +10,7 @@ if (!env.GIT_GROUP){
 }
 pipeline {
     agent {label node}
-	options {   
+	options {
 	    timeout(time: 3, unit: 'MINUTES')
     }
     stages {
