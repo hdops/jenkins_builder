@@ -55,12 +55,12 @@ pipeline {
                         if (env.on_k8s){
                             echo "======验证镜像======"
                             container("hdtoolsetcore"){
-                                sh "DNET_PRODUCT=$DNET_PRODUCT DNET_PROFILE=$DNET_PROFILE hdops deploy validate --subsystem  ${params.subsystem}"
+                                sh "DNET_PRODUCT=$DNET_PRODUCT DNET_PROFILE=$DNET_PROFILE hdops deploy validate --subsystem  ${params.image}"
                             }
                         }else {
                             echo "======验证镜像======"
                             docker.image("harbor.qianfan123.com/toolset/toolsetcore:${toolset_image_version}").inside  {
-                                sh "DNET_PRODUCT=$DNET_PRODUCT DNET_PROFILE=$DNET_PROFILE hdops deploy validate --subsystem  ${params.subsystem}"
+                                sh "DNET_PRODUCT=$DNET_PRODUCT DNET_PROFILE=$DNET_PROFILE hdops deploy validate --subsystem  ${params.image}"
                             }
                         }
 				    }
@@ -74,12 +74,12 @@ pipeline {
                         if (env.on_k8s){
                             echo "======检查env======"
                             container("hdtoolsetcore"){
-                                sh "DNET_AK=$DNET_AK DNET_PRODUCT=$DNET_PRODUCT DNET_PROFILE=$DNET_PROFILE hdops generate_env_file --subsystem ${params.subsystem}"
+                                sh "DNET_AK=$DNET_AK DNET_PRODUCT=$DNET_PRODUCT DNET_PROFILE=$DNET_PROFILE hdops generate_env_file --subsystem ${params.image}"
                             }
                         }else {
                             echo "======检查env======"
                             docker.image("harbor.qianfan123.com/toolset/toolsetcore:${toolset_image_version}").inside  {
-                                sh "DNET_AK=$DNET_AK DNET_PRODUCT=$DNET_PRODUCT DNET_PROFILE=$DNET_PROFILE hdops generate_env_file --subsystem ${params.subsystem}"
+                                sh "DNET_AK=$DNET_AK DNET_PRODUCT=$DNET_PRODUCT DNET_PROFILE=$DNET_PROFILE hdops generate_env_file --subsystem ${params.image}"
                             }
                         }
 				    }
