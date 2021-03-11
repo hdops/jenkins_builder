@@ -1,0 +1,51 @@
+def node=""
+if (env.node){
+    node =env.node
+}else{
+    node ="master"
+}
+if (!env.GIT_GROUP){
+    env.GIT_GROUP="phoenix-config"
+}
+if (!env.dingding){
+    env.dingding="False"
+}
+pipeline {
+    agent {label node}
+	options {
+	    timeout(time: 15, unit: 'MINUTES')
+    }
+
+    stages {
+        stage('delete workspace') {
+			steps{
+				deleteDir()
+		    }
+        }
+        stage('下载phoenix config') {
+            steps{
+                git branch: "${params.GIT_BRANCH}", credentialsId: '17643215-09f8-4a9a-b0ea-c8e49777ce1d', url: "http://gitlab.app.hd123.cn:10080/${GIT_GROUP}/${params.GIT_REPONAME}.git"
+            }
+        }
+        stage('healthcheck') {
+            steps {
+                script{
+                    if (env.dingding == "True") {
+                        sh "phoenix-tools healthcheck --dingding ${dingding} --tag ${params.tag}"
+                    } else {
+                        sh "phoenix-tools healthcheck --tag ${params.tag}"
+                    }
+                }
+            }
+			post {
+
+			    failure{
+
+				    build job: "${params.container_restart_job}", parameters: [string(name: 'container_restart_workspace', value: "${WORKSPACE}")], propagate: false, wait: false
+
+				}
+
+			}
+        }
+    }
+}

@@ -1,0 +1,37 @@
+def node=""
+if (env.node){
+    node =env.node
+}else{
+    node ="master"
+}
+if (!env.GIT_GROUP){
+    env.GIT_GROUP="phoenix-config"
+}
+pipeline {
+    agent {label node}
+	options {
+	    timeout(time: 120, unit: 'MINUTES')
+    }
+    stages {
+	    stage('delete workspace') {
+			steps{
+				deleteDir()
+			}
+        }
+        stage('下载phoenix_template') {
+			steps{
+                git branch: "${params.GIT_BRANCH}", credentialsId: '17643215-09f8-4a9a-b0ea-c8e49777ce1d', url: "http://gitlab.app.hd123.cn:10080/${GIT_GROUP}/${params.GIT_REPONAME}.git"
+			}
+        }
+        stage('授予inventory.py执行权限') {
+			steps{
+				sh "chmod +x inventory.py"
+			}
+        }
+        stage('主机合规性检查') {
+			steps{
+				sh "phoenix-tools check_hosts --hostname ${params.hostname} --dryrun ${params.dryrun}"
+			}
+        }
+    }
+}

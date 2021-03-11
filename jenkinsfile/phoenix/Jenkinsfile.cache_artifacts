@@ -1,0 +1,25 @@
+def node=""
+if (env.node){
+    node =env.node
+}else{
+    node ="master"
+}
+pipeline {
+    agent {label node}
+	options {
+	    timeout(time: 60, unit: 'MINUTES')
+    }
+
+    stages {
+        stage('delete workspace') {
+			steps{
+				deleteDir()
+		    }
+        }
+        stage('Cache artifacts') {
+            steps {
+                sh "phoenix-tools  cache_artifacts --dryrun ${dryrun}"
+            }
+        }
+    }
+}
