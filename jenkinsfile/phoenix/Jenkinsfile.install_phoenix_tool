@@ -1,0 +1,43 @@
+// def node = "$node"?:'master'
+def node=""
+if (env.node){
+    node =env.node
+}else{
+    node ="master"
+}
+if (!env.GIT_GROUP){
+    env.GIT_GROUP="phoenix-config"
+}
+pipeline {
+    agent {label node}
+	options {   
+	    timeout(time: 3, unit: 'MINUTES')
+    }
+    stages {
+	    stage('delete workspace') {
+			steps{
+				deleteDir()
+			}
+        }
+        stage('下载phoenix_template') {
+			steps{
+                git branch: "${params.GIT_BRANCH}", credentialsId: '17643215-09f8-4a9a-b0ea-c8e49777ce1d', url: "http://gitlab.app.hd123.cn:10080/${GIT_GROUP}/${params.GIT_REPONAME}.git"
+			}
+        }
+        stage('install phoenix-tools') {
+            steps {
+                script{
+                    data = readYaml file: 'docker_environments.yaml'
+                    println(data.crmVersion)
+                    if (data.crmVersion){
+                        env.version = data.crmVersion
+                    }
+                }
+                retry(3) {
+                    sh "pip uninstall -y hdphoenixcore"
+                    sh "pip install -i http://mirrors.qianfan123.com/root/hdops --trusted-host mirrors.qianfan123.com  hdphoenixcore==${version}"
+                }
+            }
+        }
+    }
+}
