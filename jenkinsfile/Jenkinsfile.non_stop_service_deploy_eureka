@@ -10,7 +10,7 @@ if (env.whether_post){
 }else{
     whether_post ="True"
 }
-def retry_num="2"
+def retry_num="5"
 if (env.retry_num){
     retry_num =env.retry_num
 }
