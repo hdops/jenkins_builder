@@ -30,10 +30,7 @@ if (env.git_project){
    git_project = env.git_project
 }
 
-def toolset_image_version="0.3.0-private"
-if (env.toolset_image_version){
-    toolset_image_version = env.toolset_image_version
-}
+
 
 pipeline {
     agent {label node}
