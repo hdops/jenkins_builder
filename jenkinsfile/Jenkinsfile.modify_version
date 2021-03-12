@@ -46,6 +46,7 @@ pipeline {
                             deleteDir()
                             echo "product is ${params.DNET_PRODUCT}"
                             echo "active profile is ${params.DNET_PROFILE}"
+                            echo "git branch is ${git_branch}"
 
                             // checkout code
                             checkout([$class: 'GitSCM', branches: [[name: "*/${git_branch}"]],userRemoteConfigs: [[credentialsId: 'qianfan',url: "${ci_git_server_baseurl}/${git_project}.git"]]])
@@ -63,6 +64,7 @@ pipeline {
                         deleteDir()
                         echo "product is ${params.DNET_PRODUCT}"
                         echo "active profile is ${params.DNET_PROFILE}"
+                        echo "git branch is ${git_branch}"
 
                         // checkout code
                         checkout([$class: 'GitSCM', branches: [[name: "*/${git_branch}"]],userRemoteConfigs: [[credentialsId: 'qianfan',url: "${ci_git_server_baseurl}/${git_project}.git"]]])
@@ -71,7 +73,6 @@ pipeline {
                             sh "DNET_PROFILE=${params.DNET_PROFILE} DNET_PRODUCT=${params.DNET_PRODUCT} hdops modify_version --image ${image} --version ${version}"
 
                             sh """
-                            git pull
                             git add .
                             git commit -m "update settings"
                             git push
