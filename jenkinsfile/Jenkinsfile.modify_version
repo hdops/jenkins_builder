@@ -1,9 +1,8 @@
-def node=""
+def node="master"
 if (env.node){
     node =env.node
-}else{
-    node ="master"
 }
+
 def whether_post=""
 if (env.whether_post){
     whether_post =env.whether_post
