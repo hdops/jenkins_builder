@@ -54,8 +54,8 @@ pipeline {
                             sh "DNET_PROFILE=${params.DNET_PROFILE} DNET_PRODUCT=${params.DNET_PRODUCT} hdops modify_version --image ${image} --version ${version}"
 
                             sh """
-                            sh "git config --global user.email qianfan@hd123.com"
-							sh "git config --global user.name qianfan"
+                            sh "git config  user.name qianfan"
+							sh "git config  user.email qianfan@hd123.com"
                             git pull
                             git add .
                             git commit -m "update settings"
@@ -75,8 +75,8 @@ pipeline {
                             sh "DNET_PROFILE=${params.DNET_PROFILE} DNET_PRODUCT=${params.DNET_PRODUCT} hdops modify_version --image ${image} --version ${version}"
 
                             sh """
-                            sh "git config --global user.email qianfan@hd123.com"
-							sh "git config --global user.name qianfan"
+							sh "git config  user.name qianfan"
+							sh "git config  user.email qianfan@hd123.com"
                             git pull
                             git add .
                             git commit -m "update settings"
