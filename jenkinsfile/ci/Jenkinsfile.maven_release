@@ -79,7 +79,6 @@ pipeline {
                         mvn_shell+=" -s $maven_settings"
                         echo "mvn_shell is ${mvn_shell}"
                         sh "${mvn_shell}"
-                        sh "set +x; docker pull harbor.qianfan123.com/toolset/toolsetcore:${toolset_image_version}"
                     }
                 }
             }
