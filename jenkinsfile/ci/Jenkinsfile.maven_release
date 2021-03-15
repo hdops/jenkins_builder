@@ -47,9 +47,6 @@ pipeline {
             args "${docker_args}"
           }}
     options {
-	//     buildDiscarder(logRotator(numToKeepStr: '10'))
-	//     disableConcurrentBuilds()
-	//     disableResume()
 	    timeout(time: 1, unit: 'HOURS')
     } 
     stages {
@@ -68,6 +65,34 @@ pipeline {
                         echo "http://hddenv/svn/${svn_project}/${build_branch}"
                         checkout([$class: 'SubversionSCM', additionalCredentials: [], excludedCommitMessages: '', excludedRegions: '', excludedRevprop: '', excludedUsers: '', filterChangelog: false, ignoreDirPropChanges: false, includedRegions: '', locations: [[cancelProcessOnExternalsFail: false, credentialsId: 'hddenv', depthOption: 'infinity', ignoreExternalsOption: true, local: '.', remote: "http://hddenv/svn/${svn_project}/${build_branch}"]], quietOperation: true, workspaceUpdater: [$class: 'CheckoutUpdater']])
                     }
+                }
+            }
+        }
+        stage('pre-build-1') {
+            steps{
+                script{
+                    def mvn_shell="mvn help:effective-pom -Doutput=effectivepom.xml"
+                    configFileProvider([configFile(fileId:mvn_configfile, variable: 'maven_settings')]) {
+                        mvn_shell+=" -s $maven_settings"
+                        echo "mvn_shell is ${mvn_shell}"
+                        sh "${mvn_shell}"
+                    }
+                }
+            }
+        }
+        stage('pre-buil-2') {
+            agent {
+                docker {
+                    image "harbor.qianfan123.com/toolset/toolsetcore:0.3.0"
+                    label node
+                    args "-v ${WORKSPACE}:/opt"
+                    registryUrl "https://harbor.qianfan123.com/"
+                    registryCredentialsId "qianfan"
+                }
+            }
+            steps{
+                script{
+                    sh "hdmon maven_docker_check --pomfile /opt/effectivepom.xml --configfile http://github.app.hd123.cn:10080/qianfanops/toolset/raw/develop/check/maven_check_dependency.yaml --metadata http://github.app.hd123.cn:10080/hd123/dev-docs/raw/master/src/rfc/artifact/service-metadata.yml"
                 }
             }
         }
