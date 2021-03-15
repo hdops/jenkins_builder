@@ -41,7 +41,10 @@ if (env.skipversionupdate){
     skipversionupdate =env.skipversionupdate
 }
 
-def credentialsId="qianfan"
+def toolset_image_version="0.3.0"
+if (env.toolset_image_version){
+    toolset_image_version = env.toolset_image_version
+}
 
 
 pipeline {
@@ -52,9 +55,6 @@ pipeline {
             args "${docker_args}"
           }}
     options {
-	//     buildDiscarder(logRotator(numToKeepStr: '10'))
-	//     disableConcurrentBuilds()
-	//     disableResume()
 	    timeout(time: 1, unit: 'HOURS')
     }
     stages {
@@ -84,6 +84,8 @@ pipeline {
                         mvn_shell+=" -s $maven_settings"
                         echo "mvn_shell is ${mvn_shell}"
                         sh "${mvn_shell}"
+                        sh "set +x; docker login harbor.qianfan123.com -u offline -p Go9jRQJxpwVuXfhcIVko3WgF"
+                        sh "set +x; docker pull harbor.qianfan123.com/toolset/toolsetcore:${toolset_image_version}"
                     }
                 }
             }
@@ -91,7 +93,7 @@ pipeline {
         stage('pre-buil-2') {
             agent {
                 docker {
-                    image "harbor.qianfan123.com/toolset/toolsetcore:0.3.0"
+                    image "harbor.qianfan123.com/toolset/toolsetcore:${toolset_image_version}"
                     label node
                     args "-v ${WORKSPACE}:/opt"
                     registryUrl "https://harbor.qianfan123.com/"
