@@ -76,6 +76,34 @@ pipeline {
                 }
             }
         }
+        stage('pre-build-1') {
+            steps{
+                script{
+                    def mvn_shell="mvn help:effective-pom -Doutput=effectivepom.xml"
+                    configFileProvider([configFile(fileId:mvn_configfile, variable: 'maven_settings')]) {
+                        mvn_shell+=" -s $maven_settings"
+                        echo "mvn_shell is ${mvn_shell}"
+                        sh "${mvn_shell}"
+                    }
+                }
+            }
+        }
+        stage('pre-buil-2') {
+            agent {
+                docker {
+                    image "harbor.qianfan123.com/toolset/toolsetcore:0.3.0"
+                    label node
+                    args "-v ${WORKSPACE}:/opt"
+                    registryUrl "https://harbor.qianfan123.com/"
+                    registryCredentialsId "qianfan"
+                }
+            }
+            steps{
+                script{
+                    sh "hdmon maven_docker_check --pomfile /opt/effectivepom.xml --configfile http://github.app.hd123.cn:10080/qianfanops/toolset/raw/develop/check/maven_check_dependency.yaml --metadata http://github.app.hd123.cn:10080/hd123/dev-docs/raw/master/src/rfc/artifact/service-metadata.yml"
+                }
+            }
+        }
 		stage('build') {
 		    steps{
 				script{
