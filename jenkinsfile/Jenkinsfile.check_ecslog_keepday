@@ -37,6 +37,7 @@ pipeline {
 							sh "DNET_PRODUCT=${params.DNET_PRODUCT} DNET_PROFILE=${params.DNET_PROFILE} hdmon check_ecslog_keepday --filename $filename --days ${params.days} --logtype ${params.logtype} --dryrun ${params.dryrun}"
 						}
 					}else {
+					    docker.image("harbor.qianfan123.com/toolset/toolsetcore:${toolset_image_version}").pull()
                         docker.image("harbor.qianfan123.com/toolset/toolsetcore:${toolset_image_version}").inside {
                             echo "active profile is ${params.DNET_PROFILE}"
                             echo "toolset path is ${WORKSPACE}"
