@@ -92,16 +92,16 @@ pipeline {
                         spec:
                             containers:
                             - name: phoenixcore-${version}
-                                image: harbor.qianfan123.com/toolset/phoenixcore:${version}
-                                command:
-                                - \"/bin/sh\"
-                                - \"-c\"
-                                tty: true
-                                resources: 
-                                    limits: {}
-                                    requests:
-                                        memory: "100Mi"
-                                        cpu: "0.1"
+                              image: harbor.qianfan123.com/toolset/phoenixcore:${version}
+                              command:
+                              - \"/bin/sh\"
+                              - \"-c\"
+                              tty: true
+                              resources: 
+                                limits: {}
+                                requests:
+                                    memory: "100Mi"
+                                    cpu: "0.1"
                     """.stripIndent()
                 }
             }
