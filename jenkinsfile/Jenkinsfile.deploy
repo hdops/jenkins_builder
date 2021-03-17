@@ -120,6 +120,7 @@ pipeline {
         always {
 			script {
 				currentBuild.description = "${params.DNET_PROFILE}:${params.subsystem}:${params.skipversion}"
+				archiveArtifacts allowEmptyArchive: true, artifacts: 'dbinit_log*txt', followSymlinks: false
 			}
 		}
     }
