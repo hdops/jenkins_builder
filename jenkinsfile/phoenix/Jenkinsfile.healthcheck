@@ -91,7 +91,7 @@ pipeline {
                             name: ${node}-phoenixcore-${version}
                         spec:
                             containers:
-                            - name: phoenixcore-${version}
+                            - name: phoenixcore
                               image: harbor.qianfan123.com/toolset/phoenixcore:${version}
                               command:
                               - \"/bin/sh\"
