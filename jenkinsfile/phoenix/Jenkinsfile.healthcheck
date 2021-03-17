@@ -56,7 +56,7 @@ pipeline {
             agent {
                 docker {
                     image "harbor.qianfan123.com/toolset/phoenixcore:${version}"
-                    label ${node}
+                    label node
                 }
             }
 
@@ -80,8 +80,8 @@ pipeline {
 
             agent {
                 kubernetes {
-                    label ${node}
-                    defaultContainer ${containerName}
+                    label node
+                    defaultContainer containerName
                     yaml """\
                         apiVersion: v1
                         kind: Pod
