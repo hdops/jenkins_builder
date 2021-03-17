@@ -29,7 +29,6 @@ pipeline {
 							echo "sub systems are ${params.subsystem}"
 							echo "skip version is ${params.skipversion}"
 							echo "upstream URL is ${params.upurl}"
-							echo "svnreversion is ${params.svnreversion}"
 							retry(2){
 								sh "DNET_PROFILE=integration_test DNET_PRODUCT=dnet hdops download_toolset --branch ${params.GIT_BRANCH} -p ."
 							}
@@ -44,7 +43,6 @@ pipeline {
                             echo "sub systems are ${params.subsystem}"
                             echo "skip version is ${params.skipversion}"
                             echo "upstream URL is ${params.upurl}"
-                            echo "svnreversion is ${params.svnreversion}"
                             retry(2){
                                 sh "DNET_PROFILE=integration_test DNET_PRODUCT=dnet hdops download_toolset --branch ${params.GIT_BRANCH} -p ."
                             }
