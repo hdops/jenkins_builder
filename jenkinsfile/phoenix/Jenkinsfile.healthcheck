@@ -60,11 +60,13 @@ pipeline {
             }
 
             steps {
+                git branch: "${params.GIT_BRANCH}", credentialsId: '17643215-09f8-4a9a-b0ea-c8e49777ce1d', url: "http://gitlab.app.hd123.cn:10080/${GIT_GROUP}/${params.GIT_REPONAME}.git"
+
                 script{    
                     if (env.dingding == "True") {
-                        sh "phoenix-tools healthcheck --dingding ${dingding} --tag ${params.tag}"
+                        echo "phoenix-tools healthcheck --dingding ${dingding} --tag ${params.tag}"
                     } else {
-                        sh "phoenix-tools healthcheck --tag ${params.tag}"
+                        echo "phoenix-tools healthcheck --tag ${params.tag}"
                     }
                 }
             }
@@ -75,9 +77,38 @@ pipeline {
                 environment name: 'on_k8s', value: 'True'
             }
 
+            agent {
+                kubernetes {
+                  yaml """\
+                    apiVersion: v1
+                    kind: Pod
+                    metadata:
+                      labels:
+                        some-label: some-label-value
+                    spec:
+                      containers:
+                      - name: hdphoenixcore
+                        image: harbor.qianfan123.com/toolset/phoenixcore:${version}
+                        command:
+                        - /bin/sh
+                        - -c
+                        tty: true
+                        resources: 
+                            limits: {}
+                            requests:
+                                memory: "100Mi"
+                                cpu: "0.1"
+                    """.stripIndent()
+                }
+            }
+
             steps {
-                script{    
-                    echo "run in k8s"
+                container('hdphoenixcore') {    
+                    if (env.dingding == "True") {
+                        echo "phoenix-tools healthcheck --dingding ${dingding} --tag ${params.tag}"
+                    } else {
+                        echo "phoenix-tools healthcheck --tag ${params.tag}"
+                    }
                 }
             }
         }
