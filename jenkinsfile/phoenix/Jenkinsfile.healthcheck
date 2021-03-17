@@ -89,11 +89,11 @@ pipeline {
                             labels:
                                 jenkins: \"slave\"
                                 jenkins/label: \"alpine-jnlp-slave\"
-                            name: ${node}-${containerName}
+                            name: "node"-"containerName"
                         spec:
                             containers:
-                            - name: ${containerName}
-                                image: harbor.qianfan123.com/toolset/phoenixcore:${version}
+                            - name: "containerName"
+                                image: harbor.qianfan123.com/toolset/phoenixcore:"version"
                                 command:
                                 - \"/bin/sh\"
                                 - \"-c\"
