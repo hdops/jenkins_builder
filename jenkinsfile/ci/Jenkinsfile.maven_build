@@ -94,8 +94,6 @@ pipeline {
                     image "harbor.qianfan123.com/toolset/toolsetcore:${toolset_image_version}"
                     label node
                     args "-v ${WORKSPACE}:/opt"
-                    registryUrl "https://harbor.qianfan123.com/"
-                    registryCredentialsId "qianfan"
                 }
             }
             steps{
