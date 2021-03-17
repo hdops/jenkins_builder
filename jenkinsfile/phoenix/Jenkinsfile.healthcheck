@@ -78,11 +78,6 @@ pipeline {
                 environment name: 'on_k8s', value: 'True'
             }
 
-            agent {
-
-                }
-            }
-
             steps {
                 script {    
                     if (env.dingding == "True") {
