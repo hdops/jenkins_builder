@@ -38,7 +38,6 @@ pipeline {
                     data = readYaml file: 'docker_environments.yaml'
                     echo "crmVersion is ${data.crmVersion}"
                     echo "on_k8s is ${env.on_k8s}"
-                    echo "containerName is ${containerName}"
                     if (data.crmVersion){
                         env.version = data.crmVersion
                     } else {
