@@ -13,7 +13,7 @@ if (!env.dingding){
 if (!env.on_k8s){
     env.on_k8s="False"
 }
-
+def containerName="hdphoenixcore-"${version}
 pipeline {
     agent {label node}
     
@@ -38,6 +38,7 @@ pipeline {
                     data = readYaml file: 'docker_environments.yaml'
                     echo "crmVersion is ${data.crmVersion}"
                     echo "on_k8s is ${env.on_k8s}"
+                    echo "containerName is ${containerName}"
                     if (data.crmVersion){
                         env.version = data.crmVersion
                     } else {
@@ -55,7 +56,7 @@ pipeline {
             agent {
                 docker {
                     image "harbor.qianfan123.com/toolset/phoenixcore:${version}"
-                    label node
+                    label ${node}
                 }
             }
 
@@ -79,31 +80,35 @@ pipeline {
 
             agent {
                 kubernetes {
-                  yaml """\
-                    apiVersion: v1
-                    kind: Pod
-                    metadata:
-                      labels:
-                        some-label: some-label-value
-                    spec:
-                      containers:
-                      - name: hdphoenixcore
-                        image: harbor.qianfan123.com/toolset/phoenixcore:${version}
-                        command:
-                        - /bin/sh
-                        - -c
-                        tty: true
-                        resources: 
-                            limits: {}
-                            requests:
-                                memory: "100Mi"
-                                cpu: "0.1"
+                    label ${node}
+                    defaultContainer ${containerName}
+                    yaml """\
+                        apiVersion: v1
+                        kind: Pod
+                        metadata:
+                            labels:
+                                jenkins: \"slave\"
+                                jenkins/label: \"alpine-jnlp-slave\"
+                            name: ${node}-${containerName}
+                        spec:
+                            containers:
+                            - name: ${containerName}
+                                image: harbor.qianfan123.com/toolset/phoenixcore:${version}
+                                command:
+                                - \"/bin/sh\"
+                                - \"-c\"
+                                tty: true
+                                resources: 
+                                    limits: {}
+                                    requests:
+                                        memory: "100Mi"
+                                        cpu: "0.1"
                     """.stripIndent()
                 }
             }
 
             steps {
-                container('hdphoenixcore') {    
+                script {    
                     if (env.dingding == "True") {
                         echo "phoenix-tools healthcheck --dingding ${dingding} --tag ${params.tag}"
                     } else {
