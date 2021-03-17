@@ -10,8 +10,13 @@ if (!env.GIT_GROUP){
 if (!env.dingding){
     env.dingding="False"
 }
+if (!env.on_k8s){
+    env.on_k8s="False"
+}
+
 pipeline {
     agent {label node}
+    
 	options {
 	    timeout(time: 15, unit: 'MINUTES')
     }
@@ -22,24 +27,57 @@ pipeline {
 				deleteDir()
 		    }
         }
-        stage('healthcheck') {
+        stage('下载phoenix config') {
+            steps{
+                git branch: "${params.GIT_BRANCH}", credentialsId: '17643215-09f8-4a9a-b0ea-c8e49777ce1d', url: "http://gitlab.app.hd123.cn:10080/${GIT_GROUP}/${params.GIT_REPONAME}.git"
+            }
+        }
+        stage('get crmVersion') {
             steps {
                 script{
-                    if (env.on_k8s){
-                        container('hdtoolsetcore'){
-                            echo "kubernetes"
-                        }
-                    }else {
-                        docker.image("harbor.qianfan123.com/toolset/toolsetcore:${toolset_image_version}").inside {
-                            echo "GIT_BRANCH is ${params.GIT_BRANCH}, git url is ${GIT_GROUP}/${params.GIT_REPONAME}.git"
-                            sh "git clone -b ${params.GIT_BRANCH} http://gitlab.app.hd123.cn:10080/${GIT_GROUP}/${params.GIT_REPONAME}.git"
-                            if (env.dingding == "True") {
-                                sh "phoenix-tools healthcheck --dingding ${dingding} --tag ${params.tag}"
-                            } else {
-                                sh "phoenix-tools healthcheck --tag ${params.tag}"
-                            }
-                        }
+                    data = readYaml file: 'docker_environments.yaml'
+                    echo "crmVersion is ${data.crmVersion}"
+                    echo "on_k8s is ${env.on_k8s}"
+                    if (data.crmVersion){
+                        env.version = data.crmVersion
+                    } else {
+                        error "can not get crmVersion"
                     }
+                }
+            }
+        }
+        stage('healthcheck on docker') {
+            when {
+                beforeAgent true
+                environment name: 'on_k8s', value: 'False'
+            }
+
+            agent {
+                docker {
+                    image "harbor.qianfan123.com/toolset/phoenixcore:${version}"
+                    label node
+                }
+            }
+
+            steps {
+                script{    
+                    if (env.dingding == "True") {
+                        sh "phoenix-tools healthcheck --dingding ${dingding} --tag ${params.tag}"
+                    } else {
+                        sh "phoenix-tools healthcheck --tag ${params.tag}"
+                    }
+                }
+            }
+        }
+        stage('healthcheck on k8s') {
+            when {
+                beforeAgent true
+                environment name: 'on_k8s', value: 'True'
+            }
+
+            steps {
+                script{    
+                    echo "run in k8s"
                 }
             }
         }
