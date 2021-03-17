@@ -79,31 +79,7 @@ pipeline {
             }
 
             agent {
-                kubernetes {
-                    label node
-                    defaultContainer containerName
-                    yaml """\
-                        apiVersion: v1
-                        kind: Pod
-                        metadata:
-                            labels:
-                                jenkins: \"slave\"
-                                jenkins/label: \"alpine-jnlp-slave\"
-                            name: "node"-"containerName"
-                        spec:
-                            containers:
-                            - name: "containerName"
-                                image: harbor.qianfan123.com/toolset/phoenixcore:"version"
-                                command:
-                                - \"/bin/sh\"
-                                - \"-c\"
-                                tty: true
-                                resources: 
-                                    limits: {}
-                                    requests:
-                                        memory: "100Mi"
-                                        cpu: "0.1"
-                    """.stripIndent()
+
                 }
             }
 
