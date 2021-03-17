@@ -80,7 +80,7 @@ pipeline {
             agent {
                 kubernetes {
                     label node
-                    defaultContainer containerName
+                    defaultContainer "phoenixcore-"version
                     yaml """\
                         apiVersion: v1
                         kind: Pod
