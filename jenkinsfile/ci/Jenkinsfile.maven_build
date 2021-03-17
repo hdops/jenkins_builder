@@ -98,7 +98,8 @@ pipeline {
             }
             steps{
                 script{
-                    sh "DNET_PRODUCT=dnet DNET_PROFILE=integration_test hdmon maven_docker_check --pomfile /opt/effectivepom.xml --configfile http://github.app.hd123.cn:10080/qianfanops/toolset/raw/develop/check/maven_check_dependency.yaml --metadata http://github.app.hd123.cn:10080/hd123/dev-docs/raw/master/src/rfc/artifact/service-metadata.yml"
+                     echo "服务白名单检查"
+                    // sh "DNET_PRODUCT=dnet DNET_PROFILE=integration_test hdmon maven_docker_check --pomfile /opt/effectivepom.xml --configfile http://github.app.hd123.cn:10080/qianfanops/toolset/raw/develop/check/maven_check_dependency.yaml --metadata http://github.app.hd123.cn:10080/hd123/dev-docs/raw/master/src/rfc/artifact/service-metadata.yml"
                 }
             }
         }
