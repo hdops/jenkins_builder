@@ -1,6 +1,10 @@
-podTemplate(containers: [containerTemplate(name: 'kaniko', image: 'nginx', command: 'sleep', args: '10')]) {
+podTemplate(
+    containers: [
+        containerTemplate(name: 'healtcheck', image: 'harbor.qianfan123.com/toolset/phoenixcore:6.14.0', command: 'sleep', args: '10')
+    ]
+) {
     node(POD_LABEL) {
-        container(name: 'kaniko') {
+        container(name: 'healtcheck') {
             sh 'echo $PATH'
         }
     }
