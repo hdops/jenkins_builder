@@ -76,12 +76,13 @@ pipeline {
 
             agent {
                 kubernetes{
+                    cloud 'kubernetes'
                     containerTemplate {
                         name 'hdphoenixtoolsetcore'
                         image "nginx"
-                        alwaysPullImage true
+                        ttyEnabled true
                         command 'sleep'
-                        args '10'
+                        args '100'
                     }
                 }
             }
