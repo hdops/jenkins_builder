@@ -1,5 +1,28 @@
-def version = '6.14.0'
+def node=""
+if (env.node){
+    node =env.node
+}else{
+    node ="master"
+}
+node = "master"
+if (!env.GIT_GROUP){
+    env.GIT_GROUP="phoenix-config"
+}
+if (!env.dingding){
+    env.dingding="False"
+}
+if (!env.on_k8s){
+    env.on_k8s="False"
+}
+def version
+version = '6.14.0'
 
+pipeline {
+    agent {label node}
+    
+	options {
+	    timeout(time: 5, unit: 'MINUTES')
+    }
 
     podTemplate(
         cloud: 'kubernetes', 
@@ -48,3 +71,4 @@ def version = '6.14.0'
             }
         }
     }
+}
