@@ -68,8 +68,15 @@ pipeline {
                 }
             }
         }
-    }
-    podTemplate(
+        stage('healthcheck on k8s') {
+            when {
+                beforeAgent true
+                environment name: 'on_k8s', value: 'True'
+            }
+
+            steps {
+                script {
+                    podTemplate(
                         cloud: 'kubernetes', 
                         namespace: 'opsapp',
                         label: 'alpine-phoenix-jnlp-slave-test',
@@ -106,29 +113,19 @@ pipeline {
                         annotations: [
                             podAnnotation(key: "my-key", value: "my-value")
                         ]
-                    ){
-                        node('alpine-phoenix-jnlp-slave-test'){
-                            stage('healthcheck on k8s') {
-            when {
-                beforeAgent true
-                environment name: 'on_k8s', value: 'True'
-            }
-
-            steps {
-                script {    
-                    container("hdphoenixtoolsetcore"){
-                        sh "phoenix-tools version"
-                        if (env.dingding == "True") {
-                            echo "phoenix-tools healthcheck --dingding ${dingding} --tag ${params.tag}"
-                        } else {
-                            echo "phoenix-tools healthcheck --tag ${params.tag}"
+                    ) node('alpine-phoenix-jnlp-slave-test')  {
+                        container("hdphoenixtoolsetcore"){
+                            sh "phoenix-tools version"
+                            if (env.dingding == "True") {
+                                echo "phoenix-tools healthcheck --dingding ${dingding} --tag ${params.tag}"
+                            } else {
+                                echo "phoenix-tools healthcheck --tag ${params.tag}"
+                            }
                         }
-                    }
+                    }  
+                    
                 }
             }
         }
-                        }
-                    }
-        
-
+    }
 }
