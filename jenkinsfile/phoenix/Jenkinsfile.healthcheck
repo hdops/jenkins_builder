@@ -34,6 +34,7 @@ podTemplate(
     )   {
         node('alpine-phoenix-jnlp-slave-test')  {
             stage('test shell') {
+                steps{
                 container("hdphoenixtoolsetcore-test")   {
                     sh "phoenix-tools version"
                     if (env.dingding == "True") {
@@ -42,6 +43,8 @@ podTemplate(
                         echo "phoenix-tools healthcheck --tag ${params.tag}"
                     }
                 }
+                }
+                
             }
         }
     }
