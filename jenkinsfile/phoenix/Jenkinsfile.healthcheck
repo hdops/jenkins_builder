@@ -75,40 +75,14 @@ pipeline {
                 environment name: 'on_k8s', value: 'True'
             }
 
-            agent {
-                kubernetes {
-                    defaultContainer "phoenixcore-"+version
-                    yaml """\
-                        apiVersion: v1
-                        kind: Pod
-                        metadata:
-                            labels:
-                                jenkins: \"slave\"
-                                jenkins/label: \"alpine-jnlp-slave\"
-                            name: ${node}-phoenixcore-${version}
-                        spec:
-                            containers:
-                            - name: phoenixcore
-                              image: harbor.qianfan123.com/toolset/phoenixcore:${version}
-                              command:
-                              - \"/bin/sh\"
-                              - \"-c\"
-                              tty: true
-                              resources: 
-                                limits: {}
-                                requests:
-                                    memory: "100Mi"
-                                    cpu: "0.1"
-                    """.stripIndent()
-                }
-            }
-
             steps {
                 script {    
-                    if (env.dingding == "True") {
-                        echo "phoenix-tools healthcheck --dingding ${dingding} --tag ${params.tag}"
-                    } else {
-                        echo "phoenix-tools healthcheck --tag ${params.tag}"
+                    container("hdphoenixtoolsetcore"){
+                        if (env.dingding == "True") {
+                            echo "phoenix-tools healthcheck --dingding ${dingding} --tag ${params.tag}"
+                        } else {
+                            echo "phoenix-tools healthcheck --tag ${params.tag}"
+                        }
                     }
                 }
             }
