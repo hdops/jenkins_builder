@@ -1,6 +1,37 @@
-podTemplate(containers: [
-    containerTemplate(name: 'golang', image: 'hello-world', ttyEnabled: true, command: 'cat')
-  ]) {
+podTemplate(
+        cloud: 'kubernetes', 
+        namespace: 'opsapp',
+        label: 'alpine-phoenix-jnlp-slave-test',
+        activeDeadlineSeconds: 1200,
+        slaveConnectTimeout: 200,
+        serviceAccount: 'jenkins',
+        runAsUser: '0',
+        runAsGroup: '0',
+        nodeSelector: 'app=jenkins',
+        containers: [
+            containerTemplate(
+                name: 'hdphoenixtoolsetcore',
+                image: "harbor.qianfan123.com/toolset/phoenixcore:${version}",
+                ttyEnabled: true,
+                privileged: false,
+                alwaysPullImage: true,
+                workingDir: '/home/jenkins/agent',
+                command: '/bin/sh -c',
+                args: 'cat',
+                resourceRequestCpu: '50m',
+                resourceLimitCpu: '100m',
+                resourceRequestMemory: '100Mi',
+                resourceLimitMemory: '200Mi',
+            )
+        ],
+
+        volumes: [
+            secretVolume(mountPath: '/root/.ssh', secretName: 'jenkins-ssh-key'),
+            hostPathVolume(mountPath: '/var/run/docker.sock', hostPath: '/var/run/docker.sock'),
+            hostPathVolume(mountPath: '/bin/docker', hostPath: '/usr/bin/docker')
+        ],
+        imagePullSecrets: ['harbor-admin']
+) {
 
     node(POD_LABEL) {
         stage('Get a Golang project') {
