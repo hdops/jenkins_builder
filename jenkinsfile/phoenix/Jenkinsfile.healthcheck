@@ -1,10 +1,5 @@
 def version = '6.14.0'
 
-pipeline {
-    agent {label 'master'}
-	options {
-	    timeout(time: 5, unit: 'MINUTES')
-    }
 
     podTemplate(
         cloud: 'kubernetes', 
@@ -53,4 +48,3 @@ pipeline {
             }
         }
     }
-}
