@@ -75,7 +75,6 @@ pipeline {
             }
 
             steps {
-                script {
                     podTemplate(
                         cloud: 'kubernetes', 
                         namespace: 'opsapp',
@@ -109,13 +108,10 @@ pipeline {
                             hostPathVolume(mountPath: '/var/run/docker.sock', hostPath: '/var/run/docker.sock'),
                             hostPathVolume(mountPath: '/bin/docker', hostPath: '/usr/bin/docker')
                         ],
-                        imagePullSecrets: [ 'harbor-admin' ],
-                        annotations: [
-                            podAnnotation(key: "my-key", value: "my-value")
-                        ]
-                    ){
+                        imagePullSecrets: 'harbor-admin'
+                    )   {
                         node('alpine-phoenix-jnlp-slave-test')  {
-                            container("hdphoenixtoolsetcore"){
+                            container("hdphoenixtoolsetcore")   {
                                 sh "phoenix-tools version"
                                 if (env.dingding == "True") {
                                     echo "phoenix-tools healthcheck --dingding ${dingding} --tag ${params.tag}"
@@ -125,7 +121,7 @@ pipeline {
                             }
                         }
                     }
-                }
+                
             }
         }
     }
