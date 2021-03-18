@@ -4,7 +4,7 @@ if (env.node){
 }else{
     node ="master"
 }
-node = "alpine-phoenix-jnlp-slave"
+node = "master"
 if (!env.GIT_GROUP){
     env.GIT_GROUP="phoenix-config"
 }
@@ -74,9 +74,14 @@ pipeline {
                 environment name: 'on_k8s', value: 'True'
             }
 
+            agent {
+                label "alpine-phoenix-jnlp-slave"
+            }
+
             steps {
                 script {    
                     container("hdphoenixtoolsetcore"){
+                        sh phoenix-tools --version
                         if (env.dingding == "True") {
                             echo "phoenix-tools healthcheck --dingding ${dingding} --tag ${params.tag}"
                         } else {
