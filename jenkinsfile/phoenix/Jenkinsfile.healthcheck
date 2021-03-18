@@ -1,4 +1,4 @@
-podTemplate(containers: [containerTemplate(name: 'kaniko', image: 'hello-world', command: 'sleep', args: '10')]) {
+podTemplate(containers: [containerTemplate(name: 'kaniko', image: 'nginx', command: 'sleep', args: '10')]) {
     node(POD_LABEL) {
         container(name: 'kaniko') {
             sh 'echo $PATH'
