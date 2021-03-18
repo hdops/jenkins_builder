@@ -11,7 +11,7 @@ podTemplate(
         containers: [
             containerTemplate(
                 name: 'hdphoenixtoolsetcore',
-                image: "harbor.qianfan123.com/toolset/phoenixcore:${version}",
+                image: "harbor.qianfan123.com/toolset/phoenixcore:6.14.0",
                 ttyEnabled: true,
                 privileged: false,
                 alwaysPullImage: true,
