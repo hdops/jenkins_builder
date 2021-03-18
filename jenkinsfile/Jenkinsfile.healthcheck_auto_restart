@@ -4,11 +4,9 @@ if (env.node){
 }else{
     node ="master"
 }
-def whether_post=""
+def whether_post="False"
 if (env.whether_post){
     whether_post =env.whether_post
-}else{
-    whether_post ="True"
 }
 def result=0
 def toolset_image_version="0.3.0-private"
