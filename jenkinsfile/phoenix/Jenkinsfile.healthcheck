@@ -58,13 +58,13 @@ pipeline {
                 script{    
                     if (env.dingding == "True") {
                         withDockerContainer(args: "-v ${WORKSPACE}:/opt", image: "harbor.qianfan123.com/toolset/phoenixcore:${version}") {
-                            echo "phoenix-tools healthcheck --dingding ${dingding} --tag ${params.tag}"
                             sh "phoenix-tools version"
+                            sh "phoenix-tools healthcheck --dingding ${dingding} --tag ${params.tag}"
                         }                        
                     } else {
                         withDockerContainer(args: "-v ${WORKSPACE}:/opt", image: "harbor.qianfan123.com/toolset/phoenixcore:${version}") {
-                            echo "phoenix-tools healthcheck --tag ${params.tag}"
                             sh "phoenix-tools version"
+                            sh "phoenix-tools healthcheck --tag ${params.tag}"
                         }                        
                     }
                 }
@@ -94,9 +94,9 @@ pipeline {
                     container("hdphoenixtoolsetcore")   {
                         sh "phoenix-tools version"
                         if (env.dingding == "True") {
-                            echo "phoenix-tools healthcheck --dingding ${dingding} --tag ${params.tag}"
+                            sh "phoenix-tools healthcheck --dingding ${dingding} --tag ${params.tag}"
                         } else {
-                            echo "phoenix-tools healthcheck --tag ${params.tag}"
+                            sh "phoenix-tools healthcheck --tag ${params.tag}"
                         }
                     }
                 } 
