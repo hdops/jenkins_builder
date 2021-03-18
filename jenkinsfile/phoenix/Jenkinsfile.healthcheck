@@ -1,13 +1,4 @@
 podTemplate(
-        cloud: 'kubernetes', 
-        namespace: 'opsapp',
-        label: 'alpine-phoenix-jnlp-slave-test',
-        activeDeadlineSeconds: 1200,
-        slaveConnectTimeout: 200,
-        serviceAccount: 'jenkins',
-        runAsUser: '0',
-        runAsGroup: '0',
-        nodeSelector: 'app=jenkins',
         containers: [
             containerTemplate(
                 name: 'hdphoenixtoolsetcore',
@@ -23,17 +14,10 @@ podTemplate(
                 resourceRequestMemory: '100Mi',
                 resourceLimitMemory: '200Mi',
             )
-        ],
-
-        volumes: [
-            secretVolume(mountPath: '/root/.ssh', secretName: 'jenkins-ssh-key'),
-            hostPathVolume(mountPath: '/var/run/docker.sock', hostPath: '/var/run/docker.sock'),
-            hostPathVolume(mountPath: '/bin/docker', hostPath: '/usr/bin/docker')
-        ],
-        imagePullSecrets: ['harbor-admin']
+        ]
 ) {
     node(POD_LABEL) {
-        container(name: 'healtcheck') {
+        container(name: 'hdphoenixtoolsetcore') {
             sh 'echo $PATH'
         }
     }
