@@ -94,12 +94,14 @@ pipeline {
             }
 
             steps {
-                container("hdphoenixtoolsetcore")   {
-                    sh "phoenix-tools version"
-                    if (env.dingding == "True") {
-                        echo "phoenix-tools healthcheck --dingding ${dingding} --tag ${params.tag}"
-                    } else {
-                        echo "phoenix-tools healthcheck --tag ${params.tag}"
+                script{
+                    container("hdphoenixtoolsetcore")   {
+                        sh "phoenix-tools version"
+                        if (env.dingding == "True") {
+                            echo "phoenix-tools healthcheck --dingding ${dingding} --tag ${params.tag}"
+                        } else {
+                            echo "phoenix-tools healthcheck --tag ${params.tag}"
+                        }
                     }
                 } 
             }
