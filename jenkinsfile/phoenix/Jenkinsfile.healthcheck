@@ -4,7 +4,7 @@ if (env.node){
 }else{
     node ="master"
 }
-node ="master"
+node = "alpine-phoenix-jnlp-slave"
 if (!env.GIT_GROUP){
     env.GIT_GROUP="phoenix-config"
 }
@@ -39,7 +39,6 @@ pipeline {
                     data = readYaml file: 'docker_environments.yaml'
                     echo "crmVersion is ${data.crmVersion}"
                     echo "on_k8s is ${env.on_k8s}"
-                    node = "master"
                     echo "node is ${node}"
                     echo "env node is ${env.node}"
                     if (data.crmVersion){
