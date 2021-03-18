@@ -1,36 +1,40 @@
-def node=""
-if (env.node){
-    node =env.node
-}else{
-    node ="master"
-}
-node = "master"
-if (!env.GIT_GROUP){
-    env.GIT_GROUP="phoenix-config"
-}
-if (!env.dingding){
-    env.dingding="False"
-}
-if (!env.on_k8s){
-    env.on_k8s="False"
-}
-def version
-version = '6.14.0'
+podTemplate(
+        cloud: 'kubernetes', 
+        namespace: 'opsapp',
+        label: 'alpine-phoenix-jnlp-slave-test',
+        activeDeadlineSeconds: 1200,
+        slaveConnectTimeout: 200,
+        serviceAccount: 'jenkins',
+        runAsUser: '0',
+        runAsGroup: '0',
+        nodeSelector: 'app=jenkins',
+        containers: [
+            containerTemplate(
+                name: 'hdphoenixtoolsetcore',
+                image: "harbor.qianfan123.com/toolset/phoenixcore:${version}",
+                ttyEnabled: true,
+                privileged: false,
+                alwaysPullImage: true,
+                workingDir: '/home/jenkins/agent',
+                command: '/bin/sh -c',
+                args: 'cat',
+                resourceRequestCpu: '50m',
+                resourceLimitCpu: '100m',
+                resourceRequestMemory: '100Mi',
+                resourceLimitMemory: '200Mi',
+            )
+        ],
 
-pipeline {
-    agent {label node}
-    
-	options {
-	    timeout(time: 5, unit: 'MINUTES')
-    }
-    stages {
-        stage('test'){
-    podTemplate(containers: [
-        containerTemplate(name: 'hdphoenixtoolsetcore', image: 'harbor.qianfan123.com/toolset/phoenixcore:6.14.0', ttyEnabled: true, command: 'cat')
-    ])   {
-        node(POD_LABEL)  {
-            stage('test') {
-                container("hdphoenixtoolsetcore")   {
+        volumes: [
+            secretVolume(mountPath: '/root/.ssh', secretName: 'jenkins-ssh-key'),
+            hostPathVolume(mountPath: '/var/run/docker.sock', hostPath: '/var/run/docker.sock'),
+            hostPathVolume(mountPath: '/bin/docker', hostPath: '/usr/bin/docker')
+        ],
+        imagePullSecrets: 'harbor-admin'
+    )   {
+        node('alpine-phoenix-jnlp-slave-test')  {
+            stage('test shell') {
+                container("hdphoenixtoolsetcore-test")   {
                     sh "phoenix-tools version"
                     if (env.dingding == "True") {
                         echo "phoenix-tools healthcheck --dingding ${dingding} --tag ${params.tag}"
@@ -41,5 +45,3 @@ pipeline {
             }
         }
     }
-    }}
-}
