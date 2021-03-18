@@ -23,6 +23,7 @@ pipeline {
 	options {
 	    timeout(time: 5, unit: 'MINUTES')
     }
+    stages {
     podTemplate(containers: [
         containerTemplate(name: 'hdphoenixtoolsetcore', image: 'harbor.qianfan123.com/toolset/phoenixcore:6.14.0', ttyEnabled: true, command: 'cat')
     ])   {
@@ -38,5 +39,6 @@ pipeline {
                 }
             }
         }
+    }
     }
 }
