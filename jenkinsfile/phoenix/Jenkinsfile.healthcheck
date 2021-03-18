@@ -76,7 +76,7 @@ pipeline {
 
             agent {
                 kubernetes {
-                    podTemplate(
+
                         cloud: 'kubernetes', 
                         namespace: 'opsapp',
                         label: 'alpine-phoenix-jnlp-slave',
@@ -86,8 +86,7 @@ pipeline {
                         runAsUser: '0',
                         runAsGroup: '0',
                         nodeSelector: 'app=jenkins',
-                        containers: [
-                            containerTemplate(
+                        containerTemplate: [
                                 name: 'hdphoenixtoolsetcore',
                                 image: "harbor.qianfan123.com/toolset/phoenixcore:${version}",
                                 ttyEnabled: true,
@@ -99,10 +98,8 @@ pipeline {
                                 resourceRequestCpu: '50m',
                                 resourceLimitCpu: '100m',
                                 resourceRequestMemory: '100Mi',
-                                resourceLimitMemory: '200Mi',
-                            )
+                                resourceLimitMemory: '200Mi'
                         ],
-                    
                         volumes: [
                             secretVolume(mountPath: '/root/.ssh', secretName: 'jenkins-ssh-key'),
                             hostPathVolume(mountPath: '/var/run/docker.sock', hostPath: '/var/run/docker.sock'),
@@ -112,7 +109,7 @@ pipeline {
                         annotations: [
                             podAnnotation(key: "my-key", value: "my-value")
                         ]
-                    )
+
                 }
             }
 
