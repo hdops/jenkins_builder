@@ -113,17 +113,18 @@ pipeline {
                         annotations: [
                             podAnnotation(key: "my-key", value: "my-value")
                         ]
-                    ) node('alpine-phoenix-jnlp-slave-test')  {
-                        container("hdphoenixtoolsetcore"){
-                            sh "phoenix-tools version"
-                            if (env.dingding == "True") {
-                                echo "phoenix-tools healthcheck --dingding ${dingding} --tag ${params.tag}"
-                            } else {
-                                echo "phoenix-tools healthcheck --tag ${params.tag}"
+                    ){
+                        node('alpine-phoenix-jnlp-slave-test')  {
+                            container("hdphoenixtoolsetcore"){
+                                sh "phoenix-tools version"
+                                if (env.dingding == "True") {
+                                    echo "phoenix-tools healthcheck --dingding ${dingding} --tag ${params.tag}"
+                                } else {
+                                    echo "phoenix-tools healthcheck --tag ${params.tag}"
+                                }
                             }
                         }
-                    }  
-                    
+                    }
                 }
             }
         }
