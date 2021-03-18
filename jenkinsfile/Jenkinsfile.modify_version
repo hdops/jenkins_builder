@@ -54,6 +54,9 @@ pipeline {
                             def status = sh(returnStatus:true,script:"DNET_PROFILE=${params.DNET_PROFILE} DNET_PRODUCT=${params.DNET_PRODUCT} hdops modify_version --image ${image} --version ${version}")
                             if(status == 0){
                                 sh """
+                                git config --global credential.helper store
+                                git config --global user.email "qianfanauto@hd123.com"
+                                git config --global user.name "qianfanauto"
                                 git checkout ${git_branch}
                                 git pull
                                 git add .
@@ -75,6 +78,9 @@ pipeline {
                             def status = sh(returnStatus:true,script:"DNET_PROFILE=${params.DNET_PROFILE} DNET_PRODUCT=${params.DNET_PRODUCT} hdops modify_version --image ${image} --version ${version}")
                             if(status == 0){
                                 sh """
+                                git config --global credential.helper store
+                                git config --global user.email "qianfanauto@hd123.com"
+                                git config --global user.name "qianfanauto"
                                 git checkout ${git_branch}
                                 git pull
                                 git add .
