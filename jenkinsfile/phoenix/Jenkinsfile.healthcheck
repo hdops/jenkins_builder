@@ -39,6 +39,7 @@ pipeline {
                     data = readYaml file: 'docker_environments.yaml'
                     echo "crmVersion is ${data.crmVersion}"
                     echo "on_k8s is ${env.on_k8s}"
+                    node = "master"
                     echo "node is ${node}"
                     echo "env node is ${env.node}"
                     if (data.crmVersion){
