@@ -82,7 +82,7 @@ pipeline {
                     defaultContainer 'hdphoenixtoolsetcore'
                     containerTemplate {
                         name 'hdphoenixtoolsetcore'
-                        image "nginx"
+                        image  "harbor.qianfan123.com/toolset/phoenixcore:${version}"
                         ttyEnabled true
                         command 'sleep'
                         args '100'
