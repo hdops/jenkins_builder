@@ -75,7 +75,6 @@ pipeline {
 
             agent {
                 kubernetes {
-                    label node
                     defaultContainer "phoenixcore-"+version
                     yaml """\
                         apiVersion: v1
