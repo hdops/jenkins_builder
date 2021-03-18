@@ -81,7 +81,7 @@ pipeline {
             steps {
                 script {    
                     container("hdphoenixtoolsetcore"){
-                        sh "phoenix-tools --version"
+                        sh "phoenix-tools version"
                         if (env.dingding == "True") {
                             echo "phoenix-tools healthcheck --dingding ${dingding} --tag ${params.tag}"
                         } else {
