@@ -56,7 +56,7 @@ pipeline {
             hostPathVolume(mountPath: '/var/run/docker.sock', hostPath: '/var/run/docker.sock'),
             hostPathVolume(mountPath: '/bin/docker', hostPath: '/usr/bin/docker')
         ],
-        imagePullSecrets: 'harbor-admin'
+        imagePullSecrets: ['harbor-admin']
     )   {
         node('alpine-phoenix-jnlp-slave-test')  {
             stage('test shell') {
