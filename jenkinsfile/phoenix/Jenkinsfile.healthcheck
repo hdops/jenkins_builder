@@ -79,7 +79,6 @@ pipeline {
             agent {
                 kubernetes{
                     cloud 'kubernetes'
-                    defaultContainer 'hdphoenixtoolsetcore'
                     containerTemplate {
                         name 'hdphoenixtoolsetcore'
                         image  "harbor.qianfan123.com/toolset/phoenixcore:${version}"
@@ -92,12 +91,14 @@ pipeline {
 
             steps {
                 script{
+                    container("hdphoenixtoolsetcore")   {
                         sh "phoenix-tools version"
                         if (env.dingding == "True") {
                             echo "phoenix-tools healthcheck --dingding ${dingding} --tag ${params.tag}"
                         } else {
                             echo "phoenix-tools healthcheck --tag ${params.tag}"
                         }
+                    }
                 } 
             }
         }
