@@ -52,22 +52,16 @@ pipeline {
                 beforeAgent true
                 environment name: 'on_k8s', value: 'False'
             }
-
-            agent {
-                docker {
-                    image "harbor.qianfan123.com/toolset/phoenixcore:${version}"
-                    label node
-                }
-            }
-
             steps {
-                git branch: "${params.GIT_BRANCH}", credentialsId: '17643215-09f8-4a9a-b0ea-c8e49777ce1d', url: "http://gitlab.app.hd123.cn:10080/${GIT_GROUP}/${params.GIT_REPONAME}.git"
-
                 script{    
                     if (env.dingding == "True") {
-                        echo "phoenix-tools healthcheck --dingding ${dingding} --tag ${params.tag}"
+                        withDockerContainer(args: "-v ${WORKSPACE}:/opt", image: "harbor.qianfan123.com/toolset/phoenixcore:${version}") {
+                            echo "phoenix-tools healthcheck --dingding ${dingding} --tag ${params.tag}"
+                        }                        
                     } else {
-                        echo "phoenix-tools healthcheck --tag ${params.tag}"
+                        withDockerContainer(args: "-v ${WORKSPACE}:/opt", image: "harbor.qianfan123.com/toolset/phoenixcore:${version}") {
+                            echo "phoenix-tools healthcheck --tag ${params.tag}"
+                        }                        
                     }
                 }
             }
