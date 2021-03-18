@@ -80,8 +80,8 @@ pipeline {
                         name 'hdphoenixtoolsetcore'
                         image "nginx"
                         alwaysPullImage true
-                        command '/bin/sh -c'
-                        args 'cat'
+                        command 'sleep'
+                        args '10'
                     }
                 }
             }
