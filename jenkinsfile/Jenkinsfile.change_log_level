@@ -25,7 +25,6 @@ pipeline {
                         container("hdtoolsetcore"){
                             echo "profile is ${params.DNET_PROFILE}"
                             echo "sub systems are ${params.subsystem}"
-                            echo "svnreversion is ${params.svnreversion}"
                             echo "upstream URL is ${params.upurl}"
                             retry(2){
                                 sh "DNET_PROFILE=integration_test DNET_PRODUCT=dnet hdops download_toolset --branch ${params.GIT_BRANCH} -p ."
@@ -37,7 +36,6 @@ pipeline {
                         docker.image("harbor.qianfan123.com/toolset/toolsetcore:${toolset_image_version}").inside {
                             echo "profile is ${params.DNET_PROFILE}"
                             echo "sub systems are ${params.subsystem}"
-                            echo "svnreversion is ${params.svnreversion}"
                             echo "upstream URL is ${params.upurl}"
                             retry(2){
                                 sh "DNET_PROFILE=integration_test DNET_PRODUCT=dnet hdops download_toolset --branch ${params.GIT_BRANCH} -p ."
