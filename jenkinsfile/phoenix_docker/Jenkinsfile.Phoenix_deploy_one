@@ -1,0 +1,86 @@
+def node=""
+if (env.node){
+    node =env.node
+}else{
+    node ="master"
+}
+if (!env.GIT_GROUP){
+    env.GIT_GROUP="phoenix-config"
+}
+pipeline {
+    agent {label node}
+	options {
+	    timeout(time: 60, unit: 'MINUTES')
+    }
+
+    stages {
+        stage('delete workspace') {
+			steps{
+				deleteDir()
+			}
+        }
+        stage('下载phoenix config') {
+            steps{
+
+                git branch: "${params.GIT_BRANCH}", credentialsId: '17643215-09f8-4a9a-b0ea-c8e49777ce1d', url: "http://gitlab.app.hd123.cn:10080/${GIT_GROUP}/${params.GIT_REPONAME}.git"
+            }
+        }
+        stage('get crmVersion') {
+            steps {
+                script{
+                    data = readYaml file: 'docker_environments.yaml'
+                    echo "crmVersion is ${data.crmVersion}"
+                    echo "on_k8s is ${env.on_k8s}"
+                    echo "node is ${node}"
+                    if (data.crmVersion){
+                        env.version = data.crmVersion
+                    } else {
+                        error "can not get crmVersion"
+                    }
+                }
+            }
+        }
+        stage('deploy on docker') {
+            when {
+                beforeAgent true
+                environment name: 'on_k8s', value: 'False'
+            }
+            steps {
+                script{    
+                    withDockerContainer(args: "-v ${WORKSPACE}:/opt", image: "harbor.qianfan123.com/toolset/phoenixcore:${version}") {
+                        sh "phoenix-tools version"
+                        sh "phoenix-tools ${params.action} ${params.skipversion}  --subsystem ${params.subsystem} --skipupgrade ${params.skipupgrade} --tag ${params.tag}"
+                    }
+                }
+            }
+        }
+        stage('deploy on k8s') {
+            when {
+                beforeAgent true
+                environment name: 'on_k8s', value: 'True'
+            }
+
+            agent {
+                kubernetes{
+                    cloud 'kubernetes'
+                    containerTemplate {
+                        name 'hdphoenixtoolsetcore'
+                        image  "harbor.qianfan123.com/toolset/phoenixcore:${version}"
+                        ttyEnabled true
+                        command 'sleep'
+                        args '100'
+                    }
+                }
+            }
+
+            steps {
+                script{
+                    container("hdphoenixtoolsetcore")   {
+                        sh "phoenix-tools version"
+                        sh "phoenix-tools ${params.action} ${params.skipversion}  --subsystem ${params.subsystem} --skipupgrade ${params.skipupgrade} --tag ${params.tag}"
+                    }
+                } 
+            }
+        }
+    }
+}
