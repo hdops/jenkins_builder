@@ -182,22 +182,28 @@ pipeline {
         stage('maven denpendency check'){
 			steps{
 				script{
-						def mvn_shell="mvn "
-                        if (env.mvn_pom){
-                            mvn_shell+=" -f "+env.mvn_pom+" "+" dependency:list "
-                            }
-                        else{
-                            mvn_shell+=" dependency:list "
-                            }
-                        echo "mvn_configfile is ${mvn_configfile}"
-                        configFileProvider([configFile(fileId:mvn_configfile, variable: 'maven_settings')]) {
-                                mvn_shell+="  -s $maven_settings"
-                                echo "maven denpendency check is ${mvn_shell}"
-                                sh "${mvn_shell}"
-                            }
-                        echo "BUILD_URL:${BUILD_URL}"
-                        triggerRemoteJob job: "Maven_Denpendency_Check", maxConn: 3, parameters: """upurl=${BUILD_URL}
-isrelease=False""", remoteJenkinsName: "11.3", shouldNotFailBuild: true, useCrumbCache: false, useJobInfoCache: false, enhancedLogging: true
+                    def mvn_shell="mvn "
+                    if (env.mvn_pom){
+                        mvn_shell+=" -f "+env.mvn_pom+" "+" dependency:list "
+                        }
+                    else{
+                        mvn_shell+=" dependency:list "
+                        }
+                    echo "mvn_configfile is ${mvn_configfile}"
+                    configFileProvider([configFile(fileId:mvn_configfile, variable: 'maven_settings')]) {
+                            mvn_shell+="  -s $maven_settings"
+                            echo "maven denpendency check is ${mvn_shell}"
+                            sh "${mvn_shell}"
+                        }
+                    echo "BUILD_URL:${BUILD_URL}"
+                    withDockerContainer(args: "-v ${WORKSPACE}:/opt", image: "harbor.qianfan123.com/toolset/toolsetcore:${toolset_image_version}") {
+                        retry(2){
+                            sh "DNET_PROFILE=integration_test DNET_PRODUCT=dnet TRUST_PUBLIC_IP=true hdops download_toolset --branch develop -p ."
+                        }
+                        sh "tar zxf toolset.tar.gz -C ${WORKSPACE}"
+                        echo "maven denpendency check"
+                        sh "DNET_PRODUCT=dnet DNET_PROFILE=integration_test hdmon maven_dependency_check --jenkins_url ${BUILD_URL} --isrelease False"
+                    }
 				}
 			}
 		}
