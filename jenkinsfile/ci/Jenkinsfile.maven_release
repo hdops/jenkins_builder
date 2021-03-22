@@ -179,9 +179,11 @@ pipeline {
                         println(data)
                         count = data.size()
                         tasks = [:]
+                        def image = env.image
                         if (env.gitpath == "" || env.gitpath == null || env.gitpath == "None" || env.gitpath == "none") {
-                          echo("gitpath 为空，从 pom 中读取 images")
-                          def image = readFile 'envfile_images.txt'
+                            echo("gitpath 为空，从 pom 中读取 images")
+                            image = readFile 'envfile_images.txt'
+                            echo("from envfile_images.txt : ${image}")
                         }
                         echo("image=${image}")
                         data.each{ i ->
