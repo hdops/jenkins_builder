@@ -83,16 +83,29 @@ pipeline {
                 }
             }
         }
-         stage('pre-buil-2') {
+        stage('pre-buil-2') {
             steps{
                  script {
                     withDockerContainer(args: "-v ${WORKSPACE}:/opt", image: "harbor.qianfan123.com/toolset/toolsetcore:${toolset_image_version}") {
                         echo "服务白名单检查"
-                        sh "DNET_PRODUCT=dnet DNET_PROFILE=integration_test hdmon maven_docker_check --pomfile /opt/effectivepom.xml --configfile http://github.app.hd123.cn:10080/qianfanops/toolset/raw/develop/check/maven_check_dependency.yaml --metadata http://github.app.hd123.cn:10080/hd123/dev-docs/raw/master/src/rfc/artifact/service-metadata.yml"
+                        sh "DNET_PRODUCT=dnet DNET_PROFILE=integration_test hdmon maven_docker_check --pomfile /opt/effectivepom.xml --configfile http://github.app.hd123.cn:10080/qianfanops/toolset/raw/develop/check/maven_check_dependency.yaml"
+                        sh "DNET_PRODUCT=dnet DNET_PROFILE=integration_test hdmon maven_enforcer_check --pomfile /opt/pom.xml --outputfile /opt/maven_enforce.xml"
                     }
                  }
             }
          }
+         stage('pre-buil-mvn-enforcer') {
+            steps{
+                script{
+                    def mvn_shell="mvn validate -f maven_enforce.xml"
+                    configFileProvider([configFile(fileId:mvn_configfile, variable: 'maven_settings')]) {
+                        mvn_shell+=" -s $maven_settings"
+                        echo "mvn_shell is ${mvn_shell}"
+                        sh "${mvn_shell}"
+                    }
+                }
+            }
+        }
 		stage('build') {
 		    steps{
 				script{  
