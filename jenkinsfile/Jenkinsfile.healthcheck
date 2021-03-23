@@ -18,6 +18,10 @@ if (env.toolset_image_version){
     toolset_image_version = env.toolset_image_version
 }
 
+if (!env.on_k8s){
+    env.on_k8s="False"
+}
+
 pipeline {
     agent {label node}
     options {
@@ -28,7 +32,7 @@ pipeline {
 		stage('healthcheck') {
 			steps{
 				script {
-                    if (env.on_k8s){
+                    if (env.on_k8s == 'True'){
                         container('hdtoolsetcore'){
                             echo "profile is ${params.DNET_PROFILE}"
                             echo "sub systems are ${params.subsystem}"

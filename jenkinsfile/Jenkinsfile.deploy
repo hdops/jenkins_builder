@@ -14,6 +14,9 @@ def toolset_image_version="0.3.0-private"
 if (env.toolset_image_version){
     toolset_image_version = env.toolset_image_version
 }
+if (!env.on_k8s){
+    env.on_k8s="False"
+}
 pipeline {
     agent {label node}
     options {  
@@ -28,7 +31,7 @@ pipeline {
 		stage('validate docker image') {
 			steps{
 				script{
-					if(env.on_k8s){
+					if(env.on_k8s == 'True'){
 						container("hdtoolsetcore"){
 						    echo "active profile is ${params.DNET_PROFILE}"
 							echo "toolset path is ${WORKSPACE}"
