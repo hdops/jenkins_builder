@@ -23,8 +23,8 @@ if (!env.on_k8s){
 } else {
     on_k8s=env.on_k8s
 }
-if (parameters.on_k8s) {
-    on_k8s=parameters.on_k8s
+if (set_on_k8s) {
+    on_k8s=set_on_k8s
 }
 
 pipeline {
