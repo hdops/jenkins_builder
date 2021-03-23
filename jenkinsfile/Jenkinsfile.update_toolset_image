@@ -14,17 +14,25 @@ def toolset_image_version="0.3.0-private"
 if (env.toolset_image_version){
     toolset_image_version = env.toolset_image_version
 }
+def nodes= node.split(',').findAll { it }.collect { it.trim() }
+def jobs =[:]
+for (int i = 0; i < nodes.size(); i++) {
+    def _node = nodesp[i]
+    jobs["jobs-${_node}"] = {
+        node(_node) {
+            stage("Update toolset image on  ${_node}") {
+               sh "docker pull harbor.qianfan123.com/toolset/toolsetcore:${toolset_image_version}"
+            }
+        }
+    }
+}
 pipeline {
-    agent {label node}
+    agent none
     options {
 	    timeout(time: 1, unit: 'HOURS')
     }
 	stages {
-	    stage('delete workspace') {
-            steps{
-                deleteDir()
-            }
-        }
+
 		stage('update toolset image') {
 			steps{
                 script {
@@ -33,9 +41,7 @@ pipeline {
                     }else {
                         echo "start"
                         echo "workspace is $WORKSPACE"
-                        retry(2){
-                            sh "docker pull harbor.qianfan123.com/toolset/toolsetcore:${toolset_image_version}"
-                        }
+                        parallel jobs
                     }
                 }
 			}
