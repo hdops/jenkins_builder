@@ -86,6 +86,7 @@ pipeline {
                     container("hdphoenixtoolsetcore")   {
                         sh "phoenix-tools version"
                         sh "ls /home/jenkins/agent"
+                        sh "ls /home/jenkins/agent/workspace"
                     }
                 } 
             }
