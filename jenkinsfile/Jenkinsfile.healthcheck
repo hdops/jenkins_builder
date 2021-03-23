@@ -25,13 +25,14 @@ if (!env.on_k8s){
 pipeline {
     agent {label node}
     options {
-	    timeout(time: 3, unit: 'HOURS')
+	    timeout(time: 1, unit: 'HOURS')
     }
 
     stages {
 		stage('healthcheck') {
 			steps{
 				script {
+                    echo "${env.on_k8s}"
                     if (env.on_k8s == 'True'){
                         container('hdtoolsetcore'){
                             echo "profile is ${params.DNET_PROFILE}"
