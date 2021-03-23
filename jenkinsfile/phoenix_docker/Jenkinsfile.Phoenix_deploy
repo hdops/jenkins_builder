@@ -55,6 +55,8 @@ pipeline {
                 script{    
                     withDockerContainer(args: "-v ${WORKSPACE}:/opt", image: "harbor.qianfan123.com/toolset/phoenixcore:${version}") {
                         sh "phoenix-tools version"
+                        sh "ls"
+                        sh "pwd"
                         if (env.skipnochange) {
                             if (env.tag) {
                                sh "phoenix-tools ${params.action} ${params.skipversion} --skipupgrade ${params.skipupgrade} --skipnochange ${params.skipnochange} --tag ${params.tag}"
@@ -95,6 +97,7 @@ pipeline {
                 script{
                     container("hdphoenixtoolsetcore")   {
                         sh "phoenix-tools version"
+                        sh "cd /home/jenkins/agent/workspace/${JOB_NAME}"
                         if (env.skipnochange) {
                             if (env.tag) {
                                sh "phoenix-tools ${params.action} ${params.skipversion} --skipupgrade ${params.skipupgrade} --skipnochange ${params.skipnochange} --tag ${params.tag}"
