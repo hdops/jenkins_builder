@@ -11,6 +11,11 @@ if (!env.GIT_GROUP){
     env.GIT_GROUP="phoenix-config"
 }
 
+def GITLAB_URL="http://gitlab.app.hd123.cn:10080"
+if (env.GITLAB_URL){
+    GITLAB_URL =env.GITLAB_URL
+}
+
 pipeline {
     agent {label node}
 
@@ -23,7 +28,7 @@ pipeline {
         stage('下载phoenix config') {
             steps{
 
-                git branch: "${params.GIT_BRANCH}", credentialsId: '17643215-09f8-4a9a-b0ea-c8e49777ce1d', url: "http://gitlab.app.hd123.cn:10080/${GIT_GROUP}/${params.GIT_REPONAME}.git"
+                git branch: "${params.GIT_BRANCH}", credentialsId: '17643215-09f8-4a9a-b0ea-c8e49777ce1d', url: "${GITLAB_URL}/${GIT_GROUP}/${params.GIT_REPONAME}.git"
             }
         }
         stage('get crmVersion') {
