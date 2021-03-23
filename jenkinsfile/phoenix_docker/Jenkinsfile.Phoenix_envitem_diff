@@ -3,14 +3,6 @@ if (env.node){
     node =env.node
 }
 
-if (!env.GIT_GROUP){
-    env.GIT_GROUP="phoenix-config"
-}
-
-if (!env.dingding){
-    env.dingding="False"
-}
-
 if (!env.on_k8s){
     env.on_k8s="False"
 }
@@ -22,16 +14,15 @@ if (env.GITLAB_URL){
 
 pipeline {
     agent {label node}
-    
 	options {
-	    timeout(time: 15, unit: 'MINUTES')
+	    timeout(time: 3, unit: 'MINUTES')
     }
 
     stages {
         stage('delete workspace') {
 			steps{
 				deleteDir()
-		    }
+			}
         }
         stage('下载phoenix config') {
             steps{
@@ -53,28 +44,21 @@ pipeline {
                 }
             }
         }
-        stage('healthcheck on docker') {
+        stage('env item diff on docker') {
             when {
                 beforeAgent true
                 environment name: 'on_k8s', value: 'False'
             }
             steps {
                 script{    
-                    if (env.dingding == "True") {
-                        withDockerContainer(args: "-v ${WORKSPACE}:/opt", image: "harbor.qianfan123.com/toolset/phoenixcore:${version}") {
-                            sh "phoenix-tools version"
-                            sh "phoenix-tools healthcheck --dingding ${dingding} --tag ${params.tag}"
-                        }                        
-                    } else {
-                        withDockerContainer(args: "-v ${WORKSPACE}:/opt", image: "harbor.qianfan123.com/toolset/phoenixcore:${version}") {
-                            sh "phoenix-tools version"
-                            sh "phoenix-tools healthcheck --tag ${params.tag}"
-                        }                        
+                    withDockerContainer(args: "-v ${WORKSPACE}:/opt", image: "harbor.qianfan123.com/toolset/phoenixcore:${version}") {
+                        sh "phoenix-tools version"
+                        sh "phoenix-tools envitem_diff --oldversion ${params.oldversion} --newversion ${params.newversion}"
                     }
                 }
             }
         }
-        stage('healthcheck on k8s') {
+        stage('env item diff on k8s') {
             when {
                 beforeAgent true
                 environment name: 'on_k8s', value: 'True'
@@ -97,13 +81,14 @@ pipeline {
                 script{
                     container("hdphoenixtoolsetcore")   {
                         sh "phoenix-tools version"
-                        if (env.dingding == "True") {
-                            sh "phoenix-tools healthcheck --dingding ${dingding} --tag ${params.tag}"
-                        } else {
-                            sh "phoenix-tools healthcheck --tag ${params.tag}"
-                        }
+                        sh "phoenix-tools envitem_diff --oldversion ${params.oldversion} --newversion ${params.newversion}"
                     }
                 } 
+            }
+        }
+        stage('archiveArtifacts') {
+            steps {
+                archiveArtifacts 'envitem_diff.md'
             }
         }
     }

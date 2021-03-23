@@ -3,16 +3,12 @@ if (env.node){
     node =env.node
 }
 
-if (!env.GIT_GROUP){
-    env.GIT_GROUP="phoenix-config"
-}
-
-if (!env.dingding){
-    env.dingding="False"
-}
-
 if (!env.on_k8s){
     env.on_k8s="False"
+}
+
+if (!env.GIT_GROUP){
+    env.GIT_GROUP="phoenix-config"
 }
 
 def GITLAB_URL="http://gitlab.app.hd123.cn:10080"
@@ -22,21 +18,19 @@ if (env.GITLAB_URL){
 
 pipeline {
     agent {label node}
-    
 	options {
-	    timeout(time: 15, unit: 'MINUTES')
+	    timeout(time: 120, unit: 'MINUTES')
     }
-
     stages {
-        stage('delete workspace') {
+	    stage('delete workspace') {
 			steps{
 				deleteDir()
-		    }
+			}
         }
-        stage('下载phoenix config') {
-            steps{
+        stage('下载phoenix_template') {
+			steps{
                 git branch: "${params.GIT_BRANCH}", credentialsId: '17643215-09f8-4a9a-b0ea-c8e49777ce1d', url: "${GITLAB_URL}/${GIT_GROUP}/${params.GIT_REPONAME}.git"
-            }
+			}
         }
         stage('get crmVersion') {
             steps {
@@ -53,28 +47,22 @@ pipeline {
                 }
             }
         }
-        stage('healthcheck on docker') {
+        stage('Check Hosts One on docker') {
             when {
                 beforeAgent true
                 environment name: 'on_k8s', value: 'False'
             }
             steps {
                 script{    
-                    if (env.dingding == "True") {
-                        withDockerContainer(args: "-v ${WORKSPACE}:/opt", image: "harbor.qianfan123.com/toolset/phoenixcore:${version}") {
-                            sh "phoenix-tools version"
-                            sh "phoenix-tools healthcheck --dingding ${dingding} --tag ${params.tag}"
-                        }                        
-                    } else {
-                        withDockerContainer(args: "-v ${WORKSPACE}:/opt", image: "harbor.qianfan123.com/toolset/phoenixcore:${version}") {
-                            sh "phoenix-tools version"
-                            sh "phoenix-tools healthcheck --tag ${params.tag}"
-                        }                        
+                    withDockerContainer(args: "-v ${WORKSPACE}:/opt", image: "harbor.qianfan123.com/toolset/phoenixcore:${version}") {
+                        sh "phoenix-tools version"
+                        sh "chmod +x inventory.py"
+                        sh "phoenix-tools check_hosts --hostname ${params.hostname} --dryrun ${params.dryrun}"
                     }
                 }
             }
         }
-        stage('healthcheck on k8s') {
+        stage('Check Hosts One on k8s') {
             when {
                 beforeAgent true
                 environment name: 'on_k8s', value: 'True'
@@ -97,11 +85,8 @@ pipeline {
                 script{
                     container("hdphoenixtoolsetcore")   {
                         sh "phoenix-tools version"
-                        if (env.dingding == "True") {
-                            sh "phoenix-tools healthcheck --dingding ${dingding} --tag ${params.tag}"
-                        } else {
-                            sh "phoenix-tools healthcheck --tag ${params.tag}"
-                        }
+                        sh "chmod +x inventory.py"
+                        sh "phoenix-tools check_hosts --hostname ${params.hostname} --dryrun ${params.dryrun}"
                     }
                 } 
             }
