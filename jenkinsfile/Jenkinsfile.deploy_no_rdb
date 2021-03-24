@@ -14,6 +14,14 @@ def toolset_image_version="0.3.0-private"
 if (env.toolset_image_version){
     toolset_image_version = env.toolset_image_version
 }
+if (!env.on_k8s){
+    env.on_k8s="False"
+}
+
+if (set_on_k8s) {
+    env.on_k8s=set_on_k8s
+}
+
 pipeline {
     agent {label node}
     options {   
@@ -28,7 +36,7 @@ pipeline {
 		stage('validate docker image') {
 			steps{
 				script{
-					if(env.on_k8s){
+					if(env.on_k8s == 'True'){
 						container("hdtoolsetcore"){
 						    echo "active profile is ${params.DNET_PROFILE}"
 							echo "toolset path is ${WORKSPACE}"
@@ -61,7 +69,7 @@ pipeline {
 		stage('image download && appinstall') {
 		    steps{
 				script{
-					if (env.on_k8s){
+					if(env.on_k8s == 'True'){
 						container("hdtoolsetcore"){
 							sh "DNET_PRODUCT=${params.DNET_PRODUCT} DNET_PROFILE=${params.DNET_PROFILE} PRESET_IMAGE_VERSION=${params.PRESET_IMAGE_VERSION} hdops deploy image_download --subsystem ${params.subsystem} --stackids ${params.stackIds} --tag ${params.tag}"
 		        			sh "DNET_AK=${params.DNET_AK} DNET_PRODUCT=${params.DNET_PRODUCT} DNET_PROFILE=${params.DNET_PROFILE} PRESET_IMAGE_VERSION=${params.PRESET_IMAGE_VERSION} hdops deploy appinstall --subsystem ${params.subsystem} --stackids ${params.stackIds}  --operate ${params.action} --tag ${params.tag}"
