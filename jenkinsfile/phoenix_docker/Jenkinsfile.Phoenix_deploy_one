@@ -91,7 +91,8 @@ pipeline {
                 script{
                     hdphoenixtoolsetcoreYamlData.spec.containers[0].image = "harbor.qianfan123.com/toolset/phoenixcore:${version}"
                     writeYaml file: "${YAML_FILE}", data: hdphoenixtoolsetcoreYamlData
-                    sh "pwd"
+                    sh "ls /var/jenkins_home/workspace/PNX_Phoenix-docker/PNX-Phoenix_deploy_one@script"
+                    sh "ls /var/jenkins_home/workspace/PNX_Phoenix-docker"
                     echo "${WORKSPACE}"
                     sh "cat ${YAML_FILE}"
                 } 
