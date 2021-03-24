@@ -1,0 +1,50 @@
+- group1:
+  - stage: st1
+    configfile: 1.yaml
+
+  - stage: st2
+    configfile: 2.yaml
+
+- group2:
+  - stage: st3
+    configfile: 3.yaml
+
+  - stage: st4
+    configfile: 4.yaml
+
+  - stage: st5
+    configfile: 5.yaml
+
+- group3:
+  - stage: st6
+    configfile: 6.yaml
+
+  - stage: st7
+    configfile: 7.yaml
+
+  - stage: st8
+    configfile: 8.yaml
+
+node{
+    git url:"https://gitee.com/hdops/aa.git"
+    data = readYaml file:"a.yaml"
+
+    tasks=[:]
+    data.each { group_detail ->
+        group_detail.each{grp_name, d->
+           tasks[grp_name]={
+               d.each{
+                   stage("${it.stage}"){
+                       echo  "hdops --config ${it.configfile}"
+                   }
+               }
+           }
+
+        }
+    }
+    parallel tasks
+
+
+
+
+}

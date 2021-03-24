@@ -1,0 +1,25 @@
+def node=""
+if (env.node){
+    node =env.node
+}else{
+    node ="master"
+}
+def whether_post=""
+if (env.whether_post){
+    whether_post =env.whether_post
+}else{
+    whether_post ="True"
+}
+pipeline {
+    agent {label node}
+    stages {
+        stage('remove jenkins cache') {
+			steps{
+			// 删除cache 目录
+			      sh "ls -l ${JENKINS_HOME}/caches"
+                  sh "rm -fr ${JENKINS_HOME}/caches"
+                  sh "ls -l ${JENKINS_HOME}/caches"
+			}
+        }
+    }
+}
