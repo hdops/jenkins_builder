@@ -89,7 +89,7 @@ pipeline {
             agent {
                 kubernetes{
                     cloud 'kubernetes'
-                    yamlFile 'hdphoenixtoolsetcore.yaml'
+                    yamlFile 'jenkinsfile/phoenix_docker/hdphoenixtoolsetcore.yaml'
                 }
             }
 
