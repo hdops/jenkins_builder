@@ -88,19 +88,19 @@ pipeline {
                 environment name: 'on_k8s', value: 'True'
             }
 
-            agent {
-                kubernetes{
-                    cloud 'kubernetes'
-                    yamlFile 'jenkinsfile/phoenix_docker/hdphoenixtoolsetcore.yaml'
-                }
-            }
+            //agent {
+            //    kubernetes{
+            //        cloud 'kubernetes'
+            //        yamlFile 'jenkinsfile/phoenix_docker/hdphoenixtoolsetcore.yaml'
+            //    }
+            //}
 
             steps {
                 script{
-                    container("hdphoenixtoolsetcore")   {
+                    //container("hdphoenixtoolsetcore")   {
                         sh "phoenix-tools version"
                         echo "phoenix-tools ${params.action} ${params.skipversion}  --subsystem ${params.subsystem} --skipupgrade ${params.skipupgrade} --tag ${params.tag}"
-                    }
+                    //}
                 } 
             }
         }
