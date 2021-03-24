@@ -180,9 +180,11 @@ pipeline {
                         count = data.size()
                         tasks = [:]
                         def image = env.image
+                        def gitpath = env.gitpath
                         if (env.gitpath == "" || env.gitpath == null || env.gitpath == "None" || env.gitpath == "none") {
                             echo("gitpath 为空，从 pom 中读取 images")
                             image = readFile 'envfile_images.txt'
+                            gitpath = "None"
                             echo("from envfile_images.txt : ${image}")
                         }
                         echo("image=${image}")
