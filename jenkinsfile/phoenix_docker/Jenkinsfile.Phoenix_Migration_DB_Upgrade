@@ -37,7 +37,6 @@ pipeline {
 
 		stage('migration') {
 			steps{
-			    sh "docker login -u offline -p Go9jRQJxpwVuXfhcIVko3WgF harbor.qianfan123.com"
 			    sh "docker pull harbor.qianfan123.com/phoenix/phoenix-migration-rdb-setup:${params.VERSION}"
                 sh "docker run -i -v ${jen_home}/workspace/$JOB_NAME/application.yml:/share/data/application.yml -v /hdapp/phoenix-migration/logs:/apache-tomcat/logs --rm harbor.qianfan123.com/phoenix/phoenix-migration-rdb-setup:${params.VERSION} all -d 'jdbc:mysql://${params.DB_HOST}:${params.DB_PORT}/${params.DB_NAME}?useLegacyDatetimeCode=false&serverTimezone=Asia/Shanghai&useUnicode=yes&characterEncoding=utf-8&useSSL=no' -u ${params.DB_USER} -p ${params.DB_PASS} --skip-version-check"
 			}
