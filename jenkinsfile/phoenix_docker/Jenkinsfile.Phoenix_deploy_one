@@ -36,9 +36,9 @@ pipeline {
             steps {
                 script{
                     sh "pwd"
-                    sh "ls"
+                    sh "ls jenkinsfile/phoenix_docker/hdphoenixtoolsetcore.yaml"
                     data = readYaml file: 'jenkinsfile/phoenix_docker/hdphoenixtoolsetcore.yaml'
-                    echo ${data}
+                    echo "${data}"
                 } 
             }
         }
