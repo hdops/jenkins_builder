@@ -91,10 +91,11 @@ pipeline {
 
             steps {
                 script{
-                    echo "${hdphoenixtoolsetcoreYamlData.spec.containers[0].image}"
                     hdphoenixtoolsetcoreYamlData.spec.containers[0].image = "${GITLAB_URL}:${version}"
                     echo "${hdphoenixtoolsetcoreYamlData}"
                     writeYaml file: "${YAML_FILE}", data: hdphoenixtoolsetcoreYamlData
+                    sh "pwd"
+                    sh "cat ${YAML_FILE}"
                 } 
             }
         }
