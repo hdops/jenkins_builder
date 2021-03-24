@@ -19,12 +19,11 @@ if (env.toolset_image_version){
 }
 
 if (!env.on_k8s){
-    on_k8s="False"
-} else {
-    on_k8s=env.on_k8s
+    env.on_k8s="False"
 }
+
 if (set_on_k8s) {
-    on_k8s=set_on_k8s
+    env.on_k8s=set_on_k8s
 }
 
 pipeline {
@@ -37,8 +36,7 @@ pipeline {
 		stage('healthcheck') {
 			steps{
 				script {
-                    echo "${on_k8s}"
-                    if (on_k8s == 'True'){
+                    if (env.on_k8s == 'True'){
                         container('hdtoolsetcore'){
                             echo "profile is ${params.DNET_PROFILE}"
                             echo "sub systems are ${params.subsystem}"
