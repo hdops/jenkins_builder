@@ -87,8 +87,10 @@ pipeline {
                     cloud 'kubernetes'
                     containerTemplate {
                         name 'hdphoenixtoolsetcore'
+                        namespace 'opsapp'
                         image  "harbor.qianfan123.com/toolset/phoenixcore:${version}"
                         ttyEnabled true
+                        alwaysPullImage true
                         command 'sleep'
                         args '100'
                     }
