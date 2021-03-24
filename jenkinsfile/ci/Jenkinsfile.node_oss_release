@@ -1,0 +1,86 @@
+def node="master"
+if (env.node){
+    node =env.node
+}
+
+def node_image= "harbor.qianfan123.com/base/node:9.11.2"
+if (env.node_image){
+    node_image =env.node_image
+}
+
+def ci_git_server_baseurl= "http://github.app.hd123.cn:10080"
+if (env.ci_git_server_baseurl){
+    ci_git_server_baseurl = env.ci_git_server_baseurl
+}
+
+def credentialsId="qianfan"
+
+def build_branch="develop"
+if (params.build_branch){
+    build_branch =params.build_branch
+}
+
+def packageRemoteJob="createResourcePackage"
+if (env.packageRemoteJob){
+    packageRemoteJob = env.packageRemoteJob
+}
+
+def uploadRemoteJob="qianfan-front-web-oss"
+if (env.uploadRemoteJob){
+    uploadRemoteJob = env.uploadRemoteJob
+}
+
+pipeline {
+	agent {label node}
+    options {
+	//     buildDiscarder(logRotator(numToKeepStr: '10'))
+	//     disableConcurrentBuilds()
+	//     disableResume()
+	    timeout(time: 1, unit: 'HOURS')
+    } 
+    stages {
+        stage('delete workspace'){
+		    when {
+			    expression {'Y' == "${params.deleteWorkspace}"}
+			}
+			steps{
+			    deleteDir()
+			}
+		}
+         stage('checkout & build') {
+              agent {
+			    docker {
+			    image "${node_image}"
+			    args '-v /var/run/docker.sock:/var/run/docker.sock -v /root/.ssh:/root/.ssh -v /usr/bin/docker:/usr/bin/docker -v /hdapp/npm:/root/.npm -v /root/.npmrc:/root/.npmrc'
+			    }
+             }
+             steps{ 
+				echo "checkout ${ci_git_server_baseurl}/${git_project}.git  branch:${build_branch}"
+                checkout([$class: 'GitSCM', branches: [[name: '*/${build_branch}']],userRemoteConfigs: [[url: "${ci_git_server_baseurl}/${git_project}.git",credentialsId: "${credentialsId}"]]])
+                sh """git config --global credential.helper store
+git config --global user.email qianfan@hd123.com
+git config --global user.name qianfan
+git checkout ${releaseBranchName}
+git pull
+git checkout ${build_branch}
+git pull
+git merge -s recursive -X theirs ${releaseBranchName} -m '版本发布'
+git push origin ${build_branch}
+git tag ${releaseVersion}
+git push --tags"""
+				echo "npm_shell is ${npm_shell}"
+				sh "${npm_shell}"
+				archiveArtifacts '*.tar.gz' 
+             }
+         }  
+        stage('打包'){
+			steps{
+				script{
+						echo "subsystem:${subsystem}"
+						echo "BUILD_URL:${BUILD_URL}"
+						build job: "${packageRemoteJob}", parameters: [string(name: 'DNET_PROFILE', value: 'production'), string(name: 'subsystem', value: subsystem), string(name: 'BUILD_URL', value: BUILD_URL), string(name: 'fromVersion', value: "$releaseVersion"), string(name: 'toVersion', value: "$releaseVersion"), string(name: 'alias', value: "$alias")], wait: true
+				}
+			}
+		}
+    }
+}

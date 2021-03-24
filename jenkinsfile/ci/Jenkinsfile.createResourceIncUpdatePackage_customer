@@ -1,0 +1,39 @@
+def node=""
+if (env.node){
+    node =env.node
+}else{
+    node ="develop"
+}
+
+pipeline {
+	agent {
+			    docker {
+			    label node
+			    image "harbor.qianfan123.com/toolset/toolsetcore:0.3.0"
+			    args '-v /var/run/docker.sock:/var/run/docker.sock -v /usr/bin/docker:/usr/bin/docker --add-host=hd-hz-public.oss-cn-hangzhou-internal.aliyuncs.com:47.110.23.37'
+			    }
+             }
+    options {
+	//     buildDiscarder(logRotator(numToKeepStr: '10'))
+	//     disableConcurrentBuilds()
+	//     disableResume()
+	    timeout(time: 1, unit: 'HOURS')
+    } 
+    stages {
+        stage('download_toolset'){ 
+			steps{
+                            echo "active profile is ${DNET_PROFILE}"
+                            echo "workspace is $WORKSPACE"
+                            retry(2){
+                                sh "set +x;DNET_CLOUD_VENDOR=${dnet_cloud_vendor} DNET_PRIVATE_URL=${dnet_private_url} DNET_PRIVATE_BUCKET=${dnet_private_bucket} DNET_PRIVATE_AK=${dnet_private_ak} DNET_PRIVATE_AS=${dnet_private_as} DNET_PRIVATE_REGION=${dnet_private_region} hdops download_toolset --branch ${build_branch} -p ."
+                            }
+                            sh "tar zxf toolset.tar.gz -C $WORKSPACE"
+			}
+		}
+        stage('createResourceIncUpdatePackage'){
+			steps{   
+                            sh "DNET_PRODUCT=${params.DNET_PRODUCT} DNET_PROFILE=${params.DNET_PROFILE} hdmon create_resource_inc_update_package --subsystem ${params.subsystem} --fromversion ${params.fromVersion} --toversion ${params.toVersion} --branch ${params.branch}"
+			}
+		}
+    }
+}
