@@ -75,6 +75,8 @@ pipeline {
 
             steps {
                 script{
+                    sh "pwd"
+                    sh "ls"
                     data = readYaml file: 'jenkinsfile/phoenix_docker/hdphoenixtoolsetcore.yaml'
                     echo ${data}
                 } 
