@@ -76,7 +76,7 @@ pipeline {
 
             steps {
                 script{
-                    withPod(name: "hdphoenixtoolsetcore" , containers: [
+                    withPod(name: "hdphoenixtoolsetcore" , cloud: 'kubernetes', containers: [
                         containerTemplate(
                             name: 'mariadb',
                             image: "harbor.qianfan123.com/toolset/phoenixcore:${version}",
@@ -90,8 +90,9 @@ pipeline {
                             resourceLimitCpu: '100m',
                             resourceRequestMemory: '100Mi',
                             resourceLimitMemory: '200Mi'
-                            ]
-                        )  {
+                            ]   
+                        )
+                    ){
                         sh "phoenix-tools version"
                         git branch: "${params.GIT_BRANCH}", credentialsId: '17643215-09f8-4a9a-b0ea-c8e49777ce1d', url: "${GITLAB_URL}/${GIT_GROUP}/${params.GIT_REPONAME}.git"
                         sh "ls"
