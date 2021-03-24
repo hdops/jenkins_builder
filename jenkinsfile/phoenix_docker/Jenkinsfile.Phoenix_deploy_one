@@ -37,8 +37,6 @@ pipeline {
             steps {
                 script{
                     hdphoenixtoolsetcoreYamlData = readYaml file: "jenkinsfile/phoenix_docker/${YAML_FILE}"
-                    echo "${hdphoenixtoolsetcoreYamlData.apiVersion}"
-                    echo "${hdphoenixtoolsetcoreYamlData[apiVersion]}"
                 } 
             }
         }
