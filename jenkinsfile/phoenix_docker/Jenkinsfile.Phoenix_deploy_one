@@ -76,7 +76,7 @@ pipeline {
 
             steps {
                 script{
-                    withPod(name: "hdphoenixtoolsetcore" , containers: cloud: 'kubernetes', containers: [
+                    withPod(name: "hdphoenixtoolsetcore" , containers: [
                         containerTemplate(
                             name: 'mariadb',
                             image: "harbor.qianfan123.com/toolset/phoenixcore:${version}",
