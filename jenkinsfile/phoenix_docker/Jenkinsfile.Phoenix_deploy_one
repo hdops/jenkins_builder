@@ -25,8 +25,23 @@ pipeline {
 	options {
 	    timeout(time: 60, unit: 'MINUTES')
     }
-
+    
     stages {
+        stage('prepare on k8s') {
+            when {
+                beforeAgent true
+                environment name: 'on_k8s', value: 'True'
+            }
+
+            steps {
+                script{
+                    sh "pwd"
+                    sh "ls"
+                    data = readYaml file: 'jenkinsfile/phoenix_docker/hdphoenixtoolsetcore.yaml'
+                    echo ${data}
+                } 
+            }
+        }
         stage('delete workspace') {
 			steps{
 				deleteDir()
@@ -65,21 +80,6 @@ pipeline {
                         sh "phoenix-tools ${params.action} ${params.skipversion}  --subsystem ${params.subsystem} --skipupgrade ${params.skipupgrade} --tag ${params.tag}"
                     }
                 }
-            }
-        }
-        stage('prepare on k8s') {
-            when {
-                beforeAgent true
-                environment name: 'on_k8s', value: 'True'
-            }
-
-            steps {
-                script{
-                    sh "pwd"
-                    sh "ls"
-                    data = readYaml file: 'jenkinsfile/phoenix_docker/hdphoenixtoolsetcore.yaml'
-                    echo ${data}
-                } 
             }
         }
         stage('deploy on k8s') {
