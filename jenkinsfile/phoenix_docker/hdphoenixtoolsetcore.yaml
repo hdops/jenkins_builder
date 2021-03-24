@@ -1,0 +1,38 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  labels:
+    label: hdphoenixtoolsetcore
+spec:
+  containers:
+  - name: hdphoenixtoolsetcore
+    namespace: opsapp
+    image: harbor.qianfan123.com/toolset/phoenixcore:6.14.0
+    command: ["sleep"]
+    args: ["100"]
+    tty: true
+    volumeMounts:
+    - mountPath: "/root/.ssh"
+      name: "volume-0"
+      readOnly: false
+    - mountPath: "/bin/docker"
+      name: "volume-2"
+      readOnly: false
+    - mountPath: "/var/run/docker.sock"
+      name: "volume-1"
+      readOnly: false
+    - mountPath: "/home/jenkins/agent"
+      name: "workspace-volume"
+      readOnly: false
+    workingDir: "/home/jenkins/agent"
+  volumes:
+  - name: "volume-0"
+    secret:
+      defaultMode: 384
+      secretName: "jenkins-ssh-key"
+  - hostPath:
+      path: "/usr/bin/docker"
+    name: "volume-2"
+  - hostPath:
+      path: "/var/run/docker.sock"
+    name: "volume-1"

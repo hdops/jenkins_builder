@@ -1,9 +1,8 @@
-def node=""
+def node="master"
 if (env.node){
     node =env.node
-}else{
-    node ="master"
 }
+
 if (!env.GIT_GROUP){
     env.GIT_GROUP="phoenix-config"
 }
@@ -68,7 +67,7 @@ pipeline {
                 }
             }
         }
-        stage('deploy on k8s') {
+        stage('prepare on k8s') {
             when {
                 beforeAgent true
                 environment name: 'on_k8s', value: 'True'
@@ -76,32 +75,29 @@ pipeline {
 
             steps {
                 script{
-                    podTemplate(name: "test-alpine-phoenixcore-k8s" , cloud: 'kubernetes', containers: [
-                        containerTemplate(
-                            name: 'hdphoenixtoolsetcore',
-                            image: "harbor.qianfan123.com/toolset/phoenixcore:${version}",
-                            ttyEnabled: true,
-                            privileged: false,
-                            alwaysPullImage: true,
-                            command: 'sleep',
-                            args: '100',
-                            workingDir: '/home/jenkins/agent',
-                            resourceRequestCpu: '50m',
-                            resourceLimitCpu: '100m',
-                            resourceRequestMemory: '100Mi',
-                            resourceLimitMemory: '200Mi'
-                        ) ]   
-                    )  {
-                        node(POD_LABEL) {
-                            container('hdphoenixtoolsetcore'){
-                                sh "phoenix-tools version"
-                                git branch: "${params.GIT_BRANCH}", credentialsId: '17643215-09f8-4a9a-b0ea-c8e49777ce1d', url: "${GITLAB_URL}/${GIT_GROUP}/${params.GIT_REPONAME}.git"
-                                sh "ls"
-                                sh "which docker"
-                                echo "phoenix-tools ${params.action} ${params.skipversion}  --subsystem ${params.subsystem} --skipupgrade ${params.skipupgrade} --tag ${params.tag}"
-                            }
-                        }
-                        
+                    data = readYaml file: 'jenkinsfile/phoenix_docker/hdphoenixtoolsetcore.yaml'
+                    echo ${data}
+                } 
+            }
+        }
+        stage('deploy on k8s') {
+            when {
+                beforeAgent true
+                environment name: 'on_k8s', value: 'True'
+            }
+
+            agent {
+                kubernetes{
+                    cloud 'kubernetes'
+                    yamlFile 'hdphoenixtoolsetcore.yaml'
+                }
+            }
+
+            steps {
+                script{
+                    container("hdphoenixtoolsetcore")   {
+                        sh "phoenix-tools version"
+                        echo "phoenix-tools ${params.action} ${params.skipversion}  --subsystem ${params.subsystem} --skipupgrade ${params.skipupgrade} --tag ${params.tag}"
                     }
                 } 
             }
