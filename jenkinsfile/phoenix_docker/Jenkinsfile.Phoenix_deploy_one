@@ -37,8 +37,7 @@ pipeline {
                 script{
                     sh "pwd"
                     sh "ls jenkinsfile/phoenix_docker/hdphoenixtoolsetcore.yaml"
-                    data = readYaml file: 'jenkinsfile/phoenix_docker/hdphoenixtoolsetcore.yaml'
-                    echo "${data}"
+                    hdphoenixtoolsetcoreYamlData = readYaml file: 'jenkinsfile/phoenix_docker/hdphoenixtoolsetcore.yaml'
                 } 
             }
         }
@@ -60,6 +59,7 @@ pipeline {
                     echo "crmVersion is ${data.crmVersion}"
                     echo "on_k8s is ${env.on_k8s}"
                     echo "node is ${node}"
+                    echo "${hdphoenixtoolsetcoreYamlData}"
                     if (data.crmVersion){
                         env.version = data.crmVersion
                     } else {
@@ -91,14 +91,14 @@ pipeline {
             //agent {
             //    kubernetes{
             //        cloud 'kubernetes'
-            //        yamlFile 'jenkinsfile/phoenix_docker/hdphoenixtoolsetcore.yaml'
+            //        yaml "${hdphoenixtoolsetcoreYamlData}"
             //    }
             //}
 
             steps {
                 script{
                     //container("hdphoenixtoolsetcore")   {
-                        sh "phoenix-tools version"
+                    //    sh "phoenix-tools version"
                         echo "phoenix-tools ${params.action} ${params.skipversion}  --subsystem ${params.subsystem} --skipupgrade ${params.skipupgrade} --tag ${params.tag}"
                     //}
                 } 
