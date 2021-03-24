@@ -16,6 +16,7 @@ if (env.set_on_k8s) {
 }
 
 def GITLAB_URL="http://gitlab.app.hd123.cn:10080"
+def YAML_FILE="hdphoenixtoolsetcore.yaml"
 if (env.GITLAB_URL){
     GITLAB_URL =env.GITLAB_URL
 }
@@ -27,7 +28,7 @@ pipeline {
     }
     
     stages {
-        stage('prepare on k8s') {
+        stage('advance prepare on k8s to read yaml') {
             when {
                 beforeAgent true
                 environment name: 'on_k8s', value: 'True'
@@ -35,9 +36,7 @@ pipeline {
 
             steps {
                 script{
-                    sh "pwd"
-                    sh "ls jenkinsfile/phoenix_docker/hdphoenixtoolsetcore.yaml"
-                    hdphoenixtoolsetcoreYamlData = readYaml file: 'jenkinsfile/phoenix_docker/hdphoenixtoolsetcore.yaml'
+                    hdphoenixtoolsetcoreYamlData = readYaml file: "jenkinsfile/phoenix_docker/${YAML_FILE}"
                     echo "${hdphoenixtoolsetcoreYamlData}"
                 } 
             }
@@ -82,6 +81,22 @@ pipeline {
                 }
             }
         }
+
+        stage('prepare on k8s') {
+            when {
+                beforeAgent true
+                environment name: 'on_k8s', value: 'True'
+            }
+
+            steps {
+                script{
+                    hdphoenixtoolsetcoreYamlData.spec.containers.image = "${GITLAB_URL}:${version}"
+                    echo "${hdphoenixtoolsetcoreYamlData}"
+                    writeYaml file: "${YAML_FILE}", data: hdphoenixtoolsetcoreYamlData
+                } 
+            }
+        }
+
         stage('deploy on k8s') {
             when {
                 beforeAgent true
@@ -91,7 +106,7 @@ pipeline {
             agent {
                 kubernetes{
                     cloud 'kubernetes'
-                    yaml "${hdphoenixtoolsetcoreYamlData}"
+                    yamlFile "${YAML_FILE}"
                 }
             }
 

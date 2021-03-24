@@ -7,7 +7,7 @@ spec:
   containers:
   - name: hdphoenixtoolsetcore
     namespace: opsapp
-    image: harbor.qianfan123.com/toolset/phoenixcore:6.14.0
+    image: harbor.qianfan123.com/toolset/phoenixcore:${version}
     command: ["sleep"]
     args: ["100"]
     tty: true
