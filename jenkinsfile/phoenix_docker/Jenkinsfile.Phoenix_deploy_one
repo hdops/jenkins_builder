@@ -47,7 +47,6 @@ pipeline {
         }
         stage('下载phoenix config') {
             steps{
-
                 git branch: "${params.GIT_BRANCH}", credentialsId: '17643215-09f8-4a9a-b0ea-c8e49777ce1d', url: "${GITLAB_URL}/${GIT_GROUP}/${params.GIT_REPONAME}.git"
             }
         }
@@ -90,8 +89,8 @@ pipeline {
             steps {
                 script{
                     hdphoenixtoolsetcoreYamlData.spec.containers[0].image = "harbor.qianfan123.com/toolset/phoenixcore:${version}"
-                    writeYaml file: "${WORKSPACE}@script/${YAML_FILE}", data: hdphoenixtoolsetcoreYamlData
-                    sh "cat ${WORKSPACE}@script/${YAML_FILE}"
+                    writeYaml file: "${YAML_FILE}", data: hdphoenixtoolsetcoreYamlData
+                    sh "cat ${YAML_FILE}"
                 } 
             }
         }
