@@ -100,6 +100,7 @@ pipeline {
                 script{
                     container("hdphoenixtoolsetcore")   {
                         sh "phoenix-tools version"
+                        git branch: "${params.GIT_BRANCH}", credentialsId: '17643215-09f8-4a9a-b0ea-c8e49777ce1d', url: "${GITLAB_URL}/${GIT_GROUP}/${params.GIT_REPONAME}.git"
                         if (env.dingding == "True") {
                             sh "phoenix-tools healthcheck --dingding ${dingding} --tag ${params.tag}"
                         } else {
