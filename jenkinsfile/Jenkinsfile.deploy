@@ -36,7 +36,7 @@ pipeline {
 		stage('read PRESET_IMAGE_VERSION'){
 			steps{
 				script{
-					if (params.PRESET_IMAGE_VERSION != null){
+					if (params.PRESET_IMAGE_VERSION != '' && params.PRESET_IMAGE_VERSION != null ){
         			    image_version_data = params.PRESET_IMAGE_VERSION.split(',')
         			}else{
         			    image_version_data = ['None']
