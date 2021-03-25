@@ -112,7 +112,7 @@ pipeline {
                 script{
                     container("hdphoenixtoolsetcore")   {
                         sh "phoenix-tools version"
-                        echo "phoenix-tools ${params.action} ${params.skipversion}  --subsystem ${params.subsystem} --skipupgrade ${params.skipupgrade} --tag ${params.tag}"
+                        sh "phoenix-tools ${params.action} ${params.skipversion}  --subsystem ${params.subsystem} --skipupgrade ${params.skipupgrade} --tag ${params.tag}"
                     }
                 } 
             }
