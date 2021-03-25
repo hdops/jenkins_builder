@@ -12,6 +12,7 @@ if (!env.on_k8s){
 }
 
 def GITLAB_URL="http://gitlab.app.hd123.cn:10080"
+def YAML_FILE="hdphoenixtoolsetcore.yaml"
 if (env.GITLAB_URL){
     GITLAB_URL =env.GITLAB_URL
 }
@@ -23,6 +24,18 @@ pipeline {
     }
 
     stages {
+        stage('advance prepare on k8s to read yaml') {
+            when {
+                beforeAgent true
+                environment name: 'on_k8s', value: 'True'
+            }
+
+            steps {
+                script{
+                    hdphoenixtoolsetcoreYamlData = readYaml file: "jenkinsfile/phoenix_docker/${YAML_FILE}"
+                } 
+            }
+        }
         stage('delete workspace') {
 			steps{
 				deleteDir()
@@ -66,6 +79,21 @@ pipeline {
             }
         }
         
+        stage('prepare on k8s') {
+            when {
+                beforeAgent true
+                environment name: 'on_k8s', value: 'True'
+            }
+
+            steps {
+                script{
+                    hdphoenixtoolsetcoreYamlData.spec.containers[0].image = "harbor.qianfan123.com/toolset/phoenixcore:${version}"
+                    writeYaml file: "${YAML_FILE}", data: hdphoenixtoolsetcoreYamlData
+                    sh "cat ${YAML_FILE}"
+                } 
+            }
+        }
+
         stage('consul tool on k8s') {
             when {
                 beforeAgent true
@@ -75,13 +103,7 @@ pipeline {
             agent {
                 kubernetes{
                     cloud 'kubernetes'
-                    containerTemplate {
-                        name 'hdphoenixtoolsetcore'
-                        image  "harbor.qianfan123.com/toolset/phoenixcore:${version}"
-                        ttyEnabled true
-                        command 'sleep'
-                        args '100'
-                    }
+                    yamlFile "${YAML_FILE}"
                 }
             }
 
@@ -89,6 +111,7 @@ pipeline {
                 script{
                     container("hdphoenixtoolsetcore")   {
                         sh "phoenix-tools version"
+                        git branch: "${params.GIT_BRANCH}", credentialsId: '17643215-09f8-4a9a-b0ea-c8e49777ce1d', url: "${GITLAB_URL}/${GIT_GROUP}/${params.GIT_REPONAME}.git"
                         sh "phoenix-tools consul_tool --customer ${params.customer} --profile ${params.profile} --subsystem ${params.subsystem} --consul_url ${params.consul_url} --action ${params.action} --dryrun ${params.dryrun}"
                     }
                 } 
