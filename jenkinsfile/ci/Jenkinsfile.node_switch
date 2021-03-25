@@ -65,17 +65,18 @@ pipeline {
         }
         stage('switch') {
             steps{
-                sh """git config --global user.email qianfan@hd123.com
-git config --global user.name qianfan
-git checkout ${releaseBranchName}
-git checkout develop
-git branch -d ${releaseBranchName}
-git push origin :${releaseBranchName}
-git checkout develop
-git pull
-git checkout -b ${releaseBranchName}
-git push origin ${releaseBranchName}
-"""
+                sh """git config credential.helper store
+                git config user.email qianfan@hd123.com
+                git config user.name qianfan
+                git checkout ${releaseBranchName}
+                git checkout develop
+                git branch -d ${releaseBranchName}
+                git push origin :${releaseBranchName}
+                git checkout develop
+                git pull
+                git checkout -b ${releaseBranchName}
+                git push origin ${releaseBranchName}
+                """
             }
         }
     }
