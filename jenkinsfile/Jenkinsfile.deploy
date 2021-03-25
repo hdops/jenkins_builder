@@ -18,8 +18,8 @@ if (!env.on_k8s){
     env.on_k8s="False"
 }
 
-if (set_on_k8s) {
-    env.on_k8s=set_on_k8s
+if (env.set_on_k8s) {
+    env.on_k8s=env.set_on_k8s
 }
 
 pipeline {

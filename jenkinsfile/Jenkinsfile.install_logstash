@@ -25,7 +25,6 @@ pipeline {
         }
         stage('install logstash') {
 			steps{
-			    sh 'docker login -u qianfan -p xxx harbor.qianfan123.com'
 			    sh 'docker pull harbor.qianfan123.com/base/iac:0.1.0'
 				sh "docker run -i --rm -v /root/.ssh:/root/.ssh -v ${params.jenkins_home}/workspace/${JOB_NAME}/elk_build_quickly:/root/iac/elk_build_quickly harbor.qianfan123.com/base/iac:0.1.0 'ansible-playbook -i elk_build_quickly/elk_inventory hdiac/logstash/logstash7.yml -e @elk_build_quickly/logstash_vars.yml'"
 			}
