@@ -10,6 +10,7 @@ if (!env.GIT_GROUP){
 }
 
 def GITLAB_URL="http://gitlab.app.hd123.cn:10080"
+def YAML_FILE="hdphoenixtoolsetcore.yaml"
 if (env.GITLAB_URL){
     GITLAB_URL =env.GITLAB_URL
 }
@@ -20,7 +21,7 @@ pipeline {
 	    timeout(time: 3, unit: 'MINUTES')
     }
     stages {
-	    stage('delete workspace') {
+        stage('delete workspace') {
 			steps{
 				deleteDir()
 			}

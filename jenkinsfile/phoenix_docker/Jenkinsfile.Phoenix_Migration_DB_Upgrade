@@ -17,6 +17,7 @@ if (params.JENS_HOME){
 }
 
 def GITLAB_URL="http://gitlab.app.hd123.cn:10080"
+def YAML_FILE="hdphoenixtoolsetcore.yaml"
 if (env.GITLAB_URL){
     GITLAB_URL =env.GITLAB_URL
 }
