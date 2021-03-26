@@ -41,9 +41,6 @@ pipeline {
         			}else{
         			    image_version_data = ['None'] as String[]
         			}
-					echo "image_version_data is ${image_version_data}"
-					echo "${image_version_data.length}"
-					echo "${image_version_data[0]}"
 					last_image_version=image_version_data[image_version_data.length-1]
 					echo "image_version_data is ${image_version_data} , last_image_version is ${last_image_version}"
 					echo "active profile is ${params.DNET_PROFILE}"
