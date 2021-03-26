@@ -42,16 +42,6 @@ pipeline {
         			    image_version_data = ['None']
         			}
 					echo "${image_version_data}"
-					echo "${image_version_data.length}"
-					test=image_version_data[0]
-					echo "0 ${test}"
-					test=image_version_data[1]
-					echo "1 ${test}"
-					test=image_version_data[image_version_data.length-1]
-					echo "image_version_data.length-1 ${test}"
-					test=image_version_data[image_version_data.length]
-					echo "image_version_data.length ${test}"
-					error "test"
 					if(env.on_k8s == 'True'){
 						container("hdtoolsetcore"){
 						    echo "active profile is ${params.DNET_PROFILE}"
@@ -84,7 +74,7 @@ pipeline {
 			steps{
 				script{
 					image_version_data.each{ i ->
-                        echo "======检查${i}版本镜像======"
+                        echo "======执行${i}版本镜像======"
 						if(env.on_k8s == 'True'){
 							container("hdtoolsetcore"){
 								echo "validate docker imag"
@@ -110,6 +100,7 @@ pipeline {
 		    steps{
 				script{
 					i=image_version_data[image_version_data.length-1]
+					echo "download and install version is ${i}"
 					if(env.on_k8s == 'True'){
 						container("hdtoolsetcore"){
 							sh "DNET_PRODUCT=${params.DNET_PRODUCT} DNET_PROFILE=${params.DNET_PROFILE} PRESET_IMAGE_VERSION=${i} hdops deploy image_download --subsystem ${params.subsystem} --stackids ${params.stackIds} --tag ${params.tag}"
