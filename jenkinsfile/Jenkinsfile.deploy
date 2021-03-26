@@ -41,6 +41,7 @@ pipeline {
         			}else{
         			    image_version_data = ['None']
         			}
+					echo "image_version_data is ${image_version_data}"
 					echo "${image_version_data.length}"
 					echo "${image_version_data[0]}"
 					last_image_version=image_version_data[image_version_data.length-1]
