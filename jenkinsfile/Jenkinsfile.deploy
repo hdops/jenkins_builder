@@ -44,13 +44,13 @@ pipeline {
 					echo "${image_version_data}"
 					echo "${image_version_data.length}"
 					test=image_version_data[0]
-					echo "${test}"
+					echo "0 ${test}"
 					test=image_version_data[1]
-					echo "${test}"
+					echo "1 ${test}"
 					test=image_version_data[image_version_data.length-1]
-					echo "${test}"
+					echo "image_version_data.length-1 ${test}"
 					test=image_version_data[image_version_data.length]
-					echo "${test}"
+					echo "image_version_data.length ${test}"
 					error "test"
 					if(env.on_k8s == 'True'){
 						container("hdtoolsetcore"){
