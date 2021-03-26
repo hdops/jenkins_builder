@@ -130,6 +130,7 @@ pipeline {
                         configFileProvider([configFile(fileId:mvn_configfile, variable: 'maven_settings')]) {
                                 mvn_shell+="  -s $maven_settings"
                                 echo "mvn_shell is ${mvn_shell}"
+                                git config credential.helper store
                                 sh "git config --global user.email qianfan@hd123.com"
                                 sh "git config --global user.name qianfan"
                                 sh "${mvn_shell}"
