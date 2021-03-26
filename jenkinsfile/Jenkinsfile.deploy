@@ -33,7 +33,7 @@ pipeline {
                 deleteDir()
             }
         }
-		stage('read PRESET_IMAGE_VERSION'){
+		stage('read PRESET_IMAGE_VERSION and prepare workspace'){
 			steps{
 				script{
 					if (params.PRESET_IMAGE_VERSION != '' && params.PRESET_IMAGE_VERSION != null ){
@@ -42,60 +42,55 @@ pipeline {
         			    image_version_data = ['None']
         			}
 					echo "${image_version_data}"
+					if(env.on_k8s == 'True'){
+						container("hdtoolsetcore"){
+						    echo "active profile is ${params.DNET_PROFILE}"
+							echo "toolset path is ${WORKSPACE}"
+							echo "sub systems are ${params.subsystem}"
+							echo "skip version is ${params.skipversion}"
+							echo "upstream URL is ${params.upurl}"
+							retry(2){
+								sh "DNET_PROFILE=integration_test DNET_PRODUCT=dnet hdops download_toolset --branch ${params.GIT_BRANCH} -p ."
+							}
+							sh "tar zxf toolset.tar.gz -C ${WORKSPACE}"
+						}
+					}else {
+					    docker.image("harbor.qianfan123.com/toolset/toolsetcore:${toolset_image_version}").inside {
+					        echo "active profile is ${params.DNET_PROFILE}"
+                	        echo "toolset path is ${WORKSPACE}"
+                	        echo "sub systems are ${params.subsystem}"
+                	        echo "skip version is ${params.skipversion}"
+                	        echo "upstream URL is ${params.upurl}"
+                	        retry(2){
+                	            sh "DNET_PROFILE=integration_test DNET_PRODUCT=dnet hdops download_toolset --branch ${params.GIT_BRANCH} -p ."
+                	        }
+                	        sh "tar zxf toolset.tar.gz -C ${WORKSPACE}"
+					    }
+					}
 				}
 			}
 		}
-		stage('validate docker image') {
+		stage('prepare for deploy docker') {
 			steps{
 				script{
 					image_version_data.each{ i ->
                         echo "======检查${i}版本镜像======"
 						if(env.on_k8s == 'True'){
 							container("hdtoolsetcore"){
-							    echo "active profile is ${params.DNET_PROFILE}"
-								echo "toolset path is ${WORKSPACE}"
-								echo "sub systems are ${params.subsystem}"
-								echo "skip version is ${params.skipversion}"
-								echo "upstream URL is ${params.upurl}"
-								retry(2){
-									sh "DNET_PROFILE=integration_test DNET_PRODUCT=dnet hdops download_toolset --branch ${params.GIT_BRANCH} -p ."
-								}
-								sh "tar zxf toolset.tar.gz -C ${WORKSPACE}"
+								echo "validate docker imag"
 								sh "DNET_PRODUCT=${params.DNET_PRODUCT} DNET_PROFILE=${params.DNET_PROFILE} PRESET_IMAGE_VERSION=${i} hdops deploy validate --subsystem  ${params.subsystem}"
-							}
-						}else {
-						    docker.image("harbor.qianfan123.com/toolset/toolsetcore:${toolset_image_version}").inside {
-						        echo "active profile is ${params.DNET_PROFILE}"
-                    	        echo "toolset path is ${WORKSPACE}"
-                    	        echo "sub systems are ${params.subsystem}"
-                    	        echo "skip version is ${params.skipversion}"
-                    	        echo "upstream URL is ${params.upurl}"
-                    	        retry(2){
-                    	            sh "DNET_PROFILE=integration_test DNET_PRODUCT=dnet hdops download_toolset --branch ${params.GIT_BRANCH} -p ."
-                    	        }
-                    	        sh "tar zxf toolset.tar.gz -C ${WORKSPACE}"
-                    	        sh "DNET_PRODUCT=${params.DNET_PRODUCT} DNET_PROFILE=${params.DNET_PROFILE} PRESET_IMAGE_VERSION=${i} hdops deploy validate --subsystem  ${params.subsystem}"
-						    }
-						}
-					}
-				}
-			}
-        }
-		stage('rds upgrade && logAnalysis') {
-			steps{
-			    script{
-					image_version_data.each{ i ->
-                        echo "======更新${i}版本数据库======"
-						if(env.on_k8s == 'True'){
-							container("hdtoolsetcore"){
+								echo "rds upgrade && logAnalysis"
 								sh "DNET_PRODUCT=${params.DNET_PRODUCT} DNET_PROFILE=${params.DNET_PROFILE} PRESET_IMAGE_VERSION=${i} hdops deploy db_upgrade --subsystem ${params.subsystem} --stackids ${params.stackIds} --dblist ${params.dblist} ${params.skipversion} ${params.skipversionupdate} --receivers ${params.receivers} --timeout ${params.timeout} --threadcount ${params.threadcount} --tag ${params.tag} --nodethreadcount ${params.nodethreadcount}"
 								sh "DNET_PRODUCT=${params.DNET_PRODUCT} DNET_PROFILE=${params.DNET_PROFILE} PRESET_IMAGE_VERSION=${i} RECEIVERS_WHEN_SUCCEED=${params.RECEIVERS_WHEN_SUCCEED}  hdops deploy db_upgrade_check --url ${env.BUILD_URL} --receivers ${params.receivers} --buildurl ${env.BUILD_URL}"
 							}
 						}else {
 						    docker.image("harbor.qianfan123.com/toolset/toolsetcore:${toolset_image_version}").inside {
-						        sh "DNET_PRODUCT=${params.DNET_PRODUCT} DNET_PROFILE=${params.DNET_PROFILE} PRESET_IMAGE_VERSION=${i} hdops deploy db_upgrade --subsystem ${params.subsystem} --stackids ${params.stackIds} --dblist ${params.dblist} ${params.skipversion} ${params.skipversionupdate} --receivers ${params.receivers} --timeout ${params.timeout} --threadcount ${params.threadcount} --tag ${params.tag} --nodethreadcount ${params.nodethreadcount}"
+								echo "validate docker imag"
+								sh "DNET_PRODUCT=${params.DNET_PRODUCT} DNET_PROFILE=${params.DNET_PROFILE} PRESET_IMAGE_VERSION=${i} hdops deploy validate --subsystem  ${params.subsystem}"
+						        echo "rds upgrade && logAnalysis"
+								sh "DNET_PRODUCT=${params.DNET_PRODUCT} DNET_PROFILE=${params.DNET_PROFILE} PRESET_IMAGE_VERSION=${i} hdops deploy db_upgrade --subsystem ${params.subsystem} --stackids ${params.stackIds} --dblist ${params.dblist} ${params.skipversion} ${params.skipversionupdate} --receivers ${params.receivers} --timeout ${params.timeout} --threadcount ${params.threadcount} --tag ${params.tag} --nodethreadcount ${params.nodethreadcount}"
 							    sh "DNET_PRODUCT=${params.DNET_PRODUCT} DNET_PROFILE=${params.DNET_PROFILE} PRESET_IMAGE_VERSION=${i} RECEIVERS_WHEN_SUCCEED=${params.RECEIVERS_WHEN_SUCCEED}  hdops deploy db_upgrade_check --url ${env.BUILD_URL} --receivers ${params.receivers} --buildurl ${env.BUILD_URL}"
-						    }
+							}
 						}
 					}
 				}
