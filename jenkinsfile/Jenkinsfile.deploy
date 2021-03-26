@@ -42,6 +42,15 @@ pipeline {
         			    image_version_data = ['None']
         			}
 					echo "${image_version_data}"
+					echo "${image_version_data.length}"
+					test=image_version_data[0]
+					echo "${test}"
+					test=image_version_data[1]
+					echo "${test}"
+					test=image_version_data[image_version_data.length-1]
+					echo "${test}"
+					test=image_version_data[image_version_data.length]
+					echo "${test}"
 					if(env.on_k8s == 'True'){
 						container("hdtoolsetcore"){
 						    echo "active profile is ${params.DNET_PROFILE}"
@@ -99,6 +108,7 @@ pipeline {
 		stage('image download && appinstall') {
 		    steps{
 				script{
+					i=image_version_data[image_version_data.length-1]
 					if(env.on_k8s == 'True'){
 						container("hdtoolsetcore"){
 							sh "DNET_PRODUCT=${params.DNET_PRODUCT} DNET_PROFILE=${params.DNET_PROFILE} PRESET_IMAGE_VERSION=${i} hdops deploy image_download --subsystem ${params.subsystem} --stackids ${params.stackIds} --tag ${params.tag}"
