@@ -64,14 +64,16 @@ pipeline {
         }
         stage('merge') {
             steps{
-                sh """git config --global user.email qianfan@hd123.com
-git config --global user.name qianfan
-git checkout ${source}
-git pull
-git checkout ${target}
-git pull
-git merge -X theirs ${source} -m '版本发布'
-git push origin"""
+                sh """
+                git config credential.helper store
+                git config user.email qianfan@hd123.com
+                git config user.name qianfan
+                git checkout ${source}
+                git pull
+                git checkout ${target}
+                git pull
+                git merge -X theirs ${source} -m '版本发布'
+                git push origin"""
             }
         }
     }
