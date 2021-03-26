@@ -39,7 +39,7 @@ pipeline {
 					if (params.PRESET_IMAGE_VERSION != '' && params.PRESET_IMAGE_VERSION != null ){
         			    image_version_data = params.PRESET_IMAGE_VERSION.split(',')
         			}else{
-        			    image_version_data = ['None']
+        			    image_version_data = ['None','None']
         			}
 					echo "image_version_data is ${image_version_data}"
 					echo "${image_version_data.length}"
