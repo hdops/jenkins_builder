@@ -7,6 +7,10 @@ if (!env.on_k8s){
     env.on_k8s="False"
 }
 
+if (env.set_on_k8s) {
+    env.on_k8s=env.set_on_k8s
+}
+
 if (!env.GIT_GROUP){
     env.GIT_GROUP="phoenix-config"
 }
@@ -70,7 +74,7 @@ pipeline {
                     withDockerContainer(args: "-v ${WORKSPACE}:/opt", image: "harbor.qianfan123.com/toolset/phoenixcore:${version}") {
                         sh "phoenix-tools version"
                         sh "chmod +x inventory.py"
-                        echo "phoenix-tools check_hosts --dryrun ${params.dryrun}" 
+                        sh "phoenix-tools check_hosts --dryrun ${params.dryrun}" 
                     }
                 }
             }
@@ -110,7 +114,7 @@ pipeline {
                         sh "phoenix-tools version"
                         git branch: "${params.GIT_BRANCH}", credentialsId: '17643215-09f8-4a9a-b0ea-c8e49777ce1d', url: "${GITLAB_URL}/${GIT_GROUP}/${params.GIT_REPONAME}.git"
                         sh "chmod +x inventory.py"
-                        echo "phoenix-tools check_hosts --dryrun ${params.dryrun}" 
+                        sh "phoenix-tools check_hosts --dryrun ${params.dryrun}" 
                     }
                 } 
             }
