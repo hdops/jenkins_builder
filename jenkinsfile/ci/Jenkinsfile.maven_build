@@ -24,7 +24,7 @@ if (env.source_code_management){
     source_code_management ="git"
 }
 
-def docker_args="-v /var/run/docker.sock:/var/run/docker.sock -v /usr/bin/docker:/usr/bin/docker"
+def docker_args="-v /var/run/docker.sock:/var/run/docker.sock -v /usr/bin/docker:/usr/bin/docker --add-host=maven.qianfan123.com:172.17.0.82 "
 if (env.maven_repository){
     docker_args+=" -v "+env.maven_repository
 }else{
