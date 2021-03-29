@@ -92,6 +92,7 @@ pipeline {
                     writeYaml file: "${YAML_FILE}", data: hdphoenixtoolsetcoreYamlData
                     sh "pwd"
                     sh "ls -l"
+                    echo "${WORKSPACE}/${YAML_FILE}"
                     sh "cat ${YAML_FILE}"
                 } 
             }
