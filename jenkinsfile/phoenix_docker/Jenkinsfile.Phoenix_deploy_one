@@ -90,7 +90,7 @@ pipeline {
                 script{
                     hdphoenixtoolsetcoreYamlData.spec.containers[0].image = "harbor.qianfan123.com/toolset/phoenixcore:${version}"
                     writeYaml file: "${YAML_FILE}", data: hdphoenixtoolsetcoreYamlData
-                    writeYaml file: "${WORKSPACE}@script${YAML_FILE}", data: hdphoenixtoolsetcoreYamlData
+                    writeYaml file: "${WORKSPACE}@script/${YAML_FILE}", data: hdphoenixtoolsetcoreYamlData
                     sh "cat ${YAML_FILE}"
                 } 
             }
@@ -105,7 +105,7 @@ pipeline {
             agent {
                 kubernetes{
                     cloud 'kubernetes'
-                    yamlFile "{YAML_FILE}"
+                    yamlFile "${YAML_FILE}"
                 }
             }
 
