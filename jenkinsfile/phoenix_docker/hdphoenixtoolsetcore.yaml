@@ -22,7 +22,7 @@ spec:
       name: "volume-1"
       readOnly: false
     - mountPath: "/home/jenkins/agent"
-      name: "workspace-volume"
+      name: "volume-2"
       readOnly: false
     workingDir: "/home/jenkins/agent"
   volumes:
@@ -38,7 +38,7 @@ spec:
     name: "volume-1"
   - hostPath:
       path: "/home/jenkins/agent"
-    name: "workspace-volume"
+    name: "volume-3"
   imagePullSecrets:
   - name: "harbor-admin"
   nodeSelector:
