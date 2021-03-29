@@ -36,3 +36,9 @@ spec:
   - hostPath:
       path: "/var/run/docker.sock"
     name: "volume-1"
+  imagePullSecrets:
+  - name: "harbor-admin"
+  nodeSelector:
+    app: "jenkins"
+  serviceAccount: "jenkins"
+  restartPolicy: "Never"
