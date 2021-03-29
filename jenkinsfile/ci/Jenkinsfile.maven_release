@@ -1,0 +1,215 @@
+def node=""
+if (env.node){
+    node =env.node
+}else{
+    node ="release"
+}
+
+def maven_image=""
+if (env.maven_image){
+    maven_image =env.maven_image
+}else{
+    maven_image ="harbor.qianfan123.com/base/maven:3.3.9_jdk8"
+}
+
+def ci_git_server_baseurl= "http://github.app.hd123.cn:10080"
+if (env.ci_git_server_baseurl){
+    ci_git_server_baseurl = env.ci_git_server_baseurl
+}
+
+def docker_args="-v /var/run/docker.sock:/var/run/docker.sock -v /usr/bin/docker:/usr/bin/docker --add-host=maven.qianfan123.com:172.17.0.82 "
+if (env.maven_repository){
+    docker_args+=" -v "+env.maven_repository
+}else{
+    docker_args+=" -v /hdapp/java:/hdapp/java"
+}
+
+def source_code_management=""
+if (env.source_code_management){
+    source_code_management =env.source_code_management
+}else{
+    source_code_management ="git"
+}
+
+def mvn_configfile="jdk8"
+if (env.mvn_configfile){
+    mvn_configfile =env.mvn_configfile
+}
+
+def credentialsId="qianfan"
+def toolset_image_version="0.3.0"
+if (env.toolset_image_version){
+    toolset_image_version = env.toolset_image_version
+}
+
+pipeline {
+    // agent {label node}
+    agent {docker {
+            image "${maven_image}"
+            label node
+            args "${docker_args}"
+          }}
+    options {
+	    timeout(time: 1, unit: 'HOURS')
+    } 
+    stages {
+        stage('delete workspace') {
+            steps{
+                deleteDir()
+            }
+        }  
+        stage('checkout') {
+            steps{
+                script{
+                    if (source_code_management == "git"){
+                        echo "checkout ${ci_git_server_baseurl}/${git_project}.git  branch:${build_branch}"
+                        checkout([$class: 'GitSCM', branches: [[name: "*/${build_branch}"]],userRemoteConfigs: [[credentialsId: 'qianfan',url: "${ci_git_server_baseurl}/${git_project}.git"]],extensions: [[$class: 'LocalBranch', localBranch: "${build_branch}"]]])
+                    } else if (source_code_management == "svn"){
+                        echo "http://hddenv/svn/${svn_project}/${build_branch}"
+                        checkout([$class: 'SubversionSCM', additionalCredentials: [], excludedCommitMessages: '', excludedRegions: '', excludedRevprop: '', excludedUsers: '', filterChangelog: false, ignoreDirPropChanges: false, includedRegions: '', locations: [[cancelProcessOnExternalsFail: false, credentialsId: 'hddenv', depthOption: 'infinity', ignoreExternalsOption: true, local: '.', remote: "http://hddenv/svn/${svn_project}/${build_branch}"]], quietOperation: true, workspaceUpdater: [$class: 'CheckoutUpdater']])
+                    }
+                }
+            }
+        }
+        stage('pre-build-1') {
+            steps{
+                script{
+                    def mvn_shell="mvn help:effective-pom -Doutput=effectivepom.xml"
+                    configFileProvider([configFile(fileId:mvn_configfile, variable: 'maven_settings')]) {
+                        mvn_shell+=" -s $maven_settings"
+                        echo "mvn_shell is ${mvn_shell}"
+                        sh "${mvn_shell}"
+                    }
+                }
+            }
+        }
+        stage('pre-buil-2') {
+            steps{
+                 script {
+                    withDockerContainer(args: "-v ${WORKSPACE}:/opt", image: "harbor.qianfan123.com/toolset/toolsetcore:${toolset_image_version}") {
+                        echo "服务白名单检查"
+                        sh "DNET_PRODUCT=dnet DNET_PROFILE=integration_test hdmon maven_docker_check --pomfile /opt/effectivepom.xml --configfile http://github.app.hd123.cn:10080/qianfanops/toolset/raw/develop/check/maven_check_dependency.yaml"
+                        sh "DNET_PRODUCT=dnet DNET_PROFILE=integration_test hdmon maven_enforcer_check --pomfile /opt/pom.xml --outputfile /opt/maven_enforce.xml"
+                    }
+                 }
+            }
+         }
+         stage('pre-buil-mvn-enforcer') {
+            steps{
+                script{
+                    def mvn_shell="mvn validate -f maven_enforce.xml"
+                    configFileProvider([configFile(fileId:mvn_configfile, variable: 'maven_settings')]) {
+                        mvn_shell+=" -s $maven_settings"
+                        echo "mvn_shell is ${mvn_shell}"
+                        sh "${mvn_shell}"
+                    }
+                }
+            }
+        }
+		stage('build') {
+		    steps{
+				script{  
+						def mvn_shell="mvn "
+                        // release:prepare -DreleaseVersion=${releaseVersion} -DdevelopmentVersion=${developVersion}  release:perform
+						def mvn_goals=" release:prepare -DreleaseVersion=${params.releaseVersion} -DdevelopmentVersion=${params.developVersion}  release:perform "
+                        if (env.mvn_profile){
+                            mvn_goals+=" "+env.mvn_profile
+                            }
+                        if (env.mvn_pom){
+                            mvn_shell+=" -f "+env.mvn_pom+" "+mvn_goals
+                            }
+                        else{
+                            mvn_shell+=mvn_goals
+                            }
+                        if (env.mvn_release_options == null){
+                            env.mvn_release_options = '-Pdocker -Darguments="-Dmaven.test.skip=true -Dmaven.javadoc.skip=true"'
+                            echo "mvn_release_options is ${mvn_release_options}"
+                            }
+                        mvn_shell+=env.mvn_release_options
+                        echo "mvn_configfile is ${mvn_configfile}"
+                        configFileProvider([configFile(fileId:mvn_configfile, variable: 'maven_settings')]) {
+                                mvn_shell+="  -s $maven_settings"
+                                echo "mvn_shell is ${mvn_shell}"
+                                sh "git config credential.helper store"
+                                sh "git config  user.email qianfan@hd123.com"
+                                sh "git config  user.name qianfan"
+                                sh "${mvn_shell}"
+                            }
+				}
+			} 
+		}
+        stage('maven denpendency check'){
+			steps{
+				script{
+                    def mvn_shell="mvn "
+                    if (env.mvn_pom){
+                        mvn_shell+=" -f "+env.mvn_pom+" "+" dependency:list||echo "
+                        }
+                    else{
+                        mvn_shell+=" dependency:list||echo "
+                        }
+                    echo "mvn_configfile is ${mvn_configfile}"
+                    configFileProvider([configFile(fileId:mvn_configfile, variable: 'maven_settings')]) {
+                            mvn_shell+="  -s $maven_settings"
+                            echo "maven denpendency check is ${mvn_shell}"
+                            sh "${mvn_shell}"
+                        }
+                    echo "BUILD_URL:${BUILD_URL}"
+                    withDockerContainer(args: "-v ${WORKSPACE}:/opt", image: "harbor.qianfan123.com/toolset/toolsetcore:${toolset_image_version}") {
+                        retry(2){
+                            sh "DNET_PROFILE=integration_test DNET_PRODUCT=dnet TRUST_PUBLIC_IP=true hdops download_toolset --branch develop -p ."
+                        }
+                        sh "tar zxf toolset.tar.gz -C ${WORKSPACE}"
+                        echo "maven denpendency check"
+                        sh "DNET_PRODUCT=dnet DNET_PROFILE=integration_test hdmon maven_dependency_check --jenkins_url ${BUILD_URL} --isrelease False"
+                    }
+				}
+			}
+		}
+        stage('env'){
+			steps{
+				script{
+				    if (env.remote_env_cfg != "" && env.remote_env_cfg != null) {
+                        echo "using mvn "
+                        //ImageVersion = readMavenPom().getVersion()
+                        ImageVersion = readMavenPom().version
+                        echo("ImageVersion=${ImageVersion}")
+                        // remote_env
+                        println(env.remote_env_cfg)
+                        String[] data = env.remote_env_cfg.split('&')
+                        println(data)
+                        count = data.size()
+                        tasks = [:]
+                        def image = env.image
+                        def gitpath = env.gitpath
+                        if (env.gitpath == "" || env.gitpath == null || env.gitpath == "None" || env.gitpath == "none") {
+                            echo("gitpath 为空，从 pom 中读取 images")
+                            image = readFile 'envfile_images.txt'
+                            gitpath = "None"
+                            echo("from envfile_images.txt : ${image}")
+                        }
+                        echo("image=${image}")
+                        data.each{ i ->
+                            String[] item = i.split(';')
+                            println(item)
+                            remoteJenkins = item[0]
+                            remoteJob = item[1]
+                            DNET_PROFILE = item[2]
+                            echo "remoteJenkins is ${remoteJenkins}"
+                            echo "remoteJob is ${remoteJob}"
+                            echo "DNET_PROFILE is ${DNET_PROFILE}"
+                            // env
+                            triggerRemoteJob job: "${remoteJob}", maxConn: 3, parameters: """DNET_PROFILE=${DNET_PROFILE}
+DNET_PRODUCT=${DNET_PRODUCT}
+image=${image}
+version=${ImageVersion}
+gitpath=${gitpath}
+sourcefrom=git
+    """, remoteJenkinsName: "${remoteJenkins}", useCrumbCache: false, useJobInfoCache: false, enhancedLogging: true
+                        }
+				    }
+				}
+			}
+		}
+    }
+}

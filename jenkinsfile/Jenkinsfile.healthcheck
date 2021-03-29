@@ -3,7 +3,7 @@ if (env.node){
     node =env.node
 }
 
-def whether_post="True"
+def whether_post="False"
 if (env.whether_post){
     whether_post =env.whether_post
 }
@@ -18,17 +18,25 @@ if (env.toolset_image_version){
     toolset_image_version = env.toolset_image_version
 }
 
+if (!env.on_k8s){
+    env.on_k8s="False"
+}
+
+if (env.set_on_k8s) {
+    env.on_k8s=env.set_on_k8s
+}
+
 pipeline {
     agent {label node}
     options {
-	    timeout(time: 3, unit: 'HOURS')
+	    timeout(time: 1, unit: 'HOURS')
     }
 
     stages {
 		stage('healthcheck') {
 			steps{
 				script {
-                    if (env.on_k8s){
+                    if (env.on_k8s == 'True'){
                         container('hdtoolsetcore'){
                             echo "profile is ${params.DNET_PROFILE}"
                             echo "sub systems are ${params.subsystem}"

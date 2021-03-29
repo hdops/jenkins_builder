@@ -88,6 +88,7 @@ pipeline {
 
             steps {
                 script{
+                    sh "rm -fr ${WORKSPACE}@script/${YAML_FILE}"
                     hdphoenixtoolsetcoreYamlData.spec.containers[0].image = "harbor.qianfan123.com/toolset/phoenixcore:${version}"
                     writeYaml file: "${WORKSPACE}@script/${YAML_FILE}", data: hdphoenixtoolsetcoreYamlData
                     sh "cat ${WORKSPACE}@script/${YAML_FILE}"

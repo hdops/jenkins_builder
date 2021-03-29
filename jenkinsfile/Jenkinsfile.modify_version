@@ -14,7 +14,7 @@ if (env.toolset_image_version){
     toolset_image_version = env.toolset_image_version
 }
 
-def ci_git_server_baseurl= "http://qianfan:headingqianfan@github.app.hd123.cn:10080"
+def ci_git_server_baseurl= "http://github.app.hd123.cn:10080"
 if (env.ci_git_server_baseurl){
     ci_git_server_baseurl = env.ci_git_server_baseurl
 }
@@ -51,17 +51,19 @@ pipeline {
                             // checkout code
                             checkout([$class: 'GitSCM', branches: [[name: "*/${git_branch}"]],userRemoteConfigs: [[credentialsId: 'qianfan',url: "${ci_git_server_baseurl}/${git_project}.git"]]])
 
-                            sh "DNET_PROFILE=${params.DNET_PROFILE} DNET_PRODUCT=${params.DNET_PRODUCT} hdops modify_version --image ${image} --version ${version}"
-
-                            sh """
-                            git config  user.name qianfan
-							git config  user.email qianfan@hd123.com
-							git checkout ${git_branch}
-                            git pull
-                            git add .
-                            git commit -m "[${DNET_PRODUCT}]update settings : ${image}:${version} in ${DNET_PROFILE} "
-                            git push
-                            """
+                            def status = sh(returnStatus:true,script:"DNET_PROFILE=${params.DNET_PROFILE} DNET_PRODUCT=${params.DNET_PRODUCT} hdops modify_version --image ${image} --version ${version}")
+                            if(status == 0){
+                                sh """
+                                git config credential.helper store
+                                git config user.email "qianfanauto@hd123.com"
+                                git config user.name "qianfanauto"
+                                git checkout ${git_branch}
+                                git pull
+                                git add .
+                                git commit -m "[${DNET_PRODUCT}]update settings : ${image}:${version} in ${DNET_PROFILE} "
+                                git push
+                                """
+                            }
                         }
                     }else {
                         deleteDir()
@@ -73,17 +75,19 @@ pipeline {
                         checkout([$class: 'GitSCM', branches: [[name: "*/${git_branch}"]],userRemoteConfigs: [[credentialsId: 'qianfan',url: "${ci_git_server_baseurl}/${git_project}.git"]]])
                         docker.image("harbor.qianfan123.com/toolset/toolsetcore:${toolset_image_version}").pull()
                         docker.image("harbor.qianfan123.com/toolset/toolsetcore:${toolset_image_version}").inside  {
-                            sh "DNET_PROFILE=${params.DNET_PROFILE} DNET_PRODUCT=${params.DNET_PRODUCT} hdops modify_version --image ${image} --version ${version}"
-
-                            sh """
-							git config  user.name qianfan
-							git config  user.email qianfan@hd123.com
-							git checkout ${git_branch}
-                            git pull
-                            git add .
-                            git commit -m "[${DNET_PRODUCT}]update settings : ${image}:${version} in ${DNET_PROFILE} "
-                            git push
-                            """
+                            def status = sh(returnStatus:true,script:"DNET_PROFILE=${params.DNET_PROFILE} DNET_PRODUCT=${params.DNET_PRODUCT} hdops modify_version --image ${image} --version ${version}")
+                            if(status == 0){
+                                sh """
+                                git config credential.helper store
+                                git config user.email "qianfanauto@hd123.com"
+                                git config user.name "qianfanauto"
+                                git checkout ${git_branch}
+                                git pull
+                                git add .
+                                git commit -m "[${DNET_PRODUCT}]update settings : ${image}:${version} in ${DNET_PROFILE} "
+                                git push
+                                """
+                            }
                         }
                     }
                 }

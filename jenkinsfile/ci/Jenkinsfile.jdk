@@ -1,0 +1,47 @@
+def node="master"
+if (env.node){
+    node =env.node
+}
+
+pipeline{
+    agent {label node}
+    stages{
+        stage("check scm "){
+            steps{
+                script{
+                    def git_url = "${env.git_repo_url}/${env.git_group}/${env.git_project}.git"
+                    git url: "${git_url}", branch:"${env.branch}",credentialsId:"git_auth"
+                }
+            }
+        }
+        stage("build"){
+            steps{
+                script{
+                    // mvn build
+                    sh "${env.mvn_cmd}"
+                }
+            }
+        }
+    }
+    post{
+        success{
+            script{
+                if (env.post_shell){
+                    sh """
+                    ${env.post_shell}
+                    """
+                }
+            }
+        }
+        failure{
+            script{
+
+                def subject = env.email_subject ? "${env.email_subject}" : "failure on Job ${env.JOB_NAME}"
+                def to = env.email_recipients ? "${env.email_recipients}" : "buhaiqing@hd123.com"
+                def body = env.email_body ? "${env.email_body}" : "failure on Job ${env.JOB_NAME}"
+                // send email
+                emailext subject: subject, to: to, body:body,attachLog:true
+            }
+        }
+    }
+}

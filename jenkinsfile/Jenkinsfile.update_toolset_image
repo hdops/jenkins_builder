@@ -16,9 +16,9 @@ if (env.toolset_image_version){
 }
 pipeline {
     agent {label node}
-    options {   
+    options {
 	    timeout(time: 1, unit: 'HOURS')
-    }           
+    }
 	stages {
 	    stage('delete workspace') {
             steps{
@@ -40,7 +40,7 @@ pipeline {
                 }
 			}
         }
-	   
+
 	}
 	post {
     // 构建失败之后钉钉通知

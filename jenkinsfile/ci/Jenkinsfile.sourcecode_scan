@@ -1,0 +1,70 @@
+def node="master"
+if (env.node){
+    node =env.node
+}
+
+pipeline {
+	agent {
+			    docker {
+			    label node
+			    image "harbor.qianfan123.com/toolset/toolsetcore:0.3.0"
+			    args '-v /var/run/docker.sock:/var/run/docker.sock -v /usr/bin/docker:/usr/bin/docker'
+			    }
+             }
+    options {
+	//     buildDiscarder(logRotator(numToKeepStr: '10'))
+	//     disableConcurrentBuilds()
+	//     disableResume()
+	    timeout(time: 1, unit: 'HOURS')
+    } 
+    stages {
+        stage('download_toolset'){
+			steps{
+			    script{
+					if(env.on_k8s){
+						container("hdtoolsetcore"){
+							retry(2){
+								sh "TRUST_PUBLIC_IP=true DNET_PROFILE=integration_test DNET_PRODUCT=dnet hdops download_toolset --branch develop -p ."
+							}
+							sh "tar zxf toolset.tar.gz -C $WORKSPACE"
+						}
+					}else {
+						retry(2){
+							sh "TRUST_PUBLIC_IP=true DNET_PROFILE=integration_test DNET_PRODUCT=dnet hdops download_toolset --branch develop -p ."
+						}
+						sh "tar zxf toolset.tar.gz -C $WORKSPACE"
+					}
+				}
+			}
+		}
+        stage('sourcecode_scan'){
+			steps{
+			    script{
+					if(env.on_k8s){
+						container("hdtoolsetcore"){
+							echo "url is ${params.url}"
+							echo "product  ${params.product}"
+							echo "image  ${params.image}"
+							echo "file_extensions  ${params.file_extensions}"
+							sh "hdmon sourcecode_scan --jenkins_url ${params.url} --product ${params.product} --scan_build_url $BUILD_URL --image ${params.image} --file_extensions ${params.file_extensions}"
+						}
+					}else {
+						echo "url is ${params.url}"
+						echo "product  ${params.product}"
+						echo "image  ${params.image}"
+						echo "file_extensions  ${params.file_extensions}"
+						sh "hdmon sourcecode_scan --jenkins_url ${params.url} --product ${params.product} --scan_build_url $BUILD_URL --image ${params.image} --file_extensions ${params.file_extensions}"
+					}
+				}
+			}
+		}
+    } 
+    post{
+        always{
+            script{
+                archiveArtifacts 'external_resource.json'
+				build job: 'etl_external_resource', parameters: [string(name: 'jenkins_build_url', value: BUILD_URL)], wait: false
+            }
+        }
+    }
+}

@@ -14,6 +14,14 @@ def toolset_image_version="0.3.0-private"
 if (env.toolset_image_version){
     toolset_image_version = env.toolset_image_version
 }
+if (!env.on_k8s){
+    env.on_k8s="False"
+}
+
+if (env.set_on_k8s) {
+    env.on_k8s=env.set_on_k8s
+}
+
 pipeline {
     agent {label node}
     options {   
@@ -28,14 +36,13 @@ pipeline {
 		stage('validate docker image') {
 			steps{
 				script{
-					if(env.on_k8s){
+					if(env.on_k8s == 'True'){
 						container("hdtoolsetcore"){
 						    echo "active profile is ${params.DNET_PROFILE}"
 							echo "toolset path is ${WORKSPACE}"
 							echo "sub systems are ${params.subsystem}"
 							echo "skip version is ${params.skipversion}"
 							echo "upstream URL is ${params.upurl}"
-							echo "svnreversion is ${params.svnreversion}"
 							retry(2){
 								sh "DNET_PROFILE=integration_test DNET_PRODUCT=dnet hdops download_toolset --branch ${params.GIT_BRANCH} -p ."
 							}
@@ -49,7 +56,6 @@ pipeline {
                             echo "sub systems are ${params.subsystem}"
                             echo "skip version is ${params.skipversion}"
                             echo "upstream URL is ${params.upurl}"
-                            echo "svnreversion is ${params.svnreversion}"
                             retry(2){
                                 sh "DNET_PROFILE=integration_test DNET_PRODUCT=dnet hdops download_toolset --branch ${params.GIT_BRANCH} -p ."
                             }
@@ -63,7 +69,7 @@ pipeline {
 		stage('image download && appinstall') {
 		    steps{
 				script{
-					if (env.on_k8s){
+					if(env.on_k8s == 'True'){
 						container("hdtoolsetcore"){
 							sh "DNET_PRODUCT=${params.DNET_PRODUCT} DNET_PROFILE=${params.DNET_PROFILE} PRESET_IMAGE_VERSION=${params.PRESET_IMAGE_VERSION} hdops deploy image_download --subsystem ${params.subsystem} --stackids ${params.stackIds} --tag ${params.tag}"
 		        			sh "DNET_AK=${params.DNET_AK} DNET_PRODUCT=${params.DNET_PRODUCT} DNET_PROFILE=${params.DNET_PROFILE} PRESET_IMAGE_VERSION=${params.PRESET_IMAGE_VERSION} hdops deploy appinstall --subsystem ${params.subsystem} --stackids ${params.stackIds}  --operate ${params.action} --tag ${params.tag}"
@@ -78,7 +84,7 @@ pipeline {
 			}
 			post {
 			    success{
-				    build job: "${params.healthcheck_job}", parameters: [string(name: 'DNET_PROFILE', value: "${params.DNET_PROFILE}"), string(name: 'subsystem', value: "${params.subsystem}"),string(name: 'svnreversion', value: "${params.svnreversion}"), string(name: 'TOOLSET_PATH', value: "${WORKSPACE}"), string(name: 'TRUST_PUBLIC_IP', value: "${params.TRUST_PUBLIC_IP}"),string(name: 'GIT_BRANCH', value: "${params.GIT_BRANCH}"), string(name:'tag',value: "${params.tag}")], propagate: false, wait: false
+				    build job: "${params.healthcheck_job}", parameters: [string(name: 'DNET_PROFILE', value: "${params.DNET_PROFILE}"), string(name: 'subsystem', value: "${params.subsystem}"), string(name: 'TOOLSET_PATH', value: "${WORKSPACE}"), string(name: 'TRUST_PUBLIC_IP', value: "${params.TRUST_PUBLIC_IP}"),string(name: 'GIT_BRANCH', value: "${params.GIT_BRANCH}"), string(name:'tag',value: "${params.tag}")], propagate: false, wait: false
 				}
 			}
 		}
