@@ -11,6 +11,7 @@ spec:
     command: ["sleep"]
     args: ["100"]
     tty: true
+    imagePullPolicy: "Always"
     volumeMounts:
     - mountPath: "/root/.ssh"
       name: "volume-0"
