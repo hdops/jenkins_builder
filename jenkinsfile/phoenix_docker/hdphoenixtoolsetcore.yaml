@@ -36,6 +36,9 @@ spec:
   - hostPath:
       path: "/var/run/docker.sock"
     name: "volume-1"
+  - hostPath:
+      path: "/home/jenkins/agent"
+    name: "workspace-volume"
   imagePullSecrets:
   - name: "harbor-admin"
   nodeSelector:
