@@ -71,7 +71,7 @@ pipeline {
 			steps{
 				script{
 					image_version_data.each{ i ->
-                        echo "======执行${i}版本镜像======"
+                        echo "======执行PRESET_IMAGE_VERSION==${i}状态发布======"
 						if(env.on_k8s == 'True'){
 							container("hdtoolsetcore"){
 								echo "validate docker imag"
