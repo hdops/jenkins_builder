@@ -11,6 +11,10 @@ if (!env.GIT_GROUP){
     env.GIT_GROUP="phoenix-config"
 }
 
+if (env.set_on_k8s) {
+    env.on_k8s=env.set_on_k8s
+}
+
 def GITLAB_URL="http://gitlab.app.hd123.cn:10080"
 def YAML_FILE="hdphoenixtoolsetcore.yaml"
 if (env.GITLAB_URL){
