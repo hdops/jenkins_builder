@@ -103,7 +103,7 @@ pipeline {
             agent {
                 kubernetes{
                     cloud 'kubernetes'
-                    yamlFile "${YAML_FILE}"
+                    yamlFile "${WORKSPACE}@script/${YAML_FILE}"
                 }
             }
 
