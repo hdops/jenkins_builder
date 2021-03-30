@@ -22,8 +22,8 @@ spec:
     - mountPath: "/var/run/docker.sock"
       name: "volume-1"
       readOnly: false
-    - mountPath: "/home/jenkins/agent"
-      name: "workspace-volume"
+    - mountPath: "/home/jenkins/agent/workspace"
+      name: "volume-3"
       readOnly: false
     workingDir: "/home/jenkins/agent"
   volumes:
@@ -37,7 +37,7 @@ spec:
   - hostPath:
       path: "/var/run/docker.sock"
     name: "volume-1"
-  - name: "workspace-volume"
+  - name: "volume-3"
     persistentVolumeClaim:
       claimName: "jenkins-agent-pvc"
   imagePullSecrets:
