@@ -9,8 +9,9 @@ spec:
     namespace: opsapp
     image: harbor.qianfan123.com/toolset/phoenixcore:${version}
     command: ["sleep"]
-    args: ["1000"]
+    args: ["100"]
     tty: true
+    imagePullPolicy: "Always"
     volumeMounts:
     - mountPath: "/root/.ssh"
       name: "volume-0"
@@ -21,7 +22,7 @@ spec:
     - mountPath: "/var/run/docker.sock"
       name: "volume-1"
       readOnly: false
-    - mountPath: "/home/jenkins/agent"
+    - mountPath: "/home/jenkins/agent/workspace"
       name: "volume-3"
       readOnly: false
     workingDir: "/home/jenkins/agent"
@@ -36,9 +37,9 @@ spec:
   - hostPath:
       path: "/var/run/docker.sock"
     name: "volume-1"
-  - hostPath:
-      path: "/home/jenkins/agent"
-    name: "volume-3"
+  - name: "volume-3"
+    persistentVolumeClaim:
+      claimName: "jenkins-agent-pvc"
   imagePullSecrets:
   - name: "harbor-admin"
   nodeSelector:
