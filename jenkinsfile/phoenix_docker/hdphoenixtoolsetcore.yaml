@@ -22,7 +22,22 @@ spec:
     - mountPath: "/var/run/docker.sock"
       name: "volume-1"
       readOnly: false
+    - mountPath: "/home/jenkins/agent/workspace"
+      name: "volume-3"
+      readOnly: false
+    - mountPath: "/home/jenkins/agent"
+      name: "workspace-volume"
+      readOnly: false
     workingDir: "/home/jenkins/agent"
+  - name: jnlp
+    image: "jenkins/jnlp-slave:3.35-5-alpine"
+    volumeMounts:
+    - mountPath: "/home/jenkins/agent/workspace"
+      name: "volume-3"
+      readOnly: false
+    - mountPath: "/home/jenkins/agent"
+      name: "workspace-volume"
+      readOnly: false
   volumes:
   - name: "volume-0"
     secret:
@@ -34,6 +49,9 @@ spec:
   - hostPath:
       path: "/var/run/docker.sock"
     name: "volume-1"
+  - name: "volume-3"
+    persistentVolumeClaim:
+      claimName: "jenkins-agent-pvc"
   imagePullSecrets:
   - name: "harbor-admin"
   nodeSelector:
