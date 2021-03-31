@@ -30,8 +30,8 @@ spec:
     image: "jenkins/jnlp-slave:3.35-5-alpine"
     volumeMounts:
     - mountPath: "/home/jenkins/agent"
-    name: "volume-3"
-    readOnly: false
+      name: "volume-3"
+      readOnly: false
   volumes:
   - name: "volume-0"
     secret:
