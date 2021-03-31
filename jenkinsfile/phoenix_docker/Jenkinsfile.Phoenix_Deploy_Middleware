@@ -115,7 +115,6 @@ pipeline {
                         sh "ls"
                         sh "pwd"
                         sh "chmod +x inventory.py"
-                        sh "docker run -i --rm -v /home/jenkins/agent/workspace/PNX_Heading_test_erp/PNX-Phoenix_Deploy_Middleware-Int-test/inventory.py:/root/iac/inventory/inventory.py -v /home/jenkins/agent/workspace/PNX_Heading_test_erp/PNX-Phoenix_Deploy_Middleware-Int-test/phoenix.yaml:/root/iac/phoenix.yaml -v /root/.ssh:/root/.ssh -v /home/jenkins/agent/scripts/middleware/nginx/middle0/20210331132719308270/main.yml:/root/iac/vars.yml harbor.qianfan123.com/base/iac:0.1.0 ls /root/iac"
                         sh "phoenix-tools deploy_middleware --workspace ${WORKSPACE} --dryrun ${params.dryrun}"       
                     }
                 } 

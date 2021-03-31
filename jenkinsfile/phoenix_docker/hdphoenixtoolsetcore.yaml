@@ -9,7 +9,7 @@ spec:
     namespace: opsapp
     image: harbor.qianfan123.com/toolset/phoenixcore:${version}
     command: ["sleep"]
-    args: ["1000"]
+    args: ["100"]
     tty: true
     imagePullPolicy: "Always"
     volumeMounts:
