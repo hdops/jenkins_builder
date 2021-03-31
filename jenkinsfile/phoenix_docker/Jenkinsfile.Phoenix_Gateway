@@ -88,8 +88,8 @@ pipeline {
             steps {
                 script{
                     hdphoenixtoolsetcoreYamlData.spec.containers[0].image = "harbor.qianfan123.com/toolset/phoenixcore:${version}"
-                    writeYaml file: "${YAML_FILE}", data: hdphoenixtoolsetcoreYamlData
-                    sh "cat ${YAML_FILE}"
+                    writeYaml file: "${WORKSPACE}@script/${YAML_FILE}", data: hdphoenixtoolsetcoreYamlData
+                    sh "cat ${WORKSPACE}@script/${YAML_FILE}"
                 } 
             }
         }

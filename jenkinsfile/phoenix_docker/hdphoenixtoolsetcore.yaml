@@ -9,7 +9,7 @@ spec:
     namespace: opsapp
     image: harbor.qianfan123.com/toolset/phoenixcore:${version}
     command: ["sleep"]
-    args: ["100"]
+    args: ["1000"]
     tty: true
     imagePullPolicy: "Always"
     volumeMounts:
@@ -22,10 +22,15 @@ spec:
     - mountPath: "/var/run/docker.sock"
       name: "volume-1"
       readOnly: false
-    - mountPath: "/home/jenkins/agent/workspace"
+    - mountPath: "/home/jenkins/agent"
       name: "volume-3"
       readOnly: false
     workingDir: "/home/jenkins/agent"
+  - name: jnlp
+    volumeMounts:
+    - mountPath: "/home/jenkins/agent"
+      name: "volume-3"
+      readOnly: false
   volumes:
   - name: "volume-0"
     secret:
