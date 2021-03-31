@@ -37,9 +37,9 @@ spec:
   - hostPath:
       path: "/var/run/docker.sock"
     name: "volume-1"
-  - name: "volume-3"
-    persistentVolumeClaim:
-      claimName: "jenkins-agent-pvc"
+  - hostPath:
+      path: "/home/jenkins/agent/workspace"
+    name: "volume-3"
   imagePullSecrets:
   - name: "harbor-admin"
   nodeSelector:
