@@ -26,6 +26,11 @@ spec:
       name: "volume-3"
       readOnly: false
     workingDir: "/home/jenkins/agent"
+  - name: jnlp
+    volumeMounts:
+    - mountPath: "/home/jenkins/agent"
+    name: "volume-3"
+    readOnly: false
   volumes:
   - name: "volume-0"
     secret:
