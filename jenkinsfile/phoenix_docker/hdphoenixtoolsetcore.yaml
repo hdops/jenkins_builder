@@ -22,6 +22,9 @@ spec:
     - mountPath: "/var/run/docker.sock"
       name: "volume-1"
       readOnly: false
+    - mountPath: "/home/jenkins"
+      name: "volume-3"
+      readOnly: false
     workingDir: "/home/jenkins/agent"
   volumes:
   - name: "volume-0"
@@ -35,8 +38,8 @@ spec:
       path: "/var/run/docker.sock"
     name: "volume-1"
   - hostPath:
-      path: "/home/jenkins/agent/workspace"
-    name: "workspace-volume"
+      path: "/home/jenkins"
+    name: "volume-3"
   imagePullSecrets:
   - name: "harbor-admin"
   nodeSelector:
