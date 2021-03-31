@@ -64,6 +64,9 @@ pipeline {
                                 git push
                                 """
                             }
+                            if (status !=0 && status != 1) {
+                                sh "`exit ${status}`"
+                            }
                         }
                     }else {
                         deleteDir()
@@ -87,6 +90,9 @@ pipeline {
                                 git commit -m "[${DNET_PRODUCT}]update settings : ${image}:${version} in ${DNET_PROFILE} "
                                 git push
                                 """
+                            }
+                            if (status !=0 && status != 1) {
+                                sh "`exit ${status}`"
                             }
                         }
                     }
