@@ -22,17 +22,11 @@ spec:
     - mountPath: "/var/run/docker.sock"
       name: "volume-1"
       readOnly: false
-
-    - mountPath: "/usr/bin/test.sh"
-      name: "volume-test"
-      readOnly: false
-
     - mountPath: "/home/jenkins/agent"
       name: "volume-3"
       readOnly: false
     workingDir: "/home/jenkins/agent"
   - name: jnlp
-    image: "jenkins/jnlp-slave:3.35-5-alpine"
     volumeMounts:
     - mountPath: "/home/jenkins/agent"
       name: "volume-3"
@@ -48,11 +42,6 @@ spec:
   - hostPath:
       path: "/var/run/docker.sock"
     name: "volume-1"
-
-  - hostPath:
-      path: "/usr/bin/test.sh"
-    name: "volume-test"
-
   - name: "volume-3"
     persistentVolumeClaim:
       claimName: "jenkins-agent-pvc"

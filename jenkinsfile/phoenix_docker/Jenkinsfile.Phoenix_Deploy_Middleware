@@ -112,12 +112,7 @@ pipeline {
                     container("hdphoenixtoolsetcore")   {
                         sh "phoenix-tools version"
                         git branch: "${params.GIT_BRANCH}", credentialsId: '17643215-09f8-4a9a-b0ea-c8e49777ce1d', url: "${GITLAB_URL}/${GIT_GROUP}/${params.GIT_REPONAME}.git"
-                        sh "ls /usr/bin/test.sh"
-                        sh "which docker"
-                        sh "docker run -i harbor.qianfan123.com/toolset/toolsetcore:0.3.0 ls"
-                        sh "bash /usr/bin/test.sh"
                         sh "chmod +x inventory.py"
-                        sh 'docker run -i --rm -v /home/jenkins/agent/workspace/PNX_Heading_test_erp/PNX-Phoenix_Deploy_Middleware-Int-test/inventory.py:/root/iac/inventory/inventory.py -v /home/jenkins/agent/workspace/PNX_Heading_test_erp/PNX-Phoenix_Deploy_Middleware-Int-test/phoenix.yaml:/root/iac/phoenix.yaml -v /root/.ssh:/root/.ssh -v /home/jenkins/agent/scripts/middleware/nginx/middle0/20210331143207088902/main.yml:/root/iac/vars.yml harbor.qianfan123.com/base/iac:0.1.0 "ansible-playbook -i inventory/inventory.py hdiac/phoenix/nginx/main.yml -e @vars.yml -e hosts=middle0"'
                         sh "phoenix-tools deploy_middleware --workspace ${WORKSPACE} --dryrun ${params.dryrun}"       
                     }
                 } 
