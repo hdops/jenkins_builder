@@ -74,7 +74,6 @@ pipeline {
                         echo "active profile is ${params.DNET_PROFILE}"
                         echo "git branch is ${git_branch}"
 
-                        // checkout code
                         docker.image("harbor.qianfan123.com/toolset/toolsetcore:${toolset_image_version}").pull()
                         docker.image("harbor.qianfan123.com/toolset/toolsetcore:${toolset_image_version}").inside  {
                             // checkout code
@@ -85,6 +84,8 @@ pipeline {
                                 git config credential.helper store
                                 git config user.email "qianfanauto@hd123.com"
                                 git config user.name "qianfanauto"
+                                git config --list
+                                cat ~/.git-credentials
                                 git checkout ${git_branch}
                                 git pull
                                 git add .
