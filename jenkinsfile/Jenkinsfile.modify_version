@@ -60,7 +60,7 @@ pipeline {
                                 git checkout ${git_branch}
                                 git pull
                                 git add .
-                                git commit -m "[${DNET_PRODUCT}]update settings : ${image}:${version} in ${DNET_PROFILE} "
+                                git commit -m "[${DNET_PRODUCT}]update settings : ${image} in ${DNET_PROFILE} "
                                 git push
                                 """
                             }
@@ -87,7 +87,7 @@ pipeline {
                                 git checkout ${git_branch}
                                 git pull
                                 git add .
-                                git commit -m "[${DNET_PRODUCT}]update settings : ${image}:${version} in ${DNET_PROFILE} "
+                                git commit -m "[${DNET_PRODUCT}]update settings : ${image} in ${DNET_PROFILE} "
                                 git push
                                 """
                             }
