@@ -79,7 +79,6 @@ pipeline {
                     }
                 }
             }
-        }
         stage('prepare on k8s') {
             when {
                 beforeAgent true
@@ -120,4 +119,4 @@ pipeline {
             }
         }
     }
-
+}
