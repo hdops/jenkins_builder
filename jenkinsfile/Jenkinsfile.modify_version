@@ -54,7 +54,7 @@ pipeline {
                             def status = sh(returnStatus:true,script:"DNET_PROFILE=${params.DNET_PROFILE} DNET_PRODUCT=${params.DNET_PRODUCT} hdops modify_version --image '${image}'")
                             if(status == 0){
                                 sh """
-                                git config credential.helper store
+                                git config --global credential.helper store
                                 git config user.email "qianfanauto@hd123.com"
                                 git config user.name "qianfanauto"
                                 git checkout ${git_branch}
