@@ -3,6 +3,10 @@ if (env.node){
     node =env.node
 }
 
+def run_on_public="None"
+if (env.run_on_public){
+    run_on_public=env.run_on_public
+}
 pipeline {
 	agent {
 			    docker {
@@ -22,7 +26,7 @@ pipeline {
 			steps{
                             echo "workspace is $WORKSPACE"
                             retry(2){
-                                sh "TRUST_PUBLIC_IP=true DNET_PROFILE=integration_test DNET_PRODUCT=dnet hdops download_toolset --branch develop -p ."
+                                sh "TRUST_PUBLIC_IP=true DNET_PROFILE=integration_test DNET_PRODUCT=dnet TRUST_PUBLIC_IP=${run_on_public} hdops download_toolset --branch develop -p ."
                             }
                             sh "tar zxf toolset.tar.gz -C $WORKSPACE"
 			}

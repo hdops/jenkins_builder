@@ -1,4 +1,8 @@
-// 该 pipeline 已过时
+// 该 def run_on_public="None"
+if (env.run_on_public){
+    run_on_public=env.run_on_public
+}
+pipeline 已过时
 def node="master"
 if (env.node){
     node =env.node
@@ -7,6 +11,10 @@ if (env.node){
 def whether_post="False"
 if (env.whether_post){
     whether_post =env.whether_post
+}
+def run_on_public="None"
+if (env.run_on_public){
+    run_on_public=env.run_on_public
 }
 pipeline {
     agent {label node}

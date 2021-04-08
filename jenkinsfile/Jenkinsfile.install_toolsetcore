@@ -1,4 +1,8 @@
-// 该 pipeline 已过时
+// 该 def run_on_public="None"
+if (env.run_on_public){
+    run_on_public=env.run_on_public
+}
+pipeline 已过时
 def nodes=["master"]
 if (env.node){
     nodes =env.node.split(',')
