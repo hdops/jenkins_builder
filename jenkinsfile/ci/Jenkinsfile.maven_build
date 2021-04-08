@@ -17,6 +17,12 @@ if (env.ci_git_server_baseurl){
     ci_git_server_baseurl = env.ci_git_server_baseurl
 }
 
+// def svn_server_baseurl= "http://hddenv/svn"
+def svn_server_baseurl= "http://172.17.0.85/svn"
+if (env.svn_server_baseurl){
+    svn_server_baseurl = env.svn_server_baseurl
+}
+
 def source_code_management=""
 if (env.source_code_management){
     source_code_management =env.source_code_management
@@ -24,7 +30,7 @@ if (env.source_code_management){
     source_code_management ="git"
 }
 
-def docker_args="-v /var/run/docker.sock:/var/run/docker.sock -v /usr/bin/docker:/usr/bin/docker --add-host=maven.qianfan123.com:172.17.0.82 "
+def docker_args="-v /var/run/docker.sock:/var/run/docker.sock -v /usr/bin/docker:/usr/bin/docker --add-host=maven.qianfan123.com:172.17.0.82 --add-host=github.app.hd123.cn:172.17.10.58 --add-host=gitlab.hd123.com:172.17.12.219 "
 if (env.maven_repository){
     docker_args+=" -v "+env.maven_repository
 }else{
@@ -70,8 +76,8 @@ pipeline {
                         echo "checkout ${ci_git_server_baseurl}/${git_project}.git  branch:${build_branch}"
                         checkout([$class: 'GitSCM', branches: [[name: "*/${build_branch}"]],userRemoteConfigs: [[credentialsId: 'qianfan',url: "${ci_git_server_baseurl}/${git_project}.git"]]])
                     } else if (source_code_management == "svn"){
-                        echo "http://hddenv/svn/${svn_project}/${build_branch}"
-                        checkout([$class: 'SubversionSCM', additionalCredentials: [], excludedCommitMessages: '', excludedRegions: '', excludedRevprop: '', excludedUsers: '', filterChangelog: false, ignoreDirPropChanges: false, includedRegions: '', locations: [[cancelProcessOnExternalsFail: false, credentialsId: 'hddenv', depthOption: 'infinity', ignoreExternalsOption: true, local: '.', remote: "http://hddenv/svn/${svn_project}/${build_branch}"]], quietOperation: true, workspaceUpdater: [$class: 'CheckoutUpdater']])
+                        echo "${svn_server_baseurl}/${svn_project}/${build_branch}"
+                        checkout([$class: 'SubversionSCM', additionalCredentials: [], excludedCommitMessages: '', excludedRegions: '', excludedRevprop: '', excludedUsers: '', filterChangelog: false, ignoreDirPropChanges: false, includedRegions: '', locations: [[cancelProcessOnExternalsFail: false, credentialsId: 'hddenv', depthOption: 'infinity', ignoreExternalsOption: true, local: '.', remote: "${svn_server_baseurl}/${svn_project}/${build_branch}"]], quietOperation: true, workspaceUpdater: [$class: 'CheckoutUpdater']])
                     }
                 }
             }
