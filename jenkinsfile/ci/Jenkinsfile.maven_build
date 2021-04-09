@@ -297,9 +297,13 @@ pipeline {
                             remoteJenkins = item[0]
                             remoteJob = item[1]
                             DNET_PROFILE = item[2]
+                            if (item.size() > 3)  {
+                                DNET_PRODUCT=item[3]
+                            }
                             echo "remoteJenkins is ${remoteJenkins}"
                             echo "remoteJob is ${remoteJob}"
                             echo "DNET_PROFILE is ${DNET_PROFILE}"
+                            echo "DNET_PRODUCT is ${DNET_PRODUCT}"
                             // env
                             triggerRemoteJob job: "${remoteJob}", maxConn: 3, parameters: """DNET_PROFILE=${DNET_PROFILE}
 DNET_PRODUCT=${DNET_PRODUCT}
@@ -329,9 +333,13 @@ sourcefrom=git
                             remoteJenkins = item[0]
                             remoteJob = item[1]
                             DNET_PROFILE = item[2]
+                            if (item.size() > 3)  {
+                                DNET_PRODUCT=item[3]
+                            }
                             echo "remoteJenkins is ${remoteJenkins}"
                             echo "remoteJob is ${remoteJob}"
                             echo "DNET_PROFILE is ${DNET_PROFILE}"
+                            echo "DNET_PRODUCT is ${DNET_PRODUCT}"
                             // deploy
                             triggerRemoteJob job: "${remoteJob}", maxConn: 3, parameters: """DNET_PROFILE=${DNET_PROFILE}
 DNET_PRODUCT=${DNET_PRODUCT}
