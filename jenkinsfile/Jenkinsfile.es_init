@@ -1,4 +1,8 @@
-// 该 pipeline 已过时
+// 该 def run_on_public="None"
+if (env.run_on_public){
+    run_on_public=env.run_on_public
+}
+pipeline 已过时
 def node=""
 if (env.node){
     node =env.node
@@ -10,6 +14,10 @@ if (env.whether_post){
     whether_post =env.whether_post
 }else{
     whether_post ="True"
+}
+def run_on_public="None"
+if (env.run_on_public){
+    run_on_public=env.run_on_public
 }
 pipeline {
     agent {label node}
@@ -24,7 +32,7 @@ pipeline {
                         container("hdtoolsetcore"){
                             echo "profile is ${params.DNET_PROFILE}"
                             retry(2){
-                                sh "DNET_PROFILE=integration_test DNET_PRODUCT=dnet hdops download_toolset --branch ${params.GIT_BRANCH} -p ."
+                                sh "DNET_PROFILE=integration_test DNET_PRODUCT=dnet TRUST_PUBLIC_IP=${run_on_public} hdops download_toolset --branch ${params.GIT_BRANCH} -p ."
                             }
                             sh "tar zxf toolset.tar.gz -C ${WORKSPACE}"
                             sh "DINGTALK_TOKEN=${DINGTALK_TOKEN} hdmon es_init --cfgname ${params.cfgname}"
@@ -33,7 +41,7 @@ pipeline {
                         docker.image("harbor.qianfan123.com/toolset/toolsetcore:0.3.0").withRun('-v /var/run/docker.sock:/var/run/docker.sock') {
                             echo "profile is ${params.DNET_PROFILE}"
                             retry(2){
-                                sh "DNET_PROFILE=integration_test DNET_PRODUCT=dnet hdops download_toolset --branch ${params.GIT_BRANCH} -p ."
+                                sh "DNET_PROFILE=integration_test DNET_PRODUCT=dnet TRUST_PUBLIC_IP=${run_on_public} hdops download_toolset --branch ${params.GIT_BRANCH} -p ."
                             }
                             sh "tar zxf toolset.tar.gz -C ${WORKSPACE}"
                             sh "DINGTALK_TOKEN=${DINGTALK_TOKEN} hdmon es_init --cfgname ${params.cfgname}"

@@ -14,6 +14,10 @@ def toolset_image_version="0.3.0-private"
 if (env.toolset_image_version){
     toolset_image_version = env.toolset_image_version
 }
+def run_on_public="None"
+if (env.run_on_public){
+    run_on_public=env.run_on_public
+}
 pipeline {
     agent {label node}   
 	environment{
@@ -31,7 +35,7 @@ pipeline {
                             echo "product is ${params.DNET_PRODUCT}"
                             echo "workspace is $WORKSPACE"
                             retry(2){
-                                sh "DNET_PROFILE=integration_test DNET_PRODUCT=dnet hdops download_toolset --branch ${params.GIT_BRANCH} -p ."
+                                sh "DNET_PROFILE=integration_test DNET_PRODUCT=dnet TRUST_PUBLIC_IP=${run_on_public} hdops download_toolset --branch ${params.GIT_BRANCH} -p ."
                             }
                             sh "tar zxf toolset.tar.gz -C $WORKSPACE"
                             sh "DNET_PRODUCT=${params.DNET_PRODUCT} DNET_PROFILE=${params.DNET_PROFILE} hdmon create_resource_package --download_url ${params.download_url} --fromversion ${params.fromversion} --toversion ${params.toversion} --alias ${params.alias} --subsystem ${params.subsystem}"
@@ -42,7 +46,7 @@ pipeline {
                         echo "workspace is $WORKSPACE"
                         docker.image("harbor.qianfan123.com/toolset/toolsetcore:${toolset_image_version}").inside {
                             retry(2){
-                                sh "DNET_PROFILE=integration_test DNET_PRODUCT=dnet hdops download_toolset --branch ${params.GIT_BRANCH} -p ."
+                                sh "DNET_PROFILE=integration_test DNET_PRODUCT=dnet TRUST_PUBLIC_IP=${run_on_public} hdops download_toolset --branch ${params.GIT_BRANCH} -p ."
                             }
                             sh "tar zxf toolset.tar.gz -C $WORKSPACE"
                             sh "DNET_PRODUCT=${params.DNET_PRODUCT} DNET_PROFILE=${params.DNET_PROFILE} hdmon create_resource_package --download_url ${params.download_url} --fromversion ${params.fromversion} --toversion ${params.toversion} --alias ${params.alias} --subsystem ${params.subsystem}"

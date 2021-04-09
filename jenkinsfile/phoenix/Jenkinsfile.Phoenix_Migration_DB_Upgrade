@@ -12,6 +12,10 @@ if (params.JENS_HOME){
 }else{
     env.jen_home = "/hdapp/jenkins"
 }
+def run_on_public="None"
+if (env.run_on_public){
+    run_on_public=env.run_on_public
+}
 pipeline {
     agent {label node}
     stages {

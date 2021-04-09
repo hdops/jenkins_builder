@@ -10,6 +10,10 @@ if (env.whether_post){
 }else{
     whether_post ="True"
 }
+def run_on_public="None"
+if (env.run_on_public){
+    run_on_public=env.run_on_public
+}
 pipeline {
     agent {label node}
     options {   
@@ -27,7 +31,7 @@ pipeline {
 							echo "skip version is ${params.skipversion}"
 							echo "upstream URL is ${params.upurl}"
 							retry(2){
-								sh "DNET_PROFILE=integration_test DNET_PRODUCT=dnet hdops download_toolset --branch ${params.GIT_BRANCH} -p ."
+								sh "DNET_PROFILE=integration_test DNET_PRODUCT=dnet TRUST_PUBLIC_IP=${run_on_public} hdops download_toolset --branch ${params.GIT_BRANCH} -p ."
 							}
 							sh "tar zxf toolset.tar.gz -C ${WORKSPACE}"
 						}
@@ -38,7 +42,7 @@ pipeline {
 						echo "skip version is ${params.skipversion}"
 						echo "upstream URL is ${params.upurl}"
 						retry(2){
-							sh "DNET_PROFILE=integration_test DNET_PRODUCT=dnet hdops download_toolset --branch ${params.GIT_BRANCH} -p ."
+							sh "DNET_PROFILE=integration_test DNET_PRODUCT=dnet TRUST_PUBLIC_IP=${run_on_public} hdops download_toolset --branch ${params.GIT_BRANCH} -p ."
 						}
 						sh "tar zxf toolset.tar.gz -C ${WORKSPACE}"
 					}

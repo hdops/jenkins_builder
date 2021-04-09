@@ -30,6 +30,10 @@ if (env.uploadRemoteJob){
     uploadRemoteJob = env.uploadRemoteJob
 }
 
+def run_on_public="None"
+if (env.run_on_public){
+    run_on_public=env.run_on_public
+}
 pipeline {
 	agent {label node}
     options {

@@ -24,6 +24,10 @@ def docker_args="-v /var/run/docker.sock:/var/run/docker.sock -v /usr/bin/docker
 
 def credentialsId="qianfan"
 
+def run_on_public="None"
+if (env.run_on_public){
+    run_on_public=env.run_on_public
+}
 pipeline {
     agent {docker {
             image "${build_image}"

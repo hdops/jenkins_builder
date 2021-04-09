@@ -12,6 +12,10 @@ def toolset_image_version="0.3.0-private"
 if (env.toolset_image_version){
     toolset_image_version = env.toolset_image_version
 }
+def run_on_public="None"
+if (env.run_on_public){
+    run_on_public=env.run_on_public
+}
 pipeline {
     agent {label node}
     options {   
@@ -35,7 +39,7 @@ pipeline {
 							echo "skip version is ${params.skipversion}"
 							echo "upstream URL is ${params.upurl}"
 							retry(2){
-								sh "DNET_PROFILE=integration_test DNET_PRODUCT=dnet hdops download_toolset --branch ${params.GIT_BRANCH} -p ."
+								sh "DNET_PROFILE=integration_test DNET_PRODUCT=dnet TRUST_PUBLIC_IP=${run_on_public} hdops download_toolset --branch ${params.GIT_BRANCH} -p ."
 							}
 							sh "tar zxf toolset.tar.gz -C ${WORKSPACE}"
 							sh "DINGTALK_TOKEN=${DINGTALK_TOKEN} hdmon delete_esbakcup --day ${params.day} --cfgname ${params.cfgname}"
@@ -48,7 +52,7 @@ pipeline {
                             echo "skip version is ${params.skipversion}"
                             echo "upstream URL is ${params.upurl}"
                             retry(2){
-                                sh "DNET_PROFILE=integration_test DNET_PRODUCT=dnet hdops download_toolset --branch ${params.GIT_BRANCH} -p ."
+                                sh "DNET_PROFILE=integration_test DNET_PRODUCT=dnet TRUST_PUBLIC_IP=${run_on_public} hdops download_toolset --branch ${params.GIT_BRANCH} -p ."
                             }
                             sh "tar zxf toolset.tar.gz -C ${WORKSPACE}"
                             sh "DINGTALK_TOKEN=${DINGTALK_TOKEN} hdmon delete_esbakcup --day ${params.day} --cfgname ${params.cfgname}"
