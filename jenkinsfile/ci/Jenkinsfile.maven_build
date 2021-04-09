@@ -208,7 +208,7 @@ pipeline {
                     echo "BUILD_URL:${BUILD_URL}"
                     withDockerContainer(args: "-v ${WORKSPACE}:/opt", image: "harbor.qianfan123.com/toolset/toolsetcore:${toolset_image_version}") {
                         retry(2){
-                            sh "DNET_PROFILE=integration_test DNET_PRODUCT=dnet TRUST_PUBLIC_IP=true TRUST_PUBLIC_IP=${run_on_public} hdops download_toolset --branch develop -p ."
+                            sh "DNET_PROFILE=integration_test DNET_PRODUCT=dnet TRUST_PUBLIC_IP=true hdops download_toolset --branch develop -p ."
                         }
                         sh "tar zxf toolset.tar.gz -C ${WORKSPACE}"
                         echo "maven denpendency check"
