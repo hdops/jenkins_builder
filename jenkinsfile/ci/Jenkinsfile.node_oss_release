@@ -59,7 +59,9 @@ pipeline {
 			    args '-v /var/run/docker.sock:/var/run/docker.sock -v /root/.ssh:/root/.ssh -v /usr/bin/docker:/usr/bin/docker -v /hdapp/npm:/root/.npm -v /root/.npmrc:/root/.npmrc'
 			    }
              }
-             steps{ 
+             steps{
+                echo "delete workspace"
+			    deleteDir()
 				echo "checkout ${ci_git_server_baseurl}/${git_project}.git  branch:${build_branch}"
                 checkout([$class: 'GitSCM', branches: [[name: '*/${build_branch}']],userRemoteConfigs: [[url: "${ci_git_server_baseurl}/${git_project}.git",credentialsId: "${credentialsId}"]]])
                 sh """git config --global credential.helper store
