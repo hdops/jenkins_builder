@@ -26,7 +26,7 @@ pipeline{
     stage('run') {
         steps{
             script {
-                if (env.on_k8s){
+                if(env.on_k8s == 'True'){
                     container("hdtoolsetcore"){
                         retry(2){
                             sh "DNET_PROFILE=integration_test DNET_PRODUCT=dnet TRUST_PUBLIC_IP=${run_on_public} hdops download_toolset --branch ${params.GIT_BRANCH} -p ."

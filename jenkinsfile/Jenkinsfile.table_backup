@@ -18,6 +18,12 @@ def run_on_public="None"
 if (env.run_on_public){
     run_on_public=env.run_on_public
 }
+if (!env.on_k8s){
+    env.on_k8s="False"
+}
+if (env.set_on_k8s) {
+    env.on_k8s=env.set_on_k8s
+}
 pipeline {
     agent {label node}
     //options { 
@@ -27,7 +33,7 @@ pipeline {
 	    stage('表数据备份') {
 			steps{
 				script {
-                    if (env.on_k8s){
+                    if(env.on_k8s == 'True'){
                         container("hdtoolsetcore"){
                             echo "active profile is ${params.DNET_PROFILE}"
                             echo "product is ${params.DNET_PRODUCT}"
