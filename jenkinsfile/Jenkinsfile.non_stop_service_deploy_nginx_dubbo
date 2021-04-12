@@ -1,0 +1,289 @@
+def node=""
+if (env.node){
+    node =env.node
+}else{
+    node ="master"
+}
+def whether_post=""
+if (env.whether_post){
+    whether_post =env.whether_post
+}else{
+    whether_post ="True"
+}
+def toolset_image_version="0.3.0-private"
+if (env.toolset_image_version){
+    toolset_image_version = env.toolset_image_version
+}
+def run_on_public="None"
+if (env.run_on_public){
+    run_on_public=env.run_on_public
+}
+pipeline {
+    agent {label node}
+    options {  
+	    timeout(time: 3, unit: 'HOURS')
+    }            
+    stages {
+        stage('delete workspace') {
+            steps{
+                deleteDir()
+            }
+        }
+		stage('download toolset') {
+			steps{
+				script{
+					if(env.on_k8s){
+					    echo "======下载toolset======"
+						container("hdtoolsetcore"){
+							retry(2){
+								sh "DNET_PROFILE=integration_test DNET_PRODUCT=dnet TRUST_PUBLIC_IP=${run_on_public} hdops download_toolset --branch ${params.GIT_BRANCH} -p ."
+							}
+							sh "tar zxf toolset.tar.gz -C ${WORKSPACE}"
+						}
+					}else {
+					    echo "======下载toolset======"
+					    docker.image("harbor.qianfan123.com/toolset/toolsetcore:${toolset_image_version}").inside  {
+                            retry(2){
+                                sh "DNET_PROFILE=integration_test DNET_PRODUCT=dnet TRUST_PUBLIC_IP=${run_on_public} hdops download_toolset --branch ${params.GIT_BRANCH} -p ."
+                            }
+                            sh "tar zxf toolset.tar.gz -C ${WORKSPACE}"
+                        }
+					}
+				}
+			}
+        }
+		stage('validate docker image') {
+		    steps{
+				script{
+				    if (tag == 'blue' || tag == 'None'){
+                        if (env.on_k8s){
+                            echo "======验证镜像======"
+                            container("hdtoolsetcore"){
+                                sh "DNET_PRODUCT=$DNET_PRODUCT DNET_PROFILE=$DNET_PROFILE hdops deploy validate --subsystem  ${params.image}"
+                            }
+                        }else {
+                            echo "======验证镜像======"
+                            docker.image("harbor.qianfan123.com/toolset/toolsetcore:${toolset_image_version}").inside  {
+                                sh "DNET_PRODUCT=$DNET_PRODUCT DNET_PROFILE=$DNET_PROFILE hdops deploy validate --subsystem  ${params.image}"
+                            }
+                        }
+				    }
+				}
+			}
+	    }
+		stage('check envfile') {
+		    steps{
+				script{
+				    if (tag == 'blue' || tag == 'None'){
+                        if (env.on_k8s){
+                            echo "======检查env======"
+                            container("hdtoolsetcore"){
+                                sh "DNET_AK=$DNET_AK DNET_PRODUCT=$DNET_PRODUCT DNET_PROFILE=$DNET_PROFILE hdops generate_env_file --subsystem ${params.image}"
+                            }
+                        }else {
+                            echo "======检查env======"
+                            docker.image("harbor.qianfan123.com/toolset/toolsetcore:${toolset_image_version}").inside  {
+                                sh "DNET_AK=$DNET_AK DNET_PRODUCT=$DNET_PRODUCT DNET_PROFILE=$DNET_PROFILE hdops generate_env_file --subsystem ${params.image}"
+                            }
+                        }
+				    }
+				}
+			}
+		}
+		stage('blue：change nginx-dubbo') {
+		    steps{
+				script{
+				    if (tag == 'blue' || tag == 'None'){
+                        if (env.on_k8s){
+                            echo "======下线blue节点======"
+                            container("hdtoolsetcore"){
+                                sh "DNET_PRODUCT=${params.DNET_PRODUCT} DNET_PROFILE=${params.DNET_PROFILE} hdops change_nginx --image ${params.image} --tag blue --nginx_command ${params.nginx_command} --filename_nginx ${params.filename_nginx} --filename_template ${params.filename_template} --nginx_basedir ${params.nginx_basedir} --nginx_path ${params.nginx_path} --dryrun ${params.dryrun}"
+                                sh "DNET_PRODUCT=${params.DNET_PRODUCT} DNET_PROFILE=${params.DNET_PROFILE} hdops change_dubbo --image ${params.image} --tag blue --dryrun ${params.dryrun}"
+
+                            }
+                        }else {
+                            echo "======下线blue节点======"
+                            docker.image("harbor.qianfan123.com/toolset/toolsetcore:${toolset_image_version}").inside  {
+                                sh "DNET_PRODUCT=${params.DNET_PRODUCT} DNET_PROFILE=${params.DNET_PROFILE} hdops change_nginx --image ${params.image} --tag blue --nginx_command ${params.nginx_command} --filename_nginx ${params.filename_nginx} --filename_template ${params.filename_template} --nginx_basedir ${params.nginx_basedir} --nginx_path ${params.nginx_path} --dryrun ${params.dryrun}"
+                                sh "DNET_PRODUCT=${params.DNET_PRODUCT} DNET_PROFILE=${params.DNET_PROFILE} hdops change_dubbo --image ${params.image} --tag blue --dryrun ${params.dryrun}"
+                            }
+                        }
+				    }
+				}
+			}
+		}
+		stage('blue：image download && appinstall') {
+		    steps{
+				script{
+				    if (tag == 'blue' || tag == 'None'){
+                        if (env.on_k8s){
+                            echo "======blue节点：验证镜像、下载镜像、部署应用======"
+                            container("hdtoolsetcore"){
+                                sh "DNET_PRODUCT=$DNET_PRODUCT DNET_PROFILE=$DNET_PROFILE hdops deploy image_download --subsystem ${params.image} --tag blue"
+                                sh "DNET_AK=$DNET_AK DNET_PRODUCT=$DNET_PRODUCT DNET_PROFILE=$DNET_PROFILE hdops deploy appinstall --subsystem ${params.image} --tag blue"
+                            }
+                        }else {
+                            echo "======blue节点：验证镜像、下载镜像、部署应用======"
+                            docker.image("harbor.qianfan123.com/toolset/toolsetcore:${toolset_image_version}").inside  {
+                                sh "DNET_PRODUCT=$DNET_PRODUCT DNET_PROFILE=$DNET_PROFILE hdops deploy image_download --subsystem ${params.image} --tag blue"
+                                sh "DNET_AK=$DNET_AK DNET_PRODUCT=$DNET_PRODUCT DNET_PROFILE=$DNET_PROFILE hdops deploy appinstall --subsystem ${params.image} --tag blue"
+                            }
+                        }
+				    }
+				}
+			}
+	    }
+		stage('blue：healthcheck') {
+			steps{
+				script {
+				    if (tag == 'blue' || tag == 'None'){
+                        if (env.on_k8s){
+                            echo "======健康检查blue节点======"
+                            container('hdtoolsetcore'){
+                                if(env.retry_num){
+                                    def n ="${retry_num}".toInteger()
+                                    retry(n){
+                                        sh "DINGTALK_TOKEN=$DINGTALK_TOKEN DNET_PRODUCT=$DNET_PRODUCT DNET_PROFILE=$DNET_PROFILE hdops health_check --subsystem ${params.image}  --tag blue"
+                                    }
+                                }else{
+                                    sh "DINGTALK_TOKEN=$DINGTALK_TOKEN DNET_PRODUCT=$DNET_PRODUCT DNET_PROFILE=$DNET_PROFILE hdops health_check --subsystem ${params.image}  --tag blue"
+                                }
+                            }
+                        }else {
+                            echo "======健康检查blue节点======"
+                            docker.image("harbor.qianfan123.com/toolset/toolsetcore:${toolset_image_version}").inside  {
+                                if(env.retry_num){
+                                    def n ="${retry_num}".toInteger()
+                                    retry(n){
+                                        sh "DINGTALK_TOKEN=$DINGTALK_TOKEN DNET_PRODUCT=$DNET_PRODUCT DNET_PROFILE=$DNET_PROFILE hdops health_check --subsystem ${params.image}  --tag blue"
+                                    }
+                                }else{
+                                    sh "DINGTALK_TOKEN=$DINGTALK_TOKEN DNET_PRODUCT=$DNET_PRODUCT DNET_PROFILE=$DNET_PROFILE hdops health_check --subsystem ${params.image}  --tag blue"
+                                }
+                            }
+                        }
+				    }
+                }
+			}
+        }
+		stage('green：change nginx-dubbo') {
+		    steps{
+				script{
+				    if (tag == 'green' || tag == 'None'){
+                        if (env.on_k8s){
+                            echo "======下线green节点======"
+                            container("hdtoolsetcore"){
+                                sh "DNET_PRODUCT=${params.DNET_PRODUCT} DNET_PROFILE=${params.DNET_PROFILE} hdops change_nginx --image ${params.image} --tag green --nginx_command ${params.nginx_command} --filename_nginx ${params.filename_nginx} --filename_template ${params.filename_template} --nginx_basedir ${params.nginx_basedir} --nginx_path ${params.nginx_path} --dryrun ${params.dryrun}"
+                                sh "DNET_PRODUCT=${params.DNET_PRODUCT} DNET_PROFILE=${params.DNET_PROFILE} hdops change_dubbo --image ${params.image} --tag green --dryrun ${params.dryrun}"
+                            }
+                        }else {
+                            echo "======下线green节点======"
+                            docker.image("harbor.qianfan123.com/toolset/toolsetcore:${toolset_image_version}").inside  {
+                                sh "DNET_PRODUCT=${params.DNET_PRODUCT} DNET_PROFILE=${params.DNET_PROFILE} hdops change_nginx --image ${params.image} --tag green --nginx_command ${params.nginx_command} --filename_nginx ${params.filename_nginx} --filename_template ${params.filename_template} --nginx_basedir ${params.nginx_basedir} --nginx_path ${params.nginx_path} --dryrun ${params.dryrun}"
+                                sh "DNET_PRODUCT=${params.DNET_PRODUCT} DNET_PROFILE=${params.DNET_PROFILE} hdops change_dubbo --image ${params.image} --tag green --dryrun ${params.dryrun}"
+                            }
+                        }
+				    }
+				}
+			}
+		}
+		stage('green：image download && appinstall') {
+		    steps{
+				script{
+				    if (tag == 'green' || tag == 'None'){
+                        if (env.on_k8s){
+                            echo "======green节点：下载镜像、部署应用======"
+                            container("hdtoolsetcore"){
+                                sh "DNET_PRODUCT=$DNET_PRODUCT DNET_PROFILE=$DNET_PROFILE hdops deploy image_download --subsystem ${params.image} --tag green"
+                                sh "DNET_AK=$DNET_AK DNET_PRODUCT=$DNET_PRODUCT DNET_PROFILE=$DNET_PROFILE hdops deploy appinstall --subsystem ${params.image} --tag green"
+                            }
+                        }else {
+                            echo "======green节点：下载镜像、部署应用======"
+                            docker.image("harbor.qianfan123.com/toolset/toolsetcore:${toolset_image_version}").inside  {
+                                sh "DNET_PRODUCT=$DNET_PRODUCT DNET_PROFILE=$DNET_PROFILE hdops deploy image_download --subsystem ${params.image} --tag green"
+                                sh "DNET_AK=$DNET_AK DNET_PRODUCT=$DNET_PRODUCT DNET_PROFILE=$DNET_PROFILE hdops deploy appinstall --subsystem ${params.image} --tag green"
+                            }
+                        }
+				    }
+				}
+			}
+	    }
+		stage('green：healthcheck') {
+			steps{
+				script {
+				    if (tag == 'green' || tag == 'None'){
+                        if (env.on_k8s){
+                            echo "======健康检查green节点======"
+                            container('hdtoolsetcore'){
+                                if(env.retry_num){
+                                    def n ="${retry_num}".toInteger()
+                                    retry(n){
+                                        sh "DINGTALK_TOKEN=$DINGTALK_TOKEN DNET_PRODUCT=$DNET_PRODUCT DNET_PROFILE=$DNET_PROFILE hdops health_check --subsystem ${params.image}  --tag green"
+                                    }
+                                }else{
+                                    sh "DINGTALK_TOKEN=$DINGTALK_TOKEN DNET_PRODUCT=$DNET_PRODUCT DNET_PROFILE=$DNET_PROFILE hdops health_check --subsystem ${params.image}  --tag green"
+                                }
+                            }
+                        }else {
+                            echo "======健康检查green节点======"
+                            docker.image("harbor.qianfan123.com/toolset/toolsetcore:${toolset_image_version}").inside  {
+                                if(env.retry_num){
+                                    def n ="${retry_num}".toInteger()
+                                    retry(n){
+                                        sh "DINGTALK_TOKEN=$DINGTALK_TOKEN DNET_PRODUCT=$DNET_PRODUCT DNET_PROFILE=$DNET_PROFILE hdops health_check --subsystem ${params.image}  --tag green"
+                                    }
+                                }else{
+                                    sh "DINGTALK_TOKEN=$DINGTALK_TOKEN DNET_PRODUCT=$DNET_PRODUCT DNET_PROFILE=$DNET_PROFILE hdops health_check --subsystem ${params.image}  --tag green"
+                                }
+                            }
+                        }
+				    }
+                }
+			}
+        }
+		stage('None：change nginx-dubbo') {
+		    steps{
+				script{
+				    if (tag == 'green' || tag == 'None'){
+                        if (env.on_k8s){
+                            echo "======上线所有节点======"
+                            container("hdtoolsetcore"){
+                                sh "DNET_PRODUCT=${params.DNET_PRODUCT} DNET_PROFILE=${params.DNET_PROFILE} hdops change_nginx --image ${params.image} --tag None --nginx_command ${params.nginx_command} --filename_nginx ${params.filename_nginx} --filename_template ${params.filename_template} --nginx_basedir ${params.nginx_basedir} --nginx_path ${params.nginx_path} --dryrun ${params.dryrun}"
+                                sh "DNET_PRODUCT=${params.DNET_PRODUCT} DNET_PROFILE=${params.DNET_PROFILE} hdops change_dubbo --image ${params.image} --tag None --dryrun ${params.dryrun}"
+                            }
+                        }else {
+                            echo "======上线所有节点======"
+                            docker.image("harbor.qianfan123.com/toolset/toolsetcore:${toolset_image_version}").inside  {
+                                sh "DNET_PRODUCT=${params.DNET_PRODUCT} DNET_PROFILE=${params.DNET_PROFILE} hdops change_nginx --image ${params.image} --tag None --nginx_command ${params.nginx_command} --filename_nginx ${params.filename_nginx} --filename_template ${params.filename_template} --nginx_basedir ${params.nginx_basedir} --nginx_path ${params.nginx_path} --dryrun ${params.dryrun}"
+                                sh "DNET_PRODUCT=${params.DNET_PRODUCT} DNET_PROFILE=${params.DNET_PROFILE} hdops change_dubbo --image ${params.image} --tag None --dryrun ${params.dryrun}"
+                            }
+                        }
+				    }
+				}
+			}
+		}
+    }
+	post {
+    // 构建失败之后钉钉通知
+        failure {
+            script {
+                if (whether_post == "True") {
+                    dingTalk accessToken: "$DINGTALK_TOKEN", imageUrl: '', jenkinsUrl: "${jenkinsUrl}", message: "构建失败 ${new Date().format("yyyy-MM-dd HH:mm:ss")}", notifyPeople: ''
+                }
+            }
+        }
+	// 失败转成功之后钉钉通知
+        fixed {
+            script {
+                if (whether_post == "True") {
+                    dingTalk accessToken: "$DINGTALK_TOKEN", imageUrl: '', jenkinsUrl: "${jenkinsUrl}", message: "恢复正常 ${new Date().format("yyyy-MM-dd HH:mm:ss")}", notifyPeople: ''
+                }
+            }
+        }
+        always {
+			script {
+				currentBuild.description = "$DNET_PROFILE:${params.image}:${params.tag}"
+			}
+		}
+    }
+}
