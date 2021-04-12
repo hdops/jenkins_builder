@@ -43,7 +43,7 @@ pipeline {
 		stage('download toolset') {
 			steps{
 				script{
-					if(env.on_k8s){
+					if(env.on_k8s == 'True'){
 						container("toolsetcore-k8s"){
 							echo "active profile is ${params.DNET_PROFILE}"
 							echo "toolset path is ${WORKSPACE}"
@@ -72,7 +72,7 @@ pipeline {
 		stage('validate docker image') {
 			steps{
 				script{
-					if(env.on_k8s){
+					if(env.on_k8s == 'True'){
 						container("toolsetcore-k8s"){
 							sh "DNET_AK=${params.DNET_AK} DNET_PRODUCT=${params.DNET_PRODUCT} DNET_PROFILE=${params.DNET_PROFILE} PRESET_IMAGE_VERSION=${params.PRESET_IMAGE_VERSION} hdopsctl validateImage  --subsystem  ${params.subsystem}"
 						}

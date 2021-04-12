@@ -31,7 +31,7 @@ pipeline {
         stage('download_toolset'){
 			steps{
 			    script{
-					if(env.on_k8s){
+					if(env.on_k8s == 'True'){
 						container("hdtoolsetcore"){
 							retry(2){
 								sh "TRUST_PUBLIC_IP=true DNET_PROFILE=integration_test DNET_PRODUCT=dnet TRUST_PUBLIC_IP=${run_on_public} hdops download_toolset --branch develop -p ."
@@ -50,7 +50,7 @@ pipeline {
         stage('sourcecode_scan'){
 			steps{
 			    script{
-					if(env.on_k8s){
+					if(env.on_k8s == 'True'){
 						container("hdtoolsetcore"){
 							echo "url is ${params.url}"
 							echo "product  ${params.product}"

@@ -29,7 +29,7 @@ pipeline {
 		stage('download toolset') {
 			steps{
 				script{
-					if(env.on_k8s){
+					if(env.on_k8s == 'True'){
 						container("hdtoolsetcore"){
 							echo "active profile is ${params.DNET_PROFILE}"
 							echo "toolset path is ${WORKSPACE}"
@@ -58,7 +58,7 @@ pipeline {
 		stage('validate docker image') {
 			steps{
 				script{
-					if(env.on_k8s){
+					if(env.on_k8s == 'True'){
 						container("hdtoolsetcore"){
 							sh "DNET_PRODUCT=${params.DNET_PRODUCT} DNET_PROFILE=${params.DNET_PROFILE} PRESET_IMAGE_VERSION=${params.PRESET_IMAGE_VERSION} hdops deploy validate --subsystem  ${params.subsystem}"
 						}
