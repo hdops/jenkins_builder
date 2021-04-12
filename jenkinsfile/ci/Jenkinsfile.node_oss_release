@@ -48,6 +48,7 @@ pipeline {
 			    expression {'Y' == "${params.deleteWorkspace}"}
 			}
 			steps{
+			    echo "delete workspace"
 			    deleteDir()
 			}
 		}
