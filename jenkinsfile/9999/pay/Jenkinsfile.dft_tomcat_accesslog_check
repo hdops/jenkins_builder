@@ -30,7 +30,7 @@ pipeline {
 	    stage('dft_tomcat_accesslog_check') {
 			steps{
 				script{
-					if(env.on_k8s){
+					if(env.on_k8s == 'True'){
 						container("hdtoolsetcore"){
 							echo "active profile is ${params.DNET_PROFILE}"
 							echo "product is ${params.DNET_PRODUCT}"

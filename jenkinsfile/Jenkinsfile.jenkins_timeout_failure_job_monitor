@@ -31,7 +31,7 @@ pipeline {
         stage('jenkins超时失败job预警') {
 			steps{
 				script {
-                    if(env.on_k8s){
+                    if(env.on_k8s == 'True'){
                         container("hdtoolsetcore"){
                             echo "profile is ${params.DNET_PROFILE}"
                             retry(2){
