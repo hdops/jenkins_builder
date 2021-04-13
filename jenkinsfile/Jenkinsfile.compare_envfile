@@ -44,7 +44,7 @@ pipeline {
                                 sh "DNET_PROFILE=integration_test DNET_PRODUCT=dnet TRUST_PUBLIC_IP=${run_on_public} hdops download_toolset --branch ${params.GIT_BRANCH} -p ."
                             }
                             sh "tar zxf toolset.tar.gz -C $WORKSPACE"
-                            sh "DNET_PRODUCT=${params.DNET_PRODUCT} DNET_PROFILE=${params.DNET_PROFILE} hdops compare_envfiles --source_gitbranch ${params.source_gitbranch} --target_gitbranch ${params.target_gitbranch} --subsystem ${params.subsystem} --target_profile ${params.target_profile}"
+                            sh "DNET_PRODUCT=${params.DNET_PRODUCT} DNET_PROFILE=${params.DNET_PROFILE} hdops compare_envfiles --source_gitbranch ${params.source_gitbranch} --target_gitbranch ${params.target_gitbranch} --subsystem ${params.subsystem} --target_profile ${params.target_profile} --black_env ${params.black_env} "
                         }
                     }else{
                         deleteDir()
@@ -56,7 +56,7 @@ pipeline {
                                 sh "DNET_PROFILE=integration_test DNET_PRODUCT=dnet TRUST_PUBLIC_IP=${run_on_public} hdops download_toolset --branch ${params.GIT_BRANCH} -p ."
                             }
                             sh "tar zxf toolset.tar.gz -C $WORKSPACE"
-                            sh "DNET_PRODUCT=${params.DNET_PRODUCT} DNET_PROFILE=${params.DNET_PROFILE} hdops compare_envfiles --source_gitbranch ${params.source_gitbranch} --target_gitbranch ${params.target_gitbranch} --subsystem ${params.subsystem} --target_profile ${params.target_profile}"
+                            sh "DNET_PRODUCT=${params.DNET_PRODUCT} DNET_PROFILE=${params.DNET_PROFILE} hdops compare_envfiles --source_gitbranch ${params.source_gitbranch} --target_gitbranch ${params.target_gitbranch} --subsystem ${params.subsystem} --target_profile ${params.target_profile} --black_env ${params.black_env} "
                         }
                     }
                     
