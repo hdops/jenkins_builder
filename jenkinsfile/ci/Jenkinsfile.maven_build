@@ -296,8 +296,8 @@ pipeline {
                             gitpath = "None"
                             echo("from envfile_images.txt : ${image}")
                         }
-                        echo("image=${image}")
-                        if (image != "" && image != null) {
+                        echo("image=`${image}`")
+                        if (image) {
                             data.each{ i ->
                                 String[] item = i.split(';')
                                 println(item)
