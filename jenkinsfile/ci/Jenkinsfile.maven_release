@@ -181,8 +181,8 @@ pipeline {
 				script{
 				    if (env.remote_env_cfg != "" && env.remote_env_cfg != null) {
                         echo "using mvn "
-                        //ImageVersion = readMavenPom().getVersion()
-                        ImageVersion = readMavenPom().version
+                        // ImageVersion = readMavenPom().version
+                        ImageVersion = "${params.releaseVersion}"
                         echo("ImageVersion=${ImageVersion}")
                         // remote_env
                         println(env.remote_env_cfg)
