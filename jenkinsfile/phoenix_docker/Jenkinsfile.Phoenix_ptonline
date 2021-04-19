@@ -1,0 +1,132 @@
+def node="master"
+if (env.node){
+    node =env.node
+}
+
+
+
+
+
+if (!env.GIT_GROUP){
+    env.GIT_GROUP="phoenix-config"
+}
+
+def GITLAB_URL="http://gitlab.app.hd123.cn:10080"
+def YAML_FILE="hdphoenixtoolsetcore.yaml"
+if (env.GITLAB_URL){
+    GITLAB_URL =env.GITLAB_URL
+}
+
+def run_on_public="None"
+if (env.run_on_public){
+    run_on_public=env.run_on_public
+}
+if (!env.on_k8s){
+    env.on_k8s="False"
+}
+if (env.set_on_k8s) {
+    env.on_k8s=env.set_on_k8s
+}
+pipeline {
+    agent {label node}
+
+    stages {
+        stage('advance prepare on k8s to read yaml') {
+            when {
+                beforeAgent true
+                environment name: 'on_k8s', value: 'True'
+            }
+
+            steps {
+                script{
+                    hdphoenixtoolsetcoreYamlData = readYaml file: "jenkinsfile/phoenix_docker/${YAML_FILE}"
+                } 
+            }
+        }
+        stage('delete workspace') {
+			steps{
+				deleteDir()
+			}
+        }
+        stage('下载phoenix config') {
+            steps{
+
+                git branch: "${params.GIT_BRANCH}", credentialsId: '17643215-09f8-4a9a-b0ea-c8e49777ce1d', url: "${GITLAB_URL}/${GIT_GROUP}/${params.GIT_REPONAME}.git"
+            }
+        }
+        stage('get crmVersion') {
+            steps {
+                script{
+                    data = readYaml file: 'docker_environments.yaml'
+                    echo "crmVersion is ${data.crmVersion}"
+                    echo "on_k8s is ${env.on_k8s}"
+                    echo "node is ${node}"
+                    if (data.crmVersion){
+                        env.version = data.crmVersion
+                    } else {
+                        error "can not get crmVersion"
+                    }
+                }
+            }
+        }
+        stage('deploy on docker') {
+            when {
+                beforeAgent true
+                environment name: 'on_k8s', value: 'False'
+            }
+            steps {
+                script{    
+                    withDockerContainer(args: "-v ${WORKSPACE}:/opt", image: "harbor.qianfan123.com/toolset/phoenixcore:${version}") {
+                        sh "phoenix-tools version"
+                        sh "phoenix-tools dataimport ptonline --jira ${params.jira} --max_load_threads ${params.max_load_threads} --critical_load_threads ${params.critical_load_threads}  --rdb_host ${params.rdb_host}  --rdb_port ${params.rdb_port}  --rdb_username ${params.rdb_username}  --rdb_password ${params.rdb_password}  --rdb_dbname ${params.rdb_dbname} --dryrun ${params.dryrun}"
+                    }
+                }
+            }
+        }
+        stage('prepare on k8s') {
+            when {
+                beforeAgent true
+                environment name: 'on_k8s', value: 'True'
+            }
+
+            steps {
+                script{
+                    hdphoenixtoolsetcoreYamlData.spec.containers[0].image = "harbor.qianfan123.com/toolset/phoenixcore:${version}"
+                    writeYaml file: "${WORKSPACE}@script/${YAML_FILE}", data: hdphoenixtoolsetcoreYamlData
+                    sh "cat ${WORKSPACE}@script/${YAML_FILE}"
+                } 
+            }
+        }
+        stage('deploy on k8s') {
+            when {
+                beforeAgent true
+                environment name: 'on_k8s', value: 'True'
+            }
+
+            agent {
+                kubernetes{
+                    cloud 'kubernetes'
+                    containerTemplate {
+                        name 'hdphoenixtoolsetcore'
+                        namespace 'opsapp'
+                        image  "harbor.qianfan123.com/toolset/phoenixcore:${version}"
+                        ttyEnabled true
+                        alwaysPullImage true
+                        command 'sleep'
+                        args '100'
+                    }
+                }
+            }
+
+            steps {
+                script{
+                    container("hdphoenixtoolsetcore")   {
+                        sh "phoenix-tools version"
+                        git branch: "${params.GIT_BRANCH}", credentialsId: '17643215-09f8-4a9a-b0ea-c8e49777ce1d', url: "${GITLAB_URL}/${GIT_GROUP}/${params.GIT_REPONAME}.git"
+                        sh "phoenix-tools dataimport ptonline --jira ${params.jira} --max_load_threads ${params.max_load_threads} --critical_load_threads ${params.critical_load_threads}  --rdb_host ${params.rdb_host}  --rdb_port ${params.rdb_port}  --rdb_username ${params.rdb_username}  --rdb_password ${params.rdb_password}  --rdb_dbname ${params.rdb_dbname} --dryrun ${params.dryrun}"
+                    }
+                } 
+            }
+        }
+    }
+}
