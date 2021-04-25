@@ -3,9 +3,9 @@ if (env.node){
     node =env.node
 }
 
-
-
-
+if (!env.GIT_GROUP){
+    env.GIT_GROUP="phoenix-config"
+}
 
 def GITLAB_URL="http://gitlab.app.hd123.cn:10080"
 def YAML_FILE="hdphoenixtoolsetcore.yaml"
