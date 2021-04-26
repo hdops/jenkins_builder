@@ -1,0 +1,85 @@
+def node=""
+if (env.node){
+    node =env.node
+}else{
+    node ="master"
+}
+def whether_post=""
+if (env.whether_post){
+    whether_post =env.whether_post
+}else{
+    whether_post ="True"
+}
+def toolset_image_version="0.3.0-private"
+if (env.toolset_image_version){
+    toolset_image_version = env.toolset_image_version
+}
+
+
+
+def run_on_public="None"
+if (env.run_on_public){
+    run_on_public=env.run_on_public
+}
+if (!env.on_k8s){
+    env.on_k8s="False"
+}
+if (env.set_on_k8s) {
+    env.on_k8s=env.set_on_k8s
+}
+pipeline {
+    agent {label node}
+    options {   
+	    timeout(time: 1, unit: 'HOURS')
+    }           
+	stages {
+	    stage('删除workspace') {
+            steps{
+                deleteDir()
+            }
+        }
+		stage('upload envfile') {
+			steps{
+                script {
+                    if(env.on_k8s == 'True'){
+                        container("hdtoolsetcore"){
+                            retry(2){
+                                sh "DNET_PROFILE=integration_test DNET_PRODUCT=dnet TRUST_PUBLIC_IP=${run_on_public} hdops download_toolset --branch ${params.GIT_BRANCH} -p ."
+                            }
+                            sh "tar zxf toolset.tar.gz -C ${WORKSPACE}"
+                            sh "DNET_PRODUCT=${params.DNET_PRODUCT} DNET_PROFILE=${params.DNET_PROFILE} hdmon generate_ansible_data --mysql_username ${params.mysql_username} --mysql_password ${params.mysql_password} --pg_username ${params.pg_username} --pg_password ${params.pg_password} --mongo_username ${params.mongo_username} --mongo_password ${params.mongo_password} "
+                        }
+                    }else {
+                       docker.image("harbor.qianfan123.com/toolset/toolsetcore:${toolset_image_version}").inside  {
+                            retry(2){
+                                sh "DNET_PROFILE=integration_test DNET_PRODUCT=dnet TRUST_PUBLIC_IP=${run_on_public} hdops download_toolset --branch ${params.GIT_BRANCH} -p ."
+                            }
+                            sh "tar zxf toolset.tar.gz -C ${WORKSPACE}"
+                            sh "DNET_PRODUCT=${params.DNET_PRODUCT} DNET_PROFILE=${params.DNET_PROFILE} hdmon generate_ansible_data --mysql_username ${params.mysql_username} --mysql_password ${params.mysql_password} --pg_username ${params.pg_username} --pg_password ${params.pg_password} --mongo_username ${params.mongo_username} --mongo_password ${params.mongo_password} "
+                       }
+                    }
+                }
+			}
+        }
+	   
+	}
+	post {
+    // 构建失败之后钉钉通知
+        failure {
+            script {
+                if (whether_post == "True") {
+                    dingTalk accessToken: "${DINGTALK_TOKEN}", imageUrl: '', jenkinsUrl: "${jenkinsUrl}", message: "构建失败 ${new Date().format("yyyy-MM-dd HH:mm:ss")}", notifyPeople: ''
+                }
+            }
+        }
+	// 失败转成功之后钉钉通知
+        fixed {
+            script {
+                if (whether_post == "True") {
+                    dingTalk accessToken: "${DINGTALK_TOKEN}", imageUrl: '', jenkinsUrl: "${jenkinsUrl}", message: "恢复正常 ${new Date().format("yyyy-MM-dd HH:mm:ss")}", notifyPeople: ''
+                }
+            }
+        }
+    }
+}
+
