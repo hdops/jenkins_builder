@@ -45,17 +45,19 @@ pipeline {
                         container("hdtoolsetcore"){
                             retry(2){
                                 sh "DNET_PROFILE=integration_test DNET_PRODUCT=dnet TRUST_PUBLIC_IP=${run_on_public} hdops download_toolset --branch ${params.GIT_BRANCH} -p ."
+
+                                sh "tar zxf toolset.tar.gz -C ${WORKSPACE}"
+                                sh "DNET_PRODUCT=${params.DNET_PRODUCT} DNET_PROFILE=${params.DNET_PROFILE} hdops upload_envfile --image ${params.image} --version ${params.version} "
                             }
-                            sh "tar zxf toolset.tar.gz -C ${WORKSPACE}"
-                            sh "DNET_PRODUCT=${params.DNET_PRODUCT} DNET_PROFILE=${params.DNET_PROFILE} hdops upload_envfile --image ${params.image} --version ${params.version} "
                         }
                     }else {
                        docker.image("harbor.qianfan123.com/toolset/toolsetcore:${toolset_image_version}").inside  {
                             retry(2){
                                 sh "DNET_PROFILE=integration_test DNET_PRODUCT=dnet TRUST_PUBLIC_IP=${run_on_public} hdops download_toolset --branch ${params.GIT_BRANCH} -p ."
+
+                                sh "tar zxf toolset.tar.gz -C ${WORKSPACE}"
+                                sh "DNET_PRODUCT=${params.DNET_PRODUCT} DNET_PROFILE=${params.DNET_PROFILE} hdops upload_envfile --image ${params.image} --version ${params.version} "
                             }
-                            sh "tar zxf toolset.tar.gz -C ${WORKSPACE}"
-                            sh "DNET_PRODUCT=${params.DNET_PRODUCT} DNET_PROFILE=${params.DNET_PROFILE} hdops upload_envfile --image ${params.image} --version ${params.version} "
                        }
 
                     }
