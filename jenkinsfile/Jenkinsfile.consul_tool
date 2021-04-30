@@ -42,7 +42,7 @@ pipeline {
 								sh "DNET_PROFILE=integration_test DNET_PRODUCT=dnet TRUST_PUBLIC_IP=${run_on_public} hdops download_toolset --branch ${params.GIT_BRANCH} -p ."
 							}
 							sh "tar zxf toolset.tar.gz -C $WORKSPACE"
-							sh "DNET_PRODUCT=${params.DNET_PRODUCT} DNET_PROFILE=${params.DNET_PROFILE} hdmon consul_tool --image ${params.image} --consul_url ${params.consul_url} --action ${params.action} --dryrun ${params.dryrun}"
+							sh "DNET_PRODUCT=${params.DNET_PRODUCT} DNET_PROFILE=${params.DNET_PROFILE} hdmon consul_tool --image ${params.image} --consul_url ${params.consul_url} --consul_type ${params.consul_type} --action ${params.action} --dryrun ${params.dryrun}"
 						}
 					}else {
 					    docker.image("harbor.qianfan123.com/toolset/toolsetcore:${toolset_image_version}").inside {
@@ -53,7 +53,7 @@ pipeline {
                                 sh "DNET_PROFILE=integration_test DNET_PRODUCT=dnet TRUST_PUBLIC_IP=${run_on_public} hdops download_toolset --branch ${params.GIT_BRANCH} -p ."
                             }
                             sh "tar zxf toolset.tar.gz -C $WORKSPACE"
-                            sh "DNET_PRODUCT=${params.DNET_PRODUCT} DNET_PROFILE=${params.DNET_PROFILE} hdmon consul_tool --image ${params.image} --consul_url ${params.consul_url} --action ${params.action} --dryrun ${params.dryrun}"
+                            sh "DNET_PRODUCT=${params.DNET_PRODUCT} DNET_PROFILE=${params.DNET_PROFILE} hdmon consul_tool --image ${params.image} --consul_url ${params.consul_url} --consul_type ${params.consul_type} --action ${params.action} --dryrun ${params.dryrun}"
 					    }
 					}
 				}
