@@ -30,7 +30,7 @@ if (env.git_base_url){
 }
 
 def jenkins_job_config_file = 'jenkins_jobs.ini'
-if (env.if jenkins_job_config_file){
+if (env.jenkins_job_config_file){
     jenkins_job_config_file = env.jenkins_job_config_file
 }
 
