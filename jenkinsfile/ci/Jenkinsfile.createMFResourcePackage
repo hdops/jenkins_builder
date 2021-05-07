@@ -24,12 +24,14 @@ pipeline {
 			    }
              }
     options {
-	//     buildDiscarder(logRotator(numToKeepStr: '10'))
-	//     disableConcurrentBuilds()
-	//     disableResume()
 	    timeout(time: 1, unit: 'HOURS')
     } 
     stages {
+        stage('delete workspace') {
+            steps{
+                deleteDir()
+            }
+        }
         stage('delete workspace') {
             steps{
                 deleteDir()
