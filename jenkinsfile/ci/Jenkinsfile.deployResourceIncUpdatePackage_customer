@@ -17,28 +17,25 @@ if (env.set_on_k8s) {
 }
 pipeline {
 	agent {
-			    docker {
-			    label node
+		docker {
+		    label node
 			    image "harbor.qianfan123.com/toolset/toolsetcore:0.3.0"
 			    args '-v /var/run/docker.sock:/var/run/docker.sock -v /usr/bin/docker:/usr/bin/docker --add-host=hd-hz-public.oss-cn-hangzhou-internal.aliyuncs.com:47.110.23.37'
-			    }
-             }
+			}
+        }
     options {
-	//     buildDiscarder(logRotator(numToKeepStr: '10'))
-	//     disableConcurrentBuilds()
-	//     disableResume()
 	    timeout(time: 1, unit: 'HOURS')
     } 
     stages {
+        stage('delete workspace') {
+            steps{
+                deleteDir()
+            }
+        }
         stage('download_toolset'){ 
 			steps{
                 echo "active profile is ${DNET_PROFILE}"
                 echo "workspace is $WORKSPACE"
-                echo "DNET_CLOUD_VENDOR is ${DNET_CLOUD_VENDOR}"
-		        echo "DNET_PRODUCT is ${DNET_PRODUCT}"
-		        echo "DNET_PRIVATE_URL is ${DNET_PRIVATE_URL}"
-		        echo "DNET_PRIVATE_AK is ${DNET_PRIVATE_AK}"
-		        echo "DNET_PRIVATE_REGION is ${DNET_PRIVATE_REGION}"
                 retry(2){
                     sh "set +x;TRUST_PUBLIC_IP=${run_on_public} hdops download_toolset --branch ${build_branch} -p ."
                 }
@@ -47,8 +44,8 @@ pipeline {
 		}
         stage('deployResourceIncUpdatePackage'){
 			steps{
-
-               sh "DNET_PRODUCT=${params.DNET_PRODUCT} DNET_PROFILE=${params.DNET_PROFILE} hdmon deploy_resource_inc_update_package --resouce_file ${params.oss_resources}"
+			    sh "cat deploy_resource_inc_update_package_oss.yaml"
+                sh "DNET_PRODUCT=${params.DNET_PRODUCT} DNET_PROFILE=${params.DNET_PROFILE} hdmon deploy_resource_inc_update_package --resouce_file ${params.oss_resources}"
 			}
 		}
     }
