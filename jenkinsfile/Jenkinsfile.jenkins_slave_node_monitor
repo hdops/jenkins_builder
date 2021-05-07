@@ -41,7 +41,7 @@ pipeline {
                    echo "toolset_image_version is ${toolset_image_version}"
                    echo "on_k8s is ${on_k8s}"
                    echo "set_on_k8s is ${set_on_k8s}"
-                   echo "DINGTALK_TOKEN is {DINGTALK_TOKEN}"
+                   echo "DINGTALK_TOKEN is ${DINGTALK_TOKEN}"
                    if(env.on_k8s == 'True'){
                       container("hdtoolsetcore"){
                         retry(2){
