@@ -45,6 +45,7 @@ pipeline {
                         echo "workspace is $WORKSPACE"
                         retry(2){
                             sh "docker pull harbor.qianfan123.com/toolset/toolsetcore:${toolset_image_version}"
+                            sh "docker pull harbor.qianfan123.com/base/jenkins-job-builder:0.1.0"
                         }
                     }
                 }
