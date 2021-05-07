@@ -32,22 +32,17 @@ pipeline {
     stages {
         stage('download_toolset'){ 
 			steps{
-                echo "active profile is ${DNET_PROFILE}"
-                echo "workspace is $WORKSPACE"
-                echo "DNET_CLOUD_VENDOR is ${DNET_CLOUD_VENDOR}"
-		        echo "DNET_PRODUCT is ${DNET_PRODUCT}"
-		        echo "DNET_PRIVATE_URL is ${DNET_PRIVATE_URL}"
-		        echo "DNET_PRIVATE_AK is ${DNET_PRIVATE_AK}"
-		        echo "DNET_PRIVATE_REGION is ${DNET_PRIVATE_REGION}"
-                retry(2){
-                    sh "set +x;TRUST_PUBLIC_IP=${run_on_public} hdops download_toolset --branch ${build_branch} -p ."
-                }
-                sh "tar zxf toolset.tar.gz -C $WORKSPACE"
+                            echo "active profile is ${DNET_PROFILE}"
+                            echo "workspace is $WORKSPACE"
+                            retry(2){
+                                sh "set +x;TRUST_PUBLIC_IP=${run_on_public} hdops download_toolset --branch ${build_branch} -p ."
+                            }
+                            sh "tar zxf toolset.tar.gz -C $WORKSPACE"
 			}
 		}
         stage('createResourceIncUpdatePackage'){
 			steps{   
-                sh "DNET_PRODUCT=${params.DNET_PRODUCT} DNET_PROFILE=${params.DNET_PROFILE} hdmon create_resource_inc_update_package --subsystem ${params.subsystem} --fromversion ${params.fromVersion} --toversion ${params.toVersion} --branch ${params.branch}"
+                            sh "DNET_PRODUCT=${params.DNET_PRODUCT} DNET_PROFILE=${params.DNET_PROFILE} hdmon create_resource_inc_update_package --subsystem ${params.subsystem} --fromversion ${params.fromVersion} --toversion ${params.toVersion} --branch ${params.branch}"
 			}
 		}
     }
