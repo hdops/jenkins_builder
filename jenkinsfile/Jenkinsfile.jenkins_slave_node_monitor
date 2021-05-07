@@ -34,7 +34,7 @@ pipeline {
     stages {
         stage('download toolset') {
 			steps{
-			    echo "TRUST_PUBLIC_IP is ${TRUST_PUBLIC_IP}"
+			    echo "TRUST_PUBLIC_IP is ${run_on_public}"
                 echo "toolset_image_version is ${toolset_image_version}"
                 echo "on_k8s is ${on_k8s}"
                 echo "set_on_k8s is ${set_on_k8s}"
