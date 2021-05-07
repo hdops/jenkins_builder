@@ -44,8 +44,6 @@ pipeline {
 		}
         stage('deployResourceIncUpdatePackage'){
 			steps{
-			    sh "cat deploy_resource_inc_update_package_oss.yaml"
-			    sh "tail -f /dev/null"
                 sh "DNET_PRODUCT=${params.DNET_PRODUCT} DNET_PROFILE=${params.DNET_PROFILE} hdmon deploy_resource_inc_update_package --resouce_file ${params.oss_resources}"
 			}
 		}
