@@ -32,22 +32,20 @@ pipeline {
 	    timeout(time: 3, unit: 'HOURS')
     }
     stages {
-        stage('download toolset') {
-			steps{
-                retry(2){
-				    sh "${download_toolset_cmd}"
-                }
-				sh "tar zxf toolset.tar.gz -C ${WORKSPACE}"
-			}
-        }
+
         stage('jenkins slave 节点监控和预警') {
 			steps{
                 script{
                    deleteDir()
+                   echo "TRUST_PUBLIC_IP is ${run_on_public}"
+                   echo "toolset_image_version is ${toolset_image_version}"
+                   echo "on_k8s is ${on_k8s}"
+                   echo "set_on_k8s is ${set_on_k8s}"
+                   echo "DINGTALK_TOKEN is ${DINGTALK_TOKEN}"
                    if(env.on_k8s == 'True'){
                       container("hdtoolsetcore"){
                         retry(2){
-                            sh "DNET_PROFILE=integration_test DNET_PRODUCT=dnet TRUST_PUBLIC_IP=${run_on_public} hdops download_toolset --branch ${GIT_BRANCH} -p ."
+                            sh "set +x;TRUST_PUBLIC_IP=${run_on_public} hdops download_toolset --branch ${build_branch} -p ."
                         }
                         sh "tar zxf toolset.tar.gz -C ${WORKSPACE}"
                         sh "DINGTALK_TOKEN=${DINGTALK_TOKEN} hdmon jenkins_node_monitor slave_check --cfgname ${cfgname} --receivers ${receivers}"
@@ -55,7 +53,7 @@ pipeline {
                    }else{
                        docker.image("harbor.qianfan123.com/toolset/toolsetcore:${toolset_image_version}").inside  {
                             retry(2){
-                                sh "DNET_PROFILE=integration_test DNET_PRODUCT=dnet TRUST_PUBLIC_IP=${run_on_public} hdops download_toolset --branch ${GIT_BRANCH} -p ."
+                                sh "set +x;TRUST_PUBLIC_IP=${run_on_public} hdops download_toolset --branch ${build_branch} -p ."
                             }
                             sh "tar zxf toolset.tar.gz -C ${WORKSPACE}"
                             sh "DINGTALK_TOKEN=${DINGTALK_TOKEN} hdmon jenkins_node_monitor slave_check --cfgname ${cfgname} --receivers ${receivers}"
