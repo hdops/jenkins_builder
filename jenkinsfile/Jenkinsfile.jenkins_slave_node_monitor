@@ -44,7 +44,7 @@ pipeline {
                    if(env.on_k8s == 'True'){
                       container("hdtoolsetcore"){
                         retry(2){
-                            sh "DNET_PROFILE=integration_test DNET_PRODUCT=dnet TRUST_PUBLIC_IP=${run_on_public} hdops download_toolset --branch ${GIT_BRANCH} -p ."
+                            sh "set +x;TRUST_PUBLIC_IP=${run_on_public} hdops download_toolset --branch ${build_branch} -p ."
                         }
                         sh "tar zxf toolset.tar.gz -C ${WORKSPACE}"
                         sh "DINGTALK_TOKEN=${DINGTALK_TOKEN} hdmon jenkins_node_monitor slave_check --cfgname ${cfgname} --receivers ${receivers}"
@@ -52,7 +52,7 @@ pipeline {
                    }else{
                        docker.image("harbor.qianfan123.com/toolset/toolsetcore:${toolset_image_version}").inside  {
                             retry(2){
-                                sh "DNET_PROFILE=integration_test DNET_PRODUCT=dnet TRUST_PUBLIC_IP=${run_on_public} hdops download_toolset --branch ${GIT_BRANCH} -p ."
+                                sh "set +x;TRUST_PUBLIC_IP=${run_on_public} hdops download_toolset --branch ${build_branch} -p ."
                             }
                             sh "tar zxf toolset.tar.gz -C ${WORKSPACE}"
                             sh "DINGTALK_TOKEN=${DINGTALK_TOKEN} hdmon jenkins_node_monitor slave_check --cfgname ${cfgname} --receivers ${receivers}"
