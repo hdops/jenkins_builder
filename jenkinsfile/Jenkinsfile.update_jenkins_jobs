@@ -37,7 +37,7 @@ if (env.if jenkins_job_config_file){
 pipeline {
     agent {label node}
 	options {
-	    timeout(time: 5, unit: 'MINUTES')
+	    timeout(time: 6, unit: 'HOURS')
     }
     stages {
         stage('更新jenkins_jobs') {
