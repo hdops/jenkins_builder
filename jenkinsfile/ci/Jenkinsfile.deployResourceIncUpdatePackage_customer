@@ -17,12 +17,12 @@ if (env.set_on_k8s) {
 }
 pipeline {
 	agent {
-			    docker {
-			    label node
+		docker {
+		    label node
 			    image "harbor.qianfan123.com/toolset/toolsetcore:0.3.0"
 			    args '-v /var/run/docker.sock:/var/run/docker.sock -v /usr/bin/docker:/usr/bin/docker --add-host=hd-hz-public.oss-cn-hangzhou-internal.aliyuncs.com:47.110.23.37'
-			    }
-             }
+			}
+        }
     options {
 	    timeout(time: 1, unit: 'HOURS')
     } 
@@ -44,8 +44,8 @@ pipeline {
 		}
         stage('deployResourceIncUpdatePackage'){
 			steps{
-
-               sh "DNET_PRODUCT=${params.DNET_PRODUCT} DNET_PROFILE=${params.DNET_PROFILE} hdmon deploy_resource_inc_update_package --resouce_file ${params.oss_resources}"
+			    sh "cat deploy_resource_inc_update_package_oss.yaml"
+                sh "DNET_PRODUCT=${params.DNET_PRODUCT} DNET_PROFILE=${params.DNET_PROFILE} hdmon deploy_resource_inc_update_package --resouce_file ${params.oss_resources}"
 			}
 		}
     }
