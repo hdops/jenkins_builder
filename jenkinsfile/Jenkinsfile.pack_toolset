@@ -50,12 +50,29 @@ pipeline {
 		}
     }
     post{
+        success{
+            script{
+                    def subject = "pack toolset successfully for ${git_project}"
+                    def to = "buhaiqing@hd123.com"
+                    def body = "build successfully on Job ${BUILD_URL}"
+                    // send email
+                    emailext subject: subject, to: to, body:body,attachLog:true
+                }
+        }
         failure{
             script{
-
                 def subject = "pack toolset failure for ${git_project}"
                 def to = env.email_recipients ? "${env.email_recipients}" : "buhaiqing@hd123.com"
-                def body = env.email_body ? "${env.email_body}" : "failure on Job ${BUILD_URL}"
+                def body =  "failure on Job ${BUILD_URL}"
+                // send email
+                emailext subject: subject, to: to, body:body,attachLog:true
+            }
+        }
+        unstable{
+            script{
+                def subject = "pack toolset failure for ${git_project}"
+                def to = env.email_recipients ? "${env.email_recipients}" : "buhaiqing@hd123.com"
+                def body = "failure on Job ${BUILD_URL}"
                 // send email
                 emailext subject: subject, to: to, body:body,attachLog:true
             }
