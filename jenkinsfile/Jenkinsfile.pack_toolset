@@ -54,24 +54,9 @@ pipeline {
 		}
     }
     post{
-        success{
-            script{
-                    def subject = "pack toolset successfully for ${git_project} on ${BUILD_URL}"
-                    def to = "buhaiqing@hd123.com"
-                    def body = "build successfully on Job ${BUILD_URL}"
-                    // send email
-                    emailext subject: subject, to: to, body:body,attachLog:true
-                    dingTalk accessToken: "${DINGTALK_TOKEN}", imageUrl: '', jenkinsUrl: '', message: "${subject}", notifyPeople: ''
-                }
-        }
         failure{
             script{
-                def subject = "pack toolset failure for ${git_project} on ${BUILD_URL}"
-                def to = env.email_recipients ? "${env.email_recipients}" : "buhaiqing@hd123.com"
-                def body =  "failure on Job ${BUILD_URL}"
-                // send email
-                emailext subject: subject, to: to, body:body,attachLog:true
-                dingTalk accessToken: "${DINGTALK_TOKEN}", imageUrl: '', jenkinsUrl: '', message: "${subject}", notifyPeople: ''
+                dingTalk accessToken: "${DINGTALK_TOKEN}", imageUrl: '', jenkinsUrl: '', message: ""pack toolset failure for ${git_project} on ${BUILD_URL}"", notifyPeople: ''
             }
         }
     }
