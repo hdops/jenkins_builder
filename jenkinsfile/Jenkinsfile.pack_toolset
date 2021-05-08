@@ -36,7 +36,6 @@ pipeline {
 			   checkout([$class: 'GitSCM', branches: [[name: "*/${build_branch}"]],userRemoteConfigs: [[credentialsId: 'qianfan',url: "${ci_git_server_baseurl}/${git_project}.git"]]])
 			   echo "TRUST_PUBLIC_IP is ${TRUST_PUBLIC_IP}"
 			   echo "DNET_CLOUD_VENDOR is ${DNET_CLOUD_VENDOR}"
-		       echo "DNET_PRODUCT is ${DNET_PRODUCT}"
 		       echo "DNET_PRIVATE_URL is ${DNET_PRIVATE_URL}"
 		       echo "DNET_PRIVATE_AK is ${DNET_PRIVATE_AK}"
 		       echo "DNET_PRIVATE_REGION is ${DNET_PRIVATE_REGION}"
