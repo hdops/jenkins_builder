@@ -41,7 +41,7 @@ pipeline {
 		       echo "DNET_PRIVATE_BUCKET is ${DNET_PRIVATE_BUCKET}"
 		       echo "DNET_PRIVATE_REGION is ${DNET_PRIVATE_REGION}"
 
-               sh "python update_toolset_oss.py -branch $GIT_BRANCH"
+               sh "python update_toolset_oss.py -branch $BRANCH_NAME"
 			}
 		}
     }
