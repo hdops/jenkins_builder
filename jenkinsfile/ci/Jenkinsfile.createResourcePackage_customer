@@ -44,11 +44,6 @@ pipeline {
 		}
         stage('createResourcePackage'){ 
 			steps{
-			   echo "DNET_CLOUD_VENDOR is ${DNET_CLOUD_VENDOR}"
-		       echo "DNET_PRODUCT is ${DNET_PRODUCT}"
-		       echo "DNET_PRIVATE_URL is ${DNET_PRIVATE_URL}"
-		       echo "DNET_PRIVATE_AK is ${DNET_PRIVATE_AK}"
-		       echo "DNET_PRIVATE_REGION is ${DNET_PRIVATE_REGION}"
                sh "DNET_PROFILE=${params.DNET_PROFILE} hdmon create_resource_package --download_url ${params.BUILD_URL} --fromversion ${params.fromVersion} --toversion ${params.toVersion} --alias ${params.alias} --subsystem ${params.subsystem}"
 			}
 		}
