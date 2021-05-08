@@ -50,7 +50,7 @@ pipeline {
 		}
     }
     post{
-        always{
+        success{
             script{
                     def subject = "pack toolset successfully for ${git_project}"
                     def to = env.email_recipients ? "${env.email_recipients}" : "buhaiqing@hd123.com"
