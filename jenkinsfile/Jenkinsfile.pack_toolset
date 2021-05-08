@@ -56,7 +56,7 @@ pipeline {
     post{
         failure{
             script{
-                dingTalk accessToken: "${DINGTALK_TOKEN}", imageUrl: '', jenkinsUrl: '', message: ""pack toolset failure for ${git_project} on ${BUILD_URL}"", notifyPeople: ''
+                dingTalk accessToken: "${DINGTALK_TOKEN}", imageUrl: '', jenkinsUrl: '', message: "pack toolset failure for ${git_project} on ${BUILD_URL}", notifyPeople: ''
             }
         }
     }
