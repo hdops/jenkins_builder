@@ -45,4 +45,16 @@ pipeline {
 			}
 		}
     }
+    post{
+        failure{
+            script{
+
+                def subject = "pack toolset failure for ${git_project}"
+                def to = env.email_recipients ? "${env.email_recipients}" : "buhaiqing@hd123.com"
+                def body = env.email_body ? "${env.email_body}" : "failure on Job ${BUILD_URL}"
+                // send email
+                emailext subject: subject, to: to, body:body,attachLog:true
+            }
+        }
+    }
 }
