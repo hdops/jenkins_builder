@@ -36,7 +36,6 @@ pipeline {
         stage('pack toolset'){
 			steps{
                 script{
-                   def env = currentBuild.getEnvironment(currentListener)
                    checkout([$class: 'GitSCM', branches: [[name: "*/${env.gitlabBranch}"]],userRemoteConfigs: [[credentialsId: 'qianfan',url: "${ci_git_server_baseurl}/${git_project}.git"]]])
                    echo "TRUST_PUBLIC_IP is ${TRUST_PUBLIC_IP}"
                    echo "DNET_CLOUD_VENDOR is ${DNET_CLOUD_VENDOR}"
