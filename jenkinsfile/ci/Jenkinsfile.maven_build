@@ -84,10 +84,14 @@ pipeline {
                 script{
                     if (source_code_management == "git"){
                         echo "checkout ${ci_git_server_baseurl}/${git_project}.git  branch:${build_branch}"
-                        checkout([$class: 'GitSCM', branches: [[name: "*/${build_branch}"]],userRemoteConfigs: [[credentialsId: 'qianfan',url: "${ci_git_server_baseurl}/${git_project}.git"]]])
+                        retry(2){
+                            checkout([$class: 'GitSCM', branches: [[name: "*/${build_branch}"]],userRemoteConfigs: [[credentialsId: 'qianfan',url: "${ci_git_server_baseurl}/${git_project}.git"]]])
+                        }
                     } else if (source_code_management == "svn"){
                         echo "${svn_server_baseurl}/${svn_project}/${build_branch}"
-                        checkout([$class: 'SubversionSCM', additionalCredentials: [], excludedCommitMessages: '', excludedRegions: '', excludedRevprop: '', excludedUsers: '', filterChangelog: false, ignoreDirPropChanges: false, includedRegions: '', locations: [[cancelProcessOnExternalsFail: false, credentialsId: 'hddenv', depthOption: 'infinity', ignoreExternalsOption: true, local: '.', remote: "${svn_server_baseurl}/${svn_project}/${build_branch}"]], quietOperation: true, workspaceUpdater: [$class: 'CheckoutUpdater']])
+                        retry(2){
+                            checkout([$class: 'SubversionSCM', additionalCredentials: [], excludedCommitMessages: '', excludedRegions: '', excludedRevprop: '', excludedUsers: '', filterChangelog: false, ignoreDirPropChanges: false, includedRegions: '', locations: [[cancelProcessOnExternalsFail: false, credentialsId: 'hddenv', depthOption: 'infinity', ignoreExternalsOption: true, local: '.', remote: "${svn_server_baseurl}/${svn_project}/${build_branch}"]], quietOperation: true, workspaceUpdater: [$class: 'CheckoutUpdater']])
+                        }
                     }
                 }
             }
@@ -367,6 +371,27 @@ skipversionupdate=${skipversionupdate}""", remoteJenkinsName: "${remoteJenkins}"
                     sh """
                     ${env.post_shell}
                     """
+                }
+                if (env.post_build_cfg != "" && env.post_build_cfg != null) {
+                    // post_build
+                    println(env.post_build_cfg)
+                    String[] data = env.post_build_cfg.split('&')
+                    println(data)
+                    count = data.size()
+                    tasks = [:]
+                    data.each{ i ->
+                        String[] item = i.split(';')
+                        println(item)
+                        // remoteJenkins = item[0]
+                        // remoteJob = item[1]
+                        // DNET_PROFILE = item[2]
+                        postBuildJob = item[0]
+                        // echo "remoteJenkins is ${remoteJenkins}"
+                        // echo "remoteJob is ${remoteJob}"
+                        // echo "DNET_PROFILE is ${DNET_PROFILE}"
+                        // post_build
+                        build job: "${postBuildJob}", wait: false
+                    }
                 }
             }
         }
