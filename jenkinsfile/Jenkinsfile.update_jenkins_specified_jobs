@@ -80,7 +80,7 @@ pipeline {
                             if ( out == "true" ) {
                                 file=sh(returnStdout: true, script: "find ${i} -type f").split('\n')
                                 file.each{ j ->
-                                    sh "ls $i && ${update_shell} $i" 
+                                    sh "ls $j && ${update_shell} $j" 
                                 }
                             }
                             else {
