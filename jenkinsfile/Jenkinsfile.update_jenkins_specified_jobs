@@ -62,6 +62,7 @@ pipeline {
                             }
                         }
                         cfgname=path
+                        echo "set ${cfgname} to ${path}"
                     }
                 }
             }
