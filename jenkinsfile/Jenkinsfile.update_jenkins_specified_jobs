@@ -71,27 +71,29 @@ pipeline {
         stage('build job'){
             steps{
                 script {
-                    withDockerContainer(args: "-v ${WORKSPACE}/jenkins:/root/jenkins -v ${WORKSPACE}/${jenkins_jobs_ini_config}:/root/jenkins_jobs.ini", image: "harbor.qianfan123.com/base/jenkins-job-builder:0.1.0") {
-                        echo "cfgname is: ${cfgname}"
-                        String[] cfgstr = cfgname.split(',')
-                        for ( String i : cfgstr ){
-                            out = sh(script: "[ -d ${i} ]  && echo -n 'true' || echo -n 'false' ", returnStdout: true)
-                            echo "${i} is dir: ${out}"
-                            if ( out == "true" ) {
-                                file=sh(returnStdout: true, script: "find ${i} -type f").split('\n')
-                                file.each{ j ->
-                                    sh "ls $j && ${update_shell} $j" 
-                                }
-                            }
-                            else {
-                                out = sh(script: "[ -f ${i} ]  && echo -n 'true' || echo -n 'false' ", returnStdout: true)
-                                echo "${i} is file: ${out}"
+                    if cfgname != '' {
+                        withDockerContainer(args: "-v ${WORKSPACE}/jenkins:/root/jenkins -v ${WORKSPACE}/${jenkins_jobs_ini_config}:/root/jenkins_jobs.ini", image: "harbor.qianfan123.com/base/jenkins-job-builder:0.1.0") {
+                            echo "cfgname is: ${cfgname}"
+                            String[] cfgstr = cfgname.split(',')
+                            for ( String i : cfgstr ){
+                                out = sh(script: "[ -d ${i} ]  && echo -n 'true' || echo -n 'false' ", returnStdout: true)
+                                echo "${i} is dir: ${out}"
                                 if ( out == "true" ) {
-                                    sh "ls $i && ${update_shell} $i" 
+                                    file=sh(returnStdout: true, script: "find ${i} -type f").split('\n')
+                                    file.each{ j ->
+                                        sh "ls $j && ${update_shell} $j" 
+                                    }
                                 }
                                 else {
-                                    echo "${i} cannot find"
-                                    sh "false" 
+                                    out = sh(script: "[ -f ${i} ]  && echo -n 'true' || echo -n 'false' ", returnStdout: true)
+                                    echo "${i} is file: ${out}"
+                                    if ( out == "true" ) {
+                                        sh "ls $i && ${update_shell} $i" 
+                                    }
+                                    else {
+                                        echo "${i} cannot find"
+                                        sh "false" 
+                                    }
                                 }
                             }
                         }
