@@ -17,6 +17,10 @@ if (env.set_on_k8s) {
 
 def update_shell="jenkins-jobs --conf /root/jenkins_jobs.ini update --workers 5"
 
+def ignore_templates="/templates/"
+
+def error_yaml_file=""
+
 pipeline {
 	agent {
         label node
@@ -81,14 +85,23 @@ pipeline {
                                 if ( out == "true" ) {
                                     file=sh(returnStdout: true, script: "find ${i} -type f").split('\n')
                                     file.each{ j ->
-                                        sh "ls $j && ${update_shell} $j" 
+                                        out = sh(script: "echo ${j} | grep ${ignore_templates}  && echo -n 'true' || echo -n 'false' ", returnStdout: true)
+                                        if ( out == "false" ) {
+                                            out = sh(script: "ls $j && ${update_shell} $j  && echo -n 'true' || echo -n 'false' ", returnStdout: true)
+                                            if ( out == "false" ) {
+                                                error_yaml_file=error_yaml_file+'<>'+j
+                                            }
+                                        }
                                     }
                                 }
                                 else {
                                     out = sh(script: "[ -f ${i} ]  && echo -n 'true' || echo -n 'false' ", returnStdout: true)
                                     echo "${i} is file: ${out}"
                                     if ( out == "true" ) {
-                                        sh "ls $i && ${update_shell} $i" 
+                                        out = sh(script: "ls $i && ${update_shell} $i  && echo -n 'true' || echo -n 'false' ", returnStdout: true)
+                                        if ( out == "false" ) {
+                                            error_yaml_file=error_yaml_file+'<>'+j
+                                        }
                                     }
                                     else {
                                         echo "${i} cannot find"
@@ -97,6 +110,17 @@ pipeline {
                                 }
                             }
                         }
+                    }
+                }
+            }
+        }
+
+        stage('check error_yaml_file'){
+            steps{
+                script{
+                    if ( error_yaml_file != '' ){
+                        echo "${error_yaml_file}"
+                        sh 'false'
                     }
                 }
             }
