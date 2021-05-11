@@ -42,37 +42,45 @@ pipeline {
             }
         }
 
-        stage('download Jenkins job project yaml file'){
-            checkout(
-                [$class: 'GitSCM', branches: [[name: "*/${env.GIT_BRANCH}"]],userRemoteConfigs: [[credentialsId: 'qianfan',url: "${git_base_url}/${git_project}.git"]]]
-            )
+        stage('download Jenkins job project yaml file') {
+            steps{
+				script {
+                    checkout(
+                        [$class: 'GitSCM', branches: [[name: "*/${env.GIT_BRANCH}"]],userRemoteConfigs: [[credentialsId: 'qianfan',url: "${git_base_url}/${git_project}.git"]]]
+                    )
+                }
+            }
         }
 
         stage('build job'){
-            echo "cfgname is: ${cfgname}"
-            if (cfgname == 'all'){
-                file=sh(returnStdout: true, script: 'find jenkins/')
-                for ( String j : file ){
-                    sh "ls $j"
-                }
-            }
-            else {
-                String[] cfgstr = cfgname.split(',')
-                for ( String i : cfgstr ){
-                    out = sh(script: "[ -d ${i} ]  && echo 'true' || echo 'false' ", returnStdout: true)
-                    if ( out == "true" ) {
-                        file=sh(returnStdout: true, script: 'find ${i}')
+            steps{
+				script {
+                    echo "cfgname is: ${cfgname}"
+                    if (cfgname == 'all'){
+                        file=sh(returnStdout: true, script: 'find jenkins/')
                         for ( String j : file ){
                             sh "ls $j"
                         }
                     }
                     else {
-                        out = sh(script: "[ -f ${i} ]  && echo 'true' || echo 'false' ", returnStdout: true)
-                        if ( out == "true" ) {
-                            sh "ls $i" 
-                        }
-                        else {
-                            echo "${i} cannot find" 
+                        String[] cfgstr = cfgname.split(',')
+                        for ( String i : cfgstr ){
+                            out = sh(script: "[ -d ${i} ]  && echo 'true' || echo 'false' ", returnStdout: true)
+                            if ( out == "true" ) {
+                                file=sh(returnStdout: true, script: 'find ${i}')
+                                for ( String j : file ){
+                                    sh "ls $j"
+                                }
+                            }
+                            else {
+                                out = sh(script: "[ -f ${i} ]  && echo 'true' || echo 'false' ", returnStdout: true)
+                                if ( out == "true" ) {
+                                    sh "ls $i" 
+                                }
+                                else {
+                                    echo "${i} cannot find" 
+                                }
+                            }
                         }
                     }
                 }
