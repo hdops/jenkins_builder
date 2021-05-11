@@ -17,7 +17,7 @@ if (env.set_on_k8s) {
 
 def update_shell="jenkins-jobs --conf /root/jenkins_jobs.ini update --workers 5"
 
-def ignore_templates="/templates/"
+def ignore_templates="/templates/|/ops/jenkins.yml"
 
 def error_yaml_file=""
 
@@ -80,16 +80,17 @@ pipeline {
                             echo "cfgname is: ${cfgname}"
                             String[] cfgstr = cfgname.split(',')
                             for ( String i : cfgstr ){
-                                out = sh(script: "[ -d ${i} ]  && echo -n 'true' || echo -n 'false' ", returnStdout: true)
+                                out = sh(script: "[ -d ${i} ] && echo -n 'true' || echo -n 'false' ", returnStdout: true)
                                 echo "${i} is dir: ${out}"
                                 if ( out == "true" ) {
                                     file=sh(returnStdout: true, script: "find ${i} -type f").split('\n')
                                     file.each{ j ->
-                                        out = sh(script: "echo ${j} | grep ${ignore_templates}  && echo -n 'true' || echo -n 'false' ", returnStdout: true)
+                                        out = sh(script: "echo ${j} | grep -E ${ignore_templates} && echo -n 'true' || echo -n 'false' ", returnStdout: true)
                                         if ( out == "false" ) {
-                                            out = sh(script: "ls $j && ${update_shell} $j  && echo -n 'true' || echo -n 'false' ", returnStdout: true)
+                                            out = sh(script: "ls $j && ${update_shell} $j && echo -n 'true' || echo -n 'false' ", returnStdout: true)
                                             if ( out == "false" ) {
                                                 error_yaml_file=error_yaml_file+'<>'+j
+                                                echo "error_yaml_file is: ${error_yaml_file}"
                                             }
                                         } else {
                                             echo "ignore ${j}"
@@ -97,7 +98,7 @@ pipeline {
                                     }
                                 }
                                 else {
-                                    out = sh(script: "[ -f ${i} ]  && echo -n 'true' || echo -n 'false' ", returnStdout: true)
+                                    out = sh(script: "[ -f ${i} ] && echo -n 'true' || echo -n 'false' ", returnStdout: true)
                                     echo "${i} is file: ${out}"
                                     if ( out == "true" ) {
                                         out = sh(script: "ls $i && ${update_shell} $i  && echo -n 'true' || echo -n 'false' ", returnStdout: true)
