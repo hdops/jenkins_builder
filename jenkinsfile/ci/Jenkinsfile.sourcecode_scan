@@ -13,6 +13,11 @@ if (!env.on_k8s){
 if (env.set_on_k8s) {
     env.on_k8s=env.set_on_k8s
 }
+def ci_git_server_baseurl= "http://github.app.hd123.cn:10080"
+if (env.ci_git_server_baseurl){
+    ci_git_server_baseurl = env.ci_git_server_baseurl
+}
+
 pipeline {
 	agent {
 			    docker {
@@ -39,10 +44,14 @@ pipeline {
 							sh "tar zxf toolset.tar.gz -C $WORKSPACE"
 						}
 					}else {
-						retry(2){
-							sh "TRUST_PUBLIC_IP=False DNET_PROFILE=integration_test DNET_PRODUCT=dnet TRUST_PUBLIC_IP=${run_on_public} hdops download_toolset --branch develop -p ."
-						}
-						sh "tar zxf toolset.tar.gz -C $WORKSPACE"
+						//retry(2){
+						//	sh "TRUST_PUBLIC_IP=true DNET_PROFILE=integration_test DNET_PRODUCT=dnet TRUST_PUBLIC_IP=${run_on_public} hdops download_toolset --branch develop -p ."
+						//}
+						//sh "tar zxf toolset.tar.gz -C $WORKSPACE"
+
+						retry(3){
+                            checkout([$class: 'GitSCM', branches: [[name: "*/develop"]],userRemoteConfigs: [[credentialsId: 'qianfan',url: "${ci_git_server_baseurl}/qianfanops/toolset.git"]]])
+                        }
 					}
 				}
 			}
