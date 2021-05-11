@@ -71,7 +71,7 @@ pipeline {
         stage('build job'){
             steps{
                 script {
-                    if cfgname != '' {
+                    if ( cfgname != '' ) {
                         withDockerContainer(args: "-v ${WORKSPACE}/jenkins:/root/jenkins -v ${WORKSPACE}/${jenkins_jobs_ini_config}:/root/jenkins_jobs.ini", image: "harbor.qianfan123.com/base/jenkins-job-builder:0.1.0") {
                             echo "cfgname is: ${cfgname}"
                             String[] cfgstr = cfgname.split(',')
