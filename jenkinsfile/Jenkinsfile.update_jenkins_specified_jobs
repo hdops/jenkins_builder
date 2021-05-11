@@ -1,0 +1,114 @@
+def node="master"
+if (env.node){
+    node =env.node
+}
+
+def git_base_url="http://github.app.hd123.cn:10080"
+if (env.git_base_url){
+    git_base_url=env.git_base_url
+}
+
+if (!env.on_k8s){
+    env.on_k8s="False"
+}
+if (env.set_on_k8s) {
+    env.on_k8s=env.set_on_k8s
+}
+
+def update_shell="jenkins-jobs --conf ${jenkins_jobs_ini_config} update --workers 5"
+
+pipeline {
+	agent {
+        label node
+    }
+
+    options {
+	    timeout(time: 1, unit: 'HOURS')
+    }
+
+    stages {
+        stage('delete workspace') {
+            steps{
+                deleteDir()
+            }
+        }
+
+        stage('download Jenkins job project yaml file') {
+            steps{
+                script {
+                    git branch: "${env.GIT_BRANCH}", credentialsId: '17643215-09f8-4a9a-b0ea-c8e49777ce1d', url: "${git_base_url}/${git_project}.git"
+                    sh 'git submodule update --init --recursive'
+                    sh 'git submodule foreach "git pull origin master"'
+                }
+            }
+        }
+
+        stage('get git upload changed file'){
+            steps{
+                script{
+                    if ( currentBuild.changeSets != [] ) {
+                        def path=''
+                        for (changeLogSet in currentBuild.changeSets) {
+                            for (entry in changeLogSet.getItems()) {
+                                for (file in entry.getAffectedFiles()) {
+                                    if (path == ''){
+                                        path=file.getPath()
+                                    } else {
+                                        path=path+','+file.getPath()
+                                    }
+                                }
+                            }
+                        }
+                        cfgname=path
+                    }
+                }
+            }
+        }
+
+        stage('build job'){
+            steps{
+                script {
+                    withDockerContainer(args: "-v ${WORKSPACE}/jenkins:/root/jenkins -v ${WORKSPACE}/${jenkins_jobs_ini_config}:/root/jenkins_jobs.ini", image: "harbor.qianfan123.com/base/jenkins-job-builder:0.1.0") {
+                        echo "cfgname is: ${cfgname}"
+                        String[] cfgstr = cfgname.split(',')
+                        for ( String i : cfgstr ){
+                            out = sh(script: "[ -d ${i} ]  && echo -n 'true' || echo -n 'false' ", returnStdout: true)
+                            echo "${i} is dir: ${out}"
+                            if ( out == "true" ) {
+                                file=sh(returnStdout: true, script: "find ${i} -type f").split('\n')
+                                file.each{ j ->
+                                    sh "ls $j "
+                                }
+                            }
+                            else {
+                                out = sh(script: "[ -f ${i} ]  && echo -n 'true' || echo -n 'false' ", returnStdout: true)
+                                echo "${i} is file: ${out}"
+                                if ( out == "true" ) {
+                                    sh "ls $i && ${update_shell} $i" 
+                                }
+                                else {
+                                    echo "${i} cannot find"
+                                    sh "false" 
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    post{
+        failure{
+            script{
+                if ( whether_post == 'True' ){
+                    def subject = env.email_subject ? "${env.email_subject}" : "failure on Job ${env.JOB_NAME}"
+                    def to = env.email_recipients ? "${env.email_recipients}" : "yuzhiyuan@hd123.com"
+                    def body = env.email_body ? "${env.email_body}" : "failure on Job ${env.JOB_NAME} in ${env.BUILD_URL}"
+                    // send email
+                    emailext subject: subject, to: to, body:body,attachLog:true
+                }
+            }
+        }
+    }
+}
