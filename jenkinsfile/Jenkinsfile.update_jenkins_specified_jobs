@@ -91,6 +91,8 @@ pipeline {
                                             if ( out == "false" ) {
                                                 error_yaml_file=error_yaml_file+'<>'+j
                                             }
+                                        } else {
+                                            echo "ignore ${j}"
                                         }
                                     }
                                 }
