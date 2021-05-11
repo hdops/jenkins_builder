@@ -52,7 +52,7 @@ pipeline {
                        echo "DNET_PRIVATE_REGION is ${DNET_PRIVATE_REGION}"
                    }
 
-                   sh "python update_toolset_oss.py -branch ${env.gitlabBranch}"
+                   sh "DNET_CLOUD_VENDOR=${DNET_CLOUD_VENDOR} python update_toolset_oss.py -branch ${env.gitlabBranch}"
                 }
 			}
 		}
