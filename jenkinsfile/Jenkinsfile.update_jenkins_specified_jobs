@@ -15,7 +15,7 @@ if (env.set_on_k8s) {
     env.on_k8s=env.set_on_k8s
 }
 
-def update_shell="jenkins-jobs --conf ${jenkins_jobs_ini_config} update --workers 5"
+def update_shell="jenkins-jobs --conf /root/jenkins_jobs.ini update --workers 5"
 
 pipeline {
 	agent {
@@ -23,7 +23,7 @@ pipeline {
     }
 
     options {
-	    timeout(time: 1, unit: 'HOURS')
+	    timeout(time: 3, unit: 'HOURS')
     }
 
     stages {
