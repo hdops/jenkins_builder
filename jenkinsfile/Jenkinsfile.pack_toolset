@@ -45,7 +45,7 @@ pipeline {
                    }
                    echo "TRUST_PUBLIC_IP is ${TRUST_PUBLIC_IP}"
                    echo "DNET_CLOUD_VENDOR is ${DNET_CLOUD_VENDOR}"
-                   if ( "${DNET_PRIVATE_URL}" ){
+                   if ( env.DNET_PRIVATE_URL ){
                        echo "DNET_PRIVATE_URL is ${DNET_PRIVATE_URL}"
                        echo "DNET_PRIVATE_AK is ${DNET_PRIVATE_AK}"
                        echo "DNET_PRIVATE_BUCKET is ${DNET_PRIVATE_BUCKET}"
