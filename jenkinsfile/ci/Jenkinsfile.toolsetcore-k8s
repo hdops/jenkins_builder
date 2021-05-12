@@ -49,7 +49,7 @@ pipeline {
          stage('checkout') {
              steps{ 
 				echo "checkout http://github.app.hd123.cn:10080/${git_project}.git  branch:${build_branch}"
-				retry(2){
+				retry(3){
                     checkout([$class: 'GitSCM', branches: [[name: '*/${build_branch}']],userRemoteConfigs: [[url: 'http://github.app.hd123.cn:10080/${git_project}.git',credentialsId: "${credentialsId}"]]])
                 }
              }
