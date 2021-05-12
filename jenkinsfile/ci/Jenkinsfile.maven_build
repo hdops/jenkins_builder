@@ -144,7 +144,8 @@ pipeline {
                 always{
                     script{
                         if (env.DNET_PRODUCT){
-                            build job: 'sourcecode_scan', parameters: [string(name: 'url', value: BUILD_URL),string(name: 'product', value: DNET_PRODUCT)], wait: false
+                            echo "run sourcecode scan"
+                            //build job: 'sourcecode_scan', parameters: [string(name: 'url', value: BUILD_URL),string(name: 'product', value: DNET_PRODUCT)], wait: false
                         }
                     }
                 }
