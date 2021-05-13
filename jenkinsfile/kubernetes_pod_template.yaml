@@ -1,0 +1,41 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  labels:
+    label: jenkins-job
+spec:
+  containers:
+  - name: jenkins-job
+    namespace: opsapp
+    image: ${image}
+    command: ["sleep"]
+    args: ["1000"]
+    tty: true
+    imagePullPolicy: "Always"
+    volumeMounts:
+    - mountPath: "/root/.ssh"
+      name: "volume-0"
+      readOnly: false
+    - mountPath: "/home/jenkins/agent"
+      name: "volume-1"
+      readOnly: false
+    workingDir: "/home/jenkins/agent"
+  - name: jnlp
+    volumeMounts:
+    - mountPath: "/home/jenkins/agent"
+      name: "volume-1"
+      readOnly: false
+  volumes:
+  - name: "volume-0"
+    secret:
+      defaultMode: 384
+      secretName: "jenkins-ssh-key"
+  - name: "volume-1"
+    persistentVolumeClaim:
+      claimName: "jenkins-agent-pvc"
+  imagePullSecrets:
+  - name: "harbor-admin"
+  nodeSelector:
+    app: "jenkins"
+  serviceAccount: "jenkins"
+  restartPolicy: "Never"
