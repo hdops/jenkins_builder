@@ -63,7 +63,7 @@ pipeline {
 
             steps {
                 script{
-                    kubernetesPodYamlData.spec.containers[0].image = "docker_image"
+                    kubernetesPodYamlData.spec.containers[0].image = "${docker_image}"
                     writeYaml file: "${WORKSPACE}/${YAML_FILE}", data: kubernetesPodYamlData
                     sh "cat ${WORKSPACE}/${YAML_FILE}"
                     kubernetesPodReadYamlData = sh(script: "cat ${WORKSPACE}/${YAML_FILE}", returnStdout: true)
