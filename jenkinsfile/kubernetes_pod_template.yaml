@@ -17,22 +17,22 @@ spec:
       name: "volume-0"
       readOnly: false
     - mountPath: "/home/jenkins/agent"
-      name: "volume-1"
+      name: "workspace-volum"
       readOnly: false
     workingDir: "/home/jenkins/agent"
   - name: jnlp
     volumeMounts:
     - mountPath: "/home/jenkins/agent"
-      name: "volume-1"
+      name: "workspace-volum"
       readOnly: false
   volumes:
   - name: "volume-0"
     secret:
       defaultMode: 384
       secretName: "jenkins-ssh-key"
-  - name: "volume-1"
-    persistentVolumeClaim:
-      claimName: "jenkins-agent-pvc"
+  - emptyDir:
+      medium: ""
+    name: "workspace-volum"
   imagePullSecrets:
   - name: "harbor-admin"
   nodeSelector:

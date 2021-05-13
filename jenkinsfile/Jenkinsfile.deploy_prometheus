@@ -23,6 +23,7 @@ if (env.git_project_branch){
 
 def YAML_FILE="kubernetes_pod_template.yaml"
 def docker_image="harbor.qianfan123.com/toolset/ka-toolset-runenv:1.0"
+def label_name="jenkins-job-prometheus"
 
 pipeline {
 	agent {
@@ -42,7 +43,15 @@ pipeline {
 
             steps {
                 script{
+                    echo "node : ${node}"
+                    echo "on_k8s : ${on_k8s}"
                     kubernetesPodYamlData = readYaml file: "jenkinsfile/${YAML_FILE}"
+                    kubernetesPodYamlData.spec.containers[0].image = "${docker_image}"
+                    kubernetesPodYamlData.spec.containers[0].name = "${label_name}"
+                    kubernetesPodYamlData.metadata.labels.label = "${label_name}"
+                    writeYaml file: "${YAML_FILE}.tmp", data: kubernetesPodYamlData
+                    kubernetesPodReadYamlData = sh(script: "cat ${YAML_FILE}.tmp", returnStdout: true)
+                    echo "${kubernetesPodReadYamlData}"
                 } 
             }
         }
@@ -50,21 +59,6 @@ pipeline {
         stage('delete workspace') {
             steps{
                 deleteDir()
-            }
-        }
-
-        stage('prepare on k8s') {
-            when {
-                beforeAgent true
-                environment name: 'on_k8s', value: 'True'
-            }
-
-            steps {
-                script{
-                    kubernetesPodYamlData.spec.containers[0].image = "docker_image"
-                    writeYaml file: "${WORKSPACE}@script/${YAML_FILE}", data: kubernetesPodYamlData
-                    sh "cat ${WORKSPACE}@script/${YAML_FILE}"
-                } 
             }
         }
 
@@ -92,13 +86,13 @@ pipeline {
             agent {
                 kubernetes{
                     cloud 'kubernetes'
-                    yamlFile "${YAML_FILE}"
+                    yaml "${kubernetesPodReadYamlData}"
                 }
             }
 
             steps{
                 script {
-                    container("jenkins-job") {
+                    container("${label_name}") {
                         git branch: "${git_project_branch}", credentialsId: '17643215-09f8-4a9a-b0ea-c8e49777ce1d', url: "${git_project_url}"
                         sh "ansible-playbook -i config/${client}/monitor config/${client}/monitor.yml -e @config/${client}/monitor_vars.yml --tags ${tags}"
                     }
