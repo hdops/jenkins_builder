@@ -23,6 +23,7 @@ if (env.git_project_branch){
 
 def YAML_FILE="kubernetes_pod_template.yaml"
 def docker_image="harbor.qianfan123.com/toolset/ka-toolset-runenv:1.0"
+def label_name="jenkins-job-prometheus"
 
 pipeline {
 	agent {
@@ -46,6 +47,8 @@ pipeline {
                     echo "on_k8s : ${on_k8s}"
                     kubernetesPodYamlData = readYaml file: "jenkinsfile/${YAML_FILE}"
                     kubernetesPodYamlData.spec.containers[0].image = "${docker_image}"
+                    kubernetesPodYamlData.spec.containers[0].name = "${label_name}"
+                    kubernetesPodYamlData.metadata.labels.label = "${label_name}"
                     writeYaml file: "${YAML_FILE}.tmp", data: kubernetesPodYamlData
                     kubernetesPodReadYamlData = sh(script: "cat ${YAML_FILE}.tmp", returnStdout: true)
                     echo "${kubernetesPodReadYamlData}"
