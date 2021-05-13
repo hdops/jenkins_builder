@@ -39,7 +39,7 @@ pipeline {
         stage('start ansible playbook') {
             steps{
                 script {
-                    withDockerContainer(args: "-v /root/.ssh:/root/.ssh", image: "harborka.qianfan123.com/toolset/ka-toolset-runenv:1.0") {
+                    withDockerContainer(args: "-v /root/.ssh:/root/.ssh", image: "harbor.qianfan123.com/toolset/ka-toolset-runenv:1.0") {
                         git branch: "${git_project_branch}", credentialsId: '17643215-09f8-4a9a-b0ea-c8e49777ce1d', url: "${git_project_url}"
                         sh "ansible-playbook -i config/${client}/monitor config/${client}/monitor.yml -e @config/${client}/monitor_vars.yml --tags ${tags}"
                     }
