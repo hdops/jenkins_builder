@@ -64,8 +64,8 @@ pipeline {
             steps {
                 script{
                     kubernetesPodYamlData.spec.containers[0].image = "docker_image"
-                    writeYaml file: "${WORKSPACE}@script/${YAML_FILE}", data: kubernetesPodYamlData
-                    sh "cat ${WORKSPACE}@script/${YAML_FILE}"
+                    writeYaml file: "${WORKSPACE}/${YAML_FILE}", data: kubernetesPodYamlData
+                    sh "cat ${WORKSPACE}/${YAML_FILE}"
                 } 
             }
         }
@@ -94,7 +94,7 @@ pipeline {
             agent {
                 kubernetes{
                     cloud 'kubernetes'
-                    yamlFile "${YAML_FILE}"
+                    yamlFile "${WORKSPACE}/${YAML_FILE}"
                 }
             }
 
