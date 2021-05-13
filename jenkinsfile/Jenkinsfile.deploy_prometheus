@@ -42,7 +42,7 @@ pipeline {
 
             steps {
                 script{
-                    kubernetesPodYamlData = readYaml file: "jenkins/${YAML_FILE}"
+                    kubernetesPodYamlData = readYaml file: "jenkinsfile/${YAML_FILE}"
                 } 
             }
         }
