@@ -42,6 +42,8 @@ pipeline {
 
             steps {
                 script{
+                    echo "node : ${node}"
+                    echo "on_k8s : ${on_k8s}"
                     kubernetesPodYamlData = readYaml file: "jenkinsfile/${YAML_FILE}"
                 } 
             }
