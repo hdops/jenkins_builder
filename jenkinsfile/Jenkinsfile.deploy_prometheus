@@ -45,6 +45,10 @@ pipeline {
                     echo "node : ${node}"
                     echo "on_k8s : ${on_k8s}"
                     kubernetesPodYamlData = readYaml file: "jenkinsfile/${YAML_FILE}"
+                    kubernetesPodYamlData.spec.containers[0].image = "${docker_image}"
+                    writeYaml file: "${YAML_FILE}.tmp", data: kubernetesPodYamlData
+                    kubernetesPodReadYamlData = sh(script: "cat ${YAML_FILE}.tmp", returnStdout: true)
+                    echo "${kubernetesPodReadYamlData}"
                 } 
             }
         }
@@ -52,23 +56,6 @@ pipeline {
         stage('delete workspace') {
             steps{
                 deleteDir()
-            }
-        }
-
-        stage('prepare on k8s') {
-            when {
-                beforeAgent true
-                environment name: 'on_k8s', value: 'True'
-            }
-
-            steps {
-                script{
-                    kubernetesPodYamlData.spec.containers[0].image = "${docker_image}"
-                    writeYaml file: "${WORKSPACE}/${YAML_FILE}", data: kubernetesPodYamlData
-                    sh "cat ${WORKSPACE}/${YAML_FILE}"
-                    kubernetesPodReadYamlData = sh(script: "cat ${WORKSPACE}/${YAML_FILE}", returnStdout: true)
-                    echo "${kubernetesPodReadYamlData}"
-                } 
             }
         }
 
