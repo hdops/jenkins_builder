@@ -71,7 +71,7 @@ pipeline {
                 script {
                     withDockerContainer(args: "-v /root/.ssh:/root/.ssh", image: "") {
                         git branch: "${git_project_branch}", credentialsId: '17643215-09f8-4a9a-b0ea-c8e49777ce1d', url: "${git_project_url}"
-                        sh "ansible-playbook -i config/${client}/monitor /root/ka-toolset/iac/monitor.yml -e @config/${client}/monitor_vars.yml --tags ${tags}"
+                        sh "ansible-playbook -i config/${product}/monitor /root/ka-toolset/iac/monitor.yml -e @config/${product}/monitor_vars.yml --tags ${tags}"
                     }
                 }
             }
@@ -94,7 +94,7 @@ pipeline {
                 script {
                     container("${label_name}") {
                         git branch: "${git_project_branch}", credentialsId: '17643215-09f8-4a9a-b0ea-c8e49777ce1d', url: "${git_project_url}"
-                        sh "ansible-playbook -i config/${client}/monitor /root/ka-toolset/iac/monitor.yml -e @config/${client}/monitor_vars.yml --tags ${tags}"
+                        sh "ansible-playbook -i config/${product}/monitor /root/ka-toolset/iac/monitor.yml -e @config/${product}/monitor_vars.yml --tags ${tags}"
                     }
                 }
             }
