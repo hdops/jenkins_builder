@@ -68,6 +68,7 @@ pipeline {
                                 sh "DNET_PROFILE=integration_test DNET_PRODUCT=dnet TRUST_PUBLIC_IP=${run_on_public} hdops download_toolset --branch ${params.GIT_BRANCH} -p ."
                             }
                             sh "tar zxf toolset.tar.gz -C ${WORKSPACE}"
+                            echo "${env.retry_num}"
                             if(env.retry_num){
                                 def n ="${retry_num}".toInteger()
                                 retry(n){
