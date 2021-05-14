@@ -51,7 +51,7 @@ pipeline {
                        echo "DNET_PRIVATE_BUCKET is ${DNET_PRIVATE_BUCKET}"
                        echo "DNET_PRIVATE_REGION is ${DNET_PRIVATE_REGION}"
                    }
-
+                   sh "yamllint -c .yamllint docker_environment*.yaml"
                    sh "DNET_CLOUD_VENDOR=${DNET_CLOUD_VENDOR} python update_toolset_oss.py -branch ${env.gitlabBranch}"
                 }
 			}
