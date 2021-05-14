@@ -76,7 +76,6 @@ pipeline {
             steps {
                 script{    
                     sh "docker pull  harbor.qianfan123.com/toolset/phoenixcore:${version}"
-                                        sh "docker pull  harbor.qianfan123.com/toolset/phoenixcore:${version}"
                     withDockerContainer(args: "-v ${WORKSPACE}:/opt", image: "harbor.qianfan123.com/toolset/phoenixcore:${version}") {
                         sh "phoenix-tools version"
                         if (env.skipnochange) {
