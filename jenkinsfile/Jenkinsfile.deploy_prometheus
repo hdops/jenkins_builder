@@ -22,7 +22,7 @@ if (env.git_project_branch){
 }
 
 def YAML_FILE="kubernetes_pod_template.yaml"
-def docker_image="harbor.qianfan123.com/toolset/ka-toolset-runenv:1.1"
+def docker_image="harbor.qianfan123.com/toolset/ka-toolset-runenv:1.2"
 def label_name="jenkins-job-prometheus"
 
 pipeline {
@@ -94,8 +94,6 @@ pipeline {
                 script {
                     container("${label_name}") {
                         git branch: "${git_project_branch}", credentialsId: '17643215-09f8-4a9a-b0ea-c8e49777ce1d', url: "${git_project_url}"
-                        echo "ansible-playbook -i config/${client}/monitor /root/ka-toolset/iac/monitor.yml -e @config/${client}/monitor_vars.yml --tags ${tags}"
-                        sh "sleep 2000"
                         sh "ansible-playbook -i config/${client}/monitor /root/ka-toolset/iac/monitor.yml -e @config/${client}/monitor_vars.yml --tags ${tags}"
                     }
                 }
