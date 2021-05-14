@@ -50,7 +50,6 @@ pipeline {
         }
         stage('下载phoenix config') {
             steps{
-
                 git branch: "${params.GIT_BRANCH}", credentialsId: '17643215-09f8-4a9a-b0ea-c8e49777ce1d', url: "${GITLAB_URL}/${GIT_GROUP}/${params.GIT_REPONAME}.git"
             }
         }
@@ -76,6 +75,8 @@ pipeline {
             }
             steps {
                 script{    
+                    sh "docker pull  harbor.qianfan123.com/toolset/phoenixcore:${version}"
+                                        sh "docker pull  harbor.qianfan123.com/toolset/phoenixcore:${version}"
                     withDockerContainer(args: "-v ${WORKSPACE}:/opt", image: "harbor.qianfan123.com/toolset/phoenixcore:${version}") {
                         sh "phoenix-tools version"
                         if (env.skipnochange) {

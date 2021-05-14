@@ -76,6 +76,7 @@ pipeline {
             }
             steps {
                 script{    
+                                        sh "docker pull  harbor.qianfan123.com/toolset/phoenixcore:${version}"
                     withDockerContainer(args: "-v ${WORKSPACE}:/opt", image: "harbor.qianfan123.com/toolset/phoenixcore:${version}") {
                         sh "phoenix-tools version"
                         sh "phoenix-tools dataimport ptonline --jira ${params.jira} --max_load_threads ${params.max_load_threads} --critical_load_threads ${params.critical_load_threads}  --rdb_host ${params.rdb_host}  --rdb_port ${params.rdb_port}  --rdb_username ${params.rdb_username}  --rdb_password ${params.rdb_password}  --rdb_dbname ${params.rdb_dbname} --dryrun ${params.dryrun}"
