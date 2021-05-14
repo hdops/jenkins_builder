@@ -83,6 +83,7 @@ pipeline {
             }
             steps {
                 script{    
+                    sh "docker pull  harbor.qianfan123.com/toolset/phoenixcore:${version}"
                     if (env.dingding == "True") {
                         withDockerContainer(args: "-v ${WORKSPACE}:/opt", image: "harbor.qianfan123.com/toolset/phoenixcore:${version}") {
                             sh "phoenix-tools version"
