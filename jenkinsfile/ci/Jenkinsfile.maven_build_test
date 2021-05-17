@@ -44,6 +44,11 @@ if (!env.on_k8s){
 if (env.set_on_k8s) {
     env.on_k8s=env.set_on_k8s
 }
+
+def gitpath = "None"
+if (env.gitpath){
+    gitpath = env.gitpath
+}
 pipeline {
     // agent {label node}
     agent {docker {
