@@ -87,8 +87,9 @@ pipeline {
                                     file.each{ j ->
                                         out = sh(script: "echo ${j} | grep -E ${ignore_templates} && echo -n 'true' || echo -n 'false' ", returnStdout: true)
                                         if ( out == "false" ) {
-                                            out = sh(script: "ls $j && ${update_shell} $j && echo -n 'true' || echo -n 'false' ", returnStdout: true)
-                                            if ( out == "false" ) {
+                                            outstatus = sh(script: "ls $j && ${update_shell} $j && echo -n 'true' || echo -n 'false' ", returnStdout: true)
+                                            if ( outstatus == "false" ) {
+                                                echo "update ${j}: ${outstatus}"
                                                 error_yaml_file=error_yaml_file+'<>'+j
                                                 echo "error_yaml_file is: ${error_yaml_file}"
                                             }
@@ -101,9 +102,11 @@ pipeline {
                                     out = sh(script: "[ -f ${i} ] && echo -n 'true' || echo -n 'false' ", returnStdout: true)
                                     echo "${i} is file: ${out}"
                                     if ( out == "true" ) {
-                                        out = sh(script: "ls $i && ${update_shell} $i  && echo -n 'true' || echo -n 'false' ", returnStdout: true)
-                                        if ( out == "false" ) {
+                                        outstatus = sh(script: "ls $i && ${update_shell} $i  && echo -n 'true' || echo -n 'false' ", returnStdout: true)
+                                        if ( outstatus == "false" ) {
+                                            echo "update ${j}: ${outstatus}"
                                             error_yaml_file=error_yaml_file+'<>'+j
+                                            echo "error_yaml_file is: ${error_yaml_file}"
                                         }
                                     }
                                     else {
