@@ -24,6 +24,11 @@ if (env.ci_git_server_baseurl){
     ci_git_server_baseurl = env.ci_git_server_baseurl
 }
 
+def run_unittest=true
+if (env.run_unittest){
+    run_unittest = env.run_unittest.toBoolean()
+}
+
 pipeline {
 	agent {
         docker {
@@ -52,6 +57,9 @@ pipeline {
                        echo "DNET_PRIVATE_REGION is ${DNET_PRIVATE_REGION}"
                    }
                    sh "yamllint -c .yamllint docker_environment*.yaml"
+                   if (run_unittest){
+                       sh "pytest tests/image_config_test.py -m unit -sv"
+                   }
                    sh "DNET_CLOUD_VENDOR=${DNET_CLOUD_VENDOR} python update_toolset_oss.py -branch ${env.gitlabBranch}"
                 }
 			}
