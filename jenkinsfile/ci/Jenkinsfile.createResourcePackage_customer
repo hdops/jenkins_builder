@@ -48,4 +48,9 @@ pipeline {
 			}
 		}
     }
+    post{
+        always{
+            currentBuild.description = "${params.DNET_PROFILE}:${params.subsystem}"
+        }
+    }
 }
