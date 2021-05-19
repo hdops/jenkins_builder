@@ -69,7 +69,8 @@ pipeline {
             }
             steps{
                 script {
-                    withDockerContainer(args: "-v /root/.ssh:/root/.ssh", image: "") {
+                    sh "docker pull ${docker_image}"
+                    withDockerContainer(args: "-v /root/.ssh:/root/.ssh", image: "${docker_image}") {
                         git branch: "${git_project_branch}", credentialsId: '17643215-09f8-4a9a-b0ea-c8e49777ce1d', url: "${git_project_url}"
                         sh "ansible-playbook -i config/${project}/monitor /root/ka-toolset/iac/monitor.yml -e @config/${project}/monitor_vars.yml --tags ${tags}"
                     }

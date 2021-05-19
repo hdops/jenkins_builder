@@ -387,11 +387,11 @@ skipversionupdate=${skipversionupdate}""", remoteJenkinsName: "${remoteJenkins}"
                         // remoteJob = item[1]
                         // DNET_PROFILE = item[2]
                         postBuildJob = item[0]
-                        // echo "remoteJenkins is ${remoteJenkins}"
-                        // echo "remoteJob is ${remoteJob}"
-                        // echo "DNET_PROFILE is ${DNET_PROFILE}"
+                        build_branch = item[1]
+                        echo "postBuildJob is ${postBuildJob}"
+                        echo "build branch is ${build_branch}"
                         // post_build
-                        build job: "${postBuildJob}", wait: false
+                        build job: "${postBuildJob}", parameters: [string(name: 'build_branch', value: build_branch)], wait: false
                     }
                 }
             }
