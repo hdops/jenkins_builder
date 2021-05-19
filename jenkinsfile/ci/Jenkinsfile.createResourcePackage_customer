@@ -50,7 +50,9 @@ pipeline {
     }
     post{
         always{
-            currentBuild.description = "${params.DNET_PROFILE}:${params.subsystem}"
+            script{
+                currentBuild.description = "${params.DNET_PROFILE}:${params.subsystem}"
+            }
         }
     }
 }
