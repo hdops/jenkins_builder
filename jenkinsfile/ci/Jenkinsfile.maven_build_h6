@@ -17,6 +17,12 @@ if (env.ci_git_server_baseurl){
     ci_git_server_baseurl = env.ci_git_server_baseurl
 }
 
+// def svn_server_baseurl= "http://hddenv/svn"
+def svn_server_baseurl= "http://172.17.0.85/svn"
+if (env.svn_server_baseurl){
+    svn_server_baseurl = env.svn_server_baseurl
+}
+
 def source_code_management=""
 if (env.source_code_management){
     source_code_management =env.source_code_management
@@ -24,7 +30,7 @@ if (env.source_code_management){
     source_code_management ="git"
 }
 
-def docker_args="-v /var/run/docker.sock:/var/run/docker.sock -v /usr/bin/docker:/usr/bin/docker"
+def docker_args="-v /var/run/docker.sock:/var/run/docker.sock -v /usr/bin/docker:/usr/bin/docker --add-host=maven.qianfan123.com:172.17.0.82 --add-host=apidoc.hd123.com:172.17.10.53 --add-host=github.app.hd123.cn:172.17.10.58 --add-host=gitlab.hd123.com:172.17.12.219 "
 if (env.maven_repository){
     docker_args+=" -v "+env.maven_repository
 }else{
@@ -58,10 +64,10 @@ if (env.set_on_k8s) {
     env.on_k8s=env.set_on_k8s
 }
 
-def gitpath = "None"
-if (env.gitpath){
-    gitpath = env.gitpath
-}
+
+
+
+
 pipeline {
     // agent {label node}
     agent {docker {
@@ -87,14 +93,14 @@ pipeline {
                             checkout([$class: 'GitSCM', branches: [[name: "*/${build_branch}"]],userRemoteConfigs: [[credentialsId: 'qianfan',url: "${ci_git_server_baseurl}/${git_project}.git"]]])
                         }
                     } else if (source_code_management == "svn"){
-                        echo "http://hddenv/svn/${svn_project}/${build_branch}"
+                        echo "${svn_server_baseurl}/${svn_project}/${build_branch}"
                         retry(3){
-                            checkout([$class: 'SubversionSCM', additionalCredentials: [], excludedCommitMessages: '', excludedRegions: '', excludedRevprop: '', excludedUsers: '', filterChangelog: false, ignoreDirPropChanges: false, includedRegions: '', locations: [[cancelProcessOnExternalsFail: false, credentialsId: 'hddenv', depthOption: 'infinity', ignoreExternalsOption: true, local: '.', remote: "http://hddenv/svn/${svn_project}/${build_branch}"]], quietOperation: true, workspaceUpdater: [$class: 'CheckoutUpdater']])
+                            checkout([$class: 'SubversionSCM', additionalCredentials: [], excludedCommitMessages: '', excludedRegions: '', excludedRevprop: '', excludedUsers: '', filterChangelog: false, ignoreDirPropChanges: false, includedRegions: '', locations: [[cancelProcessOnExternalsFail: false, credentialsId: 'hddenv', depthOption: 'infinity', ignoreExternalsOption: true, local: '.', remote: "${svn_server_baseurl}/${svn_project}/${build_branch}"]], quietOperation: true, workspaceUpdater: [$class: 'CheckoutUpdater']])
                         }
                     }
-                }
+                 }
             }
-        }
+         }
 		stage('build') {
 		    steps{
 				script{
@@ -180,22 +186,28 @@ pipeline {
         stage('maven denpendency check'){
 			steps{
 				script{
-						def mvn_shell="mvn "
-                        if (env.mvn_pom){
-                            mvn_shell+=" -f "+env.mvn_pom+" "+" dependency:list "
-                            }
-                        else{
-                            mvn_shell+=" dependency:list "
-                            }
-                        echo "mvn_configfile is ${mvn_configfile}"
-                        configFileProvider([configFile(fileId:mvn_configfile, variable: 'maven_settings')]) {
-                                mvn_shell+="  -s $maven_settings"
-                                echo "maven denpendency check is ${mvn_shell}"
-                                sh "${mvn_shell}"
-                            }
-                        echo "BUILD_URL:${BUILD_URL}"
-                        triggerRemoteJob job: "Maven_Denpendency_Check", maxConn: 3, parameters: """upurl=${BUILD_URL}
-isrelease=False""", remoteJenkinsName: "11.3", shouldNotFailBuild: true, useCrumbCache: false, useJobInfoCache: false, enhancedLogging: true
+                    def mvn_shell="mvn "
+                    if (env.mvn_pom){
+                        mvn_shell+=" -f "+env.mvn_pom+" "+" dependency:list "
+                        }
+                    else{
+                        mvn_shell+=" dependency:list "
+                        }
+                    echo "mvn_configfile is ${mvn_configfile}"
+                    configFileProvider([configFile(fileId:mvn_configfile, variable: 'maven_settings')]) {
+                            mvn_shell+="  -s $maven_settings"
+                            echo "maven denpendency check is ${mvn_shell}"
+                            sh "${mvn_shell}"
+                        }
+                    echo "BUILD_URL:${BUILD_URL}"
+                    withDockerContainer(args: "-v ${WORKSPACE}:/opt", image: "harbor.qianfan123.com/toolset/toolsetcore:${toolset_image_version}") {
+                        retry(2){
+                            sh "DNET_PROFILE=integration_test DNET_PRODUCT=dnet TRUST_PUBLIC_IP=true hdops download_toolset --branch develop -p ."
+                        }
+                        sh "tar zxf toolset.tar.gz -C ${WORKSPACE}"
+                        echo "maven denpendency check"
+                        sh "DNET_PRODUCT=dnet DNET_PROFILE=integration_test hdmon maven_dependency_check --jenkins_url ${BUILD_URL} --isrelease False"
+                    }
 				}
 			}
 		}
@@ -264,23 +276,38 @@ isrelease=False""", remoteJenkinsName: "11.3", shouldNotFailBuild: true, useCrum
                         println(data)
                         count = data.size()
                         tasks = [:]
-                        data.each{ i ->
-                            String[] item = i.split(';')
-                            println(item)
-                            remoteJenkins = item[0]
-                            remoteJob = item[1]
-                            DNET_PROFILE = item[2]
-                            echo "remoteJenkins is ${remoteJenkins}"
-                            echo "remoteJob is ${remoteJob}"
-                            echo "DNET_PROFILE is ${DNET_PROFILE}"
-                            // env
-                            triggerRemoteJob job: "${remoteJob}", maxConn: 3, parameters: """DNET_PROFILE=${DNET_PROFILE}
-DNET_PRODUCT=${DNET_PRODUCT}
-image=${image}
-version=${ImageVersion}
-gitpath=${gitpath}
-sourcefrom=git
-    """, remoteJenkinsName: "${remoteJenkins}", useCrumbCache: false, useJobInfoCache: false, enhancedLogging: true
+                        def image = env.image
+                        def gitpath = env.gitpath
+                        if (env.gitpath == "" || env.gitpath == null || env.gitpath == "None" || env.gitpath == "none") {
+                            echo("gitpath 为空，从 pom 中读取 images")
+                            image = readFile 'envfile_images.txt'
+                            gitpath = "None"
+                            echo("from envfile_images.txt : ${image}")
+                        }
+                        echo("image=`${image}`")
+                        if (image != "" && image != "\n" && image != null) {
+                            data.each{ i ->
+                                String[] item = i.split(';')
+                                println(item)
+                                remoteJenkins = item[0]
+                                remoteJob = item[1]
+                                DNET_PROFILE = item[2]
+                                if (item.size() > 3)  {
+                                    DNET_PRODUCT=item[3]
+                                }
+                                echo "remoteJenkins is ${remoteJenkins}"
+                                echo "remoteJob is ${remoteJob}"
+                                echo "DNET_PROFILE is ${DNET_PROFILE}"
+                                echo "DNET_PRODUCT is ${DNET_PRODUCT}"
+                                // env
+                                triggerRemoteJob job: "${remoteJob}", maxConn: 3, parameters: """DNET_PROFILE=${DNET_PROFILE}
+    DNET_PRODUCT=${DNET_PRODUCT}
+    image=${image}
+    version=${ImageVersion}
+    gitpath=${gitpath}
+    sourcefrom=git
+        """, remoteJenkinsName: "${remoteJenkins}", useCrumbCache: false, useJobInfoCache: false, enhancedLogging: true
+                            }
                         }
 				    }
 				}
@@ -302,9 +329,13 @@ sourcefrom=git
                             remoteJenkins = item[0]
                             remoteJob = item[1]
                             DNET_PROFILE = item[2]
+                            if (item.size() > 3)  {
+                                DNET_PRODUCT=item[3]
+                            }
                             echo "remoteJenkins is ${remoteJenkins}"
                             echo "remoteJob is ${remoteJob}"
                             echo "DNET_PROFILE is ${DNET_PROFILE}"
+                            echo "DNET_PRODUCT is ${DNET_PRODUCT}"
                             // deploy
                             triggerRemoteJob job: "${remoteJob}", maxConn: 3, parameters: """DNET_PROFILE=${DNET_PROFILE}
 DNET_PRODUCT=${DNET_PRODUCT}
@@ -324,6 +355,27 @@ skipversionupdate=${skipversionupdate}""", remoteJenkinsName: "${remoteJenkins}"
                     sh """
                     ${env.post_shell}
                     """
+                }
+                if (env.post_build_cfg != "" && env.post_build_cfg != null) {
+                    // post_build
+                    println(env.post_build_cfg)
+                    String[] data = env.post_build_cfg.split('&')
+                    println(data)
+                    count = data.size()
+                    tasks = [:]
+                    data.each{ i ->
+                        String[] item = i.split(';')
+                        println(item)
+                        // remoteJenkins = item[0]
+                        // remoteJob = item[1]
+                        // DNET_PROFILE = item[2]
+                        postBuildJob = item[0]
+                        // echo "remoteJenkins is ${remoteJenkins}"
+                        // echo "remoteJob is ${remoteJob}"
+                        // echo "DNET_PROFILE is ${DNET_PROFILE}"
+                        // post_build
+                        build job: "${postBuildJob}", wait: false
+                    }
                 }
             }
         }
