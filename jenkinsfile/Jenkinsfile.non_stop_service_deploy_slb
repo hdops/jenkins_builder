@@ -31,13 +31,17 @@ pipeline {
     }            
     stages {
         stage('check dbUpgrade'){
-            if (dbUpgrade){
-                echo "check dbUpgrade is not Y"
-                sh "false"
-            }
-            if (dbUpgrade != 'Y'){
-                echo "check dbUpgrade is ${dbUpgrade} != Y"
-                sh "false"
+            steps{
+				script{
+                    if (dbUpgrade){
+                        echo "check dbUpgrade is not Y"
+                        sh "false"
+                    }
+                    if (dbUpgrade != 'Y'){
+                        echo "check dbUpgrade is ${dbUpgrade} != Y"
+                        sh "false"
+                    }
+                }
             }
         }
         stage('delete workspace') {
