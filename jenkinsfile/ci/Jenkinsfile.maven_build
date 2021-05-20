@@ -85,7 +85,7 @@ pipeline {
                     if (source_code_management == "git"){
                         echo "checkout ${ci_git_server_baseurl}/${git_project}.git  branch:${build_branch}"
                         retry(3){
-                            checkout([$class: 'GitSCM', branches: [[name: "*/${build_branch}"]],userRemoteConfigs: [[credentialsId: 'qianfan',url: "${ci_git_server_baseurl}/${git_project}.git"]]])
+                            checkout([$class: 'GitSCM', branches: [[name: "${build_branch}"]],userRemoteConfigs: [[credentialsId: 'qianfan',url: "${ci_git_server_baseurl}/${git_project}.git"]]])
                         }
                     } else if (source_code_management == "svn"){
                         echo "${svn_server_baseurl}/${svn_project}/${build_branch}"
@@ -99,12 +99,13 @@ pipeline {
         stage('pre-build-1') {
             steps{
                 script{
-                    def mvn_shell="mvn help:effective-pom -Doutput=effectivepom.xml"
-                    configFileProvider([configFile(fileId:mvn_configfile, variable: 'maven_settings')]) {
-                        mvn_shell+=" -s $maven_settings"
-                        echo "mvn_shell is ${mvn_shell}"
-                        sh "${mvn_shell}"
-                    }
+                    echo "temp"
+                    //def mvn_shell="mvn help:effective-pom -Doutput=effectivepom.xml"
+                    //configFileProvider([configFile(fileId:mvn_configfile, variable: 'maven_settings')]) {
+                        //mvn_shell+=" -s $maven_settings"
+                       // echo "mvn_shell is ${mvn_shell}"
+                      //  sh "${mvn_shell}"
+                    //}
                 }
             }
         }
