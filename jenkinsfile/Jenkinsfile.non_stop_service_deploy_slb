@@ -32,13 +32,13 @@ pipeline {
     stages {
         stage('check dbUpgrade'){
             steps{
-				script{
-                    if (params.dbUpgrade){
-                        echo "check dbUpgrade is not Y"
+                script{
+                    if (!dbUpgrade){
+                        echo "check dbUpgrade is not Exit"
                         sh "false"
                     }
-                    if (params.dbUpgrade != 'Y'){
-                        echo "check dbUpgrade is ${params.dbUpgrade} != Y"
+                    if (dbUpgrade != 'Y'){
+                        echo "check dbUpgrade is ${dbUpgrade} != Y"
                         sh "false"
                     }
                 }
