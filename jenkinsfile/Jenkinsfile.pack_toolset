@@ -78,5 +78,10 @@ pipeline {
                 dingTalk accessToken: "${DINGTALK_TOKEN}", imageUrl: '', jenkinsUrl: '', message: "pack toolset failure for ${git_project} on ${BUILD_URL}", notifyPeople: ''
             }
         }
+        always{
+            script{
+                junit allowEmptyResults: true, testResults: 'junit.xml'
+            }
+        }
     }
 }
