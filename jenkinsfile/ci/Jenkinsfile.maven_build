@@ -84,12 +84,12 @@ pipeline {
                 script{
                     if (source_code_management == "git"){
                         echo "checkout ${ci_git_server_baseurl}/${git_project}.git  branch:${build_branch}"
-                        retry(3){
+                        retry(5){
                             checkout([$class: 'GitSCM', branches: [[name: "${build_branch}"]],userRemoteConfigs: [[credentialsId: 'qianfan',url: "${ci_git_server_baseurl}/${git_project}.git"]]])
                         }
                     } else if (source_code_management == "svn"){
                         echo "${svn_server_baseurl}/${svn_project}/${build_branch}"
-                        retry(3){
+                        retry(5){
                             checkout([$class: 'SubversionSCM', additionalCredentials: [], excludedCommitMessages: '', excludedRegions: '', excludedRevprop: '', excludedUsers: '', filterChangelog: false, ignoreDirPropChanges: false, includedRegions: '', locations: [[cancelProcessOnExternalsFail: false, credentialsId: 'hddenv', depthOption: 'infinity', ignoreExternalsOption: true, local: '.', remote: "${svn_server_baseurl}/${svn_project}/${build_branch}"]], quietOperation: true, workspaceUpdater: [$class: 'CheckoutUpdater']])
                         }
                     }
