@@ -123,14 +123,14 @@ pipeline {
                             container("hdtoolsetcore"){
                                 sh "DNET_PRODUCT=$DNET_PRODUCT DNET_PROFILE=$DNET_PROFILE hdops change_eureka_down_up --subsystem ${params.subsystem} --tag blue"
                                 echo "等待60s用于配置刷新"
-                                sleep time: 1, unit: 'MINUTES'
+                                sleep(60)
                             }
                         }else {
                             docker.image("harbor.qianfan123.com/toolset/toolsetcore:${toolset_image_version}").inside  {
                                 echo "======下线blue节点======"
                                 sh "DNET_PRODUCT=$DNET_PRODUCT DNET_PROFILE=$DNET_PROFILE hdops change_eureka_down_up --subsystem ${params.subsystem} --tag blue"
                                 echo "等待60s用于配置刷新"
-                                sleep time: 1, unit: 'MINUTES'
+                                sleep(60)
                             }
                         }
 				    }
@@ -219,14 +219,14 @@ pipeline {
                             container("hdtoolsetcore"){
                                 sh "DNET_PRODUCT=$DNET_PRODUCT DNET_PROFILE=$DNET_PROFILE hdops change_eureka_down_up --subsystem ${params.subsystem} --tag green"
                                 echo "等待60s用于配置刷新"
-                                sleep time: 1, unit: 'MINUTES'
+                                sleep(60)
                             }
                         }else {
                             docker.image("harbor.qianfan123.com/toolset/toolsetcore:${toolset_image_version}").inside  {
                                 echo "======下线green节点======"
                                 sh "DNET_PRODUCT=$DNET_PRODUCT DNET_PROFILE=$DNET_PROFILE hdops change_eureka_down_up --subsystem ${params.subsystem} --tag green"
                                 echo "等待60s用于配置刷新"
-                                sleep time: 1, unit: 'MINUTES'
+                                sleep(60)
                             }
                         }
 				    }
