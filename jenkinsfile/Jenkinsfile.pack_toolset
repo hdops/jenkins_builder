@@ -61,11 +61,11 @@ pipeline {
                    }
                    if (run_unittest){
                        if ("${env.gitlabBranch}"!="jenkins"){
-                            sh "pytest tests/image_config_test.py -m unit -sv"
+                            sh "pytest tests/image_config_test.py -m unit  --junitxml=junit.xml -sv"
                             sh "DNET_CLOUD_VENDOR=${DNET_CLOUD_VENDOR} python update_toolset_oss.py -branch ${env.gitlabBranch}"
                        }else{
                             sh "git submodule update --init --recursive"
-                            sh "pytest -m unit -sv "
+                            sh "pytest -m unit  --junitxml=junit.xml -sv "
                        }
                    }
                 }
