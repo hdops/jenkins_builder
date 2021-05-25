@@ -99,7 +99,7 @@ pipeline {
         stage('pre-build-1') {
             steps{
                 script{
-                    echo "temp"
+                    echo "执行`mven help:effective-pom`,生成effectivepom.xml"
                     def mvn_shell="mvn help:effective-pom -Doutput=effectivepom.xml"
                     configFileProvider([configFile(fileId:mvn_configfile, variable: 'maven_settings')]) {
                         mvn_shell+=" -s $maven_settings"

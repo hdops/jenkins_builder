@@ -56,7 +56,9 @@ pipeline {
                        echo "DNET_PRIVATE_BUCKET is ${DNET_PRIVATE_BUCKET}"
                        echo "DNET_PRIVATE_REGION is ${DNET_PRIVATE_REGION}"
                    }
-                   sh "yamllint -c .yamllint docker_environment*.yaml"
+                   if ("${env.gitlabBranch}"!="jenkins"){
+                       sh "yamllint -c .yamllint docker_environment*.yaml"
+                   }
                    if (run_unittest){
                        sh "pytest tests/image_config_test.py -m unit -sv"
                    }
