@@ -60,7 +60,11 @@ pipeline {
                        sh "yamllint -c .yamllint docker_environment*.yaml"
                    }
                    if (run_unittest){
-                       sh "pytest tests/image_config_test.py -m unit -sv"
+                       if ("${env.gitlabBranch}"!="jenkins"){
+                            sh "pytest tests/image_config_test.py -m unit -sv"
+                       }else{
+                            sh "pytest -m unit --sv "
+                       }
                    }
                    sh "DNET_CLOUD_VENDOR=${DNET_CLOUD_VENDOR} python update_toolset_oss.py -branch ${env.gitlabBranch}"
                 }
