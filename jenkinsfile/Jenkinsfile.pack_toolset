@@ -63,7 +63,7 @@ pipeline {
                        if ("${env.gitlabBranch}"!="jenkins"){
                             sh "pytest tests/image_config_test.py -m unit -sv"
                        }else{
-                            sh "pytest -m unit --sv "
+                            sh "pytest -m unit -sv "
                        }
                    }
                    sh "DNET_CLOUD_VENDOR=${DNET_CLOUD_VENDOR} python update_toolset_oss.py -branch ${env.gitlabBranch}"
