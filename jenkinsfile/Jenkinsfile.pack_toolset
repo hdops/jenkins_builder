@@ -63,6 +63,7 @@ pipeline {
                        if ("${env.gitlabBranch}"!="jenkins"){
                             sh "pytest tests/image_config_test.py -m unit -sv"
                        }else{
+                            sh "git submodule update --init --recursive"
                             sh "pytest -m unit -sv "
                        }
                    }
