@@ -64,7 +64,6 @@ pipeline {
                 if (whether_post == "True") {
                     dingTalk accessToken: "${DINGTALK_TOKEN}", imageUrl: '', jenkinsUrl: "${jenkinsUrl}", message: "构建失败 ${new Date().format("yyyy-MM-dd HH:mm:ss")}", notifyPeople: ''
                 }
-                emailext(to: "${params.receivers}", mimeType: 'text/html', subject: "资料中台接口巡检 ${new Date().format("yyyy-MM-dd HH:mm:ss")}", body: readFile("analysis_report.html"));
             }
         }
 	// 失败转成功之后钉钉通知
