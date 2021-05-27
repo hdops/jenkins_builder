@@ -42,7 +42,7 @@ pipeline {
     }
     stages {
 
-        stage('checkout scm toolset'){
+        stage('checkout scm'){
 			steps{
                 script{
                    retry(3){
