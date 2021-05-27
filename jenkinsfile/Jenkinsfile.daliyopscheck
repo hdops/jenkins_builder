@@ -65,7 +65,7 @@ pipeline {
             script {
                 if (whether_post == "True") {
                     dingTalk accessToken: "${DINGTALK_TOKEN}", imageUrl: '', jenkinsUrl: "${jenkinsUrl}", message: "构建失败 ${new Date().format("yyyy-MM-dd HH:mm:ss")}", notifyPeople: ''
-                    //emailext(to: "${params.receivers}", mimeType: 'text/html', subject: "daily check failure - ${new Date().format("yyyy-MM-dd HH:mm:ss")}", body: readFile('dailycheck.html'));
+                    emailext(to: "${params.receivers}", mimeType: 'text/html', subject: "daily check failure - ${new Date().format("yyyy-MM-dd HH:mm:ss")}", body: readFile('dailycheck.html'));
                 }
             }
         }
