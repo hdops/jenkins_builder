@@ -42,7 +42,7 @@ pipeline {
     }
     stages {
 
-        stage('pack toolset'){
+        stage('checkout scm'){
 			steps{
                 script{
                    retry(3){
@@ -56,10 +56,24 @@ pipeline {
                        echo "DNET_PRIVATE_BUCKET is ${DNET_PRIVATE_BUCKET}"
                        echo "DNET_PRIVATE_REGION is ${DNET_PRIVATE_REGION}"
                    }
-                   if ("${env.gitlabBranch}"!="jenkins"){
+
+
+                }
+			}
+		}
+		stage("yamllint"){
+		    steps{
+                script{
+                if ("${env.gitlabBranch}"!="jenkins"){
                        sh "yamllint -c .yamllint docker_environment*.yaml"
                    }
-                   if (run_unittest){
+                }
+		    }
+		}
+		stage("unit test && package && upload"){
+            steps{
+                script{
+                    if (run_unittest){
                        if ("${env.gitlabBranch}"!="jenkins"){
                             sh "pytest -m unit  --junitxml=junit.xml -sv"
 
@@ -72,7 +86,7 @@ pipeline {
                        sh "DNET_CLOUD_VENDOR=${DNET_CLOUD_VENDOR} python update_toolset_oss.py -branch ${env.gitlabBranch}"
                    }
                 }
-			}
+            }
 		}
     }
     post{
