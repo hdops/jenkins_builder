@@ -33,7 +33,7 @@ pipeline{
                     if(env.on_k8s == 'True'){
                         container("hdtoolsetcore"){
                             retry(2){
-                                sh "DNET_PROFILE=integration_test DNET_PRODUCT=dnet DNET_CLOUD_VENDOR=aliyun TRUST_PUBLIC_IP=${run_on_public} hdops download_git_project --branch ${params.GIT_BRANCH} -p . --project data_importer"
+                                sh "DNET_PROFILE=${params.DNET_PROFILE} DNET_PRODUCT=${params.DNET_PRODUCT} DNET_CLOUD_VENDOR=aliyun TRUST_PUBLIC_IP=${run_on_public} hdops download_git_project --branch ${params.GIT_BRANCH} -p . --project data_importer"
                             }
                             sh "tar zxf data_importer.tar.gz -C ${WORKSPACE}"
                             sh "DNET_PROFILE=${params.DNET_PROFILE} DNET_PRODUCT=${params.DNET_PRODUCT} hdops dataimport ptonline --jira ${params.JIRA} --dryrun ${params.dryrun} --max_load_threads ${params.max_load_threads} --critical_load_threads ${params.critical_load_threads}"
@@ -41,7 +41,7 @@ pipeline{
                     }else {
                         docker.image("harbor.qianfan123.com/toolset/toolsetcore:${toolset_image_version}").inside  {
                             retry(2){
-                                sh "DNET_PROFILE=integration_test DNET_PRODUCT=dnet DNET_CLOUD_VENDOR=aliyun TRUST_PUBLIC_IP=${run_on_public} hdops download_git_project --branch ${params.GIT_BRANCH} -p . --project data_importer"
+                                sh "DNET_PROFILE=${params.DNET_PROFILE} DNET_PRODUCT=${params.DNET_PRODUCT} DNET_CLOUD_VENDOR=aliyun TRUST_PUBLIC_IP=${run_on_public} hdops download_git_project --branch ${params.GIT_BRANCH} -p . --project data_importer"
                             }
                             sh "tar zxf data_importer.tar.gz -C ${WORKSPACE}"
                             sh "DNET_PROFILE=${params.DNET_PROFILE} DNET_PRODUCT=${params.DNET_PRODUCT} hdops dataimport ptonline --jira ${params.JIRA} --dryrun ${params.dryrun} --max_load_threads ${params.max_load_threads} --critical_load_threads ${params.critical_load_threads}"
