@@ -23,6 +23,11 @@ if (env.maven_repository){
 }else{
     docker_args+=" -v /hdapp/java:/hdapp/java"
 }
+if (env.maven_opts){
+    docker_args+=" -e "+env.maven_opts
+}else{
+    docker_args+=" "
+}
 
 def source_code_management=""
 if (env.source_code_management){
