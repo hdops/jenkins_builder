@@ -17,6 +17,11 @@ if (env.ci_git_server_baseurl){
     ci_git_server_baseurl = env.ci_git_server_baseurl
 }
 
+def deploy_baseurl= "http://172.17.12.229:8080"
+if (env.deploy_baseurl){
+    deploy_baseurl = env.deploy_baseurl
+}
+
 // def svn_server_baseurl= "http://hddenv/svn"
 def svn_server_baseurl= "http://172.17.0.85/svn"
 if (env.svn_server_baseurl){
@@ -30,11 +35,16 @@ if (env.source_code_management){
     source_code_management ="git"
 }
 
-def docker_args="-v /var/run/docker.sock:/var/run/docker.sock -v /usr/bin/docker:/usr/bin/docker --add-host=maven.qianfan123.com:172.17.0.82 --add-host=apidoc.hd123.com:172.17.10.53 --add-host=github.app.hd123.cn:172.17.10.58 --add-host=gitlab.hd123.com:172.17.12.219 "
+def docker_args="--rm -v /var/run/docker.sock:/var/run/docker.sock -v /usr/bin/docker:/usr/bin/docker --add-host=maven.qianfan123.com:172.17.0.82 --add-host=apidoc.hd123.com:172.17.10.53 --add-host=github.app.hd123.cn:172.17.10.58 --add-host=gitlab.hd123.com:172.17.12.219 "
 if (env.maven_repository){
     docker_args+=" -v "+env.maven_repository
 }else{
     docker_args+=" -v /hdapp/java:/hdapp/java"
+}
+if (env.maven_opts){
+    docker_args+=" -e "+env.maven_opts
+}else{
+    docker_args+=" "
 }
 
 def mvn_configfile="jdk8"
@@ -71,6 +81,7 @@ if (env.set_on_k8s) {
 pipeline {
     // agent {label node}
     agent {docker {
+            alwaysPull true
             image "${maven_image}"
             label node
             args "${docker_args}"
@@ -200,7 +211,7 @@ pipeline {
                             sh "${mvn_shell}"
                         }
                     echo "BUILD_URL:${BUILD_URL}"
-                    withDockerContainer(args: "-v ${WORKSPACE}:/opt", image: "harbor.qianfan123.com/toolset/toolsetcore:${toolset_image_version}") {
+                    withDockerContainer(args: "--rm -v ${WORKSPACE}:/opt", image: "harbor.qianfan123.com/toolset/toolsetcore:${toolset_image_version}") {
                         retry(2){
                             sh "DNET_PROFILE=integration_test DNET_PRODUCT=dnet TRUST_PUBLIC_IP=true hdops download_toolset --branch develop -p ."
                         }
@@ -210,6 +221,20 @@ pipeline {
                     }
 				}
 			}
+		}
+		stage('remotedeploy') {
+		    steps{
+				script{  
+						def deploy_shell="curl -X GET"
+                        if (env.remote_deploy_options != null){
+                            deploy_shell+=" ${deploy_baseurl}/${deploy_apppath} "+deploy_user
+							sh "${deploy_shell}"
+                            }
+                        else{
+                            echo "No deployment required"
+                            }
+				}
+			} 
 		}
         stage('打包静态资源'){
 			steps{
