@@ -220,7 +220,7 @@ pipeline {
 		stage('remotedeploy') {
 		    steps{
 				script{  
-						def deploy_shell="curl "
+						def deploy_shell="curl -X GET"
                         if (env.remote_deploy_options != null){
                             deploy_shell+=" "+env.deploy_url+" "+deploy_app+" "+deploy_user
 							sh "${deploy_shell}"
