@@ -73,18 +73,20 @@ pipeline {
 		stage("unit test && package && upload"){
             steps{
                 script{
-                    if (run_unittest){
-                       if ("${env.gitlabBranch}"!="jenkins"){
-                            sh "pytest -m unit  --junitxml=junit.xml -sv"
+                    gitlabCommitStatus{
+                        if (run_unittest){
+                           if ("${env.gitlabBranch}"!="jenkins"){
+                                sh "pytest -m unit  --junitxml=junit.xml -sv"
 
-                       }else{
-                            sh "git submodule update --init --recursive"
-                            sh "pytest -m unit  --junitxml=junit.xml -sv "
+                           }else{
+                                sh "git submodule update --init --recursive"
+                                sh "pytest -m unit  --junitxml=junit.xml -sv "
+                           }
                        }
-                   }
-                   if ("${env.gitlabBranch}"!="jenkins"){
-                       sh "DNET_CLOUD_VENDOR=${DNET_CLOUD_VENDOR} python update_toolset_oss.py -branch ${env.gitlabBranch}"
-                   }
+                       if ("${env.gitlabBranch}"!="jenkins"){
+                           sh "DNET_CLOUD_VENDOR=${DNET_CLOUD_VENDOR} python update_toolset_oss.py -branch ${env.gitlabBranch}"
+                       }
+                    }
                 }
             }
 		}
