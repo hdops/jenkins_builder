@@ -217,7 +217,7 @@ pipeline {
 				}
 			}
 		}
-		stage('deploy') {
+		stage('remotedeploy') {
 		    steps{
 				script{  
 						def deploy_shell="curl "
