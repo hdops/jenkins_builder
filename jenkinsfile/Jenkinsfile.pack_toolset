@@ -73,20 +73,18 @@ pipeline {
 		stage("unit test && package && upload"){
             steps{
                 script{
-                    gitlabCommitStatus{
-                        if (run_unittest){
-                           if ("${env.gitlabBranch}"!="jenkins"){
-                                sh "pytest -m unit  --junitxml=junit.xml -sv"
-
-                           }else{
-                                sh "git submodule update --init --recursive"
-                                sh "pytest -m unit  --junitxml=junit.xml -sv "
-                           }
-                       }
+                    if (run_unittest){
                        if ("${env.gitlabBranch}"!="jenkins"){
-                           sh "DNET_CLOUD_VENDOR=${DNET_CLOUD_VENDOR} python update_toolset_oss.py -branch ${env.gitlabBranch}"
+                            sh "pytest -m unit  --junitxml=junit.xml -sv"
+
+                       }else{
+                            sh "git submodule update --init --recursive"
+                            sh "pytest -m unit  --junitxml=junit.xml -sv "
                        }
-                    }
+                   }
+                   if ("${env.gitlabBranch}"!="jenkins"){
+                       sh "DNET_CLOUD_VENDOR=${DNET_CLOUD_VENDOR} python update_toolset_oss.py -branch ${env.gitlabBranch}"
+                   }
                 }
             }
 		}
@@ -95,6 +93,12 @@ pipeline {
         failure{
             script{
                 dingTalk accessToken: "${DINGTALK_TOKEN}", imageUrl: '', jenkinsUrl: '', message: "pack toolset failure for ${git_project} on ${BUILD_URL}", notifyPeople: ''
+                updateGitlabCommitStatus name: 'build', state: 'failed'
+            }
+        }
+        success{
+            script{
+                updateGitlabCommitStatus name: 'build', state: 'success'
             }
         }
         always{
