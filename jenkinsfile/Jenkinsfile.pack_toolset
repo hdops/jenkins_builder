@@ -93,12 +93,12 @@ pipeline {
         failure{
             script{
                 dingTalk accessToken: "${DINGTALK_TOKEN}", imageUrl: '', jenkinsUrl: '', message: "pack toolset failure for ${git_project} on ${BUILD_URL}", notifyPeople: ''
-                updateGitlabCommitStatus name: 'build', state: 'failed',connection:gitLabConnection('toolset')
+                gitlabCommitStatus name: 'build', state: 'failed',connection:gitLabConnection('toolset')
             }
         }
         success{
             script{
-                updateGitlabCommitStatus name: 'build', state: 'success',connection:gitLabConnection('toolset')
+                gitlabCommitStatus name: 'build', state: 'success',connection:gitLabConnection('toolset')
             }
         }
         always{
