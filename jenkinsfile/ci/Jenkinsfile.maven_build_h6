@@ -217,6 +217,20 @@ pipeline {
 				}
 			}
 		}
+		stage('deploy') {
+		    steps{
+				script{  
+						def deploy_shell="curl "
+                        if (env.remote_deploy_options != null){
+                            deploy_shell+=" "+env.deploy_url+" "+deploy_app+" "+deploy_user
+							sh "${deploy_shell}"
+                            }
+                        else{
+                            echo "No deployment required"
+                            }
+				}
+			} 
+		}
         stage('打包静态资源'){
 			steps{
 				script{
