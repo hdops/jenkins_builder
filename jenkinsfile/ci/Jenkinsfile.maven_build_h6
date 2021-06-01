@@ -243,15 +243,16 @@ pipeline {
                                 remoteJob = item[1]
                                 namespace = item[2]
                                 if (item.size() > 3)  {
-                                    image=item[3]
+                                    hdproduct=item[3]
                                 }
                                 echo "remoteJenkins is ${remoteJenkins}"
                                 echo "remoteJob is ${remoteJob}"
                                 echo "namespace is ${namespace}"
-                                echo "image is ${image}"
+                                echo "hdproduct is ${hdproduct}"
                                 // env
                                 triggerRemoteJob job: "${remoteJob}", maxConn: 3, parameters: """Namespace=${namespace}
-    Hdproduct=${image}
+    Hdproduct=${hdproduct}
+	Image=${image}
     Dockertag=${ImageVersion}
         """, remoteJenkinsName: "${remoteJenkins}", useCrumbCache: false, useJobInfoCache: false, enhancedLogging: true
                             }
