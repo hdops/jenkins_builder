@@ -226,7 +226,7 @@ pipeline {
 			steps{
 				script{
 				    if (env.remote_detectimage_cfg != "" && env.remote_detectimage_cfg != null) {
-                        ImageVersion = ${docker_tag}
+                        ImageVersion = env.dockertag
                         echo("ImageVersion=${ImageVersion}")
                         println(env.remote_detectimage_cfg)
                         String[] data = env.remote_detectimage_cfg.split('&')
