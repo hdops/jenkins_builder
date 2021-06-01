@@ -222,6 +222,44 @@ pipeline {
 				}
 			}
 		}
+        stage('detectimage'){
+			steps{
+				script{
+				    if (env.remote_detectimage_cfg != "" && env.remote_detectimage_cfg != null) {
+                        ImageVersion = ${docker_tag}
+                        echo("ImageVersion=${ImageVersion}")
+                        println(env.remote_detectimage_cfg)
+                        String[] data = env.remote_detectimage_cfg.split('&')
+                        println(data)
+                        count = data.size()
+                        tasks = [:]
+                        def image = env.image
+                        echo("image=`${image}`")
+                        if (image != "" && image != "\n" && image != null) {
+                            data.each{ i ->
+                                String[] item = i.split(';')
+                                println(item)
+                                remoteJenkins = item[0]
+                                remoteJob = item[1]
+                                namespace = item[2]
+                                if (item.size() > 3)  {
+                                    image=item[3]
+                                }
+                                echo "remoteJenkins is ${remoteJenkins}"
+                                echo "remoteJob is ${remoteJob}"
+                                echo "namespace is ${namespace}"
+                                echo "image is ${image}"
+                                // env
+                                triggerRemoteJob job: "${remoteJob}", maxConn: 3, parameters: """Namespace=${namespace}
+    Hdproduct=${image}
+    Dockertag=${ImageVersion}
+        """, remoteJenkinsName: "${remoteJenkins}", useCrumbCache: false, useJobInfoCache: false, enhancedLogging: true
+                            }
+                        }
+				    }
+				}
+			}
+		}
 		stage('remotedeploy') {
 		    steps{
 				script{  
