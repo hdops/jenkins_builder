@@ -53,6 +53,7 @@ pipeline {
 					echo "sub systems are ${params.subsystem}"
 					echo "skip version is ${params.skipversion}"
 					echo "upstream URL is ${params.upurl}"
+					echo "run_on_public is ${run_on_public}"
 					if(env.on_k8s == 'True'){
 						container("hdtoolsetcore"){
 							echo "toolset path is ${WORKSPACE}"
