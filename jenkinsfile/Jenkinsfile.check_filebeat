@@ -3,6 +3,11 @@ if (env.node){
     node =env.node
 }
 
+def while_list="none"
+if (env.while_list){
+    while_list =env.while_list
+}
+
 def whether_post="False"
 if (env.whether_post){
     whether_post =env.whether_post
@@ -43,7 +48,7 @@ pipeline {
                                 sh "DNET_PROFILE=integration_test DNET_PRODUCT=dnet TRUST_PUBLIC_IP=${run_on_public} hdops download_toolset --branch ${params.GIT_BRANCH} -p ."
                             }
                             sh "tar zxf toolset.tar.gz -C ${WORKSPACE}"
-                            sh "DNET_PROFILE=${params.DNET_PROFILE} DNET_PRODUCT=${params.DNET_PRODUCT} hdmon check_filebeat "
+                            sh "DNET_PROFILE=${params.DNET_PROFILE} DNET_PRODUCT=${params.DNET_PRODUCT} hdmon check_filebeat -c ${while_list}"
                         }
                     }else{
                         docker.image("harbor.qianfan123.com/toolset/toolsetcore:${toolset_image_version}").inside {
@@ -51,7 +56,7 @@ pipeline {
                                 sh "DNET_PROFILE=integration_test DNET_PRODUCT=dnet TRUST_PUBLIC_IP=${run_on_public} hdops download_toolset --branch ${params.GIT_BRANCH} -p ."
                             }
                              sh "tar zxf toolset.tar.gz -C ${WORKSPACE}"
-                             sh "DNET_PROFILE=${params.DNET_PROFILE} DNET_PRODUCT=${params.DNET_PRODUCT} hdmon check_filebeat "
+                             sh "DNET_PROFILE=${params.DNET_PROFILE} DNET_PRODUCT=${params.DNET_PRODUCT} hdmon check_filebeat -c ${while_list}"
                         }
                     }
                 }
