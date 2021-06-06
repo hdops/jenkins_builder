@@ -64,8 +64,9 @@ pipeline {
 							sh "tar zxf toolset.tar.gz -C ${WORKSPACE}"
 						}
 					}else {
-					    docker.image("harbor.qianfan123.com/toolset/toolsetcore:${toolset_image_version}").inside {
+					    withDockerContainer(image: "harbor.qianfan123.com/toolset/toolsetcore:${toolset_image_version}") {
                 	        echo "toolset path is ${WORKSPACE}"
+							echo "DNET_PROFILE=integration_test DNET_PRODUCT=dnet TRUST_PUBLIC_IP=${run_on_public} hdops download_toolset --branch ${params.GIT_BRANCH} -p ."
                 	        retry(2){
                 	            sh "DNET_PROFILE=integration_test DNET_PRODUCT=dnet TRUST_PUBLIC_IP=${run_on_public} hdops download_toolset --branch ${params.GIT_BRANCH} -p ."
                 	        }
