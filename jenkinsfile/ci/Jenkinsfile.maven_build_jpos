@@ -68,7 +68,7 @@ pipeline {
 					    if (${params.buildDocker}==true){
 						    jpos_build_shell=""
 					        echo "hello"
-						    //sh "  ${jpos_build_shell}" 
+						    sh "  ${jpos_build_shell}" 
 					}
 				}
 			} 
