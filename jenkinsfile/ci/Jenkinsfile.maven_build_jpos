@@ -63,7 +63,7 @@ pipeline {
 				script{  
 					echo "jpos_build_shell is ${jpos_build_shell}"
 					sh "  ${jpos_build_shell}"
-					if (docker_build==true){
+					if (${params.buildDocker}==true){
 						jpos_build_shell += -Pdocker
 					    echo "jpos_build_shell is ${jpos_build_shell}"
 						sh "  ${jpos_build_shell}"  
