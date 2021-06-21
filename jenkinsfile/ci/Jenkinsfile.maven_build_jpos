@@ -65,7 +65,7 @@ pipeline {
 					    jpos_build_shell+=env.jpos_build
 					    echo "jpos_build_shell is ${jpos_build_shell}"
 					    sh "  ${jpos_build_shell}"
-					    if (env.docker_build){
+					    if (${params.buildDocker}==true){
 						    jpos_build_shell=""
 					        echo "jpos_build_shell is ${jpos_build_shell}"
 						    sh "  ${jpos_build_shell}" 
