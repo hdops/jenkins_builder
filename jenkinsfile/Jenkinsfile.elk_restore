@@ -72,6 +72,11 @@ pipeline {
                 }
             }
         }
+        always{
+            script{
+                currentBuild.description = "${params.index}:${params.cfgname}"
+            }
+        }
     }
 }
 
