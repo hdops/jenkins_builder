@@ -61,13 +61,14 @@ pipeline {
 		stage('build') {
 		    steps{
 				script{  
-					echo "jpos_build_shell is ${jpos_build_shell}"
-                    echo "${params.buildDocker}"
-					//sh "  ${jpos_build_shell}"
-					if ("${params.buildDocker}"==true){
-						jpos_build_shell+=env.jpos_build_shell+"-Pdocker"
+                        def jpos_build_shell="sh "
+					    jpos_build_shell+=env.jpos_build
 					    echo "jpos_build_shell is ${jpos_build_shell}"
-						sh "  ${jpos_build_shell}"  
+					    //sh "  ${jpos_build_shell}"
+					    if (env.docker_build==true){
+						    //jpos_build_shell=""
+					        echo "hello"
+						    //sh "  ${jpos_build_shell}"  
 					}
 				}
 			} 
