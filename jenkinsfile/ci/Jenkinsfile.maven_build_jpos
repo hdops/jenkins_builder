@@ -63,13 +63,15 @@ pipeline {
 				script{  
                         def jpos_build_shell="sh "
 					    jpos_build_shell+=env.jpos_build
-					    echo "jpos_build_shell is ${jpos_build_shell}"
-					    sh "  ${jpos_build_shell}"
 					    if (env.docker_build == "true"){
 						    jpos_build_shell+=" -Pdocker"
 					        echo "jpos_build_shell is ${jpos_build_shell}"
-						    sh "  ${jpos_build_shell}"  
-					}
+						    //sh "  ${jpos_build_shell}"
+                        }
+                        else{ 
+                            echo "jpos_build_shell is ${jpos_build_shell}"
+					        //sh "  ${jpos_build_shell}"
+                        }
 				}
 			} 
 		}
