@@ -30,7 +30,7 @@ if (env.source_code_management){
     source_code_management ="git"
 }
 
-def docker_args="-v /var/run/docker.sock:/var/run/docker.sock -v /usr/bin/docker:/usr/bin/docker --add-host=maven.qianfan123.com:172.17.0.82 --add-host=apidoc.hd123.com:172.17.10.53 --add-host=github.app.hd123.cn:172.17.10.58 --add-host=gitlab.hd123.com:172.17.12.219 "
+def docker_args="--rm -v /var/run/docker.sock:/var/run/docker.sock -v /usr/bin/docker:/usr/bin/docker --add-host=maven.qianfan123.com:172.17.0.82 --add-host=apidoc.hd123.com:172.17.10.53 --add-host=github.app.hd123.cn:172.17.10.58 --add-host=gitlab.hd123.com:172.17.12.219 "
 if (env.maven_repository){
     docker_args+=" -v "+env.maven_repository
 }else{
@@ -113,7 +113,7 @@ pipeline {
             steps{
                  script {
                     docker.image("harbor.qianfan123.com/toolset/toolsetcore:${toolset_image_version}").inside("-v ${WORKSPACE}:/opt --add-host=apidoc.hd123.com:172.17.10.53")  {
-                    //withDockerContainer(args: "-v ${WORKSPACE}:/opt --add-host=apidoc.hd123.com:172.17.10.53", image: "harbor.qianfan123.com/toolset/toolsetcore:${toolset_image_version}") {
+                    //withDockerContainer(args: "--rm -v ${WORKSPACE}:/opt --add-host=apidoc.hd123.com:172.17.10.53", image: "harbor.qianfan123.com/toolset/toolsetcore:${toolset_image_version}") {
                         echo "服务白名单检查"
                         sh "DNET_PRODUCT=dnet DNET_PROFILE=integration_test hdmon maven_docker_check --pomfile /opt/effectivepom.xml --configfile http://github.app.hd123.cn:10080/qianfanops/toolset/raw/develop/check/maven_check_dependency.yaml"
                     }
@@ -219,7 +219,7 @@ pipeline {
                             sh "${mvn_shell}"
                         }
                     echo "BUILD_URL:${BUILD_URL}"
-                    withDockerContainer(args: "-v ${WORKSPACE}:/opt", image: "harbor.qianfan123.com/toolset/toolsetcore:${toolset_image_version}") {
+                    withDockerContainer(args: "--rm -v ${WORKSPACE}:/opt", image: "harbor.qianfan123.com/toolset/toolsetcore:${toolset_image_version}") {
                         retry(2){
                             sh "DNET_PROFILE=integration_test DNET_PRODUCT=dnet TRUST_PUBLIC_IP=true hdops download_toolset --branch develop -p ."
                         }

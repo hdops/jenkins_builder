@@ -35,7 +35,7 @@ pipeline {
 		docker {
 		    label node
             image "${jpos_image}"
-            args '-v /var/run/docker.sock:/var/run/docker.sock -v /usr/bin/docker:/usr/bin/docker -v /hdapp/npm:/root/.npm -v /root/.npmrc:/root/.npmrc -v /root/.docker/config.json:/root/.docker/config.json  --add-host=maven.qianfan123.com:172.17.0.82 --add-host=github.app.hd123.cn:172.17.10.58 --add-host=gitlab.hd123.com:172.17.12.219 '
+            args "--rm -v /jpos-build/webapps:/jpos-build/webapps -v /var/run/docker.sock:/var/run/docker.sock -v /usr/bin/docker:/usr/bin/docker -v /hdapp/npm:/root/.npm -v /root/.npmrc:/root/.npmrc -v /root/.docker/config.json:/root/.docker/config.json  --add-host=maven.qianfan123.com:172.17.0.82 --add-host=github.app.hd123.cn:172.17.10.58 --add-host=gitlab.hd123.com:172.17.12.219 --entrypoint='' "
           }
 	}
     options {
@@ -61,15 +61,17 @@ pipeline {
 		stage('build') {
 		    steps{
 				script{  
-					def jpos_build_shell="sh "
-					jpos_build_shell+=env.jpos_build
-					echo "jpos_build_shell is ${jpos_build_shell}"
-					sh "  ${jpos_build_shell}"
-					if (env.docker_build != "" && env.docker_build != null){
-						jpos_build_shell+=env.jpos_build+" -Pdocker"
-					    echo "jpos_build_shell is ${jpos_build_shell}"
-						sh "  ${jpos_build_shell}" 
-					}
+                        def jpos_build_shell="sh "
+					    jpos_build_shell+=env.jpos_build
+					    if (env.docker_build == "true"){
+						    jpos_build_shell+=" -Pdocker"
+					        echo "jpos_build_shell is ${jpos_build_shell}"
+						    sh "  ${jpos_build_shell}"
+                        }
+                        else{ 
+                            echo "jpos_build_shell is ${jpos_build_shell}"
+					        sh "  ${jpos_build_shell}"
+                        }
 				}
 			} 
 		}
