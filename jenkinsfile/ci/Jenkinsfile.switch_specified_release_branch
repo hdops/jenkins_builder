@@ -23,7 +23,7 @@ if (env.maven_image){
     maven_image ="harbor.qianfan123.com/base/maven:3.3.9_jdk8"
 }
 
-def docker_args="-v /var/run/docker.sock:/var/run/docker.sock -v /usr/bin/docker:/usr/bin/docker"
+def docker_args="--rm -v /var/run/docker.sock:/var/run/docker.sock -v /usr/bin/docker:/usr/bin/docker"
 if (env.maven_repository){
     docker_args+=" -v "+env.maven_repository+":/hdapp/java"
 }else{

@@ -20,7 +20,7 @@ if (env.build_image){
     build_image ="harbor.qianfan123.com/base/node:v8.9.4"
 }
 
-def docker_args="-v /var/run/docker.sock:/var/run/docker.sock -v /usr/bin/docker:/usr/bin/docker -v /root/.docker/config.json:/root/.docker/config.json"
+def docker_args="--rm -v /var/run/docker.sock:/var/run/docker.sock -v /usr/bin/docker:/usr/bin/docker -v /root/.docker/config.json:/root/.docker/config.json"
 
 def credentialsId="qianfan"
 
