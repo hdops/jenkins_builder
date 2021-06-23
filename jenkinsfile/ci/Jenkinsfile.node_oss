@@ -45,7 +45,7 @@ pipeline {
     agent {docker {
             image "${node_image}"
             label node
-            args '-v /var/run/docker.sock:/var/run/docker.sock -v /usr/bin/docker:/usr/bin/docker -v /hdapp/npm:/root/.npm -v /root/.npmrc:/root/.npmrc'
+            args '--rm -v /var/run/docker.sock:/var/run/docker.sock -v /usr/bin/docker:/usr/bin/docker -v /hdapp/npm:/root/.npm -v /root/.npmrc:/root/.npmrc'
           }}
     options {
 	//     buildDiscarder(logRotator(numToKeepStr: '10'))
