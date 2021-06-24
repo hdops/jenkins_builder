@@ -2,7 +2,7 @@ def node=""
 if (env.node){
     node =env.node
 }else{
-    node ="develop"
+    node ="master"
 }
 
 pipeline {
@@ -22,13 +22,13 @@ pipeline {
             steps{
                 script{
                     def gitpath = env.gitpath
-                    if (env.gitpath == "" || env.gitpath == null || env.gitpath == "None" || env.gitpath == "none") {
+                    if (gitpath == "" || gitpath == null || gitpath == "None" || gitpath == "none") {
                         echo("gitpath 为空，从 pom 中读取 images")
                         sh "false"
                     }
 
-                    def gitbranch = env.gitbranch
-                    if (env.gitbranch == "" || env.gitbranch == null || env.gitbranch == "None" || env.gitbranch == "none") {
+                    def gitbranch = params.gitbranch
+                    if (gitbranch == "" || gitbranch == null || gitbranch == "None" || gitbranch == "none") {
                         echo("gitpath 为空，从 pom 中读取 images")
                         sh "false"
                     }
