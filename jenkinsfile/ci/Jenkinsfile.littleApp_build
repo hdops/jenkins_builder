@@ -5,9 +5,20 @@ if (env.node){
     node ="master"
 }
 
-pipeline {
-    agent {label node}
+def node_image= "harbor.qianfan123.com/base/node:9.11.2"
+if (env.node_image){
+    node_image =env.node_image
+}
 
+pipeline {
+    // agent {label node}
+    agent {
+        docker {
+            image "${node_image}"
+            label node
+            args '--rm -v /var/run/docker.sock:/var/run/docker.sock -v /usr/bin/docker:/usr/bin/docker -v /hdapp/npm:/root/.npm -v /root/.npmrc:/root/.npmrc'
+        }
+    }
     options {
 	    timeout(time: 1, unit: 'HOURS')
     }
