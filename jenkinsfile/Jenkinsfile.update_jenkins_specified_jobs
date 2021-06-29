@@ -85,7 +85,7 @@ pipeline {
                                 if ( out == "true" ) {
                                     file=sh(returnStdout: true, script: "find ${i} -type f").split('\n')
                                     file.each{ j ->
-                                        out = sh(script: "echo ${j} | grep -E ${ignore_templates} && echo -n 'true' || echo -n 'false' ", returnStdout: true)
+                                        out = sh(script: "echo ${j} | grep -E \"${ignore_templates}\" && echo -n 'true' || echo -n 'false' ", returnStdout: true)
                                         if ( out == "false" ) {
                                             outstatus = sh(script: "ls $j && ${update_shell} $j && echo -n 'true' || echo -n 'false' ", returnStdout: true)
                                             if ( outstatus == "false" ) {
