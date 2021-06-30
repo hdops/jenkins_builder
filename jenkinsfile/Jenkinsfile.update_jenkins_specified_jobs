@@ -80,6 +80,9 @@ pipeline {
                             echo "cfgname is: ${cfgname}"
                             String[] cfgstr = cfgname.split(',')
                             for ( String i : cfgstr ){
+                                if ( ${i} == "" ) {
+                                    continue
+                                }
                                 out = sh(script: "[ -d ${i} ] && echo -n 'true' || echo -n 'false' ", returnStdout: true)
                                 echo "${i} is dir: ${out}"
                                 if ( out == "true" ) {
