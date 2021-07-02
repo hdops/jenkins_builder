@@ -53,9 +53,11 @@ pipeline {
         }
         stage('delete workspace') {
             steps{
-                GIT_TOKEN_DATA=credentials('17643215-09f8-4a9a-b0ea-c8e49777ce1d')
-                sh "echo ${GIT_TOKEN_DATA_USR}:${GIT_TOKEN_DATA_PSW}"
                 deleteDir()
+                script{
+                    GIT_TOKEN_DATA=credentials('17643215-09f8-4a9a-b0ea-c8e49777ce1d')
+                    sh "echo ${GIT_TOKEN_DATA_USR}:${GIT_TOKEN_DATA_PSW}"
+                }
             }
         }
         stage('修改版本信息 on k8s') {
