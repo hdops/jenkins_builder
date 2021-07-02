@@ -10,7 +10,7 @@ if (env.node){
     node =env.node
 }
 
-def git_project_url="gitlab.hd123.com/qianfanops/kubernetes.git"
+def git_project_url="https://gitlab.hd123.com/qianfanops/kubernetes.git"
 if (env.git_project_url){
     git_project_url = env.git_project_url
 }
