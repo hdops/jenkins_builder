@@ -74,13 +74,10 @@ pipeline {
                             String[] image_version_str_tmp = i.split(':')
                             image=image_version_str_tmp[0]
                             version=image_version_str_tmp[1]
-                            # 拉取代码
                             git init
                             git branch: "${git_project_branch}", credentialsId: '17643215-09f8-4a9a-b0ea-c8e49777ce1d', url: "${git_project_url}"
                             git checkout -b ${git_project_branch}
-                            # 设置镜像
                             find ${DNET_PRODUCT}/${image}/overlays/${DNET_PROFILE}/ -name config.sh | sed s#/config.sh## | awk '{print "cd",$1,"&& kustomize edit set image ${image}:${version} && cd -"}' | bash
-                            # 提交代码
                             git config --global user.email "${BUILD_USER}@hd123.com"
                             git config --global user.name  "${BUILD_USER}"
                             git add --all .
@@ -106,13 +103,10 @@ pipeline {
                             String[] image_version_str_tmp = i.split(':')
                             image=image_version_str_tmp[0]
                             version=image_version_str_tmp[1]
-                            # 拉取代码
                             git init
                             git branch: "${git_project_branch}", credentialsId: '17643215-09f8-4a9a-b0ea-c8e49777ce1d', url: "${git_project_url}"
                             git checkout -b ${git_project_branch}
-                            # 设置镜像
                             find ${DNET_PRODUCT}/${image}/overlays/${DNET_PROFILE}/ -name config.sh | sed s#/config.sh## | awk '{print "cd",$1,"&& kustomize edit set image ${image}:${version} && cd -"}' | bash
-                            # 提交代码
                             git config --global user.email "${BUILD_USER}@hd123.com"
                             git config --global user.name  "${BUILD_USER}"
                             git add --all .
