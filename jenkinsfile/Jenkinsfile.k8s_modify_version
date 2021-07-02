@@ -82,7 +82,7 @@ pipeline {
                             git config --global user.name  "${BUILD_USER}"
                             git add --all .
                             git commit -m "${image} version update to ${version}"
-                            git push origin ${git_project_branch}'''
+                            git push'''
                         }
                     }
                 }
@@ -111,7 +111,7 @@ pipeline {
                             git config --global user.name  "${BUILD_USER}"
                             git add --all .
                             git commit -m "${image} version update to ${version}"
-                            git push origin ${git_project_branch}'''
+                            git push'''
                         }
                     }
                 }
