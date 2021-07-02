@@ -21,7 +21,7 @@ if (env.git_project_branch){
 }
 
 def YAML_FILE="kubernetes_pod_template.yaml"
-def docker_image="harborka.qianfan123.com/k8s/argocd-cli:v1.0.0"
+def docker_image="harbor.qianfan123.com/toolset/argocd-cli:v1.0.0"
 def label_name="jenkins-job-k8s-modify-version"
 
 pipeline {
