@@ -1,0 +1,128 @@
+if (!env.on_k8s){
+    env.on_k8s="False"
+}
+if (env.set_on_k8s) {
+    env.on_k8s=env.set_on_k8s
+}
+
+def node= "master"
+if (env.node){
+    node =env.node
+}
+
+def git_project_url="gitlab.hd123.com/qianfanops/kubernetes.git"
+if (env.git_project_url){
+    git_project_url = env.git_project_url
+}
+
+def git_project_branch="develop"
+if (env.git_project_branch){
+    git_project_branch = env.git_project_branch
+}
+
+def YAML_FILE="kubernetes_pod_template.yaml"
+def docker_image="harborka.qianfan123.com/k8s/argocd-cli:v1.0.0"
+def label_name="jenkins-job-k8s-modify-version"
+
+pipeline {
+    agent {label node}
+    options {
+	    timeout(time: 3, unit: 'HOURS')
+    }
+    stages {
+        stage('advance prepare on k8s to read yaml') {
+            when {
+                beforeAgent true
+                environment name: 'on_k8s', value: 'True'
+            }
+
+            steps {
+                script{
+                    echo "node : ${node}"
+                    echo "on_k8s : ${on_k8s}"
+                    kubernetesPodYamlData = readYaml file: "jenkinsfile/${YAML_FILE}"
+                    kubernetesPodYamlData.spec.containers[0].image = "${docker_image}"
+                    kubernetesPodYamlData.spec.containers[0].name = "${label_name}"
+                    kubernetesPodYamlData.metadata.labels.label = "${label_name}"
+                    writeYaml file: "${YAML_FILE}.tmp", data: kubernetesPodYamlData
+                    kubernetesPodReadYamlData = sh(script: "cat ${YAML_FILE}.tmp", returnStdout: true)
+                    echo "${kubernetesPodReadYamlData}"
+                } 
+            }
+        }
+        stage('delete workspace') {
+            steps{
+                deleteDir()
+            }
+        }
+        stage('修改版本信息 on k8s') {
+            when {
+                beforeAgent true
+                environment name: 'on_k8s', value: 'True'
+            }
+            agent {
+                kubernetes{
+                    cloud 'kubernetes'
+                    yaml "${kubernetesPodReadYamlData}"
+                }
+            }
+            steps{
+                script{
+                    container("${label_name}") {
+                        String[] image_version_str = image_version.split(',')
+                        for ( String i : image_version_str ){
+                            String[] image_version_str_tmp = i.split(':')
+                            image=image_version_str_tmp[0]
+                            version=image_version_str_tmp[1]
+                            # 拉取代码
+                            git init
+                            git branch: "${git_project_branch}", credentialsId: '17643215-09f8-4a9a-b0ea-c8e49777ce1d', url: "${git_project_url}"
+                            git checkout -b ${git_project_branch}
+                            # 设置镜像
+                            find ${DNET_PRODUCT}/${image}/overlays/${DNET_PROFILE}/ -name config.sh | sed s#/config.sh## | awk '{print "cd",$1,"&& kustomize edit set image ${image}:${version} && cd -"}' | bash
+                            # 提交代码
+                            git config --global user.email "${BUILD_USER}@hd123.com"
+                            git config --global user.name  "${BUILD_USER}"
+                            git add --all .
+                            git commit -m "${image} version update to ${version}"
+                            git push origin ${git_project_branch}
+                        }
+                    }
+                }
+            }
+        }
+
+        stage('start ansible playbook on docker') {
+            when {
+                beforeAgent true
+                environment name: 'on_k8s', value: 'False'
+            }
+            steps{
+                script {
+                    sh "docker pull ${docker_image}"
+                    withDockerContainer(args: "-v /root/.ssh:/root/.ssh", image: "${docker_image}") {
+                        String[] image_version_str = image_version.split(',')
+                        for ( String i : image_version_str ){
+                            String[] image_version_str_tmp = i.split(':')
+                            image=image_version_str_tmp[0]
+                            version=image_version_str_tmp[1]
+                            # 拉取代码
+                            git init
+                            git branch: "${git_project_branch}", credentialsId: '17643215-09f8-4a9a-b0ea-c8e49777ce1d', url: "${git_project_url}"
+                            git checkout -b ${git_project_branch}
+                            # 设置镜像
+                            find ${DNET_PRODUCT}/${image}/overlays/${DNET_PROFILE}/ -name config.sh | sed s#/config.sh## | awk '{print "cd",$1,"&& kustomize edit set image ${image}:${version} && cd -"}' | bash
+                            # 提交代码
+                            git config --global user.email "${BUILD_USER}@hd123.com"
+                            git config --global user.name  "${BUILD_USER}"
+                            git add --all .
+                            git commit -m "${image} version update to ${version}"
+                            git push origin ${git_project_branch}
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+
