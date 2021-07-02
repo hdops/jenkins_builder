@@ -11,7 +11,7 @@ if (env.build_image){
     build_image =env.build_image
 }
 
-def git_base_url="http://github.app.hd123.cn:10080"
+def git_base_url="https://gitlab.hd123.com/"
 if (env.git_base_url){
     git_base_url=env.git_base_url
 }
