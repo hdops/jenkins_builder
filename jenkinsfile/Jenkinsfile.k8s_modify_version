@@ -23,7 +23,6 @@ if (env.git_project_branch){
 def YAML_FILE="kubernetes_pod_template.yaml"
 def docker_image="harbor.qianfan123.com/toolset/argocd-cli:v2.0.0"
 def label_name="jenkins-job-k8s-modify-version"
-def GIT_TOKEN_DATA=""
 
 pipeline {
     agent {label node}
@@ -54,10 +53,6 @@ pipeline {
         stage('delete workspace') {
             steps{
                 deleteDir()
-                script{
-                    GIT_TOKEN_DATA=credentials('17643215-09f8-4a9a-b0ea-c8e49777ce1d')
-                    sh "echo ${GIT_TOKEN_DATA_USR}:${GIT_TOKEN_DATA_PSW}"
-                }
             }
         }
         stage('修改版本信息 on k8s') {
@@ -70,6 +65,9 @@ pipeline {
                     cloud 'kubernetes'
                     yaml "${kubernetesPodReadYamlData}"
                 }
+            }
+            environment {
+                GIT_TOKEN_DATA = credentials('17643215-09f8-4a9a-b0ea-c8e49777ce1d')
             }
             steps{
                 script{
