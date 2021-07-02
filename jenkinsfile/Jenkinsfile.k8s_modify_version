@@ -77,8 +77,8 @@ pipeline {
                             git branch: "${git_project_branch}", credentialsId: '17643215-09f8-4a9a-b0ea-c8e49777ce1d', url: "${git_project_url}"
                             sh """
                             sh modify_image_version.sh ${DNET_PRODUCT} ${image} ${DNET_PROFILE} ${version}
-                            git config --global user.email "${BUILD_USER}@hd123.com"
-                            git config --global user.name  "${BUILD_USER}"
+                            git config --global user.email "qianfan@hd123.com"
+                            git config --global user.name  "qianfan"
                             git add --all .
                             git commit -m "${image} version update to ${version}"
                             git push"""
@@ -105,8 +105,8 @@ pipeline {
                             git branch: "${git_project_branch}", credentialsId: '17643215-09f8-4a9a-b0ea-c8e49777ce1d', url: "${git_project_url}"
                             sh """
                             sh modify_image_version.sh ${DNET_PRODUCT} ${image} ${DNET_PROFILE} ${version}
-                            git config --global user.email "${BUILD_USER}@hd123.com"
-                            git config --global user.name  "${BUILD_USER}"
+                            git config --global user.email "qianfan@hd123.com"
+                            git config --global user.name  "qianfan"
                             git add --all .
                             git commit -m "${image} version update to ${version}"
                             git push"""
