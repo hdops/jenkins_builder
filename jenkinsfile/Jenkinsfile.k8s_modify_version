@@ -76,7 +76,7 @@ pipeline {
                             version=image_version_str_tmp[1]
                             git branch: "${git_project_branch}", credentialsId: '17643215-09f8-4a9a-b0ea-c8e49777ce1d', url: "${git_project_url}"
                             sh '''
-                            find ${DNET_PRODUCT}/${image}/overlays/${DNET_PROFILE} -name config.sh | sed s#/config.sh## | awk '{print "cd",$1,"&& kustomize edit set image ${image}:${version} && cd -"}' | bash
+                            sh modify_image_version.sh ${DNET_PRODUCT} ${image} ${DNET_PROFILE} ${version}
                             git config --global user.email "${BUILD_USER}@hd123.com"
                             git config --global user.name  "${BUILD_USER}"
                             git add --all .
@@ -103,13 +103,13 @@ pipeline {
                             image=image_version_str_tmp[0]
                             version=image_version_str_tmp[1]
                             git branch: "${git_project_branch}", credentialsId: '17643215-09f8-4a9a-b0ea-c8e49777ce1d', url: "${git_project_url}"
-                            sh '''
-                            find ${DNET_PRODUCT}/${image}/overlays/${DNET_PROFILE} -name config.sh | sed s#/config.sh## | awk '{print "cd",$1,"&& kustomize edit set image ${image}:${version} && cd -"}' | bash
+                            sh """
+                            sh modify_image_version.sh ${DNET_PRODUCT} ${image} ${DNET_PROFILE} ${version}
                             git config --global user.email "${BUILD_USER}@hd123.com"
                             git config --global user.name  "${BUILD_USER}"
                             git add --all .
                             git commit -m "${image} version update to ${version}"
-                            git push'''
+                            git push"""
                         }
                     }
                 }
