@@ -29,19 +29,6 @@ def YAML_FILE="kubernetes_pod_template.yaml"
 def docker_image="harbor.qianfan123.com/toolset/argocd-cli:v2.0.0"
 def label_name="jenkins-job-k8s-modify-version"
 
-def do_deploy() { 
-   String[] image_str = image.split(',')
-    for ( String i : image_str ){
-        argocd_proj = "${DNET_PRODUCT}"
-        argocd_repo = "${git_project_http}${git_project_url}"
-        k8s_namespace = "${DNET_PRODUCT}-${DNET_PROFILE}"
-        git branch: "${git_project_branch}", credentialsId: '17643215-09f8-4a9a-b0ea-c8e49777ce1d', url: "${git_project_http}${git_project_url}"
-        sh "sh deploy.sh ${DNET_PRODUCT} ${i} ${DNET_PROFILE} ${argocd_addr} ${ARGOCD_TOKEN_DATA_USR} ${ARGOCD_TOKEN_DATA_PSW} \
-            ${argocd_proj} ${argocd_repo} ${k8s_cluster} ${k8s_namespace}"
-        sh "git push ${git_project_http}${GIT_TOKEN_DATA_USR}:${GIT_TOKEN_DATA_PSW}@${git_project_url} develop"
-    }
-}
-
 pipeline {
     agent {label node}
     options {
@@ -91,7 +78,16 @@ pipeline {
             steps{
                 script{
                     container("${label_name}") {
-                        do_deploy()
+                        String[] image_str = image.split(',')
+                        for ( String i : image_str ){
+                            argocd_proj = "${DNET_PRODUCT}"
+                            argocd_repo = "${git_project_http}${git_project_url}"
+                            k8s_namespace = "${DNET_PRODUCT}-${DNET_PROFILE}"
+                            git branch: "${git_project_branch}", credentialsId: '17643215-09f8-4a9a-b0ea-c8e49777ce1d', url: "${git_project_http}${git_project_url}"
+                            sh "sh deploy.sh ${DNET_PRODUCT} ${i} ${DNET_PROFILE} ${argocd_addr} ${ARGOCD_TOKEN_DATA_USR} ${ARGOCD_TOKEN_DATA_PSW} \
+                                ${argocd_proj} ${argocd_repo} ${k8s_cluster} ${k8s_namespace}"
+                            sh "git push ${git_project_http}${GIT_TOKEN_DATA_USR}:${GIT_TOKEN_DATA_PSW}@${git_project_url} develop"
+                        }
                     }
                 }
             }
@@ -110,7 +106,16 @@ pipeline {
                 script {
                     sh "docker pull ${docker_image}"
                     withDockerContainer(args: "-v /root/.ssh:/root/.ssh", image: "${docker_image}") {
-                        do_deploy()
+                        String[] image_str = image.split(',')
+                        for ( String i : image_str ){
+                            argocd_proj = "${DNET_PRODUCT}"
+                            argocd_repo = "${git_project_http}${git_project_url}"
+                            k8s_namespace = "${DNET_PRODUCT}-${DNET_PROFILE}"
+                            git branch: "${git_project_branch}", credentialsId: '17643215-09f8-4a9a-b0ea-c8e49777ce1d', url: "${git_project_http}${git_project_url}"
+                            sh "sh deploy.sh ${DNET_PRODUCT} ${i} ${DNET_PROFILE} ${argocd_addr} ${ARGOCD_TOKEN_DATA_USR} ${ARGOCD_TOKEN_DATA_PSW} \
+                                ${argocd_proj} ${argocd_repo} ${k8s_cluster} ${k8s_namespace}"
+                            sh "git push ${git_project_http}${GIT_TOKEN_DATA_USR}:${GIT_TOKEN_DATA_PSW}@${git_project_url} develop"
+                        }
                     }
                 }
             }
