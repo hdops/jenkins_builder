@@ -1,0 +1,131 @@
+if (!env.on_k8s){
+    env.on_k8s="False"
+}
+if (env.set_on_k8s) {
+    env.on_k8s=env.set_on_k8s
+}
+
+def node= "master"
+if (env.node){
+    node =env.node
+}
+
+def git_project_http="https://"
+if (env.git_project_http){
+    git_project_http = env.git_project_http
+}
+
+def git_project_url="gitlab.hd123.com/qianfanops/kubernetes.git"
+if (env.git_project_url){
+    git_project_url = env.git_project_url
+}
+
+def git_project_branch="develop"
+if (env.git_project_branch){
+    git_project_branch = env.git_project_branch
+}
+
+def YAML_FILE="kubernetes_pod_template.yaml"
+def docker_image="harbor.qianfan123.com/toolset/argocd-cli:v2.0.0"
+def label_name="jenkins-job-k8s-modify-version"
+
+pipeline {
+    agent {label node}
+    options {
+	    timeout(time: 3, unit: 'HOURS')
+    }
+    stages {
+        stage('advance prepare on k8s to read yaml') {
+            when {
+                beforeAgent true
+                environment name: 'on_k8s', value: 'True'
+            }
+
+            steps {
+                script{
+                    echo "node : ${node}"
+                    echo "on_k8s : ${on_k8s}"
+                    kubernetesPodYamlData = readYaml file: "jenkinsfile/${YAML_FILE}"
+                    kubernetesPodYamlData.spec.containers[0].image = "${docker_image}"
+                    kubernetesPodYamlData.spec.containers[0].name = "${label_name}"
+                    kubernetesPodYamlData.metadata.labels.label = "${label_name}"
+                    writeYaml file: "${YAML_FILE}.tmp", data: kubernetesPodYamlData
+                    kubernetesPodReadYamlData = sh(script: "cat ${YAML_FILE}.tmp", returnStdout: true)
+                    echo "${kubernetesPodReadYamlData}"
+                } 
+            }
+        }
+        stage('delete workspace') {
+            steps{
+                deleteDir()
+            }
+        }
+        stage('修改版本信息 on k8s') {
+            when {
+                beforeAgent true
+                environment name: 'on_k8s', value: 'True'
+            }
+            agent {
+                kubernetes{
+                    cloud 'kubernetes'
+                    yaml "${kubernetesPodReadYamlData}"
+                }
+            }
+            environment {
+                GIT_TOKEN_DATA = credentials('17643215-09f8-4a9a-b0ea-c8e49777ce1d')
+                ARGOCD_TOKEN_DATA = credentials('argocd-token')
+            }
+            steps{
+                script{
+                    container("${label_name}") {
+                        String[] image_str = image.split(',')
+                        for ( String i : image_str ){
+                            argocd_user='${ARGOCD_TOKEN_DATA_USR}'
+                            argocd_password='${ARGOCD_TOKEN_DATA_PSW}'
+                            git_token='${GIT_TOKEN_DATA_USR}:${GIT_TOKEN_DATA_PSW}'
+                            argocd_proj = "${DNET_PRODUCT}"
+                            argocd_repo = "${git_project_http}${git_project_url}"
+                            k8s_namespace = "${DNET_PRODUCT}-${DNET_PROFILE}"
+                            git branch: "${git_project_branch}", credentialsId: '17643215-09f8-4a9a-b0ea-c8e49777ce1d', url: "${git_project_http}${git_project_url}"
+                            sh "sh deploy.sh ${DNET_PRODUCT} ${i} ${DNET_PROFILE} ${argocd_addr} ${argocd_user} ${argocd_password} \
+                                ${argocd_proj} ${argocd_repo} ${k8s_cluster} ${k8s_namespace}"
+                            sh "git push ${git_project_http}${git_token}@${git_project_url} develop"
+                        }
+                    }
+                }
+            }
+        }
+
+        stage('start ansible playbook on docker') {
+            when {
+                beforeAgent true
+                environment name: 'on_k8s', value: 'False'
+            }
+            environment {
+                GIT_TOKEN_DATA = credentials('17643215-09f8-4a9a-b0ea-c8e49777ce1d')
+                ARGOCD_TOKEN_DATA = credentials('argocd-token')
+            }
+            steps{
+                script {
+                    sh "docker pull ${docker_image}"
+                    withDockerContainer(args: "-v /root/.ssh:/root/.ssh", image: "${docker_image}") {
+                        String[] image_str = image.split(',')
+                        for ( String i : image_str ){
+                            argocd_user='${ARGOCD_TOKEN_DATA_USR}'
+                            argocd_password='${ARGOCD_TOKEN_DATA_PSW}'
+                            git_token='${GIT_TOKEN_DATA_USR}:${GIT_TOKEN_DATA_PSW}'
+                            argocd_proj = "${DNET_PRODUCT}"
+                            argocd_repo = "${git_project_http}${git_project_url}"
+                            k8s_namespace = "${DNET_PRODUCT}-${DNET_PROFILE}"
+                            git branch: "${git_project_branch}", credentialsId: '17643215-09f8-4a9a-b0ea-c8e49777ce1d', url: "${git_project_http}${git_project_url}"
+                            sh "sh deploy.sh ${DNET_PRODUCT} ${i} ${DNET_PROFILE} ${argocd_addr} ${argocd_user} ${argocd_password} \
+                                ${argocd_proj} ${argocd_repo} ${k8s_cluster} ${k8s_namespace}"
+                            sh "git push ${git_project_http}${git_token}@${git_project_url} develop"
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+
