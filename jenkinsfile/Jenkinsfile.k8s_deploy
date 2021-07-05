@@ -29,7 +29,7 @@ def YAML_FILE="kubernetes_pod_template.yaml"
 def docker_image="harbor.qianfan123.com/toolset/argocd-cli:v2.0.0"
 def label_name="jenkins-job-k8s-modify-version"
 
-def do() { 
+def do_deploy() { 
    String[] image_str = image.split(',')
     for ( String i : image_str ){
         argocd_proj = "${DNET_PRODUCT}"
@@ -91,7 +91,7 @@ pipeline {
             steps{
                 script{
                     container("${label_name}") {
-                        do()
+                        do_deploy()
                     }
                 }
             }
@@ -110,7 +110,7 @@ pipeline {
                 script {
                     sh "docker pull ${docker_image}"
                     withDockerContainer(args: "-v /root/.ssh:/root/.ssh", image: "${docker_image}") {
-                        do()
+                        do_deploy()
                     }
                 }
             }
