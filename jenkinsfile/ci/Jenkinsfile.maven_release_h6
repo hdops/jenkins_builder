@@ -90,6 +90,29 @@ pipeline {
                 }
             }
         }
+        stage('latin-merge') {
+            steps{
+                script{
+					if (env.latinrelease){
+						sh """
+						git clone -b ${release_src_version} https://gitlab.hd123.com/HDPOS4.6/latin-ext-lib.git latin-ext-lib
+						cd latin-ext-lib
+						git tag -a ${release_tar_version} -m 'V'${release_tar_version}
+						git push https://gitlab.hd123.com/HDPOS4.6/latin-ext-lib.git ${release_tar_version}
+						cd ..
+						git clone -b ${release_src_version} https://gitlab.hd123.com/HDPOS4.6/latin-ext-packages.git latin-ext-packages
+						cd latin-ext-packages
+						git tag -a ${release_tar_version} -m 'V'${release_tar_version}
+						git push https://gitlab.hd123.com/HDPOS4.6/latin-ext-packages.git ${release_tar_version}
+						cd ..
+						git clone -b ${release_src_version} https://gitlab.hd123.com/HDPOS4.6/latin-ext-admin.git latin-ext-admin
+						cd latin-ext-admin
+						git tag -a ${release_tar_version} -m 'V'${release_tar_version}
+						git push https://gitlab.hd123.com/HDPOS4.6/latin-ext-admin.git ${release_tar_version}"""
+					}
+				}
+            }
+        }
 		stage('build') {
 		    steps{
 				script{  
