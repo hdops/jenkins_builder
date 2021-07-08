@@ -88,7 +88,7 @@ pipeline {
                             k8s_namespace = "${DNET_PRODUCT}-${DNET_PROFILE}"
                             git branch: "${git_project_branch}", credentialsId: '17643215-09f8-4a9a-b0ea-c8e49777ce1d', url: "${git_project_http}${git_project_url}"
                             sh "sh deploy.sh ${DNET_PRODUCT} ${i} ${DNET_PROFILE} ${argocd_addr} ${argocd_user} ${argocd_password} \
-                                ${argocd_proj} ${argocd_repo} ${k8s_cluster} ${k8s_namespace}"
+                                ${argocd_proj} ${argocd_repo} ${k8s_cluster} ${k8s_namespace} ${DNET_PROJECT}"
                             sh "git push ${git_project_http}${git_token}@${git_project_url} develop"
                         }
                     }
@@ -119,7 +119,7 @@ pipeline {
                             k8s_namespace = "${DNET_PRODUCT}-${DNET_PROFILE}"
                             git branch: "${git_project_branch}", credentialsId: '17643215-09f8-4a9a-b0ea-c8e49777ce1d', url: "${git_project_http}${git_project_url}"
                             sh "sh deploy.sh ${DNET_PRODUCT} ${i} ${DNET_PROFILE} ${argocd_addr} ${argocd_user} ${argocd_password} \
-                                ${argocd_proj} ${argocd_repo} ${k8s_cluster} ${k8s_namespace}"
+                                ${argocd_proj} ${argocd_repo} ${k8s_cluster} ${k8s_namespace} ${DNET_PROJECT}"
                             sh "git push ${git_project_http}${git_token}@${git_project_url} develop"
                         }
                     }
