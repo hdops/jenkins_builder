@@ -96,8 +96,8 @@ pipeline {
 					if (env.latinrelease){
 						sh """
 						git config credential.helper store
-						git config user.email qianfan@hd123.com
-						git config user.name qianfan
+						git config --global user.email qianfan@hd123.com
+						git config --global user.name qianfan
 						git clone -b ${release_src_version} https://gitlab.hd123.com/HDPOS4.6/latin-ext-lib.git latin-ext-lib
 						cd latin-ext-lib
 						git tag -a ${release_tar_version} -m 'V'${release_tar_version}
