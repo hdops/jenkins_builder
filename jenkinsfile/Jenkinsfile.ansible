@@ -24,6 +24,13 @@ if (!env.on_k8s){
 if (env.set_on_k8s) {
     env.on_k8s=env.set_on_k8s
 }
+def add_args=""
+if (params.limit!=""){
+    add_args=add_args+" --limit ${params.limit}"
+}
+if (params.vars!=""){
+    add_args=add_args+" -e @${params.vars}"
+}
 pipeline {
     agent {label node}                
     stages {
@@ -45,11 +52,8 @@ pipeline {
                             }
                             sh "tar zxf toolset.tar.gz -C $WORKSPACE"
                             sh "chmod +x ansible/*/*/inventory/*.py"
-                            if ("${params.limit}"!=""){
-                                sh "ansible-playbook -i ${params.inventory} ${params.playbook} -e @${params.vars} --tags ${params.tags} --limit ${params.limit}"
-                            }else{
-                                sh "ansible-playbook -i ${params.inventory} ${params.playbook} -e @${params.vars} --tags ${params.tags}"
-                            }
+                            echo "add_args: ${add_args}"
+                            sh "ansible-playbook -i ${params.inventory} ${params.playbook} -e @${params.vars} --tags ${params.tags} ${add_args}"
                         }
                     }else{
                         deleteDir()
@@ -66,12 +70,8 @@ pipeline {
                             }
                             sh "tar zxf toolset.tar.gz -C $WORKSPACE"
                             sh "chmod +x ansible/*/*/inventory/*.py"
-                            if ("${params.limit}"!=""){
-                                sh "ansible-playbook -i ${params.inventory} ${params.playbook} -e @${params.vars} --tags ${params.tags} --limit ${params.limit}"
-                            }else{
-                                sh "ansible-playbook -i ${params.inventory} ${params.playbook} -e @${params.vars} --tags ${params.tags}"
-                            }
-
+                            echo "add_args: ${add_args}"
+                            sh "ansible-playbook -i ${params.inventory} ${params.playbook} -e @${params.vars} --tags ${params.tags} ${add_args}"
                         }
                     }
                     
