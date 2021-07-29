@@ -53,7 +53,7 @@ pipeline {
                             sh "tar zxf toolset.tar.gz -C $WORKSPACE"
                             sh "chmod +x ansible/*/*/inventory/*.py"
                             echo "add_args: ${add_args}"
-                            sh "ansible-playbook -i ${params.inventory} ${params.playbook} -e @${params.vars} --tags ${params.tags} ${add_args}"
+                            sh "ansible-playbook -i ${params.inventory} ${params.playbook} --tags ${params.tags} ${add_args}"
                         }
                     }else{
                         deleteDir()
@@ -71,7 +71,7 @@ pipeline {
                             sh "tar zxf toolset.tar.gz -C $WORKSPACE"
                             sh "chmod +x ansible/*/*/inventory/*.py"
                             echo "add_args: ${add_args}"
-                            sh "ansible-playbook -i ${params.inventory} ${params.playbook} -e @${params.vars} --tags ${params.tags} ${add_args}"
+                            sh "ansible-playbook -i ${params.inventory} ${params.playbook} --tags ${params.tags} ${add_args}"
                         }
                     }
                     
