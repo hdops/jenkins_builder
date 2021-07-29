@@ -27,7 +27,7 @@ pipeline {
         }
         stage('deploy-app'){
             steps {
-				sh 'ssh $sship /root/.script/toolset2.sh component $appname $version'
+				sh '${deploy_shell}'
             }
         }
     }
