@@ -157,7 +157,7 @@ pipeline {
         failure{
             script{
 
-                def subject = env.email_subject ? "${env.email_subject}" : "failure on Job ${env.JOB_NAME}"
+                def subject = env.email_subject ? "[Jenkins]${env.email_subject}" : "[Jenkins]failure on Job ${env.JOB_NAME}"
                 def to = env.email_recipients ? "${env.email_recipients}" : "buhaiqing@hd123.com"
                 def body = env.email_body ? "${env.email_body}" : "failure on Job ${env.JOB_NAME}"
                 // send email
