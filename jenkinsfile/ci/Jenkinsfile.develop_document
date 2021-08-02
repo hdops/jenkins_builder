@@ -1,14 +1,26 @@
-git_project_branch='master'
-git_project_url='https://gitlab.hd123.com/qianfanops/develop_document.git'
+def node="master"
+def git_project_branch='master'
+def git_project_url='https://gitlab.hd123.com/qianfanops/develop_document.git'
 
 pipeline {
-    agent {label master}
+    agent {label node}
     stages {
         stage('read receivers') {
 			steps{
-                git branch: "${git_project_branch}", credentialsId: '17643215-09f8-4a9a-b0ea-c8e49777ce1d', url: "${git_project_url}"
-                data = readYaml file: "receivers.yaml"
-                echo "${data}"
+                script{
+                    git branch: "${git_project_branch}", credentialsId: '17643215-09f8-4a9a-b0ea-c8e49777ce1d', url: "${git_project_url}"
+                    data = readYaml file: "receivers.yaml"
+                    def to = ""
+                    for ( String i : data.receivers ){
+                        to = to + "," + i 
+                    }
+                    to = to - ","
+                    def subject = env.email_subject ? "[Develop Document]${env.email_subject}" : "[Develop Document]发生更新"
+                    def body = env.email_body ? "${env.email_body}" : "failure on Job ${env.JOB_NAME} in ${env.BUILD_URL}"
+                    // send email
+                    echo "${to}"
+                    // emailext subject: subject, to: to, body:body,attachLog:true
+                }
             }
         }
     }
