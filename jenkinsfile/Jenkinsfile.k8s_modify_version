@@ -35,7 +35,7 @@ def func = {
         String[] image_version_str_tmp = i.split(':')
         version=image_version_str_tmp[0]
         String[] images = image_version_str_tmp[1].split(',')
-        for ( String j : image_version_str ){
+        for ( String j : images ){
             image=j
             git branch: "${git_project_branch}", credentialsId: '17643215-09f8-4a9a-b0ea-c8e49777ce1d', url: "${git_project_url}"
             sh "sh modify_image_version.sh ${DNET_PRODUCT} ${image} ${DNET_PROFILE} ${version} ${DNET_PROJECT}"
