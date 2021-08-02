@@ -99,31 +99,6 @@ pipeline {
 				}
 			}
         }
-		stage('image download && appinstall') {
-		    steps{
-				script{
-					i=last_image_version
-					echo "download and install `PRESET_IMAGE_VERSION is ${i}`"
-					if(env.on_k8s == 'True'){
-						container("hdtoolsetcore"){
-							sh "DNET_PRODUCT=${params.DNET_PRODUCT} DNET_PROFILE=${params.DNET_PROFILE} PRESET_IMAGE_VERSION=${i} hdops deploy image_download --subsystem ${params.subsystem} --stackids ${params.stackIds} --tag ${params.tag}"
-		        			sh "DNET_AK=${params.DNET_AK} DNET_PRODUCT=${params.DNET_PRODUCT} DNET_PROFILE=${params.DNET_PROFILE} PRESET_IMAGE_VERSION=${i} hdops deploy appinstall --subsystem ${params.subsystem} --stackids ${params.stackIds}  --operate ${params.action} --tag ${params.tag}"
-						}
-					}else {
-					    docker.image("harbor.qianfan123.com/toolset/toolsetcore:${toolset_image_version}").inside {
-					        sh "DNET_PRODUCT=${params.DNET_PRODUCT} DNET_PROFILE=${params.DNET_PROFILE} PRESET_IMAGE_VERSION=${i} hdops deploy image_download --subsystem ${params.subsystem} --stackids ${params.stackIds} --tag ${params.tag}"
-		        		    sh "DNET_AK=${params.DNET_AK} DNET_PRODUCT=${params.DNET_PRODUCT} DNET_PROFILE=${params.DNET_PROFILE} PRESET_IMAGE_VERSION=${i} hdops deploy appinstall --subsystem ${params.subsystem} --stackids ${params.stackIds}  --operate ${params.action} --tag ${params.tag}"
-					    }
-					}
-				}
-			}
-			post {
-			    success{
-				    build job: "${params.healthcheck_job}", parameters: [string(name: 'DNET_PROFILE', value: "${params.DNET_PROFILE}"), string(name: 'subsystem', value: "${params.subsystem}"), string(name: 'TOOLSET_PATH', value: "${WORKSPACE}"), string(name: 'TRUST_PUBLIC_IP', value: "${params.TRUST_PUBLIC_IP}"),string(name: 'GIT_BRANCH', value: "${params.GIT_BRANCH}"), string(name:'tag',value: "${params.tag}")], propagate: false, wait: false
-				}
-			}
-		}
-    }
 	post {
     // 构建失败之后钉钉通知
         failure {
