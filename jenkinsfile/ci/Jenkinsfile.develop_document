@@ -1,0 +1,33 @@
+def node="master"
+def git_project_branch='master'
+def git_project_url='https://gitlab.hd123.com/qianfanops/develop_document.git'
+
+pipeline {
+    agent {label node}
+    stages {
+        stage('delete workspace') {
+            steps{
+                deleteDir()
+            }
+        }
+        stage('read receivers') {
+			steps{
+                script{
+                    git branch: "${git_project_branch}", credentialsId: '17643215-09f8-4a9a-b0ea-c8e49777ce1d', url: "${git_project_url}"
+                    data = readYaml file: "receivers.yaml"
+                    def to = ""
+                    for ( String i : data.receivers ){
+                        to = to + ", " + i 
+                    }
+                    to = to - ", "
+                    def git_commit = sh(returnStdout: true, script: 'git log --oneline -1 | awk \'{print \$1}\'')
+                    def git_changeName = sh(returnStdout: true, script: 'git diff --name-only HEAD~ HEAD')
+                    def subject = env.email_subject ? "[Develop Document]${env.email_subject}" : "[Develop Document]发生更新"
+                    def body = env.email_body ? "${env.email_body}" : "发生提交 ${git_commit} Git 链接为 ${git_project_url} \n 有修改的内容为:\n ${git_changeName}"
+                    // send email
+                    emailext subject: subject, to: to, body:body, attachLog:true
+                }
+            }
+        }
+    }
+}

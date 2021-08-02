@@ -20,9 +20,33 @@ if (env.git_project_branch){
     git_project_branch = env.git_project_branch
 }
 
+def uploadRemoteJob="DNET_Integration_test/DNET_modify_version_Int"
+if (env.uploadRemoteJob){
+    uploadRemoteJob = env.uploadRemoteJob
+}
+
 def YAML_FILE="kubernetes_pod_template.yaml"
 def docker_image="harbor.qianfan123.com/toolset/argocd-cli:v2.0.0"
 def label_name="jenkins-job-k8s-modify-version"
+
+def func = {
+    String[] image_version_str = image_version.split(';')
+    for ( String i : image_version_str ) {
+        String[] image_version_str_tmp = i.split(':')
+        version=image_version_str_tmp[0]
+        String[] images = image_version_str_tmp[1].split(',')
+        for ( String j : images ){
+            image=j
+            git branch: "${git_project_branch}", credentialsId: '17643215-09f8-4a9a-b0ea-c8e49777ce1d', url: "${git_project_url}"
+            sh "sh modify_image_version.sh ${DNET_PRODUCT} ${image} ${DNET_PROFILE} ${version} ${DNET_PROJECT}"
+            sh "git push https://${GIT_TOKEN_DATA_USR}:${GIT_TOKEN_DATA_PSW}@gitlab.hd123.com/qianfanops/kubernetes.git develop"
+        }
+    }
+    build job: "${uploadRemoteJob}", 
+        parameters: [string(name: 'DNET_PROFILE', value: DNET_PROFILE), string(name: 'DNET_PRODUCT', value: DNET_PRODUCT), string(name: 'image', value: image_version)], 
+        wait: false
+}
+
 
 pipeline {
     agent {label node}
@@ -72,21 +96,13 @@ pipeline {
             steps{
                 script{
                     container("${label_name}") {
-                        String[] image_version_str = image_version.split(',')
-                        for ( String i : image_version_str ){
-                            String[] image_version_str_tmp = i.split(':')
-                            image=image_version_str_tmp[0]
-                            version=image_version_str_tmp[1]
-                            git branch: "${git_project_branch}", credentialsId: '17643215-09f8-4a9a-b0ea-c8e49777ce1d', url: "${git_project_url}"
-                            sh "sh modify_image_version.sh ${DNET_PRODUCT} ${image} ${DNET_PROFILE} ${version} ${DNET_PROJECT}"
-                            sh "git push https://${GIT_TOKEN_DATA_USR}:${GIT_TOKEN_DATA_PSW}@gitlab.hd123.com/qianfanops/kubernetes.git develop"
-                        }
+                        func()
                     }
                 }
             }
         }
 
-        stage('start ansible playbook on docker') {
+        stage('修改版本信息 on docker') {
             when {
                 beforeAgent true
                 environment name: 'on_k8s', value: 'False'
@@ -98,15 +114,7 @@ pipeline {
                 script {
                     sh "docker pull ${docker_image}"
                     withDockerContainer(args: "-v /root/.ssh:/root/.ssh", image: "${docker_image}") {
-                        String[] image_version_str = image_version.split(',')
-                        for ( String i : image_version_str ){
-                            String[] image_version_str_tmp = i.split(':')
-                            image=image_version_str_tmp[0]
-                            version=image_version_str_tmp[1]
-                            git branch: "${git_project_branch}", credentialsId: '17643215-09f8-4a9a-b0ea-c8e49777ce1d', url: "${git_project_url}"
-                            sh "sh modify_image_version.sh ${DNET_PRODUCT} ${image} ${DNET_PROFILE} ${version} ${DNET_PROJECT}"
-                            sh "git push https://${GIT_TOKEN_DATA_USR}:${GIT_TOKEN_DATA_PSW}@gitlab.hd123.com/qianfanops/kubernetes.git develop"
-                        }
+                        func()
                     }
                 }
             }

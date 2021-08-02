@@ -122,6 +122,9 @@ pipeline {
 						def mvn_shell="mvn "
                         // release:prepare -DreleaseVersion=${releaseVersion} -DdevelopmentVersion=${developVersion}  release:perform
 						def mvn_goals=" release:prepare -DreleaseVersion=${params.releaseVersion} -DdevelopmentVersion=${params.developVersion}  release:perform "
+                        if (env.mvn_goals){
+                        mvn_goals =env.mvn_goals
+                        }
                         if (env.mvn_profile){
                             mvn_goals+=" "+env.mvn_profile
                             }
@@ -132,7 +135,7 @@ pipeline {
                             mvn_shell+=mvn_goals
                             }
                         if (env.mvn_release_options == null){
-                            env.mvn_release_options = '-Pdocker -Darguments="-Dmaven.test.skip=true -Dmaven.javadoc.skip=true"'
+                            env.mvn_release_options = ' -Pdocker -Darguments="-Dmaven.test.skip=true -Dmaven.javadoc.skip=true"'
                             echo "mvn_release_options is ${mvn_release_options}"
                             }
                         mvn_shell+=env.mvn_release_options
