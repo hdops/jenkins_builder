@@ -1,0 +1,15 @@
+git_project_branch='master'
+git_project_url='https://gitlab.hd123.com/qianfanops/develop_document.git'
+
+pipeline {
+    agent {label master}
+    stages {
+        stage('read receivers') {
+			steps{
+                git branch: "${git_project_branch}", credentialsId: '17643215-09f8-4a9a-b0ea-c8e49777ce1d', url: "${git_project_url}"
+                data = readYaml file: "receivers.yaml"
+                echo "${data}"
+            }
+        }
+    }
+}

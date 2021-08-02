@@ -86,7 +86,7 @@ pipeline {
             }
         }
 
-        stage('start ansible playbook on docker') {
+        stage('修改版本信息 on docker') {
             when {
                 beforeAgent true
                 environment name: 'on_k8s', value: 'False'
