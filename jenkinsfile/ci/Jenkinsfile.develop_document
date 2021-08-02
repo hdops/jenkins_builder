@@ -5,6 +5,11 @@ def git_project_url='https://gitlab.hd123.com/qianfanops/develop_document.git'
 pipeline {
     agent {label node}
     stages {
+        stage('delete workspace') {
+            steps{
+                deleteDir()
+            }
+        }
         stage('read receivers') {
 			steps{
                 script{
@@ -18,7 +23,11 @@ pipeline {
                     def subject = env.email_subject ? "[Develop Document]${env.email_subject}" : "[Develop Document]发生更新"
                     def body = env.email_body ? "${env.email_body}" : "failure on Job ${env.JOB_NAME} in ${env.BUILD_URL}"
                     // send email
-                    echo "${to}"
+                    echo "${subject} ${body} ${to}"
+                    def git_commit= sh(  returnStdout: true, script: 'git log --oneline -1 | awk \'{print \$1}\'')
+                    def git_httpd= sh(  returnStdout: true, script: 'git rev-parse  HEAD')
+                    echo "${git_commit} ${git_httpd}"
+
                     // emailext subject: subject, to: to, body:body,attachLog:true
                 }
             }
