@@ -17,18 +17,15 @@ pipeline {
                     data = readYaml file: "receivers.yaml"
                     def to = ""
                     for ( String i : data.receivers ){
-                        to = to + "," + i 
+                        to = to + ", " + i 
                     }
-                    to = to - ","
+                    to = to - ", "
+                    def git_commit = sh(returnStdout: true, script: 'git log --oneline -1 | awk \'{print \$1}\'')
+                    def git_changeName = sh(returnStdout: true, script: 'git diff --name-only HEAD~ HEAD')
                     def subject = env.email_subject ? "[Develop Document]${env.email_subject}" : "[Develop Document]发生更新"
-                    def body = env.email_body ? "${env.email_body}" : "failure on Job ${env.JOB_NAME} in ${env.BUILD_URL}"
+                    def body = env.email_body ? "${env.email_body}" : "发生提交 ${git_commit} Git 链接为 ${git_project_url} \n 有修改的内容为:\n ${git_changeName}"
                     // send email
-                    echo "${subject} ${body} ${to}"
-                    def git_commit= sh(  returnStdout: true, script: 'git log --oneline -1 | awk \'{print \$1}\'')
-                    def git_httpd= sh(  returnStdout: true, script: 'git rev-parse  HEAD')
-                    echo "${git_commit} ${git_httpd}"
-
-                    // emailext subject: subject, to: to, body:body,attachLog:true
+                    emailext subject: subject, to: to, body:body, attachLog:true
                 }
             }
         }
