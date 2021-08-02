@@ -122,6 +122,9 @@ pipeline {
 						def mvn_shell="mvn "
                         // release:prepare -DreleaseVersion=${releaseVersion} -DdevelopmentVersion=${developVersion}  release:perform
 						def mvn_goals=" release:prepare -DreleaseVersion=${params.releaseVersion} -DdevelopmentVersion=${params.developVersion}  release:perform "
+                        if (env.mvn_goals){
+                        mvn_goals =env.mvn_goals
+                        }
                         if (env.mvn_profile){
                             mvn_goals+=" "+env.mvn_profile
                             }
