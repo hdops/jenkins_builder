@@ -1,6 +1,10 @@
 def node="master"
 def git_project_branch='master'
+def toolset_image_version='0.3.0'
 def git_project_url='https://gitlab.hd123.com/qianfanops/develop_document.git'
+def to = ""
+def subject = ""
+def body = ""
 
 pipeline {
     agent {label node}
@@ -15,19 +19,31 @@ pipeline {
                 script{
                     git branch: "${git_project_branch}", credentialsId: '17643215-09f8-4a9a-b0ea-c8e49777ce1d', url: "${git_project_url}"
                     data = readYaml file: "receivers.yaml"
-                    def to = ""
+                    
                     for ( String i : data.receivers ){
                         to = to + ", " + i 
                     }
                     to = to - ", "
                     def git_commit = sh(returnStdout: true, script: 'git log --oneline -1 | awk \'{print \$1}\'')
                     def git_changeName = sh(returnStdout: true, script: 'git diff --name-only HEAD~ HEAD')
-                    def subject = env.email_subject ? "[Develop Document]${env.email_subject}" : "[Develop Document]发生更新"
-                    def body = env.email_body ? "${env.email_body}" : "发生提交 ${git_commit} Git 链接为 ${git_project_url} \n 有修改的内容为:\n ${git_changeName}"
-                    // send email
-                    emailext subject: subject, to: to, body:body, attachLog:true
+                    subject = env.email_subject ? "[Develop Document]${env.email_subject}" : "[Develop Document]发生更新"
+                    body = env.email_body ? "${env.email_body}" : "发生提交 ${git_commit} Git 链接为 ${git_project_url} \n\n 有修改的内容为:\n ${git_changeName}"
+                    echo "Email_Receivers=${to} Email_Message=${body} Email_Subject=${subject}"
+                    // send email, 新CI的Jenkins邮件发送有异常
+                    // emailext subject: subject, to: to, body:body, attachLog:true
                 }
             }
+        }
+        stage('send email') {
+		    steps{
+				script{
+                    withDockerContainer(image: "harbor.qianfan123.com/toolset/toolsetcore:${toolset_image_version}") {
+                        sh "DNET_PROFILE=integration_test DNET_PRODUCT=dnet TRUST_PUBLIC_IP=True hdops download_toolset --branch develop -p ."
+                        sh "tar zxf toolset.tar.gz -C ."
+                        sh "Email_Receivers='${to}' Email_Message='${body}' Email_Subject='${subject}' python send_email.py"
+					}
+				}
+			}
         }
     }
 }
