@@ -2,6 +2,7 @@ def node="master"
 def git_project_branch='master'
 def toolset_image_version='0.3.0'
 def git_project_url='https://gitlab.hd123.com/qianfanops/develop_document.git'
+def share_url='https://gitlab.hd123.com/qianfanops/develop_document/-/blob/master/ChangeList.adoc'
 def to = ""
 def subject = ""
 def body = ""
@@ -27,7 +28,7 @@ pipeline {
                     def git_commit = sh(returnStdout: true, script: 'git log --oneline -1 | awk \'{print \$1}\'')
                     def git_changeName = sh(returnStdout: true, script: 'git diff --name-only HEAD~ HEAD')
                     subject = env.email_subject ? "[Develop Document]${env.email_subject}" : "[Develop Document]发生更新"
-                    body = env.email_body ? "${env.email_body}" : "发生提交 ${git_commit} Git 链接为 ${git_project_url} \n\n 有修改的内容为:\n ${git_changeName}"
+                    body = env.email_body ? "${env.email_body}" : "发生提交 ${git_commit} Git 链接为 ${git_project_url} \n链接地址为 ${share_url} \n\n 有修改的内容为:\n ${git_changeName}"
                     echo "Email_Receivers=${to} Email_Message=${body} Email_Subject=${subject}"
                     // send email, 新CI的Jenkins邮件发送有异常
                     // emailext subject: subject, to: to, body:body, attachLog:true
