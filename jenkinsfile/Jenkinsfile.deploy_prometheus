@@ -20,7 +20,14 @@ def git_project_branch="master"
 if (env.git_project_branch){
     git_project_branch=env.git_project_branch
 }
-
+def inventory="monitor"
+if (params.inventory){
+    inventory=params.inventory
+}
+def vars="monitor_var.yml"
+if (params.vars){
+    vars=params.vars
+}
 def YAML_FILE="kubernetes_pod_template.yaml"
 def docker_image="harbor.qianfan123.com/toolset/ka-toolset-runenv:1.2"
 def label_name="jenkins-job-prometheus"
@@ -72,7 +79,7 @@ pipeline {
                     sh "docker pull ${docker_image}"
                     withDockerContainer(args: "-v /root/.ssh:/root/.ssh", image: "${docker_image}") {
                         git branch: "${git_project_branch}", credentialsId: '17643215-09f8-4a9a-b0ea-c8e49777ce1d', url: "${git_project_url}"
-                        sh "ansible-playbook -i config/${project}/monitor /root/ka-toolset/iac/monitor.yml -e @config/${project}/monitor_vars.yml --tags ${tags}"
+                        sh "ansible-playbook -i config/${project}/${inventory} /root/ka-toolset/iac/monitor.yml -e @config/${project}/${vars} --tags ${tags}"
                     }
                 }
             }
@@ -95,7 +102,7 @@ pipeline {
                 script {
                     container("${label_name}") {
                         git branch: "${git_project_branch}", credentialsId: '17643215-09f8-4a9a-b0ea-c8e49777ce1d', url: "${git_project_url}"
-                        sh "ansible-playbook -i config/${project}/monitor /root/ka-toolset/iac/monitor.yml -e @config/${project}/monitor_vars.yml --tags ${tags}"
+                        sh "ansible-playbook -i config/${project}/${inventory} /root/ka-toolset/iac/monitor.yml -e @config/${project}/${vars} --tags ${tags}"
                     }
                 }
             }
