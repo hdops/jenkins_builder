@@ -34,6 +34,7 @@ pipeline {
 				script{  
 					echo "docker_build_tag is ${docker_build_tag}"
 					docker_build_shell = "docker build -t " + docker_build_tag + " . && docker push " + docker_build_tag
+					sh "docker_build_shell"
 				}
 			} 
 		}
