@@ -42,6 +42,11 @@ if (env.mvn_configfile){
     mvn_configfile =env.mvn_configfile
 }
 
+def trust_public_ip="None"
+if (env.trust_public_ip){
+    trust_public_ip =env.trust_public_ip
+}
+
 def skipversionupdate="--no-skipversionupdate"
 if (env.skipversionupdate){
     skipversionupdate =env.skipversionupdate
@@ -360,6 +365,7 @@ pipeline {
 DNET_PRODUCT=${DNET_PRODUCT}
 subsystem=${subsystem}
 skipversion=${skipversion}
+TRUST_PUBLIC_IP=${trust_public_ip}
 skipversionupdate=${skipversionupdate}""", remoteJenkinsName: "${remoteJenkins}", useCrumbCache: false, useJobInfoCache: false, enhancedLogging: true
                         }
                     }
