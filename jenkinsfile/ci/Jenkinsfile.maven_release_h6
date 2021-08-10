@@ -143,10 +143,14 @@ pipeline {
                         configFileProvider([configFile(fileId:mvn_configfile, variable: 'maven_settings')]) {
                                 mvn_shell+="  -s $maven_settings"
                                 echo "mvn_shell is ${mvn_shell}"
-                                sh "git config credential.helper store"
-                                sh "git config  user.email qianfan@hd123.com"
-                                sh "git config  user.name qianfan"
-                                sh "${mvn_shell}"
+                                if (source_code_management == "svn"){
+                                	sh "${mvn_shell}"
+                                }else{
+                                    sh "git config credential.helper store"
+                                    sh "git config  user.email qianfan@hd123.com"
+                                    sh "git config  user.name qianfan"
+                                    sh "${mvn_shell}"
+                                }
                             }
 				}
 			} 
