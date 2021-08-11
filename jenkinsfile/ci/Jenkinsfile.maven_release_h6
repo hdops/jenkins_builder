@@ -82,9 +82,9 @@ pipeline {
                             checkout([$class: 'GitSCM', branches: [[name: "*/${build_branch}"]],userRemoteConfigs: [[credentialsId: 'qianfan',url: "${ci_git_server_baseurl}/${git_project}.git"]],extensions: [[$class: 'LocalBranch', localBranch: "${build_branch}"]]])
                         }
                     } else if (source_code_management == "svn"){
-                        echo "http://hddenv/svn/${svn_project}/${build_branch}"
+                        echo "http://${svn_project}/${build_branch}"
                         retry(5){
-                            checkout([$class: 'SubversionSCM', additionalCredentials: [], excludedCommitMessages: '', excludedRegions: '', excludedRevprop: '', excludedUsers: '', filterChangelog: false, ignoreDirPropChanges: false, includedRegions: '', locations: [[cancelProcessOnExternalsFail: false, credentialsId: 'hddenv', depthOption: 'infinity', ignoreExternalsOption: true, local: '.', remote: "http://hddenv/svn/${svn_project}/${build_branch}"]], quietOperation: true, workspaceUpdater: [$class: 'CheckoutUpdater']])
+                            checkout([$class: 'SubversionSCM', additionalCredentials: [], excludedCommitMessages: '', excludedRegions: '', excludedRevprop: '', excludedUsers: '', filterChangelog: false, ignoreDirPropChanges: false, includedRegions: '', locations: [[cancelProcessOnExternalsFail: false, credentialsId: 'hddenv', depthOption: 'infinity', ignoreExternalsOption: true, local: '.', remote: "http://${svn_project}/${build_branch}"]], quietOperation: true, workspaceUpdater: [$class: 'CheckoutUpdater']])
                         }
                     }
                 }
@@ -143,10 +143,14 @@ pipeline {
                         configFileProvider([configFile(fileId:mvn_configfile, variable: 'maven_settings')]) {
                                 mvn_shell+="  -s $maven_settings"
                                 echo "mvn_shell is ${mvn_shell}"
-                                sh "git config credential.helper store"
-                                sh "git config  user.email qianfan@hd123.com"
-                                sh "git config  user.name qianfan"
-                                sh "${mvn_shell}"
+                                if (source_code_management == "svn"){
+                                	sh "${mvn_shell}"
+                                }else{
+                                    sh "git config credential.helper store"
+                                    sh "git config  user.email qianfan@hd123.com"
+                                    sh "git config  user.name qianfan"
+                                    sh "${mvn_shell}"
+                                }
                             }
 				}
 			} 
