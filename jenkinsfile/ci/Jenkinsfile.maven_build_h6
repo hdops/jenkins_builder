@@ -211,7 +211,7 @@ pipeline {
                             sh "${mvn_shell}"
                         }
                     echo "BUILD_URL:${BUILD_URL}"
-                    withDockerContainer(args: "--rm -v ${WORKSPACE}:/opt", image: "harbor.qianfan123.com/toolset/toolsetcore:${toolset_image_version}") {
+                    withDockerContainer(args: "--rm -v ${WORKSPACE}:/opt", image: "harborka.qianfan123.com/toolset/toolsetcore:${toolset_image_version}") {
                         retry(2){
                             sh "DNET_PROFILE=integration_test DNET_PRODUCT=dnet TRUST_PUBLIC_IP=true hdops download_toolset --branch develop -p ."
                         }
