@@ -89,28 +89,6 @@ pipeline {
     options {
 	    timeout(time: 1, unit: 'HOURS')
     }
-	stages {
-	    stage('delete workspace') {
-            steps{
-                deleteDir()
-            }
-        }
-		stage('update toolset image') {
-			steps{
-                script {
-                    if(env.on_k8s == 'True'){
-                        echo "kubernetes do not need update"
-                    }else {
-                        echo "start"
-                        echo "workspace is $WORKSPACE"
-                        retry(2){
-                            sh "docker pull harbor.qianfan123.com/toolset/toolsetcore:${toolset_image_version}"
-                        }
-                    }
-                }
-			}
-        }
-	}
     stages {
         stage('delete workspace') {
             steps{
@@ -216,21 +194,6 @@ pipeline {
                 }
             }
 		}
-		stage('update toolset image') {
-			steps{
-                script {
-                    if(env.on_k8s == 'True'){
-                        echo "kubernetes do not need update"
-                    }else {
-                        echo "start"
-                        echo "workspace is $WORKSPACE"
-                        retry(2){
-                            sh "docker pull harbor.qianfan123.com/toolset/toolsetcore:${toolset_image_version}"
-                        }
-                    }
-                }
-			}
-        }
         stage('maven denpendency check'){
 			steps{
 				script{
