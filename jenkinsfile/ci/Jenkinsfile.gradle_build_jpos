@@ -8,6 +8,11 @@ if (env.ci_git_server_baseurl){
     ci_git_server_baseurl = env.ci_git_server_baseurl
 }
 
+def deploy_baseurl= "http://172.17.12.229:8080"
+if (env.deploy_baseurl){
+    deploy_baseurl = env.deploy_baseurl
+}
+
 def jpos_image= "harborka.qianfan123.com/base/maven:3.2.5-centos7-ci"
 if (env.jpos_image){
     jpos_image =env.jpos_image
@@ -73,6 +78,20 @@ pipeline {
                             echo "jpos_build_shell is ${jpos_build_shell}"
 					        sh "  ${jpos_build_shell}"
                         }
+				}
+			} 
+		}
+		stage('remotedeploy') {
+		    steps{
+				script{  
+						def deploy_shell="curl -X GET"
+                        if (env.remote_deploy_options != null){
+                            deploy_shell+=" ${deploy_baseurl}/${deploy_apppath} "+deploy_user
+							sh "${deploy_shell}"
+                            }
+                        else{
+                            echo "No deployment required"
+                            }
 				}
 			} 
 		}
