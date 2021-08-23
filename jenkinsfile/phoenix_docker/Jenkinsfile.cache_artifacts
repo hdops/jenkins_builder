@@ -25,9 +25,6 @@ if (env.set_on_k8s) {
 }
 pipeline {
     agent {label node}
-	options {
-	    timeout(time: 60, unit: 'MINUTES')
-    }
 
     stages {
         stage('advance prepare on k8s to read yaml') {
