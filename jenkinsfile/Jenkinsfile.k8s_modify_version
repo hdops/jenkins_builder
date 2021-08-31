@@ -20,11 +20,6 @@ if (env.git_project_branch){
     git_project_branch = env.git_project_branch
 }
 
-def uploadRemoteJob="DNET_Integration_test/DNET_modify_version_Int"
-if (env.uploadRemoteJob){
-    uploadRemoteJob = env.uploadRemoteJob
-}
-
 def YAML_FILE="kubernetes_pod_template.yaml"
 def docker_image="harbor.qianfan123.com/toolset/argocd-cli:v2.0.0"
 def label_name="jenkins-job-k8s-modify-version"
@@ -42,9 +37,11 @@ def func = {
             sh "git push https://${GIT_TOKEN_DATA_USR}:${GIT_TOKEN_DATA_PSW}@gitlab.hd123.com/qianfanops/kubernetes.git develop"
         }
     }
-    build job: "${uploadRemoteJob}", 
+    if (env.uploadRemoteJob){
+        build job: "${uploadRemoteJob}", 
         parameters: [string(name: 'DNET_PROFILE', value: DNET_PROFILE), string(name: 'DNET_PRODUCT', value: DNET_PRODUCT), string(name: 'image', value: image_version)], 
         wait: false
+    }
 }
 
 
