@@ -118,12 +118,13 @@ pipeline {
                             echo "======下线blue节点======"
                             container("hdtoolsetcore"){
                                 sh "DNET_PRODUCT=${params.DNET_PRODUCT} DNET_PROFILE=${params.DNET_PROFILE} hdops change_dubbo_cmdb --image ${params.image} --tag blue --dryrun ${params.dryrun}"
-
+                                sh "sleep 60"
                             }
                         }else {
                             echo "======下线blue节点======"
                             docker.image("harbor.qianfan123.com/toolset/toolsetcore:${toolset_image_version}").inside  {
                                 sh "DNET_PRODUCT=${params.DNET_PRODUCT} DNET_PROFILE=${params.DNET_PROFILE} hdops change_dubbo_cmdb --image ${params.image} --tag blue --dryrun ${params.dryrun}"
+                                sh "sleep 60"
                             }
                         }
 				    }
@@ -192,11 +193,13 @@ pipeline {
                             echo "======下线green节点======"
                             container("hdtoolsetcore"){
                                 sh "DNET_PRODUCT=${params.DNET_PRODUCT} DNET_PROFILE=${params.DNET_PROFILE} hdops change_dubbo_cmdb --image ${params.image} --tag green --dryrun ${params.dryrun}"
+                                sh "sleep 60"
                             }
                         }else {
                             echo "======下线green节点======"
                             docker.image("harbor.qianfan123.com/toolset/toolsetcore:${toolset_image_version}").inside  {
                                 sh "DNET_PRODUCT=${params.DNET_PRODUCT} DNET_PROFILE=${params.DNET_PROFILE} hdops change_dubbo_cmdb --image ${params.image} --tag green --dryrun ${params.dryrun}"
+                                sh "sleep 60"
                             }
                         }
 				    }
