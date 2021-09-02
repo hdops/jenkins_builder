@@ -35,7 +35,7 @@ if (env.source_code_management){
     source_code_management ="git"
 }
 
-def docker_args="--rm -v /var/run/docker.sock:/var/run/docker.sock -v /etc/docker/daemon.json:/etc/docker/daemon.json -v /usr/bin/docker:/usr/bin/docker --add-host=maven.qianfan123.com:172.17.0.82 --add-host=apidoc.hd123.com:172.17.10.53 --add-host=github.app.hd123.cn:172.17.10.58 --add-host=gitlab.hd123.com:172.17.12.219 --entrypoint='' "
+def docker_args="--rm -v /var/run/docker.sock:/var/run/docker.sock -v /root/.docker/config.json:/root/.docker/config.json -v /usr/bin/docker:/usr/bin/docker --add-host=maven.qianfan123.com:172.17.0.82 --add-host=apidoc.hd123.com:172.17.10.53 --add-host=github.app.hd123.cn:172.17.10.58 --add-host=gitlab.hd123.com:172.17.12.219 --entrypoint='' "
 if (env.maven_repository){
     docker_args+=" -v "+env.maven_repository
 }else{
