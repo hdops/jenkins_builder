@@ -9,6 +9,11 @@ if (env.whether_post){
     whether_post =env.whether_post
 }
 
+def config_script_file ="config/jenkins_config_update.sh"
+if (env.config_script_file){
+   config_script_file = env.config_script_file
+}
+
 def run_on_public="None"
 if (env.run_on_public){
     run_on_public=env.run_on_public
@@ -30,7 +35,7 @@ pipeline {
 				script {
                     echo "workspace is $WORKSPACE"
                     git branch: "${params.GIT_BRANCH}", credentialsId: '17643215-09f8-4a9a-b0ea-c8e49777ce1d', url: "http://github.app.hd123.cn:10080/${GIT_GROUP}/${GIT_REPONAME}.git"
-                    sh "sh config/jenkins_config_update.sh"
+                    sh "sh ${config_script_file}"
                     }
                 }
 			}
