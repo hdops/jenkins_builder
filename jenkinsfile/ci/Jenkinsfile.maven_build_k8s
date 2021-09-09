@@ -309,6 +309,7 @@ pipeline {
 DNET_PRODUCT=${DNET_PRODUCT}
 subsystem=${subsystem}
 skipversion=${skipversion}
+nodethreadcount=2
 skipversionupdate=${skipversionupdate}""", remoteJenkinsName: "${remoteJenkins}", useCrumbCache: false, useJobInfoCache: false, enhancedLogging: true
                         }
                     }
