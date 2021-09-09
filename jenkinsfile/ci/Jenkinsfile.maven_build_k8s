@@ -340,13 +340,7 @@ skipversionupdate=${skipversionupdate}""", remoteJenkinsName: "${remoteJenkins}"
                             echo "DNET_PRODUCT is ${DNET_PRODUCT}"
                             // deploy
                             triggerRemoteJob job: "${remoteJob}", maxConn: 3, parameters: """DNET_PROFILE=${DNET_PROFILE}
-image=${image}""", remoteJenkinsName: "${remoteJenkins}", useCrumbCache: false, useJobInfoCache: false, enhancedLogging: true
-
-                            triggerRemoteJob job: "${remoteJob}", maxConn: 3, parameters: """DNET_PROFILE=${DNET_PROFILE}
-DNET_PRODUCT=${DNET_PRODUCT}
-subsystem=${subsystem}
-skipversion=${skipversion}
-skipversionupdate=${skipversionupdate}""", remoteJenkinsName: "${remoteJenkins}", useCrumbCache: false, useJobInfoCache: false, enhancedLogging: true
+image=${subsystem}""", remoteJenkinsName: "${remoteJenkins}", useCrumbCache: false, useJobInfoCache: false, enhancedLogging: true
                         }
                     }
 				}
