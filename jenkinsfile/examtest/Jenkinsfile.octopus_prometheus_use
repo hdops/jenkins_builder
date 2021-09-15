@@ -6,6 +6,14 @@ def to="buhaiqing@hd123.com, yuzhiyuan@hd123.com"
 if (env.receivers){
     to=env.receivers
 }
+def exam_time = "10"
+if (env.exam_time){
+    exam_time = env.exam_time
+}
+
+def toolset_image_version = "0.3.0"
+def git_project_branch = "develop"
+def git_project_url = "http://github.app.hd123.cn:10080/qianfanops/toolset-k8s-config.git"
 def body = "" 
 
 pipeline {
@@ -13,38 +21,55 @@ pipeline {
     options {   
         timeout(time: 120, unit: 'MINUTES')
     }
-    stage("准备环境中"){
-        steps{
-            script{
-                echo "${BUILD_USER}"
-            }
-        }
-    }
-    stage("开始考试"){
-        steps{
-            script{
-                echo "${BUILD_USER}"
-            }
-        }
-    }
-    stage("检查、计算成绩"){
-        steps{
-            script{
-                echo "${BUILD_USER}"
-                body = "test OK"
-            }
-        }
-    }
-    stage('发送邮件') {
-        steps{
-            script{
-                withDockerContainer(image: "harbor.qianfan123.com/toolset/toolsetcore:${toolset_image_version}") {
-                    subject = "${BUILD_USER} 运维助手管理prometheus规则测试结果"
-                    sh "DNET_PROFILE=integration_test DNET_PRODUCT=dnet TRUST_PUBLIC_IP=True hdops download_toolset --branch develop -p ."
-                    sh "tar zxf toolset.tar.gz -C ."
-                    sh "Email_Receivers='${to}' Email_Message='${body}' Email_Subject='${subject}' python send_email.py"
+    stages{
+        stage("准备环境中"){
+            steps{
+                script{
+                    if (!user){
+                        echo "请输入你的名字信息"
+                        sh "false"
+                    }
+                    withDockerContainer(image: "harbor.qianfan123.com/toolset/toolsetcore:${toolset_image_version}") {
+                        git branch: "${git_project_branch}", credentialsId: '17643215-09f8-4a9a-b0ea-c8e49777ce1d', url: "${git_project_url}"
+                        sh "python examtest_octopus_prometheus.py -a prepare"
+                        sh "python examtest_octopus_prometheus.py -a topic"
+                    }
                 }
             }
         }
-     }   
+        stage("开始考试"){
+            steps{
+                script{
+                    echo "${user} 开始考试，考试时间为${exam_time}分钟，请抓紧时间作答"
+                    sh "sleep ${exam_time}m"
+                }
+            }
+        }
+        stage("检查、计算成绩"){
+            steps{
+                script{
+                    echo "考试结束，开始测评，请等待..."
+                    withDockerContainer(image: "harbor.qianfan123.com/toolset/toolsetcore:${toolset_image_version}") {
+                        git branch: "${git_project_branch}", credentialsId: '17643215-09f8-4a9a-b0ea-c8e49777ce1d', url: "${git_project_url}"
+                        body = sh(script: "python examtest_octopus_prometheus.py -a check", returnStdout: true)
+                    }
+                    body = "test OK"
+                    echo "考试结果： ${body}"
+                }
+            }
+        }
+        stage('发送邮件') {
+            steps{
+                script{
+                    withDockerContainer(image: "harbor.qianfan123.com/toolset/toolsetcore:${toolset_image_version}") {
+                        subject = "${user} 运维助手管理prometheus规则测试结果"
+                        sh "DNET_PROFILE=integration_test DNET_PRODUCT=dnet TRUST_PUBLIC_IP=True hdops download_toolset --branch develop -p ."
+                        sh "tar zxf toolset.tar.gz -C ."
+                        sh "Email_Receivers='${to}' Email_Message='${body}' Email_Subject='${subject}' python send_email.py"
+                    }
+                }
+            }
+        }   
+    }
+    
 }
