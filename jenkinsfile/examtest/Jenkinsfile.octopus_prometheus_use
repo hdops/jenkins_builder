@@ -1,0 +1,50 @@
+def node="master"
+if (env.node){
+    node =env.node
+}
+def to="buhaiqing@hd123.com, yuzhiyuan@hd123.com"
+if (env.receivers){
+    to=env.receivers
+}
+def body = "" 
+
+pipeline {
+    agent {label node}
+    options {   
+        timeout(time: 120, unit: 'MINUTES')
+    }
+    stage("准备环境中"){
+        steps{
+            script{
+                echo "${BUILD_USER}"
+            }
+        }
+    }
+    stage("开始考试"){
+        steps{
+            script{
+                echo "${BUILD_USER}"
+            }
+        }
+    }
+    stage("检查、计算成绩"){
+        steps{
+            script{
+                echo "${BUILD_USER}"
+                body = "test OK"
+            }
+        }
+    }
+    stage('发送邮件') {
+        steps{
+            script{
+                withDockerContainer(image: "harbor.qianfan123.com/toolset/toolsetcore:${toolset_image_version}") {
+                    subject = "${BUILD_USER} 运维助手管理prometheus规则测试结果"
+                    sh "DNET_PROFILE=integration_test DNET_PRODUCT=dnet TRUST_PUBLIC_IP=True hdops download_toolset --branch develop -p ."
+                    sh "tar zxf toolset.tar.gz -C ."
+                    sh "Email_Receivers='${to}' Email_Message='${body}' Email_Subject='${subject}' python send_email.py"
+                }
+            }
+        }
+     }   
+}
