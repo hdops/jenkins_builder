@@ -53,7 +53,7 @@ pipeline {
                         git branch: "${git_project_branch}", credentialsId: '17643215-09f8-4a9a-b0ea-c8e49777ce1d', url: "${git_project_url}"
                         body = sh(script: "python examtest_octopus_prometheus.py -a check", returnStdout: true)
                     }
-                    echo "考试结果： ${body}"
+                    echo "考试结果： \n${body}"
                 }
             }
         }
