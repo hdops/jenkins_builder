@@ -95,7 +95,7 @@ pipeline {
             }
         }
 
-        stage('start ansible playbook on docker') {
+        stage('部署指定任务 on docker') {
             when {
                 beforeAgent true
                 environment name: 'on_k8s', value: 'False'
