@@ -106,7 +106,7 @@ pipeline {
                                     echo "${i} is file: ${out}"
                                     if ( out == "true" ) {
                                         outstatus = sh(script: "ls $i && ${update_shell} $i  && echo -n 'true' || echo -n 'false' ", returnStdout: true)
-                                        if ( outstatus == "false" ) {
+                                        if ( outstatus != "true" ) {
                                             echo "update ${j}: ${outstatus}"
                                             error_yaml_file=error_yaml_file+'<>'+j
                                             echo "error_yaml_file is: ${error_yaml_file}"
@@ -144,7 +144,7 @@ pipeline {
                     def to = env.email_recipients ? "${env.email_recipients}" : "yuzhiyuan@hd123.com"
                     def body = env.email_body ? "${env.email_body}" : "failure on Job ${env.JOB_NAME} in ${env.BUILD_URL}"
                     // send email
-                    emailext subject: subject, to: to, body:body,attachLog:true
+                    emailext(recipientProviders: [[$class: 'DevelopersRecipientProvider']],subject: "${subject}", body: "${body}",attachLog:true)
                 }
             }
         }
