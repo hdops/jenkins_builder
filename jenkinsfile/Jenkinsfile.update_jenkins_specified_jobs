@@ -105,10 +105,10 @@ pipeline {
                                     out = sh(script: "[ -f ${i} ] && echo -n 'true' || echo -n 'false' ", returnStdout: true)
                                     echo "${i} is file: ${out}"
                                     if ( out == "true" ) {
-                                        outstatus = sh(script: "ls $i && ${update_shell} $i  && echo -n 'true' || echo -n 'false' ", returnStdout: true)
-                                        if ( outstatus != "true" ) {
-                                            echo "update ${j}: ${outstatus}"
-                                            error_yaml_file=error_yaml_file+'<>'+j
+                                        outputstatus = sh(script: "ls $i && ${update_shell} $i  && echo -n 'true' || echo -n 'false' ", returnStdout: true)
+                                        echo "Get ${i}: ${outputstatus}"
+                                        if ( outputstatus == "false" ) {
+                                            error_yaml_file=error_yaml_file+'<>'+i
                                             echo "error_yaml_file is: ${error_yaml_file}"
                                         }
                                     }
