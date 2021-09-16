@@ -90,7 +90,7 @@ pipeline {
                                     file.each{ j ->
                                         out = sh(script: "echo ${j} | grep -E \"${ignore_templates}\" && echo -n 'true' || echo -n 'false' ", returnStdout: true)
                                         if ( out == "false" ) {
-                                            outstatus = sh(script: "ls $j && ${update_shell} $j && echo -n 'true' || echo -n 'false' ", returnStdout: true)
+                                            outstatus = sh(script: "ls $j &> /dev/null && ${update_shell} $j && echo -n 'true' || echo -n 'false' ", returnStdout: true)
                                             if ( outstatus == "false" ) {
                                                 echo "update ${j}: ${outstatus}"
                                                 error_yaml_file=error_yaml_file+'<>'+j
@@ -105,7 +105,7 @@ pipeline {
                                     out = sh(script: "[ -f ${i} ] && echo -n 'true' || echo -n 'false' ", returnStdout: true)
                                     echo "${i} is file: ${out}"
                                     if ( out == "true" ) {
-                                        outputstatus = sh(script: "ls $i && ${update_shell} $i  && echo -n 'true' || echo -n 'false' ", returnStdout: true)
+                                        outputstatus = sh(script: "ls $i  &> /dev/null && ${update_shell} $i  && echo -n 'true' || echo -n 'false' ", returnStdout: true)
                                         echo "Get ${i}: ${outputstatus}"
                                         if ( outputstatus == "false" ) {
                                             error_yaml_file=error_yaml_file+'<>'+i
