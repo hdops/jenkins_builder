@@ -71,9 +71,9 @@ pipeline {
                         sh "tar zxf toolset.tar.gz -C ."
                         sh "Email_Receivers='${to}' Email_Message='${body}' Email_Subject='${subject}' python send_email.py"
                     }
+                    emailext(recipientProviders: [[$class: 'RequesterRecipientProvider']],subject: "${subject}", body: "${body}",attachLog:true)
                 }
             }
         }   
     }
-    
 }
