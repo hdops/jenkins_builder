@@ -10,6 +10,11 @@ if (env.maven_image){
     maven_image ="harbor.qianfan123.com/base/maven:3.3.9_jdk8"
 }
 
+def mvn_configfile="jdk8"
+if (env.mvn_configfile){
+    mvn_configfile =env.mvn_configfile
+}
+
 def docker_args="--rm -v /var/run/docker.sock:/var/run/docker.sock -v /usr/bin/docker:/usr/bin/docker --add-host=maven.qianfan123.com:172.17.0.82 --add-host=apidoc.hd123.com:172.17.10.53 --add-host=github.app.hd123.cn:172.17.10.58 --add-host=gitlab.hd123.com:172.17.12.219 "
 if (env.maven_repository){
     docker_args+=" -v "+env.maven_repository
@@ -44,7 +49,14 @@ pipeline{
                         echo "请输入脚本文件位置"
                         sh "false"
                     }
+                    if (env.mvn_opt == 'True') {
+                        configFileProvider([configFile(fileId:mvn_configfile, variable: 'maven_settings')]) {
+                            shell_file+=" $maven_settings"
+                        }
+                    }
+                    echo "do shell is ${shell_file}"
                     sh "${shell_file}"
+                    archiveArtifacts '*.tar.gz' 
                 }
             }
         }
