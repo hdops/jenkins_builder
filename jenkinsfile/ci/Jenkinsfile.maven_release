@@ -251,19 +251,20 @@ pipeline {
             steps{
                 script{
                     withDockerContainer(image: "harborka.qianfan123.com/component/dops-release:latest", args: "-v ${WORKSPACE}/:") {
-                        def text = jenkinsStepAccess.readFile("pom.xml")
-                        def parser = new XmlParser()
-                        def xml = parser.parseText(text.toString())
-                        print xml
+                        pom = readMavenPom file: 'pom.xml'
+                        def data = "{\"projectName\":\"${pom.groupId}:${pom.artifactId}\",\"version\": \"${releaseVersion}\",\"cdd\": {"
+                        
                         dirs=sh(returnStdout: true, script: "ls .").split('\n')
-                        file.each{ i ->
+                        dirs.each{ i ->
                             out = sh(script: "[ -f ${i}/src/main/resources/META-INF/cdd.yml ] && echo -n 'true' || echo -n 'false' ", returnStdout: true)
                             if ( out == "true" ) {
-                                
-                            } else {
-                                echo "ignore ${j}"
+                                print "find ${i} has cdd.yml"
+                                xml = readMavenPom file: "${i}/pom.xml"
+                                data += "\"${xml.artifactId}\":\"${i}/src/main/resources/META-INF/cdd.yml\","
                             }
                         }
+                        data = "java -jar dops-release wiki '" + data[0..-2] + "}}'"
+                        print data
                     }
                 }
             }
@@ -275,7 +276,7 @@ pipeline {
             }
             steps{
                 script{
-                    
+                    print 1
                 }
             }
         }
