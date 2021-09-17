@@ -1,0 +1,30 @@
+def node="master"
+if (env.node){
+    node =env.node
+}
+
+def toolset_image_version="0.3.0"
+if (env.toolset_image_version){
+    toolset_image_version =env.toolset_image_version
+}
+
+def docker_args="--rm -v /var/run/docker.sock:/var/run/docker.sock -v /usr/bin/docker:/usr/bin/docker "
+
+pipeline{
+    agent {
+        docker {
+            image "harbor.qianfan123.com/toolset/toolsetcore:${toolset_image_version}"
+            label node
+            args "${docker_args}"
+        }
+    }
+    stages{
+        stage("start Sql Check"){
+            steps{
+                script{
+                    sh "DNET_PRODUCT=dnet DNET_PROFILE=integration_test hdops sql_slow_log_records -u ${url} -c ${cycle} -q ${query} -l ${lock} -e ${number}"
+                }
+            }
+        }
+    }
+}
