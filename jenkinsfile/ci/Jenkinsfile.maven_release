@@ -263,7 +263,7 @@ pipeline {
                                 data += "\"${xml.artifactId}\":\"${i}/src/main/resources/META-INF/cdd.yml\","
                             }
                         }
-                        data = data[0..-2] + "}}"
+                        data = "java -jar dops-release wiki '" + data[0..-2] + "}}'"
                         print data
                     }
                 }
