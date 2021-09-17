@@ -52,6 +52,16 @@ if (!env.on_k8s){
 if (env.set_on_k8s) {
     env.on_k8s=env.set_on_k8s
 }
+
+def pub2_wiki="False"
+if (env.pub2_wiki){
+    pub2_wiki=env.pub2_wiki
+}
+def pub2_octopus="False"
+if (env.pub2_octopus){
+    pub2_octopus=env.pub2_octopus
+}
+
 pipeline {
     // agent {label node}
     agent {docker {
@@ -233,5 +243,41 @@ pipeline {
 				}
 			}
 		}
+        stage('pub2wiki'){
+            when {
+                beforeAgent true
+                environment name: 'pub2_wiki', value: 'True'
+            }
+            steps{
+                script{
+                    withDockerContainer(image: "harborka.qianfan123.com/component/dops-release:latest", args: "-v ${WORKSPACE}/:") {
+                        def text = jenkinsStepAccess.readFile("pom.xml")
+                        def parser = new XmlParser()
+                        def xml = parser.parseText(text.toString())
+                        print xml
+                        dirs=sh(returnStdout: true, script: "ls .").split('\n')
+                        file.each{ i ->
+                            out = sh(script: "[ -f ${i}/src/main/resources/META-INF/cdd.yml ] && echo -n 'true' || echo -n 'false' ", returnStdout: true)
+                            if ( out == "true" ) {
+                                
+                            } else {
+                                echo "ignore ${j}"
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        stage('pub2octopus'){
+            when {
+                beforeAgent true
+                environment name: 'pub2_octopus', value: 'True'
+            }
+            steps{
+                script{
+                    
+                }
+            }
+        }
     }
 }
