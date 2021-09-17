@@ -52,10 +52,12 @@ pipeline{
                     if (env.mvn_opt == 'True') {
                         configFileProvider([configFile(fileId:mvn_configfile, variable: 'maven_settings')]) {
                             shell_file+=" $maven_settings"
+                            echo "do shell is ${shell_file}"
+                            sh "${shell_file}"
                         }
+                    } else {
+                        sh "${shell_file}"
                     }
-                    echo "do shell is ${shell_file}"
-                    sh "${shell_file}"
                     archiveArtifacts '*.tar.gz' 
                 }
             }
