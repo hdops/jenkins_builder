@@ -41,8 +41,9 @@ pipeline {
                             sh "tar zxf toolset.tar.gz -C ${WORKSPACE}"
                             if (env.nginx_file){
                                 sh "DINGTALK_TOKEN=${DINGTALK_TOKEN} DNET_PROFILE=${params.DNET_PROFILE} DNET_PRODUCT=${params.DNET_PRODUCT} hdops check_nginx --nginx_path ${env.nginx_file}"
+                            } else {
+                                sh "DINGTALK_TOKEN=${DINGTALK_TOKEN} DNET_PROFILE=${params.DNET_PROFILE} DNET_PRODUCT=${params.DNET_PRODUCT} hdops check_nginx"
                             }
-                            sh "DINGTALK_TOKEN=${DINGTALK_TOKEN} DNET_PROFILE=${params.DNET_PROFILE} DNET_PRODUCT=${params.DNET_PRODUCT} hdops check_nginx"
                         }
                     }else {
                         docker.image("harbor.qianfan123.com/toolset/toolsetcore:${toolset_image_version}").inside {
@@ -55,8 +56,9 @@ pipeline {
                             sh "tar zxf toolset.tar.gz -C ${WORKSPACE}"
                             if (env.nginx_file){
                                 sh "DINGTALK_TOKEN=${DINGTALK_TOKEN} DNET_PROFILE=${params.DNET_PROFILE} DNET_PRODUCT=${params.DNET_PRODUCT} hdops check_nginx --nginx_path ${env.nginx_file}"
+                            } else {
+                                sh "DINGTALK_TOKEN=${DINGTALK_TOKEN} DNET_PROFILE=${params.DNET_PROFILE} DNET_PRODUCT=${params.DNET_PRODUCT} hdops check_nginx"
                             }
-                            sh "DINGTALK_TOKEN=${DINGTALK_TOKEN} DNET_PROFILE=${params.DNET_PROFILE} DNET_PRODUCT=${params.DNET_PRODUCT} hdops check_nginx"
                         }
                     }
                 }
