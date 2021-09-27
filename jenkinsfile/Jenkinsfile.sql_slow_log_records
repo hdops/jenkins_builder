@@ -18,6 +18,16 @@ if (env.DNET_PROFILE){
     DNET_PROFILE=env.DNET_PROFILE
 }
 
+def run_on_public="None"
+if (env.run_on_public){
+    run_on_public=env.run_on_public
+}
+
+def GIT_BRANCH="develop"
+if (params.GIT_BRANCH){
+    GIT_BRANCH=params.GIT_BRANCH
+}
+
 def docker_args="--rm -v /var/run/docker.sock:/var/run/docker.sock -v /usr/bin/docker:/usr/bin/docker "
 
 pipeline{
@@ -33,7 +43,7 @@ pipeline{
             steps{
                 script{
                     retry(2){
-                        sh "DNET_PROFILE=integration_test DNET_PRODUCT=dnet TRUST_PUBLIC_IP=${run_on_public} hdops download_toolset --branch ${params.GIT_BRANCH} -p ."
+                        sh "DNET_PROFILE=integration_test DNET_PRODUCT=dnet TRUST_PUBLIC_IP=${run_on_public} hdops download_toolset --branch ${GIT_BRANCH} -p ."
                     }
                     sh "tar zxf toolset.tar.gz -C ${WORKSPACE}"
                     sh "DNET_PRODUCT=${DNET_PRODUCT} DNET_PROFILE=${DNET_PROFILE} hdops sql_slow_log_records -u ${url} -c ${cycle} -q ${query} -l ${lock} -e ${number} -t ${project}"
