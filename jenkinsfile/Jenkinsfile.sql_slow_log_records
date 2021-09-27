@@ -8,6 +8,16 @@ if (env.toolset_image_version){
     toolset_image_version =env.toolset_image_version
 }
 
+def DNET_PRODUCT="dnet"
+if (env.DNET_PRODUCT){
+    DNET_PRODUCT=env.DNET_PRODUCT
+}
+
+def DNET_PROFILE="integration_test"
+if (env.DNET_PROFILE){
+    DNET_PROFILE=env.DNET_PROFILE
+}
+
 def docker_args="--rm -v /var/run/docker.sock:/var/run/docker.sock -v /usr/bin/docker:/usr/bin/docker "
 
 pipeline{
@@ -22,7 +32,7 @@ pipeline{
         stage("start Sql Check"){
             steps{
                 script{
-                    sh "DNET_PRODUCT=dnet DNET_PROFILE=integration_test hdops sql_slow_log_records -u ${url} -c ${cycle} -q ${query} -l ${lock} -e ${number}"
+                    sh "DNET_PRODUCT=${DNET_PRODUCT} DNET_PROFILE=${DNET_PROFILE} hdops sql_slow_log_records -u ${url} -c ${cycle} -q ${query} -l ${lock} -e ${number} -t ${project}"
                 }
             }
         }
