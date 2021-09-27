@@ -32,6 +32,10 @@ pipeline{
         stage("start Sql Check"){
             steps{
                 script{
+                    retry(2){
+                        sh "DNET_PROFILE=integration_test DNET_PRODUCT=dnet TRUST_PUBLIC_IP=${run_on_public} hdops download_toolset --branch ${params.GIT_BRANCH} -p ."
+                    }
+                    sh "tar zxf toolset.tar.gz -C ${WORKSPACE}"
                     sh "DNET_PRODUCT=${DNET_PRODUCT} DNET_PROFILE=${DNET_PROFILE} hdops sql_slow_log_records -u ${url} -c ${cycle} -q ${query} -l ${lock} -e ${number} -t ${project}"
                 }
             }
