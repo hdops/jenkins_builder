@@ -65,7 +65,7 @@ pipeline {
 		stage("yamllint"){
 		    steps{
                 script{
-                if ("${env.gitlabBranch}"!="jenkins"){
+                if ("${env.gitlabBranch}"!="jenkins" && "${env.gitlabBranch}"!="erp"){
                        sh "yamllint -c .yamllint docker_environment*.yaml"
                    }
                 }
