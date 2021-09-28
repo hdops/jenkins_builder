@@ -119,7 +119,19 @@ pipeline {
     // 构建失败之后邮件通知
         failure {
             script {
+                def subject = "kustomize校验发现问题"
+                def to = env.email_build_recipients ? "${env.email_build_recipients}" : "buhaiqing@hd123.com"
+                def body = "kustomize校验发现问题, 更多信息请查阅：${BUILD_URL}"
                 emailext(recipientProviders: [[$class: 'DevelopersRecipientProvider']],subject: "${subject}", body: "${body}",attachLog:true)
+            }
+        }
+        fixed {
+            script {
+                def subject = "kustomize校验问题已经修复"
+                def to = env.email_build_recipients ? "${env.email_build_recipients}" : "buhaiqing@hd123.com"
+                def body = "kustomize校验已通过, 更多信息请查阅：${BUILD_URL}"
+                // send email
+                emailext subject: subject, to: to, body:body,attachLog:true
             }
         }
     }
