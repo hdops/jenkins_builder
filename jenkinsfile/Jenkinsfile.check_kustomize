@@ -1,0 +1,111 @@
+if (!env.on_k8s){
+    env.on_k8s="False"
+}
+if (env.set_on_k8s) {
+    env.on_k8s=env.set_on_k8s
+}
+
+def node= "master"
+if (env.node){
+    node =env.node
+}
+
+def git_project_http="https://"
+if (env.git_project_http){
+    git_project_http = env.git_project_http
+}
+
+def git_project_url="gitlab.hd123.com/qianfanops/kubernetes.git"
+if (env.git_project_url){
+    git_project_url = env.git_project_url
+}
+
+def git_project_branch="develop"
+if (env.git_project_branch){
+    git_project_branch = env.git_project_branch
+}
+
+def YAML_FILE="kubernetes_pod_template.yaml"
+def docker_image="harbor.qianfan123.com/toolset/argocd-cli:v2.0.0"
+def label_name="jenkins-job-k8s-modify-version"
+
+def func = {
+    
+}
+
+pipeline {
+    agent {label node}
+    options {
+	    timeout(time: 3, unit: 'HOURS')
+    }
+    stages {
+        stage('advance prepare on k8s to read yaml') {
+            when {
+                beforeAgent true
+                environment name: 'on_k8s', value: 'True'
+            }
+
+            steps {
+                script{
+                    echo "node : ${node}"
+                    echo "on_k8s : ${on_k8s}"
+                    kubernetesPodYamlData = readYaml file: "jenkinsfile/${YAML_FILE}"
+                    kubernetesPodYamlData.spec.containers[0].image = "${docker_image}"
+                    kubernetesPodYamlData.spec.containers[0].name = "${label_name}"
+                    kubernetesPodYamlData.metadata.labels.label = "${label_name}"
+                    writeYaml file: "${YAML_FILE}.tmp", data: kubernetesPodYamlData
+                    kubernetesPodReadYamlData = sh(script: "cat ${YAML_FILE}.tmp", returnStdout: true)
+                    echo "${kubernetesPodReadYamlData}"
+                } 
+            }
+        }
+        stage('delete workspace') {
+            steps{
+                deleteDir()
+            }
+        }
+        stage('检查配置 on k8s') {
+            when {
+                beforeAgent true
+                environment name: 'on_k8s', value: 'True'
+            }
+            agent {
+                kubernetes{
+                    cloud 'kubernetes'
+                    yaml "${kubernetesPodReadYamlData}"
+                }
+            }
+            steps{
+                script{
+                    container("${label_name}") {
+                        func()
+                    }
+                }
+            }
+        }
+
+        stage('检查配置 on docker') {
+            when {
+                beforeAgent true
+                environment name: 'on_k8s', value: 'False'
+            }
+            steps{
+                script {
+                    sh "docker pull ${docker_image}"
+                    withDockerContainer(args: "-v /root/.ssh:/root/.ssh", image: "${docker_image}") {
+                        func()
+                    }
+                }
+            }
+        }
+    }
+    post {
+    // 构建失败之后邮件通知
+        failure {
+            script {
+                emailext(recipientProviders: [[$class: 'DevelopersRecipientProvider']],subject: "${subject}", body: "${body}",attachLog:true)
+            }
+        }
+    }
+}
+
