@@ -30,7 +30,7 @@ def docker_image="harbor.qianfan123.com/toolset/argocd-cli:v2.0.0"
 def label_name="jenkins-job-k8s-check-kustomize"
 
 def func = {
-    git branch: "${git_project_branch}", credentialsId: '17643215-09f8-4a9a-b0ea-c8e49777ce1d', url: "${git_project_http}${git_base_url}"
+    git branch: "${git_project_branch}", credentialsId: '17643215-09f8-4a9a-b0ea-c8e49777ce1d', url: "${git_project_http}${git_project_url}"
     if ( currentBuild.changeSets != [] ) {
         def path=''
         for (changeLogSet in currentBuild.changeSets) {
@@ -119,6 +119,7 @@ pipeline {
     // 构建失败之后邮件通知
         failure {
             script {
+                updateGitlabCommitStatus name: 'build', state: 'failed'
                 def subject = "kustomize校验发现问题"
                 def to = env.email_build_recipients ? "${env.email_build_recipients}" : "buhaiqing@hd123.com"
                 def body = "kustomize校验发现问题, 更多信息请查阅：${BUILD_URL}"
@@ -132,6 +133,11 @@ pipeline {
                 def body = "kustomize校验已通过, 更多信息请查阅：${BUILD_URL}"
                 // send email
                 emailext subject: subject, to: to, body:body,attachLog:true
+            }
+        }
+        success{
+            script{
+                updateGitlabCommitStatus name: 'build', state: 'success'
             }
         }
     }
