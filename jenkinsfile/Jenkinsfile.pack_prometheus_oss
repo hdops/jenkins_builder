@@ -66,8 +66,7 @@ pipeline {
 		    steps{
                 script{
                 if ("${env.gitlabBranch}"!="jenkins"){
-                       sh "yamllint -c .yamllint *.yml"
-                       sh "yamllint -c .yamllint *.yaml"
+                       sh "yamllint -c .yamllint config/*/*.yml"
                    }
                 }
 		    }
@@ -97,11 +96,6 @@ pipeline {
         success{
             script{
                 updateGitlabCommitStatus name: 'build', state: 'success'
-            }
-        }
-        always{
-            script{
-                junit allowEmptyResults: true, testResults: 'junit.xml'
             }
         }
     }
