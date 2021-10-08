@@ -28,25 +28,26 @@ if (params.GIT_BRANCH){
     GIT_BRANCH=params.GIT_BRANCH
 }
 
-def docker_args="--rm -v /var/run/docker.sock:/var/run/docker.sock -v /usr/bin/docker:/usr/bin/docker "
-
 pipeline{
     agent {
-        docker {
-            image "harbor.qianfan123.com/toolset/toolsetcore:${toolset_image_version}"
-            label node
-            args "${docker_args}"
-        }
+        label node
     }
     stages{
+        stage('delete workspace'){
+			steps{
+			    deleteDir()
+			}
+		}
         stage("start Sql Check"){
             steps{
                 script{
-                    retry(2){
-                        sh "DNET_PROFILE=integration_test DNET_PRODUCT=dnet TRUST_PUBLIC_IP=${run_on_public} hdops download_toolset --branch ${GIT_BRANCH} -p ."
+                    withDockerContainer(image: "harbor.qianfan123.com/toolset/toolsetcore:${toolset_image_version}") {
+                        retry(2){
+                            sh "DNET_PROFILE=integration_test DNET_PRODUCT=dnet TRUST_PUBLIC_IP=${run_on_public} hdops download_toolset --branch ${GIT_BRANCH} -p ."
+                        }
+                        sh "tar zxf toolset.tar.gz -C ."
+                        sh "DNET_PRODUCT=${DNET_PRODUCT} DNET_PROFILE=${DNET_PROFILE} hdops sql_slow_log_records -u ${url} -c ${cycle} -q ${query} -l ${lock} -e ${number} -t ${project} -r ${receivers}"
                     }
-                    sh "tar zxf toolset.tar.gz -C ${WORKSPACE}"
-                    sh "DNET_PRODUCT=${DNET_PRODUCT} DNET_PROFILE=${DNET_PROFILE} hdops sql_slow_log_records -u ${url} -c ${cycle} -q ${query} -l ${lock} -e ${number} -t ${project} -r ${receivers}"
                 }
             }
         }

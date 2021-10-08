@@ -34,18 +34,19 @@ def func = {
     if ( currentBuild.changeSets != [] ) {
         def path=''
         for (changeLogSet in currentBuild.changeSets) {
-            print changeLogSet
             for (entry in changeLogSet.getItems()) {
                 for (file in entry.getAffectedFiles()) {
-                    if (path == ''){
-                        path=file.getPath()
-                    } else {
-                        path=path+','+file.getPath()
+                    tmpfile=file.getPath()
+                    tmp=tmpfile.tokenize("/")
+                    tmpDir=""
+                    for(String i in tmp-tmp[-1]) {
+                        tmpDir=tmpDir+"/"+i
                     }
+                    echo "find ${tmpfile} --> ${tmpDir} need check"
+                    sh "kustomize build --load-restrictor LoadRestrictionsNone .${tmpDir}"
                 }
             }
         }
-        echo "find ${path} need check"
     }
 }
 
@@ -53,6 +54,7 @@ pipeline {
     agent {label node}
     options {
 	    timeout(time: 3, unit: 'HOURS')
+        gitLabConnection('gitlab')
     }
     stages {
         stage('advance prepare on k8s to read yaml') {
