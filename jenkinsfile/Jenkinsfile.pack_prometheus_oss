@@ -1,0 +1,102 @@
+import jenkins.model.*
+
+def node="master"
+if (env.node){
+    node =env.node
+
+}
+def DINGTALK_TOKEN = 'c809dcef2819cae9f4baa46c46d4e4c9864af899ae81b7145987d026cc51a87a'
+if (env.DINGTALK_TOKEN){
+   DINGTALK_TOKEN = env.DINGTALK_TOKEN
+}
+def run_on_public="None"
+if (env.run_on_public){
+    run_on_public=env.run_on_public
+}
+if (!env.on_k8s){
+    env.on_k8s="False"
+}
+if (env.set_on_k8s) {
+    env.on_k8s=env.set_on_k8s
+}
+def ci_git_server_baseurl= "http://github.app.hd123.cn:10080"
+if (env.ci_git_server_baseurl){
+    ci_git_server_baseurl = env.ci_git_server_baseurl
+}
+
+def run_unittest=true
+if (env.run_unittest){
+    run_unittest = env.run_unittest.toBoolean()
+}
+
+pipeline {
+	agent {
+        docker {
+        label node
+        image "harbor.qianfan123.com/toolset/toolsetcore:0.3.0"
+        args '-v /var/run/docker.sock:/var/run/docker.sock -v /usr/bin/docker:/usr/bin/docker --add-host=hd-hz-public.oss-cn-hangzhou-internal.aliyuncs.com:47.110.23.37'
+        }
+    }
+    options {
+	    timeout(time: 1, unit: 'HOURS')
+        gitLabConnection('toolset')
+    }
+    stages {
+
+        stage('checkout scm'){
+			steps{
+                script{
+                   retry(3){
+                        checkout([$class: 'GitSCM', branches: [[name: "*/${env.gitlabBranch}"]],userRemoteConfigs: [[credentialsId: 'qianfan',url: "${ci_git_server_baseurl}/${git_project}.git"]]])
+                   }
+                   echo "TRUST_PUBLIC_IP is ${TRUST_PUBLIC_IP}"
+                   echo "DNET_CLOUD_VENDOR is ${DNET_CLOUD_VENDOR}"
+                   if ( env.DNET_PRIVATE_URL ){
+                       echo "DNET_PRIVATE_URL is ${DNET_PRIVATE_URL}"
+                       echo "DNET_PRIVATE_AK is ${DNET_PRIVATE_AK}"
+                       echo "DNET_PRIVATE_BUCKET is ${DNET_PRIVATE_BUCKET}"
+                       echo "DNET_PRIVATE_REGION is ${DNET_PRIVATE_REGION}"
+                   }
+
+
+                }
+			}
+		}
+		stage("yamllint"){
+		    steps{
+                script{
+                if ("${env.gitlabBranch}"!="jenkins"){
+                       sh "yamllint -c .yamllint config/*/*.yml"
+                   }
+                }
+		    }
+		}
+		stage("package && upload"){
+            steps{
+                script{
+                    echo "python update_toolset_oss.py -branch ${env.gitlabBranch}"
+                    sh "DNET_CLOUD_VENDOR=${DNET_CLOUD_VENDOR} python update_toolset_oss.py -branch ${env.gitlabBranch} -filename prometheus"
+                }
+            }
+		}
+    }
+    post{
+        failure{
+            script{
+                dingTalk accessToken: "${DINGTALK_TOKEN}", imageUrl: '', jenkinsUrl: '', message: "pack toolset failure for ${git_project} on ${BUILD_URL}", notifyPeople: ''
+                updateGitlabCommitStatus name: 'build', state: 'failed'
+                emailext(recipientProviders: [developers(),requestor(),culprits()],  subject: "pack toolset failure on ${git_project}", body: "failure on Job ${env.BUILD_URL}",attachLog:true)
+            }
+        }
+        fixed{
+            script{
+                emailext(recipientProviders: [developers(),requestor(),culprits()],  subject: "pack toolset success on ${git_project}", body: "success on Job ${env.BUILD_URL}")
+            }
+        }
+        success{
+            script{
+                updateGitlabCommitStatus name: 'build', state: 'success'
+            }
+        }
+    }
+}
