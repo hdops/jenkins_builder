@@ -1,0 +1,62 @@
+def node="master"
+if (env.node){
+    node =env.node
+}
+
+def git_server_baseurl="https://gitlab.hd123.com"
+if (env.git_server_baseurl){
+    git_server_baseurl = env.git_server_baseurl
+}
+
+def run_on_public="None"
+if (env.run_on_public){
+    run_on_public=env.run_on_public
+}
+
+def toolset_image_version="0.3.0"
+
+pipeline{
+    agent {
+        label node
+    }
+    stages{
+        stage("clean workspace"){
+            steps{
+                deleteDir()
+            }
+        }
+        stage("start bakup"){
+            steps{
+                script{
+                    withDockerContainer(image: "harbor.qianfan123.com/toolset/toolsetcore:${toolset_image_version}") {
+                        retry(2){
+                            sh "DNET_PROFILE=integration_test DNET_PRODUCT=dnet TRUST_PUBLIC_IP=${run_on_public} hdops download_toolset --branch develop -p ."
+                        }
+                        sh "tar zxf toolset.tar.gz -C ${WORKSPACE}"
+                        sh "python sync_git_codes.py -project kubernetes"
+                    }
+                }
+            }
+        }
+    }
+    post {
+        failure {
+            script {
+                def subject = env.email_subject ? "[Jenkins]${env.email_subject}" : "[Jenkins]failure on Job ${env.JOB_NAME}"
+                def to = env.email_recipients ? "${env.email_recipients}" : "buhaiqing@hd123.com"
+                def body = env.email_body ? "${env.email_body}" : "failure on Job ${env.JOB_NAME} in ${env.BUILD_URL}"
+                // send email
+                emailext(recipientProviders: [[$class: 'DevelopersRecipientProvider']],subject: "${subject}", body: "${body}",attachLog:true)
+            }
+        }
+        fixed {
+            script {
+                def subject = env.email_subject ? "[Jenkins]${env.email_subject}" : "[Jenkins]fixed on Job ${env.JOB_NAME}"
+                def to = env.email_recipients ? "${env.email_recipients}" : "buhaiqing@hd123.com"
+                def body = env.email_body ? "${env.email_body}" : "fixed on Job ${env.JOB_NAME} in ${env.BUILD_URL}"
+                // send email
+                emailext(recipientProviders: [[$class: 'DevelopersRecipientProvider']],subject: "${subject}", body: "${body}",attachLog:true)
+            }
+        }
+    }
+}
