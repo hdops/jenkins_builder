@@ -126,6 +126,7 @@ pipeline {
                 def to = env.email_build_recipients ? "${env.email_build_recipients}" : "buhaiqing@hd123.com"
                 def body = "kustomize校验发现问题, 更多信息请查阅：${BUILD_URL}"
                 emailext(recipientProviders: [[$class: 'DevelopersRecipientProvider']],subject: "${subject}", body: "${body}",cc: "buhaiqing@hd123.com",attachLog:true)
+                emailext subject: subject, to: to,cc: "buhaiqing@hd123.com", body:body,attachLog:true
             }
         }
         fixed {
