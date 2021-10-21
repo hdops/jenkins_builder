@@ -138,7 +138,7 @@ pipeline {
                             env.mvn_release_options = ' -Pdocker -Darguments="-Dmaven.test.skip=true -Dmaven.javadoc.skip=true"'
                             echo "mvn_release_options is ${mvn_release_options}"
                             }
-                        mvn_shell+=env.mvn_release_options
+                        mvn_shell+=" "env.mvn_release_options
                         echo "mvn_configfile is ${mvn_configfile}"
                         configFileProvider([configFile(fileId:mvn_configfile, variable: 'maven_settings')]) {
                                 mvn_shell+="  -s $maven_settings"
