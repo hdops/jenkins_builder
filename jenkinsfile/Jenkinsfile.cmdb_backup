@@ -33,6 +33,7 @@ pipeline {
         stage('cmdb备份') {
 			steps{
 				script{
+				    deleteDir()
                     if(env.on_k8s == 'True'){
                         container("hdtoolsetcore"){
                             echo "profile is ${params.DNET_PROFILE}"

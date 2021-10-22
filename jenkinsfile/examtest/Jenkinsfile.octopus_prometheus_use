@@ -22,6 +22,11 @@ pipeline {
         timeout(time: 120, unit: 'MINUTES')
     }
     stages{
+        stage('delete workspace') {
+            steps{
+                deleteDir()
+            }
+        }
         stage("准备环境中"){
             steps{
                 script{
@@ -53,8 +58,7 @@ pipeline {
                         git branch: "${git_project_branch}", credentialsId: '17643215-09f8-4a9a-b0ea-c8e49777ce1d', url: "${git_project_url}"
                         body = sh(script: "python examtest_octopus_prometheus.py -a check", returnStdout: true)
                     }
-                    body = "test OK"
-                    echo "考试结果： ${body}"
+                    echo "考试结果： \n${body}"
                 }
             }
         }
@@ -67,9 +71,9 @@ pipeline {
                         sh "tar zxf toolset.tar.gz -C ."
                         sh "Email_Receivers='${to}' Email_Message='${body}' Email_Subject='${subject}' python send_email.py"
                     }
+                    emailext(recipientProviders: [[$class: 'RequesterRecipientProvider']],subject: "${subject}", body: "${body}",attachLog:true)
                 }
             }
         }   
     }
-    
 }

@@ -1,0 +1,55 @@
+def node="master"
+if (env.node){
+    node =env.node
+}
+
+def toolset_image_version="0.3.0"
+if (env.toolset_image_version){
+    toolset_image_version =env.toolset_image_version
+}
+
+def DNET_PRODUCT="dnet"
+if (env.DNET_PRODUCT){
+    DNET_PRODUCT=env.DNET_PRODUCT
+}
+
+def DNET_PROFILE="integration_test"
+if (env.DNET_PROFILE){
+    DNET_PROFILE=env.DNET_PROFILE
+}
+
+def run_on_public="None"
+if (env.run_on_public){
+    run_on_public=env.run_on_public
+}
+
+def GIT_BRANCH="develop"
+if (params.GIT_BRANCH){
+    GIT_BRANCH=params.GIT_BRANCH
+}
+
+pipeline{
+    agent {
+        label node
+    }
+    stages{
+        stage('delete workspace'){
+			steps{
+			    deleteDir()
+			}
+		}
+        stage("start Sql Check"){
+            steps{
+                script{
+                    withDockerContainer(image: "harbor.qianfan123.com/toolset/toolsetcore:${toolset_image_version}") {
+                        retry(2){
+                            sh "DNET_PROFILE=integration_test DNET_PRODUCT=dnet TRUST_PUBLIC_IP=${run_on_public} hdops download_toolset --branch ${GIT_BRANCH} -p ."
+                        }
+                        sh "tar zxf toolset.tar.gz -C ."
+                        sh "DNET_PRODUCT=${DNET_PRODUCT} DNET_PROFILE=${DNET_PROFILE} hdops sql_slow_log_records -u ${url} -c ${cycle} -q ${query} -l ${lock} -e ${number} -t ${project} -r ${receivers}"
+                    }
+                }
+            }
+        }
+    }
+}
