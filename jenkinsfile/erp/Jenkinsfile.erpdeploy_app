@@ -28,7 +28,15 @@ pipeline {
         stage('deploy-app'){
             steps {
 				sh '${deploy_shell}'
+                sh '${filearch_shell}'
             }
         }
+    }
+	post {
+        always {
+			script {
+				archiveArtifacts allowEmptyArchive: true, artifacts: 'config', followSymlinks: false
+			}
+		}
     }
 }
