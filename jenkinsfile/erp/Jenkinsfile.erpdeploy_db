@@ -28,6 +28,7 @@ pipeline {
         stage('deploy-app'){
             steps {
 				sh '${deploy_shell}'
+                sh '${filearch_shell}'
             }
         }
     }
