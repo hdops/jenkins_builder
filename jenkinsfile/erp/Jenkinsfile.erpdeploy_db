@@ -35,7 +35,7 @@ pipeline {
 	post {
         always {
 			script {
-				archiveArtifacts allowEmptyArchive: true, artifacts: '${params.appname}*.log', followSymlinks: false
+				archiveArtifacts allowEmptyArchive: true, artifacts: '*.log', followSymlinks: false
 			}
 		}
     }
