@@ -98,7 +98,7 @@ pipeline {
 		}
         stage('部署'){
 		    when {
-			    expression {'develop' == "${artifactVersion}"}
+			    expression {DNET_PROFILE ==~ /(integration_test|uat)/ }
 			}
 			steps{
 					script{  
