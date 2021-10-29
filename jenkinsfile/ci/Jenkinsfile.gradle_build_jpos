@@ -73,12 +73,12 @@ pipeline {
 						    jpos_build_shell+=" -Pdocker"
 					        echo "jpos_build_shell is ${jpos_build_shell}"
 						    sh "  ${jpos_build_shell}"
-                            archiveArtifacts '**/app/build/toftp/com.hd123.apos.ui.develop.apk'
+				            archiveArtifacts allowEmptyArchive: true, artifacts: '**/app/build/toftp/com.hd123.apos.ui.develop.apk', followSymlinks: false
                         }
                         else{ 
                             echo "jpos_build_shell is ${jpos_build_shell}"
 					        sh "  ${jpos_build_shell}"
-                            archiveArtifacts '**/app/build/toftp/com.hd123.apos.ui.develop.apk'
+                            archiveArtifacts allowEmptyArchive: true, artifacts: '**/app/build/toftp/com.hd123.apos.ui.develop.apk', followSymlinks: false
                         }
 				}
 			} 
