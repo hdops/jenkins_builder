@@ -1,0 +1,116 @@
+def node="develop"
+if (env.node){
+    node =env.node
+}
+
+def maven_image= "harbor.qianfan123.com/base/maven:3.3.9_jdk8"
+if (env.maven_image){
+    maven_image =env.maven_image
+}
+
+def node_image= "harbor.qianfan123.com/base/node:12.18.0-hd"
+if (env.node_image){
+    node_image =env.node_image
+}
+
+def mvn_configfile="jdk8"
+
+def toolset_image_version="0.3.0"
+
+
+def packageRemoteJob="createResourcePackage"
+if (env.packageRemoteJob){
+    packageRemoteJob = env.packageRemoteJob
+}
+
+def uploadRemoteJob="upload_to_oss_customer"
+if (env.uploadRemoteJob){
+    uploadRemoteJob = env.uploadRemoteJob
+}
+
+def run_on_public="None"
+if (env.run_on_public){
+    run_on_public=env.run_on_public
+}
+if (!env.on_k8s){
+    env.on_k8s="False"
+}
+if (env.set_on_k8s) {
+    env.on_k8s=env.set_on_k8s
+}
+pipeline {
+	agent {label node}
+    options {
+	    timeout(time: 1, unit: 'HOURS')
+    } 
+    stages {
+        stage('delete workspace'){
+		    when {
+			    expression {'Y' == "${params.deleteWorkspace}"}
+			}
+			steps{
+			    deleteDir()
+			}
+		}
+         stage('mvn dependency') {
+              agent {
+			    docker {
+			    image "${maven_image}"
+			    args "--rm --add-host=maven.qianfan123.com:172.17.0.82  -v /hdapp/java:/hdapp/java" 
+			    }
+             }
+            steps{
+                script{
+                    configFileProvider([configFile(fileId:mvn_configfile, variable: 'maven_settings')]) {
+                        echo "执行 mvn dependency:get "
+                        sh "mvn dependency:get -DremoteRepositories=http://maven.hd123.cn/repository/maven-snapshots -DgroupId=${groupId} -DartifactId=${artifactId} -Dversion=${artifactVersion}  -Dpackaging=zip -Dclassifier=src -Dtransitive=false -s $maven_settings"
+                        echo "执行 mvn dependency:copy "
+                        sh "mvn dependency:copy -Dartifact=${groupId}:${artifactId}:${artifactVersion}:zip:src -DoutputDirectory=. -s $maven_settings"
+						sh "unzip -o ${artifactId}*.zip" 
+                    }
+                }
+            }
+         }    
+         stage('build') {
+              agent {
+			    docker {
+			    image "${node_image}"
+			    args '--rm -v /hdapp/npm:/root/.npm  -v /root/.npmrc:/root/.npmrc'
+			    }
+             }
+             steps{ 
+				echo "build ${artifactId} "
+				sh " node -v && cd  ${artifactId}-${artifactVersion}  && npm install --registry=https://registry.npm.taobao.org/ && npm run build && tar czvf ../${artifactId}.tar.gz dist" 
+				archiveArtifacts '*.tar.gz' 
+             }
+         }  
+        stage('打包'){
+			steps{
+				script{
+						echo "DNET_PROFILE:${DNET_PROFILE}"
+						echo "artifactId:${artifactId}"
+						echo "subsystem:${artifactId}"
+						echo "artifactVersion:${artifactVersion}"
+						echo "BUILD_URL:${BUILD_URL}"
+						build job: "${packageRemoteJob}", parameters: [string(name: 'DNET_PROFILE', value: DNET_PROFILE), string(name: 'subsystem', value: artifactId), string(name: 'BUILD_URL', value: BUILD_URL), string(name: 'fromVersion', value: artifactVersion), string(name: 'toVersion', value: artifactVersion), string(name: 'alias', value: DNET_PROFILE)], wait: true
+				}
+			}
+		}
+        stage('部署'){
+		    when {
+			    expression {DNET_PROFILE ==~ /(integration_test|uat)/ }
+			}
+			steps{
+					script{  
+							echo "DNET_PROFILE:${DNET_PROFILE}"
+							echo "artifactId:${artifactId}"
+							echo "subsystem:${artifactId}"
+							def oss_resources=""
+							oss_resources = env.artifactId + "-" + artifactVersion+ "-" + DNET_PROFILE + ".tar.gz"
+							echo "oss_resources:${oss_resources}" 
+							build job: "${uploadRemoteJob}", parameters: [string(name: 'DNET_PROFILE', value: DNET_PROFILE), string(name: 'subsystem', value: artifactId), string(name: 'oss_resources', value: oss_resources)], wait: false
+				}
+			}
+		}
+    }
+}
