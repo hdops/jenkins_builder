@@ -73,15 +73,18 @@ pipeline {
 						    jpos_build_shell+=" -Pdocker"
 					        echo "jpos_build_shell is ${jpos_build_shell}"
 						    sh "  ${jpos_build_shell}"
-				            archiveArtifacts allowEmptyArchive: true, artifacts: '**/app/build/toftp/com.hd123.apos.ui.develop.apk', followSymlinks: false
                         }
                         else{ 
                             echo "jpos_build_shell is ${jpos_build_shell}"
 					        sh "  ${jpos_build_shell}"
-                            archiveArtifacts allowEmptyArchive: true, artifacts: '**/app/build/toftp/com.hd123.apos.ui.develop.apk', followSymlinks: false
                         }
 				}
 			} 
+		}
+		stage('save apk') {
+		    steps{
+                archiveArtifacts allowEmptyArchive: true, artifacts: '**/app/build/toftp/com.hd123.apos.ui.develop.apk', followSymlinks: false
+            }
 		}
 		stage('remotedeploy') {
 		    steps{
