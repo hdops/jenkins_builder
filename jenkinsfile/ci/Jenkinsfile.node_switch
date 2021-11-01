@@ -81,10 +81,10 @@ pipeline {
                 git config user.email qianfan@hd123.com
                 git config user.name qianfan
                 git checkout ${releaseBranchName}
-                git checkout develop
+                git checkout ${build_branch}
                 git branch -d ${releaseBranchName}
                 git push origin :${releaseBranchName}
-                git checkout develop
+                git checkout ${build_branch}
                 git pull
                 git checkout -b ${releaseBranchName}
                 git push origin ${releaseBranchName}
