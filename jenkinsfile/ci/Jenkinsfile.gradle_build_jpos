@@ -81,11 +81,6 @@ pipeline {
 				}
 			} 
 		}
-		stage('save apk') {
-		    steps{
-                archiveArtifacts allowEmptyArchive: true, artifacts: '**/app/build/toftp/com.hd123.apos.ui.develop.apk', followSymlinks: false
-            }
-		}
 		stage('remotedeploy') {
 		    steps{
 				script{  

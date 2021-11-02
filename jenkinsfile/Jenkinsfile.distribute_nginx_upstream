@@ -24,6 +24,19 @@ if (!env.on_k8s){
 if (env.set_on_k8s) {
     env.on_k8s=env.set_on_k8s
 }
+def nginx_command="nginx"
+if (env.nginx_command) {
+    nginx_command=env.nginx_command
+}
+def nginx_basedir="/etc/nginx/conf.d"
+if (env.nginx_basedir) {
+    nginx_basedir=env.nginx_basedir
+}
+def nginx_path="/etc/nginx/nginx.conf"
+if (env.nginx_path) {
+    nginx_path=env.nginx_path
+}
+
 pipeline {
    agent {label node}
     options {   
@@ -45,7 +58,7 @@ pipeline {
                             sh "echo step1 -- check nginx upstream.conf"
                             sh "DNET_PROFILE=${params.DNET_PROFILE} DNET_PRODUCT=${params.DNET_PRODUCT} hdops check_nginx --local_nginx_check True --local_nginx_path nginx/dly/production.yaml"
                             sh "echo step2 -- distribute nginx upstream.conf"
-                            sh "DNET_PROFILE=${params.DNET_PROFILE} DNET_PRODUCT=${params.DNET_PRODUCT} hdops distribute_nginx_upstream --nginx_hostid ${params.nginx_hostid} --dryrun ${params.dryrun}"
+                            sh "DNET_PROFILE=${params.DNET_PROFILE} DNET_PRODUCT=${params.DNET_PRODUCT} hdops distribute_nginx_upstream --nginx_hostid ${params.nginx_hostid} --dryrun ${params.dryrun} --nginx_command ${nginx_command} --nginx_basedir ${nginx_basedir} --nginx_path ${nginx_path}"
                         }
                     }else {
                         docker.image("harbor.qianfan123.com/toolset/toolsetcore:${toolset_image_version}").inside  {
@@ -59,7 +72,7 @@ pipeline {
                             sh "echo step1 -- check nginx upstream.conf"
                             sh "DNET_PROFILE=${params.DNET_PROFILE} DNET_PRODUCT=${params.DNET_PRODUCT} hdops check_nginx --local_nginx_check True --local_nginx_path nginx/dly/production.yaml"
                             sh "echo step2 -- distribute nginx upstream.conf"
-                            sh "DNET_PROFILE=${params.DNET_PROFILE} DNET_PRODUCT=${params.DNET_PRODUCT} hdops distribute_nginx_upstream --nginx_hostid ${params.nginx_hostid} --dryrun ${params.dryrun}"
+                            sh "DNET_PROFILE=${params.DNET_PROFILE} DNET_PRODUCT=${params.DNET_PRODUCT} hdops distribute_nginx_upstream --nginx_hostid ${params.nginx_hostid} --dryrun ${params.dryrun} --nginx_command ${nginx_command} --nginx_basedir ${nginx_basedir} --nginx_path ${nginx_path}"
                         }
                     }
                 }
