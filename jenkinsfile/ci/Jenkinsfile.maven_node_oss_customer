@@ -66,7 +66,13 @@ pipeline {
                         sh "mvn dependency:get -DremoteRepositories=http://maven.hd123.cn/repository/maven-snapshots -DgroupId=${groupId} -DartifactId=${artifactId} -Dversion=${artifactVersion}  -Dpackaging=zip -Dclassifier=src -Dtransitive=false -s $maven_settings"
                         echo "执行 mvn dependency:copy "
                         sh "mvn dependency:copy -Dartifact=${groupId}:${artifactId}:${artifactVersion}:zip:src -DoutputDirectory=. -s $maven_settings"
-						sh "unzip -o ${artifactId}*.zip" 
+                        echo "准备 ${artifactId} "
+						prepare_shell = "unzip -o ${artifactId}*.zip  && cd  ${artifactId}-${artifactVersion}" 
+						if (env.custom_oss){
+							echo "custom_oss is ${custom_oss}"
+							prepare_shell += " && " + custom_oss
+						}
+						sh "  ${prepare_shell}"  
                     }
                 }
             }
