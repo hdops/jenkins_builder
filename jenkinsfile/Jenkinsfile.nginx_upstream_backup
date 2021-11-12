@@ -14,7 +14,7 @@ def whether_post=""
 if (env.whether_post){
     whether_post =env.whether_post
 }else{
-    whether_post ="True"
+    whether_post ="False"
 }
 def toolset_image_version="0.3.0-private"
 if (env.toolset_image_version){
