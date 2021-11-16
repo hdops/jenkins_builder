@@ -35,7 +35,7 @@ pipeline {
 	post {
         always {
 			script {
-				archiveArtifacts allowEmptyArchive: true, artifacts: 'apollodir', followSymlinks: false
+				archiveArtifacts allowEmptyArchive: true, artifacts: '*apollo', followSymlinks: false
 			}
 		}
     }
