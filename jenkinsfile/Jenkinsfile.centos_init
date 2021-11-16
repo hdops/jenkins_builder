@@ -2,7 +2,10 @@ def node="master"
 if (env.node){
     node =env.node
 }
-
+def docker_bip="254.254.252.1/24"
+if (env.docker_bip){
+    docker_bip =env.docker_bip
+}
 def whether_post="False"
 if (env.whether_post){
     whether_post =env.whether_post
@@ -23,9 +26,9 @@ if (env.set_on_k8s) {
 }
 pipeline {
     agent {label node}
-	options {   
+	options {
 	    timeout(time: 300, unit: 'MINUTES')
-    }       
+    }
     stages {
         stage('初始化机器') {
 			steps{
@@ -35,17 +38,40 @@ pipeline {
                         container("hdtoolsetcore"){
                             deleteDir()
                             sh 'docker pull harbor.qianfan123.com/base/iac:0.1.0'
-                            sh 'docker run -i -e ANSIBLE_HOSTS=$hosts -e ANSIBLE_PORT=$port -e ANSIBLE_USER=$user -e ANSIBLE_PASSWORD=$password -e ANSIBLE_FILE=$filename --rm -v /root/.ssh:/root/.ssh harbor.qianfan123.com/base/iac:0.1.0 "ansible-playbook -i inventory/$filename hdiac/centos_init/init.yml --tags $tags"'
+                            if(env.docker_bip == ''){
+                                sh 'docker run -i -e ANSIBLE_HOSTS=$hosts -e ANSIBLE_PORT=$port -e ANSIBLE_USER=$user -e ANSIBLE_PASSWORD=$password -e ANSIBLE_FILE=$filename --rm -v /root/.ssh:/root/.ssh harbor.qianfan123.com/base/iac:0.1.0 "ansible-playbook -i inventory/$filename hdiac/centos_init/init.yml --tags $tags"'
+                            } else {
+                                script {
+                                    docker_bip_umask = sh(returnStdout: true, script: 'echo $docker_bip|cut -d / -f2').trim()
+                                }
+                                if(docker_bip_umask <= '24'){
+                                    sh 'docker run -i -e ANSIBLE_HOSTS=$hosts -e ANSIBLE_PORT=$port -e ANSIBLE_USER=$user -e ANSIBLE_PASSWORD=$password -e ANSIBLE_FILE=$filename --rm -v /root/.ssh:/root/.ssh harbor.qianfan123.com/base/iac:0.1.0 "ansible-playbook -e docker_bip=$docker_bip -i inventory/$filename hdiac/centos_init/init.yml --tags $tags"'
+                                } else {
+                                    echo "子网掩码可用范围需要大于或等于24位"
+                                }
+                            }
                         }
-                    } else {
-                        deleteDir()
-                        sh 'docker pull harbor.qianfan123.com/base/iac:0.1.0'
-                        sh 'docker run -i -e ANSIBLE_HOSTS=$hosts -e ANSIBLE_PORT=$port -e ANSIBLE_USER=$user -e ANSIBLE_PASSWORD=$password -e ANSIBLE_FILE=$filename --rm -v /root/.ssh:/root/.ssh harbor.qianfan123.com/base/iac:0.1.0 "ansible-playbook -i inventory/$filename hdiac/centos_init/init.yml --tags $tags"'
-                    }
-			    }
-			}
+                        } else {
+                            deleteDir()
+                            sh 'docker pull harbor.qianfan123.com/base/iac:0.1.0'
+                            if(env.docker_bip == ''){
+                                sh 'docker run -i -e ANSIBLE_HOSTS=$hosts -e ANSIBLE_PORT=$port -e ANSIBLE_USER=$user -e ANSIBLE_PASSWORD=$password -e ANSIBLE_FILE=$filename --rm -v /root/.ssh:/root/.ssh harbor.qianfan123.com/base/iac:0.1.0 "ansible-playbook -i inventory/$filename hdiac/centos_init/init.yml --tags $tags"'
+                            } else {
+                                script {
+                                    docker_bip_umask = sh(returnStdout: true, script: 'echo $docker_bip|cut -d / -f2').trim()
+                                }
+                                if(docker_bip_umask <= '24'){
+                                    sh 'docker run -i -e ANSIBLE_HOSTS=$hosts -e ANSIBLE_PORT=$port -e ANSIBLE_USER=$user -e ANSIBLE_PASSWORD=$password -e ANSIBLE_FILE=$filename --rm -v /root/.ssh:/root/.ssh harbor.qianfan123.com/base/iac:0.1.0 "ansible-playbook -e docker_bip=$docker_bip -i inventory/$filename hdiac/centos_init/init.yml --tags $tags"'
+                                } else {
+                                    echo "子网掩码可用范围需要大于或等于24位"
+                                }
+                            }
+                        }
+			        }
+                }
+            }
         }
-    }
+
 	post {
     // 构建失败之后钉钉通知
         failure {
