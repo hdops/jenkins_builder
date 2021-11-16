@@ -188,7 +188,7 @@ pipeline {
                         }
                         sh "tar zxf toolset.tar.gz -C ${WORKSPACE}"
                         echo "maven denpendency check"
-                        sh "DNET_PRODUCT=dnet DNET_PROFILE=integration_test hdmon maven_dependency_check --jenkins_url ${BUILD_URL} --isrelease False"
+                        sh "DNET_PRODUCT=dnet DNET_PROFILE=integration_test hdmon maven_dependency_check --jenkins_url ${BUILD_URL} --isrelease True"
                     }
 				}
 			}
