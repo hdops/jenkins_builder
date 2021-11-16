@@ -38,6 +38,7 @@ pipeline {
                         container("hdtoolsetcore"){
                             deleteDir()
                             sh 'docker pull harbor.qianfan123.com/base/iac:0.1.0'
+                            if(env.docker_bip){
                             if(env.docker_bip == ''){
                                 sh 'docker run -i -e ANSIBLE_HOSTS=$hosts -e ANSIBLE_PORT=$port -e ANSIBLE_USER=$user -e ANSIBLE_PASSWORD=$password -e ANSIBLE_FILE=$filename --rm -v /root/.ssh:/root/.ssh harbor.qianfan123.com/base/iac:0.1.0 "ansible-playbook -i inventory/$filename hdiac/centos_init/init.yml --tags $tags"'
                             } else {
@@ -50,10 +51,14 @@ pipeline {
                                     echo "子网掩码可用范围需要大于或等于24位"
                                 }
                             }
+                        } else {
+                            sh 'docker run -i -e ANSIBLE_HOSTS=$hosts -e ANSIBLE_PORT=$port -e ANSIBLE_USER=$user -e ANSIBLE_PASSWORD=$password -e ANSIBLE_FILE=$filename --rm -v /root/.ssh:/root/.ssh harbor.qianfan123.com/base/iac:0.1.0 "ansible-playbook -i inventory/$filename hdiac/centos_init/init.yml --tags $tags"'
                         }
+                    }
                         } else {
                             deleteDir()
                             sh 'docker pull harbor.qianfan123.com/base/iac:0.1.0'
+                            if(env.docker_bip){
                             if(env.docker_bip == ''){
                                 sh 'docker run -i -e ANSIBLE_HOSTS=$hosts -e ANSIBLE_PORT=$port -e ANSIBLE_USER=$user -e ANSIBLE_PASSWORD=$password -e ANSIBLE_FILE=$filename --rm -v /root/.ssh:/root/.ssh harbor.qianfan123.com/base/iac:0.1.0 "ansible-playbook -i inventory/$filename hdiac/centos_init/init.yml --tags $tags"'
                             } else {
@@ -64,13 +69,16 @@ pipeline {
                                     sh 'docker run -i -e ANSIBLE_HOSTS=$hosts -e ANSIBLE_PORT=$port -e ANSIBLE_USER=$user -e ANSIBLE_PASSWORD=$password -e ANSIBLE_FILE=$filename --rm -v /root/.ssh:/root/.ssh harbor.qianfan123.com/base/iac:0.1.0 "ansible-playbook -e docker_bip=$docker_bip -i inventory/$filename hdiac/centos_init/init.yml --tags $tags"'
                                 } else {
                                     echo "子网掩码可用范围需要大于或等于24位"
-                                }
-                            }
-                        }
+                              }
+                          }
+                      } else {
+                        sh 'docker run -i -e ANSIBLE_HOSTS=$hosts -e ANSIBLE_PORT=$port -e ANSIBLE_USER=$user -e ANSIBLE_PASSWORD=$password -e ANSIBLE_FILE=$filename --rm -v /root/.ssh:/root/.ssh harbor.qianfan123.com/base/iac:0.1.0 "ansible-playbook -i inventory/$filename hdiac/centos_init/init.yml --tags $tags"'
+                      }
 			        }
                 }
             }
         }
+    }
 
 	post {
     // 构建失败之后钉钉通知
