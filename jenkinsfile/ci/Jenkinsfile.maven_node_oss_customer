@@ -60,7 +60,7 @@ pipeline {
 			    }
              }
             steps{
-			    deleteDir()
+			    //deleteDir()
                 script{
                     configFileProvider([configFile(fileId:mvn_configfile, variable: 'maven_settings')]) {
                         echo "执行 mvn dependency:get "
