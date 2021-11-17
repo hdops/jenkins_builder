@@ -51,7 +51,7 @@ pipeline {
                             }else{
                                 result=sh(script:"DINGTALK_TOKEN=${DINGTALK_TOKEN} DNET_PRODUCT=${params.DNET_PRODUCT} DNET_PROFILE=${params.DNET_PROFILE} hdops health_check --subsystem ${params.subsystem}  --tag ${params.tag}", returnStatus:true)
                             }
-                            if (result==5) {
+                            if (result==5 || result==15) {
                                 echo "健康检查失败，重启对应的容器"
                                 sh "DINGTALK_TOKEN=${DINGTALK_TOKEN} DNET_PRODUCT=${params.DNET_PRODUCT} DNET_PROFILE=${params.DNET_PROFILE} hdops container_restart"
                                 currentBuild.result = 'FAIL'
@@ -73,7 +73,7 @@ pipeline {
                             }else{
                                 result=sh(script:"DINGTALK_TOKEN=${DINGTALK_TOKEN} DNET_PRODUCT=${params.DNET_PRODUCT} DNET_PROFILE=${params.DNET_PROFILE} hdops health_check --subsystem ${params.subsystem}  --tag ${params.tag}", returnStatus:true)
                             }
-                            if (result==5) {
+                            if (result==5 || result==15) {
                                 echo "健康检查失败，重启对应的容器"
                                 sh "DINGTALK_TOKEN=${DINGTALK_TOKEN} DNET_PRODUCT=${params.DNET_PRODUCT} DNET_PROFILE=${params.DNET_PROFILE} hdops container_restart"
                                 currentBuild.result = 'FAIL'
