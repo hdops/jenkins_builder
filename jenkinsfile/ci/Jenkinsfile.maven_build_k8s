@@ -320,7 +320,7 @@ skipversionupdate=${skipversionupdate}""", remoteJenkinsName: "${remoteJenkins}"
         stage('deploy'){
 			steps{
 				script{
-				    if (env.remote_deploy_cfg && env.remote_deploy_cfg != "" && env.remote_deploy_cfg != null) {
+				    if (env.remote_deploy_cfg!=null && env.remote_deploy_cfg != "" && env.remote_deploy_cfg != null) {
 						// remote_deploy
                         println(env.remote_deploy_cfg)
                         String[] data = env.remote_deploy_cfg.split('&')
