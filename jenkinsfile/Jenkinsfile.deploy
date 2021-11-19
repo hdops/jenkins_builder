@@ -80,7 +80,7 @@ pipeline {
                         echo "======执行`PRESET_IMAGE_VERSION=${i}`状态发布======"
 						if(env.on_k8s == 'True'){
 							container("hdtoolsetcore"){
-								echo "validate docker imag"
+								echo "validate docker image"
 								sh "DNET_PRODUCT=${params.DNET_PRODUCT} DNET_PROFILE=${params.DNET_PROFILE} PRESET_IMAGE_VERSION=${i} hdops deploy validate --subsystem  ${params.subsystem}"
 								echo "rds upgrade && logAnalysis"
 								sh "DNET_PRODUCT=${params.DNET_PRODUCT} DNET_PROFILE=${params.DNET_PROFILE} PRESET_IMAGE_VERSION=${i} hdops deploy db_upgrade --subsystem ${params.subsystem} --stackids ${params.stackIds} --dblist ${params.dblist} ${params.skipversion} ${params.skipversionupdate} --receivers ${params.receivers} --timeout ${params.timeout} --threadcount ${params.threadcount} --tag ${params.tag} --nodethreadcount ${params.nodethreadcount}"
@@ -88,7 +88,7 @@ pipeline {
 							}
 						}else {
 						    docker.image("harbor.qianfan123.com/toolset/toolsetcore:${toolset_image_version}").inside {
-								echo "validate docker imag"
+								echo "validate docker image"
 								sh "DNET_PRODUCT=${params.DNET_PRODUCT} DNET_PROFILE=${params.DNET_PROFILE} PRESET_IMAGE_VERSION=${i} hdops deploy validate --subsystem  ${params.subsystem}"
 						        echo "rds upgrade && logAnalysis"
 								sh "DNET_PRODUCT=${params.DNET_PRODUCT} DNET_PROFILE=${params.DNET_PROFILE} PRESET_IMAGE_VERSION=${i} hdops deploy db_upgrade --subsystem ${params.subsystem} --stackids ${params.stackIds} --dblist ${params.dblist} ${params.skipversion} ${params.skipversionupdate} --receivers ${params.receivers} --timeout ${params.timeout} --threadcount ${params.threadcount} --tag ${params.tag} --nodethreadcount ${params.nodethreadcount}"
