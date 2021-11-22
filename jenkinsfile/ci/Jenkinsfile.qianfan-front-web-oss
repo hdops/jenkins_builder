@@ -45,7 +45,7 @@ pipeline {
 		}
         stage('qianfan-front-web-oss'){ 
 			steps{   
-			    sh "DNET_CLOUD_VENDOR=${params.DNET_CLOUD_VENDOR} DNET_PROFILE=${params.DNET_PROFILE} python qf_front_backend.py -download_url ${params.oss_resources} -download_from_jenkins  ${env.download_from_jenkins}  -subsystem ${params.subsystem}"
+			    sh "DNET_CLOUD_VENDOR=${params.DNET_CLOUD_VENDOR} DNET_PROFILE=${params.DNET_PROFILE} CACHECONTROL_MAX_AGE=${params.CACHECONTROL_MAX_AGE} python qf_front_backend.py -download_url ${params.oss_resources} -download_from_jenkins  ${env.download_from_jenkins}  -subsystem ${params.subsystem}"
 			}
 		}
     }
