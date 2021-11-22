@@ -44,7 +44,7 @@ pipeline {
 		}
         stage('deployMFResourcePackage'){
 			steps{   
-                            sh "DNET_PROFILE=${params.DNET_PROFILE} python dpos_front_backend.py -download_url ${params.oss_resources}"
+                            sh "DNET_PROFILE=${params.DNET_PROFILE} CACHECONTROL_MAX_AGE=${params.CACHECONTROL_MAX_AGE} python dpos_front_backend.py -download_url ${params.oss_resources}"
 			}
 		}
     }
