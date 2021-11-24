@@ -114,7 +114,7 @@ pipeline {
                 }
             }
         }
-         stage('pre-buil-2') {
+         stage('pre-build-2') {
             steps{
                  script {
                     docker.image("harbor.qianfan123.com/toolset/toolsetcore:${toolset_image_version}").inside("--rm -v ${WORKSPACE}:/opt --add-host=apidoc.hd123.com:172.17.10.53")  {
