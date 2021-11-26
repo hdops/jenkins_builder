@@ -77,7 +77,7 @@ pipeline {
                 not {
                     environment name: 'BUILD_USER_ID', value: 'qianfan'
                 }
-  }
+           }
 		}
 		stage("unit test && package && upload"){
             steps{
