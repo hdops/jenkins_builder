@@ -54,6 +54,7 @@ pipeline {
                    }
                    echo "TRUST_PUBLIC_IP is ${TRUST_PUBLIC_IP}"
                    echo "DNET_CLOUD_VENDOR is ${DNET_CLOUD_VENDOR}"
+                   echo "git commiter is ${GIT_AUTHOR_NAME}"
                    if ( env.DNET_PRIVATE_URL ){
                        echo "DNET_PRIVATE_URL is ${DNET_PRIVATE_URL}"
                        echo "DNET_PRIVATE_AK is ${DNET_PRIVATE_AK}"
