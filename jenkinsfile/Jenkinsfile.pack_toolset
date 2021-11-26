@@ -63,6 +63,7 @@ pipeline {
 
 
                 }
+                echo "当前用户是： $BUILD_USER_ID"
 			}
 		}
 		stage("yamllint"){
@@ -81,6 +82,8 @@ pipeline {
 		}
 		stage("unit test && package && upload"){
             steps{
+                echo "当前用户是： $BUILD_USER_ID"
+                echo "单元测试： $run_unittest"
                 script{
                     if (run_unittest){
                        if ("${env.gitlabBranch}"!="jenkins"){
