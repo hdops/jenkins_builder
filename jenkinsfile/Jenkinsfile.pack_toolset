@@ -27,9 +27,9 @@ if (env.ci_git_server_baseurl){
 def run_unittest=true
 if (env.run_unittest){
     run_unittest = env.run_unittest.toBoolean()
-    run_unittest = run_unittest && env.BUILD_USER_ID != "qianfan"
+    run_unittest = run_unittest && env.BUILD_USER_ID != "scmChange"
 } else {
-    run_unittest = env.BUILD_USER_ID != "qianfan"
+    run_unittest = env.BUILD_USER_ID != "scmChange"
 }
 
 pipeline {
@@ -77,7 +77,7 @@ pipeline {
 		    }
 		    when {
                 not {
-                    environment name: 'BUILD_USER_ID', value: 'qianfan'
+                    environment name: 'BUILD_USER_ID', value: 'scmChange'
                 }
            }
 		}
