@@ -27,9 +27,9 @@ if (env.ci_git_server_baseurl){
 def run_unittest=true
 if (env.run_unittest){
     run_unittest = env.run_unittest.toBoolean()
-    run_unittest = run_unittest && env.BUILD_USER_ID != "scmChange"
+    run_unittest = run_unittest && env.BUILD_USER_ID != "qianfan"
 } else {
-    run_unittest = env.BUILD_USER_ID != "scmChange"
+    run_unittest = env.BUILD_USER_ID != "qianfan"
 }
 
 pipeline {
@@ -75,11 +75,6 @@ pipeline {
                    }
                 }
 		    }
-		    when {
-                not {
-                    environment name: 'BUILD_USER_ID', value: 'scmChange'
-                }
-           }
 		}
 		stage("unit test && package && upload"){
             steps{
@@ -89,7 +84,7 @@ pipeline {
                     def git_commit_author = sh(returnStdout: true, script: 'git log -n 1 --pretty=format:"%an"')
                     // 提交用户是qianfanauto时，不做单元测试
                     println("git commit author is " + git_commit_author+"!")
-                    if (run_unittest && git_commit_author=='qianfanauto'){
+                    if (run_unittest && git_commit_author!='qianfanauto'){
                     //if (run_unittest){
                        if ("${env.gitlabBranch}"!="jenkins"){
                             sh "pytest -m unit  --junitxml=junit.xml -sv"
