@@ -86,7 +86,10 @@ pipeline {
                 echo "当前用户是： $BUILD_USER_ID"
                 echo "单元测试： $run_unittest"
                 script{
-                    if (run_unittest){
+                    def git_commit_author = sh(returnStdout: true, script: 'git log -n 1 --pretty=format:"%an"')
+                    // 提交用户是qianfanauto时，不做单元测试
+                    if (run_unittest && git_commit_author=='qianfanauto'){
+                    //if (run_unittest){
                        if ("${env.gitlabBranch}"!="jenkins"){
                             sh "pytest -m unit  --junitxml=junit.xml -sv"
 
