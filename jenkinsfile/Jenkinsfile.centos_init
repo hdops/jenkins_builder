@@ -42,10 +42,9 @@ pipeline {
                             if(env.docker_bip == ''){
                                 sh 'docker run -i -e ANSIBLE_HOSTS=$hosts -e ANSIBLE_PORT=$port -e ANSIBLE_USER=$user -e ANSIBLE_PASSWORD=$password -e ANSIBLE_FILE=$filename --rm -v /root/.ssh:/root/.ssh harbor.qianfan123.com/base/iac:0.1.0 "ansible-playbook -i inventory/$filename hdiac/centos_init/init.yml --tags $tags"'
                             } else {
-                                script {
-                                    docker_bip_umask = sh(returnStdout: true, script: 'echo $docker_bip|cut -d / -f2').trim()
-                                }
-                                if(docker_bip_umask <= '24'){
+                                docker_bip_umask = sh(returnStdout: true, script: 'echo $docker_bip|cut -d / -f2').trim()
+                                def n ="${docker_bip_umask}".toInteger()
+                                if(n <= 24){
                                     sh 'docker run -i -e ANSIBLE_HOSTS=$hosts -e ANSIBLE_PORT=$port -e ANSIBLE_USER=$user -e ANSIBLE_PASSWORD=$password -e ANSIBLE_FILE=$filename --rm -v /root/.ssh:/root/.ssh harbor.qianfan123.com/base/iac:0.1.0 "ansible-playbook -e docker_bip=$docker_bip -i inventory/$filename hdiac/centos_init/init.yml --tags $tags"'
                                 } else {
                                     echo "子网掩码可用范围需要大于或等于24位"
@@ -62,10 +61,9 @@ pipeline {
                             if(env.docker_bip == ''){
                                 sh 'docker run -i -e ANSIBLE_HOSTS=$hosts -e ANSIBLE_PORT=$port -e ANSIBLE_USER=$user -e ANSIBLE_PASSWORD=$password -e ANSIBLE_FILE=$filename --rm -v /root/.ssh:/root/.ssh harbor.qianfan123.com/base/iac:0.1.0 "ansible-playbook -i inventory/$filename hdiac/centos_init/init.yml --tags $tags"'
                             } else {
-                                script {
-                                    docker_bip_umask = sh(returnStdout: true, script: 'echo $docker_bip|cut -d / -f2').trim()
-                                }
-                                if(docker_bip_umask <= '24'){
+                                docker_bip_umask = sh(returnStdout: true, script: 'echo $docker_bip|cut -d / -f2').trim()
+                                def n ="${docker_bip_umask}".toInteger()
+                                if(n <= 24){
                                     sh 'docker run -i -e ANSIBLE_HOSTS=$hosts -e ANSIBLE_PORT=$port -e ANSIBLE_USER=$user -e ANSIBLE_PASSWORD=$password -e ANSIBLE_FILE=$filename --rm -v /root/.ssh:/root/.ssh harbor.qianfan123.com/base/iac:0.1.0 "ansible-playbook -e docker_bip=$docker_bip -i inventory/$filename hdiac/centos_init/init.yml --tags $tags"'
                                 } else {
                                     echo "子网掩码可用范围需要大于或等于24位"
