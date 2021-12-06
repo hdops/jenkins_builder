@@ -17,7 +17,7 @@ if (env.ci_git_server_baseurl){
     ci_git_server_baseurl = env.ci_git_server_baseurl
 }
 
-def docker_args="--rm -v /var/run/docker.sock:/var/run/docker.sock -v /usr/bin/docker:/usr/bin/docker --add-host=maven.qianfan123.com:172.17.0.82 --add-host=apidoc.hd123.com:172.17.10.53 --add-host=github.app.hd123.cn:172.17.10.58 --add-host=gitlab.hd123.com:172.17.12.219 --entrypoint='' "
+def docker_args="--rm -v /var/run/docker.sock:/var/run/docker.sock -v /root/.docker/config.json:/root/.docker/config.json -v /usr/bin/docker:/usr/bin/docker --add-host=maven.qianfan123.com:172.17.0.82 --add-host=apidoc.hd123.com:172.17.10.53 --add-host=github.app.hd123.cn:172.17.10.58 --add-host=gitlab.hd123.com:172.17.12.219 --entrypoint='' "
 if (env.maven_repository){
     docker_args+=" -v "+env.maven_repository
 }else{
@@ -60,6 +60,7 @@ if (env.set_on_k8s) {
 pipeline {
     // agent {label node}
     agent {docker {
+            alwaysPull true
             image "${maven_image}"
             label node
             args "${docker_args}"
@@ -86,6 +87,44 @@ pipeline {
                         retry(5){
                             checkout([$class: 'SubversionSCM', additionalCredentials: [], excludedCommitMessages: '', excludedRegions: '', excludedRevprop: '', excludedUsers: '', filterChangelog: false, ignoreDirPropChanges: false, includedRegions: '', locations: [[cancelProcessOnExternalsFail: false, credentialsId: 'hddenv', depthOption: 'infinity', ignoreExternalsOption: true, local: '.', remote: "http://${svn_project}/${build_branch}"]], quietOperation: true, workspaceUpdater: [$class: 'CheckoutUpdater']])
                         }
+                    }
+                }
+            }
+        }
+        stage('pre-build-1') {
+            steps{
+                script{
+                    echo "执行`mven help:effective-pom`,生成effectivepom.xml"
+                    def mvn_shell="mvn help:effective-pom -Doutput=effectivepom.xml"
+                    configFileProvider([configFile(fileId:mvn_configfile, variable: 'maven_settings')]) {
+                        mvn_shell+=" -s $maven_settings"
+                        echo "mvn_shell is ${mvn_shell}"
+                        sh "${mvn_shell}"
+                    }
+                }
+            }
+        }
+        stage('pre-build-2') {
+            steps{
+                 script {
+                    withDockerContainer(args: "--rm -v ${WORKSPACE}:/opt --add-host=apidoc.hd123.com:172.17.10.53", image: "harbor.qianfan123.com/toolset/toolsetcore:${toolset_image_version}") {
+                        echo "服务白名单检查"
+                        //sh "DNET_PRODUCT=dnet DNET_PROFILE=integration_test hdmon maven_docker_check --pomfile /opt/effectivepom.xml --configfile http://github.app.hd123.cn:10080/qianfanops/toolset/raw/develop/check/maven_check_dependency.yaml"
+                        sh "DNET_PRODUCT=dnet DNET_PROFILE=integration_test hdmon maven_docker_check --pomfile /opt/effectivepom.xml "
+                        sh "DNET_PRODUCT=dnet DNET_PROFILE=integration_test hdmon maven_enforcer_check --pomfile /opt/pom.xml --outputfile /opt/maven_enforce.xml"
+                    }
+                 }
+            }
+         }
+         stage('pre-buil-mvn-enforcer') {
+            steps{
+                script{
+                    echo "temp"
+                    def mvn_shell="mvn validate -f maven_enforce.xml"
+                    configFileProvider([configFile(fileId:mvn_configfile, variable: 'maven_settings')]) {
+                        mvn_shell+=" -s $maven_settings"
+                        echo "mvn_shell is ${mvn_shell}"
+                        sh "${mvn_shell}"
                     }
                 }
             }
