@@ -73,11 +73,6 @@ if (!env.on_k8s){
 if (env.set_on_k8s) {
     env.on_k8s=env.set_on_k8s
 }
-
-
-
-
-
 pipeline {
     // agent {label node}
     agent {docker {
@@ -112,6 +107,59 @@ pipeline {
                  }
             }
          }
+        stage('pre-build-1') {
+            steps{
+                script{
+                    echo "执行`mven help:effective-pom`,生成effectivepom.xml"
+                    def mvn_shell="mvn help:effective-pom -Doutput=effectivepom.xml"
+                    configFileProvider([configFile(fileId:mvn_configfile, variable: 'maven_settings')]) {
+                        mvn_shell+=" -s $maven_settings"
+                        echo "mvn_shell is ${mvn_shell}"
+                        sh "${mvn_shell}"
+                    }
+                }
+            }
+        }
+        stage('pre-build-2') {
+            steps{
+                 script {
+                    docker.image("harbor.qianfan123.com/toolset/toolsetcore:${toolset_image_version}").inside("--rm -v ${WORKSPACE}:/opt --add-host=apidoc.hd123.com:172.17.10.53")  {
+                    //withDockerContainer(args: "--rm -v ${WORKSPACE}:/opt --add-host=apidoc.hd123.com:172.17.10.53", image: "harbor.qianfan123.com/toolset/toolsetcore:${toolset_image_version}") {
+                        echo "服务白名单检查"
+                        //sh "DNET_PRODUCT=dnet DNET_PROFILE=integration_test hdmon maven_docker_check --pomfile /opt/effectivepom.xml --configfile http://github.app.hd123.cn:10080/qianfanops/toolset/raw/develop/check/maven_check_dependency.yaml"
+                        sh "DNET_PRODUCT=dnet DNET_PROFILE=integration_test hdmon maven_docker_check --pomfile /opt/effectivepom.xml "
+                    }
+                 }
+            }
+        }
+        stage('maven denpendency check'){
+			steps{
+				script{
+                    def mvn_shell="mvn "
+                    if (env.mvn_pom){
+                        mvn_shell+=" -f "+env.mvn_pom+" "+" dependency:list "
+                        }
+                    else{
+                        mvn_shell+=" dependency:list "
+                        }
+                    echo "mvn_configfile is ${mvn_configfile}"
+                    configFileProvider([configFile(fileId:mvn_configfile, variable: 'maven_settings')]) {
+                            mvn_shell+="  -s $maven_settings"
+                            echo "maven denpendency check is ${mvn_shell}"
+                            sh "${mvn_shell}"
+                        }
+                    echo "BUILD_URL:${BUILD_URL}"
+                    withDockerContainer(args: "--rm -v ${WORKSPACE}:/opt", image: "harbor.qianfan123.com/toolset/toolsetcore:${toolset_image_version}") {
+                        // retry(2){
+                        //     sh "DNET_PROFILE=integration_test DNET_PRODUCT=dnet TRUST_PUBLIC_IP=true hdops download_toolset --branch develop -p ."
+                        // }
+                        // sh "tar zxf toolset.tar.gz -C ${WORKSPACE}"
+                        echo "maven denpendency check"
+                        sh "DNET_PRODUCT=dnet DNET_PROFILE=integration_test hdmon maven_dependency_check --jenkins_url ${BUILD_URL} --isrelease False  --pomfile /opt/effectivepom.xml --configfile http://github.app.hd123.cn:10080/qianfanops/toolset/raw/develop/check/maven_check_dependency.yaml"
+                    }
+				}
+			}
+		}
 		stage('build') {
 		    steps{
 				script{
@@ -194,35 +242,35 @@ pipeline {
                 }
             }
 		}
-        stage('maven denpendency check'){
-			steps{
-				script{
-                    def mvn_shell="mvn "
-                    if (env.mvn_pom){
-                        mvn_shell+=" -f "+env.mvn_pom+" "+" dependency:list "
-                        }
-                    else{
-                        mvn_shell+=" dependency:list "
-                        }
-                    echo "mvn_configfile is ${mvn_configfile}"
-                    configFileProvider([configFile(fileId:mvn_configfile, variable: 'maven_settings')]) {
-                            mvn_shell+="  -s $maven_settings"
-                            echo "maven denpendency check is ${mvn_shell}"
-                            sh "${mvn_shell}"
-                            sh "docker pull harbor.qianfan123.com/toolset/toolsetcore:${toolset_image_version}"
-                        }
-                    echo "BUILD_URL:${BUILD_URL}"
-                    withDockerContainer(args: "--rm -v ${WORKSPACE}:/opt", image: "harbor.qianfan123.com/toolset/toolsetcore:${toolset_image_version}") {
-                        retry(2){
-                            sh "DNET_PROFILE=integration_test DNET_PRODUCT=dnet TRUST_PUBLIC_IP=true hdops download_toolset --branch develop -p ."
-                        }
-                        sh "tar zxf toolset.tar.gz -C ${WORKSPACE}"
-                        echo "maven denpendency check"
-                        sh "DNET_PRODUCT=dnet DNET_PROFILE=integration_test hdmon maven_dependency_check --jenkins_url ${BUILD_URL} --isrelease False"
-                    }
-				}
-			}
-		}
+        //stage('maven denpendency check'){
+		//	steps{
+		//		script{
+        //            def mvn_shell="mvn "
+        //            if (env.mvn_pom){
+        //                mvn_shell+=" -f "+env.mvn_pom+" "+" dependency:list "
+        //                }
+        //            else{
+        //                mvn_shell+=" dependency:list "
+        //                }
+        //            echo "mvn_configfile is ${mvn_configfile}"
+        //            configFileProvider([configFile(fileId:mvn_configfile, variable: 'maven_settings')]) {
+        //                    mvn_shell+="  -s $maven_settings"
+        //                    echo "maven denpendency check is ${mvn_shell}"
+        //                    sh "${mvn_shell}"
+        //                    sh "docker pull harbor.qianfan123.com/toolset/toolsetcore:${toolset_image_version}"
+        //                }
+        //            echo "BUILD_URL:${BUILD_URL}"
+        //            withDockerContainer(args: "--rm -v ${WORKSPACE}:/opt", image: "harbor.qianfan123.com/toolset/toolsetcore:${toolset_image_version}") {
+        //                //retry(2){
+        //                //    sh "DNET_PROFILE=integration_test DNET_PRODUCT=dnet TRUST_PUBLIC_IP=true hdops download_toolset --branch develop -p ."
+        //                //}
+        //                //sh "tar zxf toolset.tar.gz -C ${WORKSPACE}"
+        //                echo "maven denpendency check"
+        //                sh "DNET_PRODUCT=dnet DNET_PROFILE=integration_test hdmon maven_dependency_check --jenkins_url ${BUILD_URL} --isrelease False --pomfile /opt/effectivepom.xml --configfile http://github.app.hd123.cn:10080/qianfanops/toolset/raw/develop/check/maven_check_dependency.yaml"
+        //            }
+		//		}
+		//	}
+		//}
         stage('detectimage'){
 			steps{
 				script{
