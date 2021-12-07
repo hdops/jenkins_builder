@@ -131,15 +131,15 @@ pipeline {
 				script{
                     def mvn_shell="mvn "
                     if (env.mvn_pom){
-                        if(env.excluds_groupids){
-                            mvn_shell+=" -f "+env.mvn_pom+" "+" dependency:list -DexcludeGroupIds=" + env.excluds_groupids
+                        if(env.excludes_artifactids){
+                            mvn_shell+=" -f "+env.mvn_pom+" "+" dependency:list -DexcludeArtifactIds=" + env.excludes_artifactids
                         }else{
                             mvn_shell+=" -f "+env.mvn_pom+" "+" dependency:list "
                         }
                     }
                     else{
-                        if(env.excluds_groupids){
-                            mvn_shell+=" dependency:list  -DexcludeGroupIds=" + env.excluds_groupids
+                        if(env.excludes_artifactids){
+                            mvn_shell+=" dependency:list  -DexcludeArtifactIds=" + env.excludes_artifactids
                         }else{
                             mvn_shell+=" dependency:list "
                         }
