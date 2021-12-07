@@ -23,6 +23,7 @@ pipeline {
         stage('update jenkins') {
 			steps{
 			    sh "docker pull harbor.qianfan123.com/base/jenkins-job-builder:0.1.0"
+				sh "docker run -i --rm -v $jenkins_home/workspace/$JOB_NAME/jenkins:/root/jenkins harbor.qianfan123.com/base/jenkins-job-builder:0.1.0 jenkins-jobs --conf jenkins/jenkins_jobs.ini test jenkins/phoenix/project.yml"
 				sh "docker run -i --rm -v $jenkins_home/workspace/$JOB_NAME/jenkins:/root/jenkins harbor.qianfan123.com/base/jenkins-job-builder:0.1.0 jenkins-jobs --conf jenkins/jenkins_jobs.ini update jenkins/phoenix/project.yml"
 			}
         }
