@@ -15,6 +15,7 @@ if (env.set_on_k8s) {
     env.on_k8s=env.set_on_k8s
 }
 
+def test_shell="jenkins-jobs --conf /root/jenkins_jobs.ini test "
 def update_shell="jenkins-jobs --conf /root/jenkins_jobs.ini update --workers 5"
 
 def ignore_templates="/templates/|/ops/jenkins.yml"
@@ -93,7 +94,7 @@ pipeline {
                                     file.each{ j ->
                                         out = sh(script: "echo ${j} | grep -E \"${ignore_templates}\" && echo -n 'true' || echo -n 'false' ", returnStdout: true)
                                         if ( out == "false" ) {
-                                            outstatus = sh(script: "ls $j &> /dev/null && ${update_shell} $j && echo -n 'true' || echo -n 'false' ", returnStdout: true)
+                                            outstatus = sh(script: "ls $j &> /dev/null && ${test_shell} $j && ${update_shell} $j && echo -n 'true' || echo -n 'false' ", returnStdout: true)
                                             if ( outstatus == "false" ) {
                                                 echo "update ${j}: ${outstatus}"
                                                 error_yaml_file=error_yaml_file+'<>'+j
