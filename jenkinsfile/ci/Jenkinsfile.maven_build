@@ -126,11 +126,19 @@ pipeline {
 				script{
                     def mvn_shell="mvn "
                     if (env.mvn_pom){
-                        mvn_shell+=" -f "+env.mvn_pom+" "+" dependency:list "
+                        if(env.excluds_groupids){
+                            mvn_shell+=" -f "+env.mvn_pom+" "+" dependency:list -DexcludeGroupIds=" + env.excluds_groupids
+                        }else{
+                            mvn_shell+=" -f "+env.mvn_pom+" "+" dependency:list "
                         }
+                    }
                     else{
-                        mvn_shell+=" dependency:list "
+                        if(env.excluds_groupids){
+                            mvn_shell+=" dependency:list  -DexcludeGroupIds=" + env.excluds_groupids
+                        }else{
+                            mvn_shell+=" dependency:list "
                         }
+                    }
                     echo "mvn_configfile is ${mvn_configfile}"
                     configFileProvider([configFile(fileId:mvn_configfile, variable: 'maven_settings')]) {
                             mvn_shell+="  -s $maven_settings"
