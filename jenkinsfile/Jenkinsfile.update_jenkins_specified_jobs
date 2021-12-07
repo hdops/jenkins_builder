@@ -109,7 +109,7 @@ pipeline {
                                     out = sh(script: "[ -f ${i} ] && echo -n 'true' || echo -n 'false' ", returnStdout: true)
                                     echo "${i} is file: ${out}"
                                     if ( out == "true" ) {
-                                        outputstatus = sh(script: "ls $i  &> /dev/null && ${update_shell} $i  && echo -n 'true' || echo -n 'false' ", returnStdout: true)
+                                        outputstatus = sh(script: "ls $i  &> /dev/null && ${test_shell} $i  && ${update_shell} $i  && echo -n 'true' || echo -n 'false' ", returnStdout: true)
                                         echo "Get ${i}: ${outputstatus}"
                                         if ( outputstatus == "false" ) {
                                             error_yaml_file=error_yaml_file+'<>'+i
