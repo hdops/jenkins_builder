@@ -41,7 +41,7 @@ pipeline {
 			steps{   
                             echo "upurl is ${params.upurl}"
                             echo "isrelease  ${params.isrelease}"
-							sh "hdmon maven_dependency_check --jenkins_url ${params.upurl} --isrelease ${params.isrelease} --pomfile /opt/effectivepom.xml --configfile http://github.app.hd123.cn:10080/qianfanops/toolset/raw/develop/check/maven_check_dependency.yaml" 
+							sh "hdmon maven_dependency_check --jenkins_url ${params.upurl} --isrelease ${params.isrelease} --pomfile /opt/effectivepom.xml" 
 			}
 		}
     }
