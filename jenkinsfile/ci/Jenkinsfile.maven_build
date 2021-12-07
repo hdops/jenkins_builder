@@ -229,7 +229,6 @@ pipeline {
                     echo "BUILD_URL:${BUILD_URL}"
                     withDockerContainer(args: "--rm -v ${WORKSPACE}:/opt", image: "harbor.qianfan123.com/toolset/toolsetcore:${toolset_image_version}") {
                         echo "maven denpendency check"
-                        if (evn.mvn_pom)
                         // sh "DNET_PRODUCT=dnet DNET_PROFILE=integration_test hdmon maven_dependency_check --jenkins_url ${BUILD_URL} --isrelease False  --pomfile /opt/effectivepom.xml ${hdmon_maven_dependency_check}"
                     }
 				}
