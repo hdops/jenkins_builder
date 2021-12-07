@@ -127,16 +127,16 @@ pipeline {
                     def mvn_shell="mvn "
                     if (env.mvn_pom){
                         if(env.excludes_artifactids){
-                            mvn_shell+=" -f "+env.mvn_pom+" "+" dependency:go-offline -DexcludeArtifactIds=" + env.excludes_artifactids
+                            mvn_shell+=" -f "+env.mvn_pom+" "+" compile dependency:list -DexcludeArtifactIds=" + env.excludes_artifactids
                         }else{
-                            mvn_shell+=" -f "+env.mvn_pom+" "+" dependency:list "
+                            mvn_shell+=" -f "+env.mvn_pom+" "+" compile dependency:list "
                         }
                     }
                     else{
                         if(env.excludes_artifactids){
-                            mvn_shell+=" dependency:go-offline  -DexcludeArtifactIds=" + env.excludes_artifactids
+                            mvn_shell+=" compile dependency:list  -DexcludeArtifactIds=" + env.excludes_artifactids
                         }else{
-                            mvn_shell+=" dependency:list "
+                            mvn_shell+=" compile  dependency:list "
                         }
                     }
                     echo "mvn_configfile is ${mvn_configfile}"
