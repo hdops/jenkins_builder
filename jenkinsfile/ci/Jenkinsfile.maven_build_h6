@@ -107,31 +107,6 @@ pipeline {
                  }
             }
          }
-        stage('pre-build-1') {
-            steps{
-                script{
-                    echo "执行`mven help:effective-pom`,生成effectivepom.xml"
-                    def mvn_shell="mvn help:effective-pom -Doutput=effectivepom.xml"
-                    configFileProvider([configFile(fileId:mvn_configfile, variable: 'maven_settings')]) {
-                        mvn_shell+=" -s $maven_settings"
-                        echo "mvn_shell is ${mvn_shell}"
-                        sh "${mvn_shell}"
-                    }
-                }
-            }
-        }
-        stage('pre-build-2') {
-            steps{
-                 script {
-                    docker.image("harbor.qianfan123.com/toolset/toolsetcore:${toolset_image_version}").inside("--rm -v ${WORKSPACE}:/opt --add-host=apidoc.hd123.com:172.17.10.53")  {
-                    //withDockerContainer(args: "--rm -v ${WORKSPACE}:/opt --add-host=apidoc.hd123.com:172.17.10.53", image: "harbor.qianfan123.com/toolset/toolsetcore:${toolset_image_version}") {
-                        echo "服务白名单检查"
-                        //sh "DNET_PRODUCT=dnet DNET_PROFILE=integration_test hdmon maven_docker_check --pomfile /opt/effectivepom.xml --configfile http://github.app.hd123.cn:10080/qianfanops/toolset/raw/develop/check/maven_check_dependency.yaml"
-                        sh "DNET_PRODUCT=dnet DNET_PROFILE=integration_test hdmon maven_docker_check --pomfile /opt/effectivepom.xml "
-                    }
-                 }
-            }
-        }
 		stage('build') {
 		    steps{
 				script{
@@ -176,6 +151,31 @@ pipeline {
                 }
             }
 		}
+        stage('pre-build-1') {
+            steps{
+                script{
+                    echo "执行`mven help:effective-pom`,生成effectivepom.xml"
+                    def mvn_shell="mvn help:effective-pom -Doutput=effectivepom.xml"
+                    configFileProvider([configFile(fileId:mvn_configfile, variable: 'maven_settings')]) {
+                        mvn_shell+=" -s $maven_settings"
+                        echo "mvn_shell is ${mvn_shell}"
+                        sh "${mvn_shell}"
+                    }
+                }
+            }
+        }
+        stage('pre-build-2') {
+            steps{
+                 script {
+                    docker.image("harbor.qianfan123.com/toolset/toolsetcore:${toolset_image_version}").inside("--rm -v ${WORKSPACE}:/opt --add-host=apidoc.hd123.com:172.17.10.53")  {
+                    //withDockerContainer(args: "--rm -v ${WORKSPACE}:/opt --add-host=apidoc.hd123.com:172.17.10.53", image: "harbor.qianfan123.com/toolset/toolsetcore:${toolset_image_version}") {
+                        echo "服务白名单检查"
+                        //sh "DNET_PRODUCT=dnet DNET_PROFILE=integration_test hdmon maven_docker_check --pomfile /opt/effectivepom.xml --configfile http://github.app.hd123.cn:10080/qianfanops/toolset/raw/develop/check/maven_check_dependency.yaml"
+                        sh "DNET_PRODUCT=dnet DNET_PROFILE=integration_test hdmon maven_docker_check --pomfile /opt/effectivepom.xml "
+                    }
+                 }
+            }
+        }
         stage('maven denpendency check'){
 			steps{
 				script{
