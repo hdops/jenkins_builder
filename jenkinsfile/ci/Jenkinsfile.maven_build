@@ -214,7 +214,7 @@ pipeline {
                     def mvn_shell="mvn "
                     if (env.mvn_pom){
                         mvn_shell+=" -f "+env.mvn_pom+" "+" compile dependency:list "
-                        hdmon_maven_dependency_check=" --pompath"+env.mvn_pom
+                        hdmon_maven_dependency_check=" --pompath "+env.mvn_pom
                     }
                     else{
                         mvn_shell+=" compile  dependency:list "
