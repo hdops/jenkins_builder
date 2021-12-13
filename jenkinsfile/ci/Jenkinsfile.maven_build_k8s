@@ -129,17 +129,19 @@ pipeline {
                             pom_path=" --pompath "+env.mvn_pom
                         }
                         else{
-                            root_dir=env.mvn_pom.split('pom.xml')+"/"
-                            cd root_dir
-                            echo "执行`mven help:effective-pom`,生成"+root_dir+"/effectivepom.xml"
-                            def mvn_shell="mvn help:effective-pom -Doutput=effectivepom.xml"
-                            configFileProvider([configFile(fileId:mvn_configfile, variable: 'maven_settings')]) {
-                                mvn_shell+=" -s $maven_settings"
-                                echo "mvn_shell is ${mvn_shell}"
-                                sh "pwd"
-                                sh "${mvn_shell}"
+                            root_dir=env.mvn_pom.split('pom.xml')[0]+"/"
+                            echo "切换目录"+root_dir
+                            dir(root_dir){
+                                echo "执行`mven help:effective-pom`,生成"+root_dir+"/effectivepom.xml"
+                                def mvn_shell="mvn help:effective-pom -Doutput=effectivepom.xml"
+                                configFileProvider([configFile(fileId:mvn_configfile, variable: 'maven_settings')]) {
+                                    mvn_shell+=" -s $maven_settings"
+                                    echo "mvn_shell is ${mvn_shell}"
+                                    sh "pwd"
+                                    sh "${mvn_shell}"
+                                }
+                                pom_path=" --pompath "+env.mvn_pom+" --pomfile /opt/"+root_dir+"effectivepom.xml"
                             }
-                            pom_path=" --pompath "+env.mvn_pom+" --pomfile /opt/"+root_dir+"/effectivepom.xml"
                         }
                     }
                     else{
