@@ -126,7 +126,7 @@ pipeline {
                  }
             }
         }
-        stage('pre-build-2') {
+        stage('pre-build-3') {
             steps{
                  script {
                     withDockerContainer(args: "--rm -v ${WORKSPACE}:/opt", image: "harbor.qianfan123.com/toolset/toolsetcore:${toolset_image_version}") {
