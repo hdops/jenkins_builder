@@ -129,14 +129,30 @@ pipeline {
         stage('pre-build-3') {
             steps{
                  script {
-                    withDockerContainer(args: "--rm -v ${WORKSPACE}:/opt", image: "harbor.qianfan123.com/toolset/toolsetcore:${toolset_image_version}") {
-                        echo "服务META-INF检查"
-                        if (env.mvn_pom){
-                            pom_path+=" --pompath "+env.mvn_pom
+                    if (env.mvn_pom){
+                        if (env.mvn_pom=='pom.xml'){
+                            pom_path=" --pompath "+env.mvn_pom
                         }
                         else{
-                            pom_path=""
+                            root_dir=env.mvn_pom.split('pom.xml')+"/"
+                            dir(root_dir){
+                                echo "执行`mven help:effective-pom`,生成"+root_dir+"/effectivepom.xml"
+                                def mvn_shell="mvn help:effective-pom -Doutput=effectivepom.xml"
+                                configFileProvider([configFile(fileId:mvn_configfile, variable: 'maven_settings')]) {
+                                    mvn_shell+=" -s $maven_settings"
+                                    echo "mvn_shell is ${mvn_shell}"
+                                    sh "pwd"
+                                    sh "${mvn_shell}"
+                                }
+                                pom_path=" --pompath "+env.mvn_pom+" --pomfile /opt/"+root_dir+"/effectivepom.xml"
+                            }
                         }
+                    }
+                    else{
+                        pom_path=""
+                    }
+                    withDockerContainer(args: "--rm -v ${WORKSPACE}:/opt", image: "harbor.qianfan123.com/toolset/toolsetcore:${toolset_image_version}") {
+                        echo "服务META-INF检查"
                         sh "DNET_PRODUCT=dnet DNET_PROFILE=integration_test hdmon maven_meta_inf_check ${pom_path}"
                     }
                  }
