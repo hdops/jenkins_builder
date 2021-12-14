@@ -64,7 +64,7 @@ pipeline {
                 script{
                     configFileProvider([configFile(fileId:mvn_configfile, variable: 'maven_settings')]) {
                         echo "clean workspace "
-                        sh "ls -l *.zip  &&  rm -f *.zip"
+                        sh "rm -f *.zip"
                         echo "执行 mvn dependency:get "
                         sh "mvn dependency:get -DremoteRepositories=http://maven.hd123.cn/repository/maven-snapshots -DgroupId=${groupId} -DartifactId=${artifactId} -Dversion=${artifactVersion}  -Dpackaging=zip -Dclassifier=src -Dtransitive=false -s $maven_settings"
                         echo "执行 mvn dependency:copy "

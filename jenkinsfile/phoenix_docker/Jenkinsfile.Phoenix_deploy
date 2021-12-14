@@ -53,6 +53,16 @@ pipeline {
                 git branch: "${params.GIT_BRANCH}", credentialsId: '17643215-09f8-4a9a-b0ea-c8e49777ce1d', url: "${GITLAB_URL}/${GIT_GROUP}/${params.GIT_REPONAME}.git"
             }
         }
+        stage('使用yamllint进行配置检查(当前工作目下存在.yamllint文件)'){
+          steps{
+            script{
+              if(fileExists('.yamllint')){
+                echo "检查 docker_environments.yaml phoenix.yaml application.yml配置"
+                sh "yamllint -c .yamllint *.yaml *.yml"
+              }
+            }
+          }
+        }
         stage('get crmVersion') {
             steps {
                 script{
