@@ -60,6 +60,7 @@ pipeline {
           steps{
             script{
               if(fileExists('.yamllint')){
+                echo "检查 docker_environments.yaml phoenix.yaml application.yml配置"
                 sh "yamllint -c .yamllint *.yaml *.yml"
               }
             }
