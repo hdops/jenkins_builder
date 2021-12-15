@@ -1,0 +1,144 @@
+if (!env.on_k8s){
+    env.on_k8s="False"
+}
+if (env.set_on_k8s) {
+    env.on_k8s=env.set_on_k8s
+}
+
+def node= "master"
+if (env.node){
+    node =env.node
+}
+
+def YAML_FILE="kubernetes_pod_template.yaml"
+def toolset_image="harbor.qianfan123.com/toolset/toolsetcore:0.3.0"
+def docker_image="harbor.qianfan123.com/base/iac:0.1.0"
+def label_name="jenkins-job-k8s-deploy-nginx"
+
+def func_toolsetcore = {
+    retry(2){
+        sh "DNET_PROFILE=integration_test DNET_PRODUCT=dnet TRUST_PUBLIC_IP=${run_on_public} hdops download_toolset --branch ${params.GIT_BRANCH} -p ."
+    }
+    sh "ls /root/toolset/openresty_config/${base_update_config}/${base_update_config_environment}/inventory"
+}
+
+def func_deploy = {
+    sh "ls"
+    sh "ls /root/toolset/openresty_config/${base_update_config}/${base_update_config_environment}/inventory"
+    if (base_update_config || base_update_config_environment || tags) {
+        echo "没有找到参数 base_update_config、 base_update_config_environment、 tags"
+        sh "false"
+    }
+    echo "ansible-playbook -i /root/toolset/openresty_config/${base_update_config}/${base_update_config_environment}/inventory -e @/root/toolset/openresty_config/${base_update_config}/${base_update_config_environment}/main.yml hdiac/openresty/main-docker.yml --tags ${tags}"
+}
+
+
+pipeline {
+    agent {label node}
+    options {
+	    timeout(time: 3, unit: 'HOURS')
+    }
+    stages {
+        stage('advance prepare on k8s to read yaml') {
+            when {
+                beforeAgent true
+                environment name: 'on_k8s', value: 'True'
+            }
+
+            steps {
+                script{
+                    echo "node : ${node}"
+                    echo "on_k8s : ${on_k8s}"
+                    kubernetesPodYamlData = readYaml file: "jenkinsfile/${YAML_FILE}"
+                    kubernetesPodYamlData.spec.containers[0].image = "${docker_image}"
+                    kubernetesPodYamlData.spec.containers[0].name = "${label_name}"
+                    kubernetesPodYamlData.metadata.labels.label = "${label_name}"
+                    writeYaml file: "${YAML_FILE}.tmp", data: kubernetesPodYamlData
+                    kubernetesPodReadYamlData = sh(script: "cat ${YAML_FILE}.tmp", returnStdout: true)
+                    echo "${kubernetesPodReadYamlData}"
+
+                    kubernetesPodYamlData.spec.containers[0].image = "${toolset_image}"
+                    kubernetesPodYamlData.spec.containers[0].name = "${label_name}-toolset"
+                    kubernetesPodYamlData.metadata.labels.label = "${label_name}-toolset"
+                    writeYaml file: "${YAML_FILE}.tmp", data: kubernetesPodYamlData
+                    kubernetesPodReadYamlData_toolset = sh(script: "cat ${YAML_FILE}.tmp", returnStdout: true)
+                } 
+            }
+        }
+        stage('delete workspace') {
+            steps{
+                deleteDir()
+            }
+        }
+        stage('下载toolset on k8s') {
+            when {
+                beforeAgent true
+                environment name: 'on_k8s', value: 'True'
+            }
+            agent {
+                kubernetes{
+                    cloud 'kubernetes'
+                    yaml "${kubernetesPodReadYamlData_toolset}"
+                }
+            }
+            steps{
+                script{
+                    container("${label_name}") {
+                        func_toolsetcore()
+                    }
+                }
+            }
+        }
+
+        stage('下载toolset on docker') {
+            when {
+                beforeAgent true
+                environment name: 'on_k8s', value: 'False'
+            }
+            steps{
+                script {
+                    sh "docker pull ${toolset_image}"
+                    withDockerContainer(args: "-v /root/.ssh:/root/.ssh", image: "${toolset_image}") {
+                        func_toolsetcore()
+                    }
+                }
+            }
+        }
+
+        stage('部署nginx on k8s') {
+            when {
+                beforeAgent true
+                environment name: 'on_k8s', value: 'True'
+            }
+            agent {
+                kubernetes{
+                    cloud 'kubernetes'
+                    yaml "${kubernetesPodReadYamlData}"
+                }
+            }
+            steps{
+                script{
+                    container("${label_name}") {
+                        func_deploy()
+                    }
+                }
+            }
+        }
+
+        stage('部署nginx on docker') {
+            when {
+                beforeAgent true
+                environment name: 'on_k8s', value: 'False'
+            }
+            steps{
+                script {
+                    sh "docker pull ${docker_image}"
+                    withDockerContainer(args: "-v /root/.ssh:/root/.ssh", image: "${docker_image}") {
+                        func_deploy()
+                    }
+                }
+            }
+        }
+    }
+}
+
