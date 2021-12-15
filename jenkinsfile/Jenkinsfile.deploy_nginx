@@ -34,6 +34,7 @@ def func_toolsetcore = {
 
 def func_deploy = {
     sh "ls /root/iac/hdiac/openresty/main-docker.yml"
+    sh "ls"
     echo "ansible-playbook -i openresty_config/${base_update_config}/${base_update_config_environment}/inventory -e @openresty_config/${base_update_config}/${base_update_config_environment}/main.yml /root/iac/hdiac/openresty/main-docker.yml --tags ${tags}"
 }
 
@@ -102,6 +103,26 @@ pipeline {
             }
         }
 
+        stage('下载toolset on k8s') {
+            when {
+                beforeAgent true
+                environment name: 'on_k8s', value: 'True'
+            }
+            agent {
+                kubernetes{
+                    cloud 'kubernetes'
+                    yaml "${kubernetesPodReadYamlData}"
+                }
+            }
+            steps{
+                script{
+                    container("${label_name}-toolset") {
+                        func_toolsetcore()
+                    }
+                }
+            }
+        }
+
         stage('部署nginx on k8s') {
             when {
                 beforeAgent true
@@ -116,9 +137,6 @@ pipeline {
             steps{
                 script{
                     container("${label_name}") {
-                        sh "pwd"
-                        sh "ls"
-                        func_toolsetcore()
                         func_deploy()
                     }
                 }
