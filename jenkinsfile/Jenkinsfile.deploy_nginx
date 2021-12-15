@@ -88,7 +88,7 @@ pipeline {
             }
             steps{
                 script{
-                    container("${label_name}") {
+                    container("${label_name}-toolset") {
                         func_toolsetcore()
                     }
                 }
