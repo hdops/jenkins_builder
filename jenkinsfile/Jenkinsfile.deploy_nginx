@@ -103,7 +103,7 @@ pipeline {
             }
         }
 
-        stage('下载toolset on k8s') {
+        stage('部署nginx on k8s') {
             when {
                 beforeAgent true
                 environment name: 'on_k8s', value: 'True'
@@ -119,23 +119,6 @@ pipeline {
                     container("${label_name}-toolset") {
                         func_toolsetcore()
                     }
-                }
-            }
-        }
-
-        stage('部署nginx on k8s') {
-            when {
-                beforeAgent true
-                environment name: 'on_k8s', value: 'True'
-            }
-            agent {
-                kubernetes{
-                    cloud 'kubernetes'
-                    yaml "${kubernetesPodReadYamlData}"
-                }
-            }
-            steps{
-                script{
                     container("${label_name}") {
                         func_deploy()
                     }
