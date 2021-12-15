@@ -60,7 +60,7 @@ pipeline {
                     kubernetesPodYamlData.spec.containers[0].image = "${toolset_image}"
                     kubernetesPodYamlData.spec.containers[0].name = "${label_name}-toolset"
                     kubernetesPodYamlData.metadata.labels.label = "${label_name}-toolset"
-                    writeYaml file: "${YAML_FILE}.tmp", data: kubernetesPodYamlData
+                    writeYaml file: "${YAML_FILE}.toolset.tmp", data: kubernetesPodYamlData
                     kubernetesPodReadYamlData_toolset = sh(script: "cat ${YAML_FILE}.tmp", returnStdout: true)
                 } 
             }
