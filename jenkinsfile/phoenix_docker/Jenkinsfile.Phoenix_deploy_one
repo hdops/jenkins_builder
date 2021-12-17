@@ -56,6 +56,17 @@ pipeline {
                 git branch: "${params.GIT_BRANCH}", credentialsId: '17643215-09f8-4a9a-b0ea-c8e49777ce1d', url: "${GITLAB_URL}/${GIT_GROUP}/${params.GIT_REPONAME}.git"
             }
         }
+        stage('使用test测试配置是否符合要求'){
+            steps{
+                script{
+                    if(fileExists('tests')){
+                        withDockerContainer(args: "-v ${WORKSPACE}:${WORKSPACE}", image: "harbor.qianfan123.com/toolset/toolsetcore:0.3.0") {
+                            sh "pytest -m unit -sv"
+                        }
+                    }
+                }
+            }
+        }
         stage('使用yamllint进行配置检查(当前工作目下存在.yamllint文件)'){
           steps{
             script{
