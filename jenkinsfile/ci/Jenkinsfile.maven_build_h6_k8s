@@ -112,7 +112,7 @@ pipeline {
                  }
             }
          }
-        stage('pre-build-1') {
+        stage('pre-build-生成effectivepom') {
             steps{
                 script{
                     echo "执行`mven help:effective-pom`,生成effectivepom.xml"
@@ -125,7 +125,7 @@ pipeline {
                 }
             }
         }
-        stage('pre-build-2') {
+        stage('pre-build-服务白名单检查') {
             steps{
                  script {
                     docker.image("harbor.qianfan123.com/toolset/toolsetcore:${toolset_image_version}").inside("--rm -v ${WORKSPACE}:/opt --add-host=apidoc.hd123.com:172.17.10.53")  {
@@ -137,7 +137,7 @@ pipeline {
                  }
             }
         }
-        stage('pre-build-3') {
+        stage('pre-build-服务META-INF检查') {
             steps{
                  script {
                     if (env.mvn_pom){
