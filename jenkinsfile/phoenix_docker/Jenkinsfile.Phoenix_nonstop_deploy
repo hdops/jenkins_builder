@@ -27,7 +27,18 @@ if (env.set_on_k8s) {
 def func = {
     sh "phoenix-tools version"
     echo "注: 6.22.0后版本才支持该功能"
-    sh "phoenix-tools change_erueka --subsystem ${params.subsystem}  --tag ${params.tag}"
+    
+    echo "开始 ${params.subsystem} blue 节点更新"
+    sh "phoenix-tools change_erueka --subsystem ${params.subsystem}  --tag blue"
+    sh "phoenix-tools ${params.action} ${params.skipversion} --subsystem ${params.subsystem} --skipupgrade ${params.skipupgrade} --tag blue"
+
+    echo "开始 ${params.subsystem} green 节点更新"
+    sh "phoenix-tools change_erueka --subsystem ${params.subsystem}  --tag green"
+    sh "phoenix-tools ${params.action} ${params.skipversion} --subsystem ${params.subsystem} --skipupgrade ${params.skipupgrade} --tag green"
+
+    echo "上线 ${params.subsystem} 全部节点"
+    sh "phoenix-tools change_erueka --subsystem ${params.subsystem}  --tag None"
+    echo "${params.subsystem} 不停服升级完毕"
 }
 
 pipeline {
