@@ -50,7 +50,19 @@ pipeline {
                 }
 			}
         }
-
+        stage('delete toolset error docker') {
+			steps{
+                script {
+                    if(env.on_k8s == 'True'){
+                        echo "kubernetes do not need delete"
+                    } else {
+                        sh "docker ps -a | grep harbor.qianfan123.com/toolset/toolsetcore:0.3.0 | grep -v ' Up '"
+                        sh "echo $(docker ps -a | grep harbor.qianfan123.com/toolset/toolsetcore:0.3.0 | grep -v ' Up ' | awk '{print $1}')"
+                        // sh "docker rm $(docker ps -a | grep harbor.qianfan123.com/toolset/toolsetcore:0.3.0 | grep -v ' Up ' | awk '{print $1}')"
+                    }
+                }
+			}
+        }
 	}
 	post {
     // 构建失败之后钉钉通知
