@@ -46,10 +46,14 @@ pipeline {
                         echo "kubernetes do not need delete"
                     } else {
                         out = sh(script: "docker ps -a | grep harbor.qianfan123.com/toolset/phoenixcore | grep -v Up | awk '{print \$1}'", returnStdout: true)
-                        String[] dockerlist = out.split('\n')
-                        for ( String i : dockerlist ){
-                            sh "docker ps -a | grep ${i}"
-                            sh "docker rm ${i}"
+                        if (out == ""){
+                            sh "true"
+                        } else {
+                            String[] dockerlist = out.split('\n')
+                            for ( String i : dockerlist ){
+                                sh "docker ps -a | grep ${i}"
+                                sh "docker rm ${i}"
+                            }
                         }
                     }
                 }
