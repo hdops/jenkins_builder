@@ -45,8 +45,12 @@ pipeline {
                     if(env.on_k8s == 'True'){
                         echo "kubernetes do not need delete"
                     } else {
-                        sh "docker ps -a | grep harbor.qianfan123.com/toolset/phoenixcore | grep -v ' Up '"
-                        sh "docker rm $(docker ps -a | grep harbor.qianfan123.com/toolset/phoenixcore | grep -v ' Up ' | awk '{print $1}')"
+                        out = sh(script: "docker ps -a | grep harbor.qianfan123.com/toolset/phoenixcore | grep -v Up | awk '{print \$1}'", returnStdout: true)
+                        String[] dockerlist = out.split('\n')
+                        for ( String i : dockerlist ){
+                            sh "docker ps -a | grep ${i}"
+                            sh "docker rm ${i}"
+                        }
                     }
                 }
 			}
