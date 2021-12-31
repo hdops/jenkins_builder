@@ -44,7 +44,7 @@ pipeline {
                             echo "product is ${params.DNET_PRODUCT}"
                             echo "workspace is $WORKSPACE"
                             retry(2){
-                                sh "wget -c http://download.qianfan123.com/toolset/dnet/develop/iac.tar.gz"
+                                sh "wget -c https://dposclient.oss-cn-hangzhou.aliyuncs.com/toolset/dnet/develop/iac.tar.gz"
                             }
                             sh "tar zxf iac.tar.gz -C $WORKSPACE"
                             retry(2){
@@ -62,7 +62,7 @@ pipeline {
                         echo "workspace is $WORKSPACE"
                         docker.image("harbor.qianfan123.com/toolset/toolsetcore:${toolset_image_version}").inside {
                             retry(2){
-                                sh "wget -c http://download.qianfan123.com/toolset/dnet/develop/iac.tar.gz"
+                                sh "wget -c https://dposclient.oss-cn-hangzhou.aliyuncs.com/toolset/dnet/develop/iac.tar.gz"
                             }
                             sh "tar zxf iac.tar.gz -C $WORKSPACE"
                             retry(2){
