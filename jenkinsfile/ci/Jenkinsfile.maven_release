@@ -153,10 +153,9 @@ pipeline {
                  }
             }
         }
-        stage('pre-buil-mvn-enforcer') {
+        stage('pre-build-mvn-enforcer') {
             steps{
                 script{
-                    echo "temp"
                     def mvn_shell="mvn validate -f maven_enforce.xml"
                     configFileProvider([configFile(fileId:mvn_configfile, variable: 'maven_settings')]) {
                         mvn_shell+=" -s $maven_settings"
