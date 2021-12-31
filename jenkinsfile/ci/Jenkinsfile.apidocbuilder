@@ -1,0 +1,115 @@
+def node=""
+if (env.node){
+    node =env.node
+}else{
+    node ="develop"
+}
+
+def GIT_PROJECT = "mas/mas2doc.git"
+if (env.GIT_PROJECT){
+    GIT_PROJECT =env.GIT_PROJECT
+}
+
+def DURABLE= "$JENKINS_HOME/durable/$JOB_BASE_NAME"
+def CONTAINER = "$JOB_BASE_NAME"
+
+pipeline {
+    agent {label node}
+    environment {
+        APIDOC_CREDENTIAL = credentials("qianfan")
+    }
+    stages {
+        stage('Get source') {
+            steps {
+                cleanWs()
+                sh "git clone --depth=1 https://gitlab.hd123.com/$GIT_PROJECT mas2doc"
+            }
+        }
+        stage('Start container') {
+            steps {
+                script {
+                    if (!fileExists("$DURABLE")) {
+                        sh "mkdir -p $DURABLE"
+                    }
+                    try {
+                        sh "docker stop $CONTAINER"
+                    } catch (e) {}
+                    sh "docker run --name $CONTAINER --rm --privileged -d \
+                       -v $DURABLE:/durable \
+                       -v $WORKSPACE:/workspace \
+                       -e APIDOC_USERNAME=$APIDOC_CREDENTIAL_USR \
+                       -e APIDOC_PASSWORD=$APIDOC_CREDENTIAL_PSW \
+                       harbor.qianfan123.com/base/dind:djn"
+                    timeout(5) {
+                        waitUntil(initialRecurrencePeriod: 1000, quiet: true) {
+                            try {
+                                sh "docker exec $CONTAINER docker ps"
+                                return true;
+                            } catch (e) {
+                                return false;
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        stage('Container: start kroki') {
+            steps {
+                script {
+                    // load from durable
+                    if (fileExists("$DURABLE/kroki.tar")) {
+                        sh "docker exec $CONTAINER docker load -i /durable/kroki.tar"
+                    }
+
+                    sh "docker exec $CONTAINER docker run -d --rm -p 8900:8000 yuzutech/kroki"
+
+                    // save to durable if not exists
+                    if (!fileExists("$DURABLE/kroki.tar")) {
+                        sh "docker exec $CONTAINER docker save -o /durable/kroki.tar yuzutech/kroki"
+                    }
+                }
+            }            
+        }
+        stage('Container: npm install') {
+            steps {
+                script {
+                    // extract from durable first
+                    if (fileExists("$DURABLE/node_modules.tar")) {
+                        dir('mas2doc/apidocbuilder') {
+                            sh "tar -xf $DURABLE/node_modules.tar"
+                        }
+                    }
+                    
+                    // use faster npm registry
+                    sh "docker exec $CONTAINER npm config --global set registry https://r.npm.taobao.org/"
+
+                    // npm install
+                    sh "docker exec --workdir=/workspace/mas2doc/apidocbuilder $CONTAINER npm install"
+
+                    // save to durable if not exists
+                    if (!fileExists("$DURABLE/node_modules.tar")) {
+                        dir('mas2doc/apidocbuilder') {
+                            sh "tar -cf $DURABLE/node_modules.tar node_modules"
+                        }
+                    }
+                } 
+            }
+        }
+        stage('Container: convert') {
+            steps {
+                sh "docker exec --workdir=/workspace/mas2doc/apidocbuilder $CONTAINER node convert-and-deploy.js 1 1"
+            }
+        }
+        stage('Container: deploy') {
+            steps {
+                sh "docker exec --workdir=/workspace/mas2doc/apidocbuilder $CONTAINER node convert-and-deploy.js 2"
+            }
+        }
+        stage('Container: stop') {
+            steps {
+                // Not in post section: Keep the container if something wrong above. 
+                sh "docker stop $CONTAINER"
+            }
+        }
+    }
+}
