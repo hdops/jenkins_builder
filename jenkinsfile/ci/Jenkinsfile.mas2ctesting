@@ -1,0 +1,156 @@
+def node=""
+if (env.node){
+    node =env.node
+}else{
+    node ="develop"
+}
+
+def GIT_PROJECT = "mas/mas2c.git"
+if (env.GIT_PROJECT){
+    GIT_PROJECT =env.GIT_PROJECT
+}
+
+def DURABLE = "$JENKINS_HOME/durable/$JOB_BASE_NAME"
+def CONTAINER = "$JOB_BASE_NAME"
+def OSS_ALI_REGION = "oss-cn-hangzhou"
+def OSS_ALI_BUCKET = "essp"
+
+pipeline {
+    agent any
+    environment {
+        GIT_CREDENTIALS = credentials('qianfan')
+        GIT_API_TOKEN = credentials('qianfan-gitlab-toekn')
+        MAIL_CREDENTIALS = credentials('qianfan')
+        OSS_ALI_ACCESS_KEY = credentials('mas2ctesting')
+    }
+    stages {
+        stage('Get source') {
+            steps {
+                script {
+                    cleanWs()
+                    sh "git clone --depth=1 https://gitlab.hd123.com/$GIT_PROJECT mas2c"
+                }
+            }
+        }
+        stage('Start container') {
+            steps {
+                script {
+                    if (!fileExists("$DURABLE")) {
+                        sh "mkdir -p $DURABLE"
+                    }
+                    try {
+                        sh "docker stop $CONTAINER"
+                    } catch (e) {}
+                    sh "docker run --name $CONTAINER --rm --privileged -d \
+                       -v $DURABLE:/durable \
+                       -v $WORKSPACE:/workspace \
+                       -e OSS_ALI_REGION=$OSS_ALI_REGION \
+                       -e OSS_ALI_BUCKET=$OSS_ALI_BUCKET \
+                       -e OSS_ALI_ACCESS_KEY_ID=$OSS_ALI_ACCESS_KEY_USR \
+                       -e OSS_ALI_ACCESS_KEY_SECRET=$OSS_ALI_ACCESS_KEY_PSW \
+                       -e GIT_PRIVATE_TOKEN=$GIT_API_TOKEN \
+                       -e GIT_USERNAME=$GIT_CREDENTIALS_USR \
+                       -e GIT_PASSWORD=$GIT_CREDENTIALS_PSW \
+                       -e MAIL_USERNAME=$MAIL_CREDENTIALS_USR \
+                       -e MAIL_PASSWORD=$MAIL_CREDENTIALS_PSW \
+                       harbor.qianfan123.com/base/dind:djn"
+                }
+            }
+        }
+        stage('Container: mvn package') {
+            steps {
+                // set ip for maven.qianfan123.com
+                sh "docker exec $CONTAINER sh -c 'echo 172.17.0.82 maven.qianfan123.com >> /etc/hosts'"
+                // mvn, with local repo at /durable/m2repo
+                sh "docker exec --workdir /workspace/mas2c $CONTAINER mvn -Dmaven.repo.local=/durable/m2repo -DskipTests clean package"
+            }
+        }
+        stage('Container: docker-compose up') {
+            // agent {docker} doesn't work: it starts services in host docker daemon instead of our container's docker daemon
+            steps {
+                script {
+                    // set ip's for harbor.qianfan123.com
+                    sh "docker exec $CONTAINER sh -c 'echo 47.96.49.121 harbor.qianfan123.com >> /etc/hosts'"
+                    sh "docker exec $CONTAINER sh -c 'echo 118.178.164.30 harbor-storage.oss-cn-hangzhou-internal.aliyuncs.com >> /etc/hosts'"
+
+                    // load from durable
+                    if (fileExists("$DURABLE/eureka.tar")) {
+                        sh "docker exec $CONTAINER docker load -i /durable/eureka.tar"
+                    }
+                    if (fileExists("$DURABLE/postgres.tar")) {
+                        sh "docker exec $CONTAINER docker load -i /durable/postgres.tar"
+                    }
+                    if (fileExists("$DURABLE/rabbitmq.tar")) {
+                        sh "docker exec $CONTAINER docker load -i /durable/rabbitmq.tar"
+                    }
+                    if (fileExists("$DURABLE/redis.tar")) {
+                        sh "docker exec $CONTAINER docker load -i /durable/redis.tar"
+                    }
+
+                    // start services
+                    sh "docker exec --workdir=/workspace/mas2c/testing $CONTAINER docker-compose up -d"
+
+                    // save to durable if not exists
+                    if (!fileExists("$DURABLE/eureka.tar")) {
+                        sh "docker exec $CONTAINER docker save -o /durable/eureka.tar harbor.qianfan123.com/mirror/springcloud-eureka"
+                    }
+                    if (!fileExists("$DURABLE/postgres.tar")) {
+                        sh "docker exec $CONTAINER docker save -o /durable/postgres.tar harbor.qianfan123.com/mirror/postgres:13.2"
+                    }
+                    if (!fileExists("$DURABLE/rabbitmq.tar")) {
+                        sh "docker exec $CONTAINER docker save -o /durable/rabbitmq.tar harbor.qianfan123.com/mirror/rabbitmq:3.8.16-management-alpine"
+                    }
+                    if (!fileExists("$DURABLE/redis.tar")) {
+                        sh "docker exec $CONTAINER docker save -o /durable/redis.tar harbor.qianfan123.com/mirror/redis:4-alpine"
+                    }
+                }
+            }
+        }
+        stage('Container: npm install') {
+            steps {
+                script {
+                    // use faster npm registry
+                    sh "docker exec $CONTAINER npm config --global set registry https://r.npm.taobao.org/"
+
+                    // need access to https://gitlab.hd123.com/caili/jstl.git
+                    sh "docker exec $CONTAINER sh -c 'echo https://\$GIT_USERNAME:\$GIT_PASSWORD@gitlab.hd123.com > /.git-credentials'"
+                    sh "docker exec $CONTAINER git config --global credential.helper 'store --file=/.git-credentials'"
+
+                    // extract from durable first
+                    if (fileExists("$DURABLE/node_modules.tar")) {
+                        dir('mas2c/testing') {
+                            sh "tar -xf $DURABLE/node_modules.tar"
+                        }
+                    }
+
+                    // npm install
+                    sh "docker exec --workdir=/workspace/mas2c/testing $CONTAINER npm install"
+
+                    // save to durable if not exists
+                    if (!fileExists("$DURABLE/node_modules.tar")) {
+                        dir('mas2c/testing') {
+                            sh "tar -cf $DURABLE/node_modules.tar node_modules"
+                        }
+                    }
+                }
+            }
+        }
+        stage('Container: run-tests') {
+            steps {
+                sh "docker exec --workdir=/workspace/mas2c/testing $CONTAINER node run-config.mjs"
+                sh "docker exec --workdir=/workspace/mas2c/testing $CONTAINER node run-tests.mjs 2"
+            }
+        }
+        stage('Container: Send mails') {
+            steps {
+                sh "docker exec --workdir=/workspace/mas2c/testing $CONTAINER node run-tests.mjs 7"
+            }
+        }
+        stage('Container: stop') {
+            steps {
+                // Not in post section: Keep the container if something wrong above. 
+                sh "docker stop $CONTAINER"
+            }
+        }
+    }
+}
