@@ -19,7 +19,7 @@ pipeline {
     agent any
     environment {
         GIT_CREDENTIALS = credentials('qianfan')
-        GIT_API_TOKEN = credentials('qianfan-gitlab-toekn')
+        GIT_API_TOKEN = credentials('qianfan-gitlab-api-token')
         MAIL_CREDENTIALS = credentials('qianfan')
         OSS_ALI_ACCESS_KEY = credentials('mas2ctesting')
     }
@@ -48,7 +48,7 @@ pipeline {
                        -e OSS_ALI_BUCKET=$OSS_ALI_BUCKET \
                        -e OSS_ALI_ACCESS_KEY_ID=$OSS_ALI_ACCESS_KEY_USR \
                        -e OSS_ALI_ACCESS_KEY_SECRET=$OSS_ALI_ACCESS_KEY_PSW \
-                       -e GIT_PRIVATE_TOKEN=$GIT_API_TOKEN \
+                       -e GIT_PRIVATE_TOKEN=$GIT_API_TOKEN_PSW \
                        -e GIT_USERNAME=$GIT_CREDENTIALS_USR \
                        -e GIT_PASSWORD=$GIT_CREDENTIALS_PSW \
                        -e MAIL_USERNAME=$MAIL_CREDENTIALS_USR \
