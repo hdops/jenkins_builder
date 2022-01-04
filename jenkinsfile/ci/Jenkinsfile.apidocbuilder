@@ -44,6 +44,7 @@ pipeline {
                         waitUntil(initialRecurrencePeriod: 1000, quiet: true) {
                             try {
                                 sh "docker exec $CONTAINER docker ps"
+                                sh "docker exec $CONTAINER sh -c 'echo 172.17.10.53 apidoc.hd123.com >> /etc/hosts'"
                                 return true;
                             } catch (e) {
                                 return false;
