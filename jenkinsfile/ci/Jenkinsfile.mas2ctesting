@@ -20,7 +20,7 @@ pipeline {
     environment {
         GIT_CREDENTIALS = credentials('qianfan')
         GIT_API_TOKEN = credentials('qianfan-gitlab-api-token')
-        MAIL_CREDENTIALS = credentials('qianfan')
+        MAIL_CREDENTIALS = credentials('email')
         OSS_ALI_ACCESS_KEY = credentials('mas2ctesting')
     }
     stages {
