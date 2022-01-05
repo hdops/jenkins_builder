@@ -2,7 +2,7 @@ def node=""
 if (env.node){
     node =env.node
 }else{
-    node ="develop"
+    node ="master"
 }
 
 def GIT_PROJECT = "mas/mas2doc.git"
