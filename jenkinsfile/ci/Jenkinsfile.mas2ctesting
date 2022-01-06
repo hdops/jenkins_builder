@@ -103,6 +103,9 @@ pipeline {
                     if (!fileExists("$DURABLE/redis.tar")) {
                         sh "docker exec $CONTAINER docker save -o /durable/redis.tar harbor.qianfan123.com/mirror/redis:4-alpine"
                     }
+
+                    // wait 30 second
+                    sh "sleep 30"
                 }
             }
         }
