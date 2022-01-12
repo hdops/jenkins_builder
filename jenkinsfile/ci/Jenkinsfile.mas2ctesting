@@ -28,7 +28,10 @@ pipeline {
             steps {
                 script {
                     cleanWs()
-                    sh "git clone --depth=1 https://gitlab.hd123.com/$GIT_PROJECT mas2c"
+                    retry(2){
+                        sh "git clone --depth=1 https://gitlab.hd123.com/$GIT_PROJECT mas2c"
+                        sleep 10
+                    }
                 }
             }
         }
@@ -103,6 +106,9 @@ pipeline {
                     if (!fileExists("$DURABLE/redis.tar")) {
                         sh "docker exec $CONTAINER docker save -o /durable/redis.tar harbor.qianfan123.com/mirror/redis:4-alpine"
                     }
+
+                    // wait 30 seconds
+                    sh "sleep 30"
                 }
             }
         }
