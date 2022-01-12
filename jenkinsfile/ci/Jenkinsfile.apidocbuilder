@@ -120,7 +120,7 @@ pipeline {
                 def subject = "mas2c apidoc构建流程阻断异常"
                 def to = env.email_build_recipients ? "${env.email_build_recipients}" : "yuzhiyuan@hd123.com"
                 def body = "mas2c apidoc构建流程阻断异常, 更多信息请查阅: ${BUILD_URL}"
-                emailext subject: subject, to: to,cc: "caili@hd123.com,buhaiqing@hd123.com", body:body,attachLog:true
+                emailext subject: subject, to: to,cc: "caili@hd123.com buhaiqing@hd123.com", body:body,attachLog:true
             }
         }
         fixed {
@@ -129,7 +129,7 @@ pipeline {
                 def to = env.email_build_recipients ? "${env.email_build_recipients}" : "yuzhiyuan@hd123.com"
                 def body = "mas2c apidoc构建流程已恢复, 更多信息请查阅: ${BUILD_URL}"
                 // send email
-                emailext subject: subject, to: to,cc: "caili@hd123.com,buhaiqing@hd123.com", body:body,attachLog:true
+                emailext subject: subject, to: to,cc: "caili@hd123.com buhaiqing@hd123.com", body:body,attachLog:true
             }
         }
     }
