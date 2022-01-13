@@ -33,7 +33,6 @@ pipeline {
         }
         stage('download_toolset'){ 
 			steps{
-                echo "active profile is ${DNET_PROFILE}"
                 echo "workspace is $WORKSPACE"
                 retry(2){
                     sh "DNET_PROFILE=integration_test DNET_PRODUCT=dnet TRUST_PUBLIC_IP=${run_on_public} hdops download_toolset --branch ${build_branch} -p ."
