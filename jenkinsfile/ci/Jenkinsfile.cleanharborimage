@@ -1,0 +1,50 @@
+def node=""
+if (env.node){
+    node =env.node
+}else{
+    node ="develop"
+}
+
+def run_on_public="None"
+if (env.run_on_public){
+    run_on_public=env.run_on_public
+}
+
+def build_branch="develop"
+if (env.build_branch){
+    build_branch=env.build_branch
+}
+
+pipeline {
+	agent {
+        docker {
+            label node
+            image "harbor.qianfan123.com/toolset/toolsetcore:0.3.0"
+        }
+    }
+    options {
+	    timeout(time: 3, unit: 'HOURS')
+    } 
+    stages {
+        stage('delete workspace') {
+            steps{
+                deleteDir()
+            }
+        }
+        stage('download_toolset'){ 
+			steps{
+                echo "active profile is ${DNET_PROFILE}"
+                echo "workspace is $WORKSPACE"
+                retry(2){
+                    sh "DNET_PROFILE=integration_test DNET_PRODUCT=dnet TRUST_PUBLIC_IP=${run_on_public} hdops download_toolset --branch ${build_branch} -p ."
+                }
+                sh "tar zxf toolset.tar.gz -C $WORKSPACE"
+			}
+		}
+        stage('clean harbor image'){
+			steps{
+                sh "python clean_harbor_image.py --namespace ${params.namespace} --image ${params.image} --tags ${params.tags} --dryrun ${params.dryrun}"
+			}
+		}
+    }
+}
