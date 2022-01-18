@@ -141,5 +141,32 @@ skipversion=${skipversion}""", remoteJenkinsName: "${remoteJenkins}", useCrumbCa
 				}
 			}
 		}
+        stage('deploy on k8s'){
+			steps{
+				script{
+				    if (env.remote_deploy_k8s_cfg != "" && env.remote_deploy_k8s_cfg != null) {
+                        // remote_deploy
+                        println(env.remote_deploy_k8s_cfg)
+                        String[] data = env.remote_deploy_k8s_cfg.split('&')
+                        println(data)
+                        count = data.size()
+                        tasks = [:]
+                        data.each{ i ->
+                            String[] item = i.split(';')
+                            println(item)
+                            remoteJenkins = item[0]
+                            remoteJob = item[1]
+                            DNET_PROFILE = item[2]
+                            echo "remoteJenkins is ${remoteJenkins}"
+                            echo "remoteJob is ${remoteJob}"
+                            echo "DNET_PROFILE is ${DNET_PROFILE}"
+                            // deploy
+                            triggerRemoteJob job: "${remoteJob}", maxConn: 3, parameters: """DNET_PROFILE=${DNET_PROFILE}
+image=${subsystem}""", remoteJenkinsName: "${remoteJenkins}", useCrumbCache: false, useJobInfoCache: false, enhancedLogging: true
+                        }
+                    }
+				}
+			}
+		}
     }
 }
