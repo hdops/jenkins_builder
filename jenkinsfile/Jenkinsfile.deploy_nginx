@@ -81,7 +81,6 @@ pipeline {
                 script {
                     sh "docker pull ${toolset_image}"
                     withDockerContainer(args: "-v /root/.ssh:/root/.ssh", image: "${toolset_image}") {
-                        sh "chmod +x /root/iac/docker-entrypoint.sh"
                         func_toolsetcore()
                     }
                 }
