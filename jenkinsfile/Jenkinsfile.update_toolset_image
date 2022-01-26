@@ -48,7 +48,7 @@ pipeline {
                             String[] dockerlist = out.split('\n')
                             for ( String i : dockerlist ){
                                 sh "docker ps -a | grep ${i}"
-                                sh "docker rm ${i}"
+                                sh "docker rm -f ${i}"
                             }
                         }
                         
