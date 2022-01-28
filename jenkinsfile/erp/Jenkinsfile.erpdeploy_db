@@ -36,6 +36,7 @@ pipeline {
         always {
 			script {
 				archiveArtifacts allowEmptyArchive: true, artifacts: '*.log', followSymlinks: false
+				currentBuild.description = "${params.appname}:${params.version}:${params.mode}"
 			}
 		}
     }
