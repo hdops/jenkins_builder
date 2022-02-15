@@ -34,7 +34,7 @@ def func_toolsetcore = {
 
 def func_deploy = {
     sh "ln -s ${WORKSPACE} /root/toolset"
-    sh "cd /root/iac && ansible-playbook -i /root/toolset/openresty_config/${base_update_config}/${base_update_config_environment}/inventory -e @/root/toolset/openresty_config/${base_update_config}/${base_update_config_environment}/main.yml /root/iac/hdiac/openresty/main-docker.yml --tags ${tags}"
+    sh "cd /root/iac/ && ansible-playbook -i /root/toolset/openresty_config/${base_update_config}/${base_update_config_environment}/inventory -e @/root/toolset/openresty_config/${base_update_config}/${base_update_config_environment}/main.yml /root/iac/hdiac/openresty/main-docker.yml --tags ${tags}"
 }
 
 
