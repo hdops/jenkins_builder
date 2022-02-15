@@ -119,6 +119,7 @@ pipeline {
                         func_toolsetcore()
                     }
                     container("${label_name}") {
+                        sh "ln -s /hdiac/iac /root/iac"
                         func_deploy()
                     }
                 }
