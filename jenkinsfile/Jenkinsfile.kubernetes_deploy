@@ -26,7 +26,7 @@ def func = {
     sh "tar zxf toolset.tar.gz -C ${WORKSPACE}"
     sh "hdops kubernetes download_kubernetes -s None"
     sh "DNET_PROJECT=${DNET_PROJECT} DNET_PRODUCT=${DNET_PRODUCT} DNET_PROFILE=${DNET_PROFILE} hdops kubernetes validate --subsystem ${image}"
-    sh "DNET_PROJECT=${DNET_PROJECT} DNET_PRODUCT=${DNET_PRODUCT} DNET_PROFILE=${DNET_PROFILE} hdops kubernetes appinstall --subsystem ${image} --argocdaddr ${argocd_addr}"
+    sh "DNET_PROJECT=${DNET_PROJECT} DNET_PRODUCT=${DNET_PRODUCT} DNET_PROFILE=${DNET_PROFILE} hdops kubernetes appinstall --subsystem ${image} --stackids ${stackids} --checkstatus ${checkstatus}"
 }
 
 
