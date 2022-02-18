@@ -60,7 +60,7 @@ pipeline {
                 deleteDir()
             }
         }
-        stage('修改版本信息 on k8s') {
+        stage('数据库更新 on k8s') {
             when {
                 beforeAgent true
                 environment name: 'on_k8s', value: 'True'
@@ -83,7 +83,7 @@ pipeline {
             }
         }
 
-        stage('修改版本信息 on docker') {
+        stage('数据库更新 on docker') {
             when {
                 beforeAgent true
                 environment name: 'on_k8s', value: 'False'
