@@ -26,7 +26,7 @@ def func = {
     sh "tar zxf toolset.tar.gz -C ${WORKSPACE}"
     sh "hdops kubernetes download_kubernetes -s None"
     sh "DNET_PROJECT=${DNET_PROJECT} DNET_PRODUCT=${DNET_PRODUCT} DNET_PROFILE=${DNET_PROFILE} hdops kubernetes validate --subsystem ${image}"
-    sh "DNET_PROJECT=${DNET_PROJECT} DNET_PRODUCT=${DNET_PRODUCT} DNET_PROFILE=${DNET_PROFILE} hdops kubernetes appinstall --subsystem ${image} --argocdaddr ${argocd_addr}"
+    sh "DNET_PROJECT=${DNET_PROJECT} DNET_PRODUCT=${DNET_PRODUCT} DNET_PROFILE=${DNET_PROFILE} hdops kubernetes appinstall --subsystem ${image} --stackids ${stackids} --checkstatus ${checkstatus}"
 }
 
 
@@ -61,7 +61,7 @@ pipeline {
                 deleteDir()
             }
         }
-        stage('修改版本信息 on k8s') {
+        stage('部署 on k8s') {
             when {
                 beforeAgent true
                 environment name: 'on_k8s', value: 'True'
@@ -84,7 +84,7 @@ pipeline {
             }
         }
 
-        stage('修改版本信息 on docker') {
+        stage('部署 on docker') {
             when {
                 beforeAgent true
                 environment name: 'on_k8s', value: 'False'
