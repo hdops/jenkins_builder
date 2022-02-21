@@ -25,7 +25,7 @@ def func = {
     }
     sh "tar zxf toolset.tar.gz -C ${WORKSPACE}"
     sh "hdops kubernetes download_kubernetes -s None"
-    sh "DNET_PROJECT=${DNET_PROJECT} DNET_PRODUCT=${DNET_PRODUCT} DNET_PROFILE=${DNET_PROFILE} hdops kubernetes db_upgrade --subsystem ${params.subsystem} --stackids ${params.stackids} ${params.skipversion} ${params.skipversionupdate} --receivers ${params.receivers} --timeout ${params.timeout} --threadcount ${params.threadcount} --tag ${params.tag} --nodethreadcount ${params.nodethreadcount}"
+    sh "DNET_PROJECT=${DNET_PROJECT} DNET_PRODUCT=${DNET_PRODUCT} DNET_PROFILE=${DNET_PROFILE} hdops kubernetes db_upgrade --subsystem ${params.subsystem} --stackids ${params.stackids} --dblist ${params.dblist} ${params.skipversion} ${params.skipversionupdate} --receivers ${params.receivers} --timeout ${params.timeout} --threadcount ${params.threadcount} --tag ${params.tag} --nodethreadcount ${params.nodethreadcount}"
 }
 
 
