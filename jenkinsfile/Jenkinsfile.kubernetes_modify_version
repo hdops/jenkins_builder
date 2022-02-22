@@ -40,6 +40,11 @@ def func = {
             sh "DNET_PROJECT=${DNET_PROJECT} DNET_PRODUCT=${DNET_PRODUCT} DNET_PROFILE=${DNET_PROFILE} hdops kubernetes modify_version -s ${image} -v ${version}"
         }
     }
+    if (env.uploadRemoteJob){
+        build job: "${uploadRemoteJob}", 
+        parameters: [string(name: 'DNET_PROFILE', value: DNET_PROFILE), string(name: 'DNET_PRODUCT', value: DNET_PRODUCT), string(name: 'image', value: image_version)], 
+        wait: false
+    }
 }
 
 
