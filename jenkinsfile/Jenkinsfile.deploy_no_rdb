@@ -90,7 +90,9 @@ pipeline {
 			}
 			post {
 			    success{
-				    build job: "${params.healthcheck_job}", parameters: [string(name: 'DNET_PROFILE', value: "${params.DNET_PROFILE}"), string(name: 'subsystem', value: "${params.subsystem}"), string(name: 'TOOLSET_PATH', value: "${WORKSPACE}"), string(name: 'TRUST_PUBLIC_IP', value: "${params.TRUST_PUBLIC_IP}"),string(name: 'GIT_BRANCH', value: "${params.GIT_BRANCH}"), string(name:'tag',value: "${params.tag}")], propagate: false, wait: false
+					if(params.action != "delete"){
+						build job: "${params.healthcheck_job}", parameters: [string(name: 'DNET_PROFILE', value: "${params.DNET_PROFILE}"), string(name: 'subsystem', value: "${params.subsystem}"), string(name: 'TOOLSET_PATH', value: "${WORKSPACE}"), string(name: 'TRUST_PUBLIC_IP', value: "${params.TRUST_PUBLIC_IP}"),string(name: 'GIT_BRANCH', value: "${params.GIT_BRANCH}"), string(name:'tag',value: "${params.tag}")], propagate: false, wait: false
+					}
 				}
 			}
 		}
