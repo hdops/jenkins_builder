@@ -43,7 +43,7 @@ def func = {
     if (env.uploadRemoteJob){
         build job: "${uploadRemoteJob}", 
         parameters: [string(name: 'DNET_PROFILE', value: DNET_PROFILE), string(name: 'DNET_PRODUCT', value: DNET_PRODUCT), string(name: 'image', value: image_version)], 
-        wait: false
+        wait: true
     }
 }
 
