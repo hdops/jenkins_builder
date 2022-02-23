@@ -90,9 +90,6 @@ pipeline {
                     yaml "${kubernetesPodReadYamlData}"
                 }
             }
-            environment {
-                GIT_TOKEN_DATA = credentials('17643215-09f8-4a9a-b0ea-c8e49777ce1d')
-            }
             steps{
                 script{
                     container("${label_name}") {
@@ -106,9 +103,6 @@ pipeline {
             when {
                 beforeAgent true
                 environment name: 'on_k8s', value: 'False'
-            }
-            environment {
-                GIT_TOKEN_DATA = credentials('17643215-09f8-4a9a-b0ea-c8e49777ce1d')
             }
             steps{
                 script {
