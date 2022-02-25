@@ -8,7 +8,7 @@ if (env.node){
 
 
 if (!env.GIT_GROUP){
-    env.GIT_GROUP="oas-config"
+    env.GIT_GROUP="qianfanops"
 }
 if (params.JENS_HOME){
     env.jen_home = params.JENS_HOME
