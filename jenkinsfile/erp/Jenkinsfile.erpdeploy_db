@@ -31,7 +31,7 @@ pipeline {
         stage('deploy-app'){
             steps {
 				sh '${deploy_shell} || error=true && ${filearch_shell}'
-                sh '${filearch_shell2}'
+                sh 'if [ $error ]; then  exit -1;fi'
             }
         }
     }
