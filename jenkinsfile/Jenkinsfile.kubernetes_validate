@@ -24,7 +24,7 @@ def func = {
         sh "DNET_PROFILE=integration_test DNET_PRODUCT=dnet TRUST_PUBLIC_IP=${run_on_public} hdops download_toolset --branch develop -p ."
     }
     sh "tar zxf toolset.tar.gz -C ${WORKSPACE}"
-    sh "hdops kubernetes download_kubernetes -s None"
+    sh "DNET_PROJECT=${DNET_PROJECT} DNET_PRODUCT=${DNET_PRODUCT} DNET_PROFILE=${DNET_PROFILE} hdops kubernetes download_kubernetes -s None"
     sh "DNET_PROJECT=${DNET_PROJECT} DNET_PRODUCT=${DNET_PRODUCT} DNET_PROFILE=${DNET_PROFILE} hdops kubernetes validate --subsystem ${image}"
     sh "DNET_PROJECT=${DNET_PROJECT} DNET_PRODUCT=${DNET_PRODUCT} DNET_PROFILE=${DNET_PROFILE} hdops kubernetes compare_config --subsystem ${image}"
 }
@@ -72,9 +72,6 @@ pipeline {
                     yaml "${kubernetesPodReadYamlData}"
                 }
             }
-            environment {
-                GIT_TOKEN_DATA = credentials('17643215-09f8-4a9a-b0ea-c8e49777ce1d')
-            }
             steps{
                 script{
                     container("${label_name}") {
@@ -88,9 +85,6 @@ pipeline {
             when {
                 beforeAgent true
                 environment name: 'on_k8s', value: 'False'
-            }
-            environment {
-                GIT_TOKEN_DATA = credentials('17643215-09f8-4a9a-b0ea-c8e49777ce1d')
             }
             steps{
                 script {

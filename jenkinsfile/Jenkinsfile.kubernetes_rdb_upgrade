@@ -24,8 +24,8 @@ def func = {
         sh "DNET_PROFILE=integration_test DNET_PRODUCT=dnet TRUST_PUBLIC_IP=${run_on_public} hdops download_toolset --branch develop -p ."
     }
     sh "tar zxf toolset.tar.gz -C ${WORKSPACE}"
-    sh "hdops kubernetes download_kubernetes -s None"
-    sh "DNET_PROJECT=${DNET_PROJECT} DNET_PRODUCT=${DNET_PRODUCT} DNET_PROFILE=${DNET_PROFILE} hdops kubernetes db_upgrade --subsystem ${params.subsystem} --stackids ${params.stackids} --dblist ${params.dblist} ${params.skipversion} ${params.skipversionupdate} --receivers ${params.receivers} --timeout ${params.timeout} --threadcount ${params.threadcount} --tag ${params.tag} --nodethreadcount ${params.nodethreadcount}"
+    sh "DNET_PROJECT=${DNET_PROJECT} DNET_PRODUCT=${DNET_PRODUCT} DNET_PROFILE=${DNET_PROFILE} hdops kubernetes db_upgrade --subsystem ${params.subsystem} --stackids ${params.stackids} --dblist ${params.dblist} ${params.skipversion} ${params.skipversionupdate} --receivers ${params.receivers} --timeout ${params.timeout} --threadcount ${params.threadcount} --tag ${params.tag} --nodethreadcount ${params.nodethreadcount} --buildurl ${env.BUILD_URL}"
+    archiveArtifacts allowEmptyArchive: true, artifacts: 'dbinit_log*txt', followSymlinks: false
 }
 
 
@@ -71,9 +71,6 @@ pipeline {
                     yaml "${kubernetesPodReadYamlData}"
                 }
             }
-            environment {
-                GIT_TOKEN_DATA = credentials('17643215-09f8-4a9a-b0ea-c8e49777ce1d')
-            }
             steps{
                 script{
                     container("${label_name}") {
@@ -88,9 +85,6 @@ pipeline {
                 beforeAgent true
                 environment name: 'on_k8s', value: 'False'
             }
-            environment {
-                GIT_TOKEN_DATA = credentials('17643215-09f8-4a9a-b0ea-c8e49777ce1d')
-            }
             steps{
                 script {
                     sh "docker pull ${docker_image}"
@@ -100,6 +94,13 @@ pipeline {
                 }
             }
         }
+    }
+    post {
+        always {
+			script {
+				currentBuild.description = "${params.DNET_PROFILE}:${params.subsystem}:${params.skipversion}"
+			}
+		}
     }
 }
 

@@ -6,7 +6,7 @@ if (env.node){
 def credentialsId="qianfan"
 
 //  主要需要 git + dokcer 环境
-def build_image= "harbor.qianfan123.com/base/golang:1.14.2"
+def build_image= "harbor.qianfan123.com/base/golang:1.16.4"
 if (env.build_image){
     build_image =env.build_image
 }

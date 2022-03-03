@@ -4,6 +4,9 @@ if (env.node){
 }else{
     node ="master"
 }
+def mysh(cmd, returnStatus) {
+    return sh (script: '#!/bin/sh +e\n'+ cmd, returnStatus: returnStatus)
+}
 def run_on_public="None"
 if (env.run_on_public){
     run_on_public=env.run_on_public
@@ -27,8 +30,7 @@ pipeline {
         }
         stage('deploy-app'){
             steps {
-				sh '${deploy_shell}'
-                sh '${filearch_shell}'
+				mysh ('${deploy_shell} && ${filearch_shell}', false)
             }
         }
     }
