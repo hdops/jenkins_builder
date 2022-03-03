@@ -7,6 +7,7 @@ if (env.node){
 def mysh(cmd, returnStatus) {
     return sh (script: '#!/bin/sh -e\n'+ cmd, returnStatus: returnStatus)
 }
+def filearch_shell2="if [ $error ]; then  exit -1;fi"
 def run_on_public="None"
 if (env.run_on_public){
     run_on_public=env.run_on_public
@@ -30,8 +31,8 @@ pipeline {
         }
         stage('deploy-app'){
             steps {
-				mysh (""" ${deploy_shell} || error=true && ${filearch_shell}\n
-                       if [ $error ]; then  exit -1;fi """,false)
+				mysh (""" ${deploy_shell} || error=true && ${filearch_shell}
+                       ${filearch_shell2} """,false)
             }
         }
     }
