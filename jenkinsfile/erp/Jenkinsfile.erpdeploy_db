@@ -30,9 +30,7 @@ pipeline {
         }
         stage('deploy-app'){
             steps {
-                mysh ('${deploy_shell}',false)
-				mysh (""" ${deploy_shell2} || error=true && ${filearch_shell}
-                       ${filearch_shell2} """,false)
+				mysh ('${deploy_shell2} || ${filearch_shell} && ${filearch_shell}',false)
             }
         }
     }
