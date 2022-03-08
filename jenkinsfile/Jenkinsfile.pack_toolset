@@ -78,7 +78,6 @@ pipeline {
                 not {
                   environment name: 'gitlabBranch' ,value: 'jenkins'
                 }
-              }
             }
             steps{
                 echo "单元测试： $run_unittest"
