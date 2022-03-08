@@ -74,6 +74,12 @@ pipeline {
 		    }
 		}
 		stage("unit test && package && upload"){
+            when {
+                not {
+                  environment name: 'gitlabBranch' ,value: 'jenkins'
+                }
+              }
+            }
             steps{
                 echo "单元测试： $run_unittest"
                 script{
