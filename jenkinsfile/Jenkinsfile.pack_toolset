@@ -28,6 +28,7 @@ def run_unittest=true
 if (env.run_unittest){
     run_unittest = env.run_unittest.toBoolean()
 }
+def jjb_docker_image="harbor.qianfan123.com/base/jenkins-job-builder:0.1.0"
 
 pipeline {
 	agent {
@@ -96,6 +97,22 @@ pipeline {
                 }
             }
 		}
+    }
+        stage("run jjb test"){
+          when {
+            environment name: 'gitlabBranch' ,value: 'jenkins'
+          }
+          steps{
+             script{
+                sh "docker pull ${jjb_docker_image}"
+                withDockerContainer(args: "-v /root/.ssh:/root/.ssh -v ${WORKSPACE}:/root", image: "${jjb_docker_image}") {
+                    sh "rm -fr tests/__pycache__"
+                    sh "pytest -m jjb  --junitxml=junit.xml -sv "
+                }
+
+             }
+          }
+        }
     }
     post{
         failure{
