@@ -81,13 +81,11 @@ pipeline {
                     println("git commit author is " + git_commit_author)
                     if (run_unittest && git_commit_author!='qianfanauto'){
                     //if (run_unittest){
-                       if ("${env.gitlabBranch}"!="jenkins"){
-                            sh "pytest -m unit  --junitxml=junit.xml -sv"
-
-                       }else{
+                       if ("${env.gitlabBranch}"=="jenkins"){
                             sh "git submodule update --init --recursive"
-                            sh "git submodule foreach git pull origin master"
-                            sh "pytest -m unit  --junitxml=junit.xml -sv "
+                            sh "pytest -m unit,jjb  --junitxml=junit.xml -sv "
+                       }else{
+                            sh "pytest -m unit  --junitxml=junit.xml -sv"
                        }
                    }
                    if ("${env.gitlabBranch}"!="jenkins"){
