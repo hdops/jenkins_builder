@@ -38,7 +38,7 @@ pipeline {
 	post {
         always {
 			script {
-				archiveArtifacts allowEmptyArchive: true, artifacts: '*apollo', followSymlinks: false
+				archiveArtifacts allowEmptyArchive: true, artifacts: '*', followSymlinks: false
                 currentBuild.description = "${params.host}:${params.appname}:${params.version}"
 			}
 		}
