@@ -16,7 +16,7 @@ env.proxy_host="172.17.12.219"
 
 def push_config = {
     sh '''set +x;
-    scp ${WORKSPACE}/ldap_proxy/whiteip.lst ${proxy_host}:/hdapp/haproxy_ldap \
+    scp ${WORKSPACE}/whiteip.lst ${proxy_host}:/hdapp/haproxy_ldap \
     && ssh ${proxy_host} systemctl reload ${proxy_name}
     '''  
 }
@@ -28,8 +28,8 @@ pipeline {
 			steps{
                 script{
                     deleteDir()
-                    retry(2){
-                        sh "git clone https://gitlab.hd123.com/qianfanops/ldap_proxy.git -b develop"
+                    retry(3){
+                        checkout([$class: 'GitSCM', branches: [[name: "*/develop"]],userRemoteConfigs: [[credentialsId: 'qianfan',url: "https://gitlab.hd123.com/qianfanops/ldap_proxy.git"]]])
                     }
                     push_config()
                 }  
@@ -44,7 +44,7 @@ pipeline {
                         if(proxy_status != 'active'){
                             echo "配置有误或服务异常,已回退配置到上个版本;请检查修复并重新提交."
                             retry(2){
-                                sh '''set +x;cd $WORKSPACE/ldap_proxy && git reset --hard HEAD^ &>/dev/null''' 
+                                sh '''set +x;cd $WORKSPACE && git reset --hard HEAD^ &>/dev/null''' 
                             }
                             push_config()
                             sh 'exit 1'                 
@@ -54,7 +54,6 @@ pipeline {
                  }
             }
         }
-        
     }
 	post {
     // 构建失败之后钉钉通知
@@ -71,6 +70,11 @@ pipeline {
                 if (whether_post == "True") {
                     dingTalk accessToken: "${DINGTALK_TOKEN}", imageUrl: '', jenkinsUrl: "${jenkinsUrl}", message: "恢复正常 ${new Date().format("yyyy-MM-dd HH:mm:ss")}", notifyPeople: ''
                 }
+            }
+        }
+        success{
+            script{
+                updateGitlabCommitStatus name: 'build', state: 'success'
             }
         }
     }
