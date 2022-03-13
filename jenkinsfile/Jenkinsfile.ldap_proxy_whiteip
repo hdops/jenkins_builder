@@ -28,7 +28,7 @@ pipeline {
 			steps{
                 script{
                     deleteDir()
-                    retry(2){
+                    retry(3){
                         checkout([$class: 'GitSCM', branches: [[name: "*/develop"]],userRemoteConfigs: [[credentialsId: 'qianfan',url: "https://gitlab.hd123.com/qianfanops/ldap_proxy.git"]]])
                     }
                     push_config()
@@ -70,6 +70,11 @@ pipeline {
                 if (whether_post == "True") {
                     dingTalk accessToken: "${DINGTALK_TOKEN}", imageUrl: '', jenkinsUrl: "${jenkinsUrl}", message: "恢复正常 ${new Date().format("yyyy-MM-dd HH:mm:ss")}", notifyPeople: ''
                 }
+            }
+        }
+        success{
+            script{
+                updateGitlabCommitStatus name: 'build', state: 'success'
             }
         }
     }
