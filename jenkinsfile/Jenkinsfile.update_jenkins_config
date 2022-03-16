@@ -39,7 +39,7 @@ pipeline {
 			steps{
 				script {
                     echo "workspace is $WORKSPACE"
-                    git branch: "${params.GIT_BRANCH}", credentialsId: '17643215-09f8-4a9a-b0ea-c8e49777ce1d', url: "http://${git_server_baseurl}/${GIT_GROUP}/${GIT_REPONAME}.git"
+                    git branch: "${params.GIT_BRANCH}", credentialsId: '17643215-09f8-4a9a-b0ea-c8e49777ce1d', url: "${git_server_baseurl}/${GIT_GROUP}/${GIT_REPONAME}.git"
                     sh "sh ${config_script_file}"
                     }
                 }
