@@ -7,8 +7,18 @@ if (env.node){
 def mysh(cmd, returnStatus) {
     return sh (script: '#!/bin/sh -e\n'+ cmd, returnStatus: returnStatus)
 }
-def deploy_shell2="ssh $host wget -O /hdapp/ka_deploy_test.sh http://ka-storage.oss-cn-hangzhou.aliyuncs.com/cd_new/ka_deploy_test.sh"
-
+def remote_ssh=""
+if (env.remote_ssh){
+    remote_ssh =env.remote_ssh
+}else{
+    remote_ssh ="ssh $host"
+}
+def get_file=""
+if (env.get_file){
+    get_file =env.get_file
+}else{
+    get_file ="wget -O /hdapp/ka_deploy_test.sh http://ka-storage.oss-cn-hangzhou.aliyuncs.com/cd_new/ka_deploy_test.sh"
+}
 def run_on_public="None"
 if (env.run_on_public){
     run_on_public=env.run_on_public
@@ -32,8 +42,8 @@ pipeline {
         }
         stage('deploy-app'){
             steps {
-				mysh ('${deploy_shell2}', false)
-                mysh ('ssh -p 22 $host sh /hdapp/ka_deploy_test.sh ${deploy_shell} $appname appinstall $version $config_gen', false)
+				mysh ('${remote_ssh} ${get_file}', false)
+                mysh ('${remote_ssh} sh /hdapp/ka_deploy_test.sh ${deploy_shell} $appname appinstall $version $config_gen', false)
                 mysh ('scp -rp -P 22 $host:/hdapp/heading/${appname}_*/apollodir/{*apollo,wiki*} .', true)
             }
         }
