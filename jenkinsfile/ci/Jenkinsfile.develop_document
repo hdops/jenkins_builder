@@ -19,7 +19,7 @@ pipeline {
         stage('read receivers') {
 			steps{
                 script{
-                    git branch: "${git_project_branch}", credentialsId: '${credentialsId}', url: "${git_project_url}"
+                    git branch: "${git_project_branch}", credentialsId: "${credentialsId}", url: "${git_project_url}"
                     data = readYaml file: "receivers.yaml"
                     
                     for ( String i : data.receivers ){

@@ -46,7 +46,7 @@ pipeline {
                         sh "false"
                     }
 
-                    git branch: "${gitbranch}", credentialsId: '${credentialsId}', url: "${gitpath}"
+                    git branch: "${gitbranch}", credentialsId: "${credentialsId}", url: "${gitpath}"
                 }
             }
         }
