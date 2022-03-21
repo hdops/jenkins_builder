@@ -41,7 +41,7 @@ if (env.mvn_configfile){
     mvn_configfile =env.mvn_configfile
 }
 
-def credentialsId="qianfan"
+def credentialsId="appGitLab"
 def toolset_image_version="0.3.0"
 if (env.toolset_image_version){
     toolset_image_version = env.toolset_image_version
@@ -80,7 +80,7 @@ pipeline {
                     if (source_code_management == "git"){
                         echo "checkout ${ci_git_server_baseurl}/${git_project}.git  branch:${build_branch}"
                         retry(5){
-                            checkout([$class: 'GitSCM', branches: [[name: "*/${build_branch}"]],userRemoteConfigs: [[credentialsId: 'qianfan',url: "${ci_git_server_baseurl}/${git_project}.git"]],extensions: [[$class: 'LocalBranch', localBranch: "${build_branch}"]]])
+                            checkout([$class: 'GitSCM', branches: [[name: "*/${build_branch}"]],userRemoteConfigs: [[credentialsId: '${credentialsId}',url: "${ci_git_server_baseurl}/${git_project}.git"]],extensions: [[$class: 'LocalBranch', localBranch: "${build_branch}"]]])
                         }
                     } else if (source_code_management == "svn"){
                         echo "http://${svn_project}/${build_branch}"

@@ -22,7 +22,7 @@ if (env.build_image){
 
 def docker_args="--rm -v /var/run/docker.sock:/var/run/docker.sock -v /usr/bin/docker:/usr/bin/docker -v /root/.docker/config.json:/root/.docker/config.json"
 
-def credentialsId="qianfan"
+def credentialsId="appGitLab"
 
 def run_on_public="None"
 if (env.run_on_public){
@@ -53,7 +53,7 @@ pipeline {
             steps{
                 echo "checkout ${ci_git_server_baseurl}/${git_project}.git  branch:${build_branch}"
                 retry(3){
-                    checkout([$class: 'GitSCM', branches: [[name: "*/${build_branch}"]],userRemoteConfigs: [[credentialsId: 'qianfan',url: "${ci_git_server_baseurl}/${git_project}.git"]]])
+                    checkout([$class: 'GitSCM', branches: [[name: "*/${build_branch}"]],userRemoteConfigs: [[credentialsId: '${credentialsId}',url: "${ci_git_server_baseurl}/${git_project}.git"]]])
                 }
             }
         }

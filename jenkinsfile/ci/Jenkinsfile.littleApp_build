@@ -10,6 +10,8 @@ if (env.node_image){
     node_image =env.node_image
 }
 
+def credentialsId="appGitLab"
+
 pipeline {
     // agent {label node}
     agent {
@@ -44,7 +46,7 @@ pipeline {
                         sh "false"
                     }
 
-                    git branch: "${gitbranch}", credentialsId: '17643215-09f8-4a9a-b0ea-c8e49777ce1d', url: "${gitpath}"
+                    git branch: "${gitbranch}", credentialsId: '${credentialsId}', url: "${gitpath}"
                 }
             }
         }

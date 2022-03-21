@@ -16,6 +16,7 @@ def ci_git_server_baseurl= "http://github.app.hd123.cn:10080"
 if (env.ci_git_server_baseurl){
     ci_git_server_baseurl = env.ci_git_server_baseurl
 }
+def credentialsId="appGitLab"
 
 def deploy_baseurl= "http://172.17.12.229:8080"
 if (env.deploy_baseurl){
@@ -101,7 +102,7 @@ pipeline {
                     if (source_code_management == "git"){
                         echo "checkout ${ci_git_server_baseurl}/${git_project}.git  branch:${build_branch}"
                         retry(5){
-                            checkout([$class: 'GitSCM', branches: [[name: "*/${build_branch}"]],userRemoteConfigs: [[credentialsId: 'qianfan',url: "${ci_git_server_baseurl}/${git_project}.git"]]])
+                            checkout([$class: 'GitSCM', branches: [[name: "*/${build_branch}"]],userRemoteConfigs: [[credentialsId: '${credentialsId}',url: "${ci_git_server_baseurl}/${git_project}.git"]]])
                         }
                     } else if (source_code_management == "svn"){
                         echo "${svn_server_baseurl}/${svn_project}/${build_branch}"
