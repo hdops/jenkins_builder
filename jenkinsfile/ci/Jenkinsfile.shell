@@ -43,7 +43,7 @@ pipeline{
                         echo "请输入git地址"
                         sh "false"
                     }
-                    git branch: "${build_branch}", credentialsId: '${credentialsId}', url: "${ci_git_server_baseurl}/${git_project}.git"
+                    git branch: "${build_branch}", credentialsId: "${credentialsId}", url: "${ci_git_server_baseurl}/${git_project}.git"
                 }
             }
         }

@@ -53,7 +53,7 @@ pipeline {
             steps{
                 echo "checkout ${ci_git_server_baseurl}/${git_project}.git  branch:${build_branch}"
                 retry(3){
-                    checkout([$class: 'GitSCM', branches: [[name: "*/${build_branch}"]],userRemoteConfigs: [[credentialsId: '${credentialsId}',url: "${ci_git_server_baseurl}/${git_project}.git"]]])
+                    checkout([$class: 'GitSCM', branches: [[name: "*/${build_branch}"]],userRemoteConfigs: [[credentialsId: "${credentialsId}",url: "${ci_git_server_baseurl}/${git_project}.git"]]])
                 }
             }
         }
