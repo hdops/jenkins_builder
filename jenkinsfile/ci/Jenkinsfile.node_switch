@@ -35,7 +35,7 @@ if (env.mvn_configfile){
     mvn_configfile =env.mvn_configfile
 }
 
-def credentialsId="qianfan"
+def credentialsId="appGitLab"
 
 
 def run_on_public="None"
@@ -71,7 +71,7 @@ pipeline {
             steps{
                 echo "checkout ${ci_git_server_baseurl}/${git_project}.git  branch:${build_branch}"
                 retry(5){
-                    checkout([$class: 'GitSCM', branches: [[name: "*/${build_branch}"]],userRemoteConfigs: [[credentialsId: 'qianfan',url: "${ci_git_server_baseurl}/${git_project}.git"]]])
+                    checkout([$class: 'GitSCM', branches: [[name: "*/${build_branch}"]],userRemoteConfigs: [[credentialsId: '${credentialsId}',url: "${ci_git_server_baseurl}/${git_project}.git"]]])
                 }
             }
         }
