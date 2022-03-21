@@ -13,7 +13,7 @@ if (env.ci_git_server_baseurl){
     ci_git_server_baseurl = env.ci_git_server_baseurl
 }
 
-def credentialsId="qianfan"
+def credentialsId="appGitLab"
 
 def build_branch="develop"
 if (params.build_branch){
