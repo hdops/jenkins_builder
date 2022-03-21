@@ -2,6 +2,7 @@ def node="master"
 def git_project_branch='master'
 def toolset_image_version='0.3.0'
 def git_project_url='https://gitlab.hd123.com/qianfanops/develop_document.git'
+def credentialsId="appGitLab"
 def share_url='https://gitlab.hd123.com/qianfanops/develop_document/-/blob/master/ChangeList.adoc'
 def to = ""
 def subject = ""
@@ -18,7 +19,7 @@ pipeline {
         stage('read receivers') {
 			steps{
                 script{
-                    git branch: "${git_project_branch}", credentialsId: '17643215-09f8-4a9a-b0ea-c8e49777ce1d', url: "${git_project_url}"
+                    git branch: "${git_project_branch}", credentialsId: '${credentialsId}', url: "${git_project_url}"
                     data = readYaml file: "receivers.yaml"
                     
                     for ( String i : data.receivers ){

@@ -13,7 +13,7 @@ if (env.jpos_image){
     jpos_image =env.jpos_image
 }
 
-def credentialsId="qianfan"
+def credentialsId="appGitLab"
 
 def run_on_public="None"
 if (env.run_on_public){
@@ -54,7 +54,7 @@ pipeline {
              steps{ 
 				echo "checkout ${ci_git_server_baseurl}/${git_project}.git  branch:${build_branch}"
 				retry(5){
-                    checkout([$class: 'GitSCM', branches: [[name: "*/${build_branch}"]],userRemoteConfigs: [[credentialsId: 'qianfan',url: "${ci_git_server_baseurl}/${git_project}.git"]],extensions: [[$class: 'LocalBranch', localBranch: "${build_branch}"]]])
+                    checkout([$class: 'GitSCM', branches: [[name: "*/${build_branch}"]],userRemoteConfigs: [[credentialsId: '${credentialsId}',url: "${ci_git_server_baseurl}/${git_project}.git"]],extensions: [[$class: 'LocalBranch', localBranch: "${build_branch}"]]])
                 }
              }
          }  
