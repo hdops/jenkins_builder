@@ -56,8 +56,8 @@ pipeline {
 				retry(3){
                     checkout([$class: 'GitSCM', branches: [[name: '*/${build_branch}']],userRemoteConfigs: [[url: '${git_base_url}/${git_project}.git',credentialsId: "${credentialsId}"]]])
                 }
-                sh """git config user.email qianfan@hd123.com
-git config user.name qianfan
+                sh """git config user.email appGitLab@hd123.com
+git config user.name appGitLab
 git checkout ${releaseBranchName}
 git checkout ${build_branch}
 git pull

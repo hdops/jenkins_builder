@@ -39,8 +39,8 @@ pipeline {
 							echo "product is ${params.DNET_PRODUCT}"
 							echo "workspace is $WORKSPACE"
 							sh "git clone http://${GIT_USER}:${GIT_PASSWORD}@github.app.hd123.cn:10080/qianfanops/toolset.git -b ${params.GIT_BRANCH} ."
-							sh "git config --global user.email qianfan@hd123.com"
-							sh "git config --global user.name qianfan"
+							sh "git config --global user.email appGitLab@hd123.com"
+							sh "git config --global user.name appGitLab"
 							sh "DNET_PRODUCT=${params.DNET_PRODUCT} DNET_PROFILE=${params.DNET_PROFILE} hdops export_cmdb --toolset_x ${params.toolset_x}"
 						}
 					}else {
@@ -49,8 +49,8 @@ pipeline {
                             echo "product is ${params.DNET_PRODUCT}"
                             echo "workspace is $WORKSPACE"
                             sh "git clone http://${GIT_USER}:${GIT_PASSWORD}@github.app.hd123.cn:10080/qianfanops/toolset.git -b ${params.GIT_BRANCH} ."
-                            sh "git config --global user.email qianfan@hd123.com"
-                            sh "git config --global user.name qianfan"
+                            sh "git config --global user.email appGitLab@hd123.com"
+                            sh "git config --global user.name appGitLab"
                             sh "DNET_PRODUCT=${params.DNET_PRODUCT} DNET_PROFILE=${params.DNET_PROFILE} hdops export_cmdb --toolset_x ${params.toolset_x}"
 					    }
 					}

@@ -69,8 +69,8 @@ pipeline {
                             if(status == 0){
                                 sh """
                                 git config --global credential.helper store
-                                git config user.email "qianfanauto@hd123.com"
-                                git config user.name "qianfanauto"
+                                git config user.email "appGitLab@hd123.com"
+                                git config user.name "appGitLab"
                                 git checkout ${git_branch}
                                 git pull
                                 git add .
@@ -98,8 +98,8 @@ pipeline {
                             if(status == 0){
                                 sh """
                                 git config --global credential.helper store
-                                git config user.email "qianfanauto@hd123.com"
-                                git config user.name "qianfanauto"
+                                git config user.email "appGitLab@hd123.com"
+                                git config user.name "appGitLab"
                                 git checkout ${git_branch}
                                 git pull
                                 git add .

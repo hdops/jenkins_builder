@@ -78,8 +78,8 @@ pipeline {
         stage('switch') {
             steps{
                 sh """git config credential.helper store
-                git config user.email qianfan@hd123.com
-                git config user.name qianfan
+                git config user.email appGitLab@hd123.com
+                git config user.name appGitLab
                 git checkout ${releaseBranchName}
                 git checkout ${build_branch}
                 git branch -d ${releaseBranchName}

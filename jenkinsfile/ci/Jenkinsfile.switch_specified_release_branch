@@ -77,8 +77,8 @@ pipeline {
         }
         stage('switch') {
             steps{
-                sh """git config --global user.email qianfan@hd123.com
-git config --global user.name qianfan
+                sh """git config --global user.email appGitLab@hd123.com
+git config --global user.name appGitLab
 git checkout develop
 git branch -d ${releaseBranchName}
 git push origin :${releaseBranchName}
