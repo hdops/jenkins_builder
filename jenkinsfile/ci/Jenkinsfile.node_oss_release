@@ -73,8 +73,8 @@ pipeline {
                     checkout([$class: 'GitSCM', branches: [[name: '*/${build_branch}']],userRemoteConfigs: [[url: "${ci_git_server_baseurl}/${git_project}.git",credentialsId: "${credentialsId}"]]])
                 }
                 sh """git config --global credential.helper store
-git config --global user.email qianfan@hd123.com
-git config --global user.name qianfan
+git config --global user.email appGitLab@hd123.com
+git config --global user.name appGitLab
 git checkout ${releaseBranchName}
 git pull
 git checkout ${build_branch}

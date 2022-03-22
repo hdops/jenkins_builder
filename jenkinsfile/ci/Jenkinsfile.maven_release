@@ -190,8 +190,8 @@ pipeline {
                                 mvn_shell+="  -s $maven_settings"
                                 echo "mvn_shell is ${mvn_shell}"
                                 sh "git config credential.helper store"
-                                sh "git config  user.email qianfan@hd123.com"
-                                sh "git config  user.name qianfan"
+                                sh "git config  user.email appGitLab@hd123.com"
+                                sh "git config  user.name appGitLab"
                                 sh "${mvn_shell}"
                             }
 				}
