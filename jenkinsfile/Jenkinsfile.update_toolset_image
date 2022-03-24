@@ -42,8 +42,7 @@ pipeline {
                         echo "kubernetes do not need delete"
                     } else {
                         echo "find unused toolsetcore containers ... "
-                        out = sh(script: "docker ps -a | grep \"harbor.qianfan123.com/toolset/toolsetcore:[0.3.0|0.3.0-private]\" | grep -v Up | awk '{print \$1}'", returnStdout: true)
-                        //out = sh(script: "docker ps -a | grep harbor.qianfan123.com/toolset/toolsetcore:0.3.0 | grep -v Up | awk '{print \$1}'", returnStdout: true)
+                        out = sh(script: "docker ps -a | grep harbor.qianfan123.com/toolset/toolsetcore:${toolset_image_version} | grep -v Up | awk '{print \$1}'", returnStdout: true)
                         if (out == ""){
                             sh "true"
                         } else {
