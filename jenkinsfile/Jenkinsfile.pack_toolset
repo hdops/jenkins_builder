@@ -29,12 +29,16 @@ if (env.run_unittest){
     run_unittest = env.run_unittest.toBoolean()
 }
 def jjb_docker_image="harbor.qianfan123.com/base/jenkins-job-builder:0.1.0"
+def toolset_image_version="0.3.0"
+if (env.toolset_image_version){
+    toolset_image_version = env.toolset_image_version
+}
 
 pipeline {
 	agent {
         docker {
         label node
-        image "harbor.qianfan123.com/toolset/toolsetcore:0.3.0"
+        image "harbor.qianfan123.com/toolset/toolsetcore:${toolset_image_version}"
         args '-v /var/run/docker.sock:/var/run/docker.sock -v /usr/bin/docker:/usr/bin/docker --add-host=hd-hz-public.oss-cn-hangzhou-internal.aliyuncs.com:47.110.23.37'
         }
     }
