@@ -199,7 +199,7 @@ pipeline {
                 }
             }
 		}
-		stage('unite test') {
+		stage('unit test') {
             when {
                 expression {'Y' == env.unite_test}
             }
