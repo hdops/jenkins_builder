@@ -79,9 +79,13 @@ pipeline {
 		}
 		stage("unit test && package && upload"){
             when {
-                not {
-                  environment name: 'gitlabBranch' ,value: 'jenkins'
-                }
+               expression{
+                    (gitlabBranch != 'jenkins') && (git_project != 'qianfanops/jenkins_ci')
+               }
+
+                //not {
+                  //environment name: 'gitlabBranch' ,value: 'jenkins'
+                //}
             }
             steps{
                 echo "单元测试： $run_unittest"
@@ -109,7 +113,11 @@ pipeline {
 
         stage("run jjb test"){
           when {
-            environment name: 'gitlabBranch' ,value: 'jenkins'
+
+            expression{
+                (git_project == 'qianfanops/jenkins_ci') || ( git_project != 'qianfanops/jenkins_ci' && gitlabBranch == 'jenkins')
+            }
+            //environment name: 'gitlabBranch' ,value: 'jenkins'
           }
           steps{
              script{
