@@ -43,8 +43,8 @@ pipeline {
         stage('deploy-app'){
             steps {
 				mysh ('${get_file}', false)
-                mysh ('${remote_ssh} sh /hdapp/ka_deploy_test.sh ${deploy_shell} $appname appinstall $version $config_gen', false)
-                mysh ('scp -rp -P 22 $host:/hdapp/heading/${appname}_*/apollodir/{*apollo,wiki*} .', true)
+                mysh ('ssh $host sh /hdapp/ka_deploy_test.sh ${deploy_shell} $appname appinstall $version $config_gen', false)
+                mysh ('scp -rp $host:/hdapp/heading/${appname}_*/apollodir/{*apollo,wiki*} .', true)
             }
         }
     }
