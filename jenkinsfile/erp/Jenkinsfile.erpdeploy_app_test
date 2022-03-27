@@ -7,11 +7,11 @@ if (env.node){
 def mysh(cmd, returnStatus) {
     return sh (script: '#!/bin/sh -e\n'+ cmd, returnStatus: returnStatus)
 }
-def remote_ssh=""
-if (env.remote_ssh){
-    remote_ssh =env.remote_ssh
+def git_project=""
+if (env.git_project){
+    git_project =env.git_project
 }else{
-    remote_ssh ="ssh $host"
+    git_project ="http://github.app.hd123.cn:10080"
 }
 def get_file=""
 if (env.get_file){
@@ -43,6 +43,7 @@ pipeline {
         stage('deploy-app'){
             steps {
 				mysh ('${get_file}', false)
+                mysh ("ssh $host sed -i 's%http://github.app.hd123.cn:10080%${git_project}%' /hdapp/ka_deploy_test.sh", false)
                 mysh ('ssh $host sh /hdapp/ka_deploy_test.sh ${deploy_shell} $appname appinstall $version $config_gen', false)
                 mysh ('scp -rp $host:/hdapp/heading/${appname}_*/apollodir/{*apollo,wiki*} .', true)
             }
