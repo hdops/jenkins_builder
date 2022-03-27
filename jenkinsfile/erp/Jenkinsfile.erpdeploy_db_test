@@ -7,6 +7,12 @@ if (env.node){
 def mysh(cmd, returnStatus) {
     return sh (script: '#!/bin/sh -e\n'+ cmd, returnStatus: returnStatus)
 }
+def git_project=""
+if (env.git_project){
+    git_project =env.git_project
+}else{
+    git_project ="http://github.app.hd123.cn:10080"
+}
 def run_on_public="None"
 if (env.run_on_public){
     run_on_public=env.run_on_public
@@ -30,9 +36,10 @@ pipeline {
         }
         stage('deploy-app'){
             steps {
-                mysh ('${deploy_shell}',false)
-				mysh (""" ${deploy_shell2} || error=true && ${filearch_shell}
-                       ${judge_shell} """,false)
+                mysh ('ssh $host wget -O /hdapp/ka_deploy_test.sh http://ka-storage.oss-cn-hangzhou.aliyuncs.com/cd_new/ka_deploy_test.sh', false)
+                mysh ("ssh $host sed -i 's%http://github.app.hd123.cn:10080%${git_project}%' /hdapp/ka_deploy_test.sh", false)
+				mysh (""" ssh $host sh /hdapp/ka_deploy_test.sh ${deploy_shell} $appname dbexec $version $mode $db_url $rdbuser $rdbpwd || error=true && scp -rp $host:/hdapp/heading/${appname}_int*/rdb/*/*-$version.log .
+                       if [ $error ]; then  exit -1;fi """,false)
             }
         }
     }
