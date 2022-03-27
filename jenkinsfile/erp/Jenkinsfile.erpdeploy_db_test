@@ -1,6 +1,5 @@
 import groovy.transform.Field
 
-@Field 
 def node=""
 if (env.node){
     node =env.node
@@ -10,7 +9,10 @@ if (env.node){
 def mysh(cmd, returnStatus) {
     return sh (script: '#!/bin/sh -e\n'+ cmd, returnStatus: returnStatus)
 }
+
+@Field
 def judge_shell="if [ $error ]; then  exit -1;fi"
+
 def git_project=""
 if (env.git_project){
     git_project =env.git_project
