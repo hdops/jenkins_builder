@@ -1,3 +1,6 @@
+import groovy.transform.Field
+
+@Field 
 def node=""
 if (env.node){
     node =env.node
@@ -7,6 +10,7 @@ if (env.node){
 def mysh(cmd, returnStatus) {
     return sh (script: '#!/bin/sh -e\n'+ cmd, returnStatus: returnStatus)
 }
+def judge_shell="if [ $error ]; then  exit -1;fi"
 def git_project=""
 if (env.git_project){
     git_project =env.git_project
@@ -39,7 +43,7 @@ pipeline {
                 mysh ('ssh $host wget -O /hdapp/ka_deploy_test.sh http://ka-storage.oss-cn-hangzhou.aliyuncs.com/cd_new/ka_deploy_test.sh', false)
                 mysh ("ssh $host sed -i 's%http://github.app.hd123.cn:10080%${git_project}%' /hdapp/ka_deploy_test.sh", false)
 				mysh (""" ${deploy_shell2} || error=true && ${filearch_shell}
-                       'if [ $error ]; then  exit -1;fi' """,false)
+                       ${judge_shell} """,false)
             }
         }
     }
