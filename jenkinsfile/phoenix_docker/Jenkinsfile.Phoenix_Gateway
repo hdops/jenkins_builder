@@ -4,7 +4,10 @@ if (env.node){
 }
 
 
-
+def TOOLSET_DOCKER_REGISTRY_BASEURL = "harbor.qianfan123.com/toolset"
+if (env.TOOLSET_DOCKER_REGISTRY_BASEURL){
+    TOOLSET_DOCKER_REGISTRY_BASEURL  = env.TOOLSET_DOCKER_REGISTRY_BASEURL
+}
 
 
 def GITLAB_URL="http://gitlab.app.hd123.cn:10080"
@@ -78,8 +81,8 @@ pipeline {
             }
             steps {
                 script{    
-                    sh "docker pull  harbor.qianfan123.com/toolset/phoenixcore:${version}"
-                    withDockerContainer(args: "-v ${WORKSPACE}:/opt", image: "harbor.qianfan123.com/toolset/phoenixcore:${version}") {
+                    sh "docker pull  ${TOOLSET_DOCKER_REGISTRY_BASEURL}/phoenixcore:${version}"
+                    withDockerContainer(args: "-v ${WORKSPACE}:/opt", image: "${TOOLSET_DOCKER_REGISTRY_BASEURL}/phoenixcore:${version}") {
                         sh "phoenix-tools version"
                         sh "phoenix-tools gateway ${params.action} "
                     }
@@ -94,7 +97,7 @@ pipeline {
 
             steps {
                 script{
-                    hdphoenixtoolsetcoreYamlData.spec.containers[0].image = "harbor.qianfan123.com/toolset/phoenixcore:${version}"
+                    hdphoenixtoolsetcoreYamlData.spec.containers[0].image = "${TOOLSET_DOCKER_REGISTRY_BASEURL}/phoenixcore:${version}"
                     writeYaml file: "${WORKSPACE}@script/${YAML_FILE}", data: hdphoenixtoolsetcoreYamlData
                     sh "cat ${WORKSPACE}@script/${YAML_FILE}"
                 } 

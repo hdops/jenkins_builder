@@ -11,7 +11,10 @@ if (!env.dingding){
     env.dingding="False"
 }
 
-
+def TOOLSET_DOCKER_REGISTRY_BASEURL = "harbor.qianfan123.com/toolset"
+if (env.TOOLSET_DOCKER_REGISTRY_BASEURL){
+    TOOLSET_DOCKER_REGISTRY_BASEURL  = env.TOOLSET_DOCKER_REGISTRY_BASEURL
+}
 
 
 
@@ -85,14 +88,14 @@ pipeline {
             }
             steps {
                 script{    
-                    sh "docker pull  harbor.qianfan123.com/toolset/phoenixcore:${version}"
+                    sh "docker pull  ${TOOLSET_DOCKER_REGISTRY_BASEURL}/phoenixcore:${version}"
                     if (env.dingding == "True") {
-                        withDockerContainer(args: "-v ${WORKSPACE}:/opt", image: "harbor.qianfan123.com/toolset/phoenixcore:${version}") {
+                        withDockerContainer(args: "-v ${WORKSPACE}:/opt", image: "${TOOLSET_DOCKER_REGISTRY_BASEURL}/phoenixcore:${version}") {
                             sh "phoenix-tools version"
                             sh "phoenix-tools healthcheck --dingding ${dingding} --tag ${params.tag}"
                         }                        
                     } else {
-                        withDockerContainer(args: "-v ${WORKSPACE}:/opt", image: "harbor.qianfan123.com/toolset/phoenixcore:${version}") {
+                        withDockerContainer(args: "-v ${WORKSPACE}:/opt", image: "${TOOLSET_DOCKER_REGISTRY_BASEURL}/phoenixcore:${version}") {
                             sh "phoenix-tools version"
                             sh "phoenix-tools healthcheck --tag ${params.tag}"
                         }                        
@@ -109,7 +112,7 @@ pipeline {
 
             steps {
                 script{
-                    hdphoenixtoolsetcoreYamlData.spec.containers[0].image = "harbor.qianfan123.com/toolset/phoenixcore:${version}"
+                    hdphoenixtoolsetcoreYamlData.spec.containers[0].image = "${TOOLSET_DOCKER_REGISTRY_BASEURL}/phoenixcore:${version}"
                     writeYaml file: "${WORKSPACE}@script/${YAML_FILE}", data: hdphoenixtoolsetcoreYamlData
                     sh "cat ${WORKSPACE}@script/${YAML_FILE}"
                 } 

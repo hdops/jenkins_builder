@@ -4,7 +4,10 @@ if (env.node){
 }
 
 
-
+def TOOLSET_DOCKER_REGISTRY_BASEURL = "harbor.qianfan123.com/toolset"
+if (env.TOOLSET_DOCKER_REGISTRY_BASEURL){
+    TOOLSET_DOCKER_REGISTRY_BASEURL  = env.TOOLSET_DOCKER_REGISTRY_BASEURL
+}
 
 
 if (!env.GIT_GROUP){
@@ -76,8 +79,8 @@ pipeline {
             }
             steps {
                 script{    
-                    sh "docker pull  harbor.qianfan123.com/toolset/phoenixcore:${version}"
-                    withDockerContainer(args: "-v ${WORKSPACE}:/opt", image: "harbor.qianfan123.com/toolset/phoenixcore:${version}") {
+                    sh "docker pull  ${TOOLSET_DOCKER_REGISTRY_BASEURL}/phoenixcore:${version}"
+                    withDockerContainer(args: "-v ${WORKSPACE}:/opt", image: "${TOOLSET_DOCKER_REGISTRY_BASEURL}/phoenixcore:${version}") {
                         sh "phoenix-tools version"
                         sh "phoenix-tools dataimport ptonline --jira ${params.jira} --max_load_threads ${params.max_load_threads} --critical_load_threads ${params.critical_load_threads}  --rdb_host ${params.rdb_host}  --rdb_port ${params.rdb_port}  --rdb_username ${params.rdb_username}  --rdb_password ${params.rdb_password}  --rdb_dbname ${params.rdb_dbname} --dryrun ${params.dryrun}"
                     }
@@ -92,7 +95,7 @@ pipeline {
 
             steps {
                 script{
-                    hdphoenixtoolsetcoreYamlData.spec.containers[0].image = "harbor.qianfan123.com/toolset/phoenixcore:${version}"
+                    hdphoenixtoolsetcoreYamlData.spec.containers[0].image = "${TOOLSET_DOCKER_REGISTRY_BASEURL}/phoenixcore:${version}"
                     writeYaml file: "${WORKSPACE}@script/${YAML_FILE}", data: hdphoenixtoolsetcoreYamlData
                     sh "cat ${WORKSPACE}@script/${YAML_FILE}"
                 } 
@@ -110,7 +113,7 @@ pipeline {
                     containerTemplate {
                         name 'hdphoenixtoolsetcore'
                         namespace 'opsapp'
-                        image  "harbor.qianfan123.com/toolset/phoenixcore:${version}"
+                        image  "${TOOLSET_DOCKER_REGISTRY_BASEURL}/phoenixcore:${version}"
                         ttyEnabled true
                         alwaysPullImage true
                         command 'sleep'
