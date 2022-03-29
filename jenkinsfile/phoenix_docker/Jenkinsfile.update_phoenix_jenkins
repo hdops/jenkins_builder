@@ -5,7 +5,10 @@ if (env.node){
     node ="master"
 }
 
-
+def TOOLSET_DOCKER_REGISTRY_BASEURL = "harbor.qianfan123.com/base"
+if (env.TOOLSET_DOCKER_REGISTRY_BASEURL){
+    TOOLSET_DOCKER_REGISTRY_BASEURL  = env.TOOLSET_DOCKER_REGISTRY_BASEURL
+}
 
 def run_on_public="None"
 if (env.run_on_public){
@@ -25,8 +28,8 @@ pipeline {
     stages {
         stage('update jenkins') {
 			steps{
-			    sh "docker pull harbor.qianfan123.com/base/jenkins-job-builder:0.1.0"
-				sh "docker run -i --rm -v $jenkins_home/workspace/$JOB_NAME/jenkins:/root/jenkins harbor.qianfan123.com/base/jenkins-job-builder:0.1.0 jenkins-jobs --conf jenkins/jenkins_jobs.ini update jenkins/phoenix/project.yml"
+			    sh "docker pull ${TOOLSET_DOCKER_REGISTRY_BASEURL}/jenkins-job-builder:0.1.0"
+				sh "docker run -i --rm -v $jenkins_home/workspace/$JOB_NAME/jenkins:/root/jenkins ${TOOLSET_DOCKER_REGISTRY_BASEURL}/jenkins-job-builder:0.1.0 jenkins-jobs --conf jenkins/jenkins_jobs.ini update jenkins/phoenix/project.yml"
 			}
         }
     }

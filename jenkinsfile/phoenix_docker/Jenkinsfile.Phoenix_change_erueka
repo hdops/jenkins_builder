@@ -13,6 +13,11 @@ if (env.GITLAB_URL){
     GITLAB_URL =env.GITLAB_URL
 }
 
+def TOOLSET_DOCKER_REGISTRY_BASEURL = "harbor.qianfan123.com/toolset"
+if (env.TOOLSET_DOCKER_REGISTRY_BASEURL){
+    TOOLSET_DOCKER_REGISTRY_BASEURL  = env.TOOLSET_DOCKER_REGISTRY_BASEURL
+}
+
 def run_on_public="None"
 if (env.run_on_public){
     run_on_public=env.run_on_public
@@ -60,7 +65,7 @@ pipeline {
             steps{
                 script{
                     if(fileExists('tests')){
-                        withDockerContainer(args: "-v ${WORKSPACE}:${WORKSPACE}", image: "harbor.qianfan123.com/toolset/toolsetcore:0.3.0") {
+                        withDockerContainer(args: "-v ${WORKSPACE}:${WORKSPACE}", image: "${TOOLSET_DOCKER_REGISTRY_BASEURL}/toolsetcore:0.3.0") {
                             sh "pytest -m unit -sv"
                         }
                     }
@@ -99,8 +104,8 @@ pipeline {
             }
             steps {
                 script{    
-                    sh "docker pull  harbor.qianfan123.com/toolset/phoenixcore:${version}"
-                    withDockerContainer(args: "-v ${WORKSPACE}:/opt", image: "harbor.qianfan123.com/toolset/phoenixcore:${version}") {
+                    sh "docker pull  ${TOOLSET_DOCKER_REGISTRY_BASEURL}/phoenixcore:${version}"
+                    withDockerContainer(args: "-v ${WORKSPACE}:/opt", image: "${TOOLSET_DOCKER_REGISTRY_BASEURL}/phoenixcore:${version}") {
                         func()    
                     }
                 }
@@ -114,7 +119,7 @@ pipeline {
 
             steps {
                 script{
-                    hdphoenixtoolsetcoreYamlData.spec.containers[0].image = "harbor.qianfan123.com/toolset/phoenixcore:${version}"
+                    hdphoenixtoolsetcoreYamlData.spec.containers[0].image = "${TOOLSET_DOCKER_REGISTRY_BASEURL}/phoenixcore:${version}"
                     writeYaml file: "${WORKSPACE}@script/${YAML_FILE}", data: hdphoenixtoolsetcoreYamlData
                     sh "cat ${WORKSPACE}@script/${YAML_FILE}"
                 } 
