@@ -5,6 +5,11 @@ if (env.node){
     node ="master"
 }
 
+def TOOLSET_DOCKER_REGISTRY_BASEURL = "harbor.qianfan123.com/toolset"
+if (env.TOOLSET_DOCKER_REGISTRY_BASEURL){
+    TOOLSET_DOCKER_REGISTRY_BASEURL  = env.TOOLSET_DOCKER_REGISTRY_BASEURL
+}
+
 def whether_post="False"
 if (env.whether_post){
     whether_post =env.whether_post
@@ -56,7 +61,7 @@ pipeline {
 							sh "DNET_PRODUCT=${params.DNET_PRODUCT} DNET_PROFILE=${params.DNET_PROFILE} PRESET_IMAGE_VERSION=${params.PRESET_IMAGE_VERSION} hdops deploy validate --subsystem  ${params.subsystem}"
 						}
 					}else {
-					    docker.image("harbor.qianfan123.com/toolset/toolsetcore:${toolset_image_version}").inside {
+					    docker.image("${TOOLSET_DOCKER_REGISTRY_BASEURL}/toolsetcore:${toolset_image_version}").inside {
 					        echo "active profile is ${params.DNET_PROFILE}"
                             echo "toolset path is ${WORKSPACE}"
                             echo "sub systems are ${params.subsystem}"
@@ -81,7 +86,7 @@ pipeline {
 		        			sh "DNET_AK=${params.DNET_AK} DNET_PRODUCT=${params.DNET_PRODUCT} DNET_PROFILE=${params.DNET_PROFILE} PRESET_IMAGE_VERSION=${params.PRESET_IMAGE_VERSION} hdops deploy appinstall --subsystem ${params.subsystem} --stackids ${params.stackIds}  --operate ${params.action} --tag ${params.tag}"
 						}
 					}else {
-					    docker.image("harbor.qianfan123.com/toolset/toolsetcore:${toolset_image_version}").inside {
+					    docker.image("${TOOLSET_DOCKER_REGISTRY_BASEURL}/toolsetcore:${toolset_image_version}").inside {
 					        sh "DNET_PRODUCT=${params.DNET_PRODUCT} DNET_PROFILE=${params.DNET_PROFILE} PRESET_IMAGE_VERSION=${params.PRESET_IMAGE_VERSION} hdops deploy image_download --subsystem ${params.subsystem} --stackids ${params.stackIds} --tag ${params.tag}"
 		        		    sh "DNET_AK=${params.DNET_AK} DNET_PRODUCT=${params.DNET_PRODUCT} DNET_PROFILE=${params.DNET_PROFILE} PRESET_IMAGE_VERSION=${params.PRESET_IMAGE_VERSION} hdops deploy appinstall --subsystem ${params.subsystem} --stackids ${params.stackIds}  --operate ${params.action} --tag ${params.tag}"
 					    }

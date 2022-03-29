@@ -28,7 +28,13 @@ def run_unittest=true
 if (env.run_unittest){
     run_unittest = env.run_unittest.toBoolean()
 }
-def jjb_docker_image="harbor.qianfan123.com/base/jenkins-job-builder:0.1.0"
+
+def TOOLSET_DOCKER_REGISTRY_BASEURL = "harbor.qianfan123.com/base"
+if (env.TOOLSET_DOCKER_REGISTRY_BASEURL){
+    TOOLSET_DOCKER_REGISTRY_BASEURL  = env.TOOLSET_DOCKER_REGISTRY_BASEURL
+}
+
+def jjb_docker_image="${TOOLSET_DOCKER_REGISTRY_BASEURL}/jenkins-job-builder:0.1.0"
 def toolset_image_version="0.3.0"
 if (env.toolset_image_version){
     toolset_image_version = env.toolset_image_version

@@ -3,6 +3,11 @@ if (env.node){
     node =env.node
 }
 
+def TOOLSET_DOCKER_REGISTRY_BASEURL = "harbor.qianfan123.com/toolset"
+if (env.TOOLSET_DOCKER_REGISTRY_BASEURL){
+    TOOLSET_DOCKER_REGISTRY_BASEURL  = env.TOOLSET_DOCKER_REGISTRY_BASEURL
+}
+
 def whether_post="False"
 if (env.whether_post){
     whether_post =env.whether_post

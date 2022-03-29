@@ -10,6 +10,12 @@ if (env.whether_post){
 }else{
     whether_post ="True"
 }
+
+def TOOLSET_DOCKER_REGISTRY_BASEURL = "harbor.qianfan123.com/toolset"
+if (env.TOOLSET_DOCKER_REGISTRY_BASEURL){
+    TOOLSET_DOCKER_REGISTRY_BASEURL  = env.TOOLSET_DOCKER_REGISTRY_BASEURL
+}
+
 def toolset_image_version="0.3.0-private"
 if (env.toolset_image_version){
     toolset_image_version = env.toolset_image_version
@@ -50,7 +56,7 @@ pipeline {
                             }
                         }
                     }else {
-                        docker.image("harbor.qianfan123.com/toolset/toolsetcore:${toolset_image_version}").inside {
+                        docker.image("${TOOLSET_DOCKER_REGISTRY_BASEURL}/toolsetcore:${toolset_image_version}").inside {
                             echo "profile is ${params.DNET_PROFILE}"
                             retry(2){
                                 sh "DNET_PROFILE=integration_test DNET_PRODUCT=dnet TRUST_PUBLIC_IP=${run_on_public} hdops download_toolset --branch ${params.GIT_BRANCH} -p ."

@@ -8,6 +8,12 @@ def whether_post="False"
 if (env.whether_post){
     whether_post =env.whether_post
 }
+
+def TOOLSET_DOCKER_REGISTRY_BASEURL = "harbor.qianfan123.com/toolset"
+if (env.TOOLSET_DOCKER_REGISTRY_BASEURL){
+    TOOLSET_DOCKER_REGISTRY_BASEURL  = env.TOOLSET_DOCKER_REGISTRY_BASEURL
+}
+
 def toolset_image_version="0.3.0-private"
 if (env.toolset_image_version){
     toolset_image_version = env.toolset_image_version
@@ -49,7 +55,7 @@ pipeline {
                         echo "active profile is ${params.DNET_PROFILE}"
                         echo "product is ${params.DNET_PRODUCT}"
                         echo "workspace is $WORKSPACE"
-                        docker.image("harbor.qianfan123.com/toolset/toolsetcore:${toolset_image_version}").inside {
+                        docker.image("${TOOLSET_DOCKER_REGISTRY_BASEURL}/toolsetcore:${toolset_image_version}").inside {
                             retry(2){
                                 sh "DNET_PROFILE=integration_test DNET_PRODUCT=dnet TRUST_PUBLIC_IP=${run_on_public} hdops download_toolset --branch ${params.GIT_BRANCH} -p ."
                             }

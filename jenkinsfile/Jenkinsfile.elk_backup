@@ -2,7 +2,10 @@ def node="master"
 if (env.node){
     node =env.node
 }
-
+def TOOLSET_DOCKER_REGISTRY_BASEURL = "harbor.qianfan123.com/toolset"
+if (env.TOOLSET_DOCKER_REGISTRY_BASEURL){
+    TOOLSET_DOCKER_REGISTRY_BASEURL  = env.TOOLSET_DOCKER_REGISTRY_BASEURL
+}
 def whether_post="True"
 if (env.whether_post){
     whether_post =env.whether_post
@@ -40,7 +43,7 @@ pipeline {
                             sh "DINGTALK_TOKEN=${DINGTALK_TOKEN} hdmon backup_es --day ${params.day} --cfgname ${params.cfgname}"
                         }
                     }else{
-                        docker.image("harbor.qianfan123.com/toolset/toolsetcore:${toolset_image_version}").inside  {
+                        docker.image("${TOOLSET_DOCKER_REGISTRY_BASEURL}/toolsetcore:${toolset_image_version}").inside  {
                             echo "profile is ${params.DNET_PROFILE}"
                             retry(2){
                                 sh "DNET_PROFILE=integration_test DNET_PRODUCT=dnet TRUST_PUBLIC_IP=${run_on_public} hdops download_toolset --branch ${params.GIT_BRANCH} -p ."
