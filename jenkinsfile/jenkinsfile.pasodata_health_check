@@ -20,6 +20,10 @@ if (!env.on_k8s){
 if (env.set_on_k8s) {
     env.on_k8s=env.set_on_k8s
 }
+def TOOLSET_DOCKER_REGISTRY_BASEURL = "harbor.qianfan123.com/toolset"
+if (env.TOOLSET_DOCKER_REGISTRY_BASEURL){
+    TOOLSET_DOCKER_REGISTRY_BASEURL  = env.TOOLSET_DOCKER_REGISTRY_BASEURL
+}
 pipeline {
     agent {label node}
     options {   
@@ -34,7 +38,7 @@ pipeline {
                             sh "hdmon pasodata_health_check_job --url ${params.url} --receivers ${params.receivers}"
                         }
                     }else {
-                        docker.image("harbor.qianfan123.com/toolset/toolsetcore:0.3.0").withRun('-v /var/run/docker.sock:/var/run/docker.sock') {
+                        docker.image("${TOOLSET_DOCKER_REGISTRY_BASEURL}/toolsetcore:0.3.0").withRun('-v /var/run/docker.sock:/var/run/docker.sock') {
                             sh "hdmon pasodata_health_check_job --url ${params.url} --receivers ${params.receivers}"
                         }
 

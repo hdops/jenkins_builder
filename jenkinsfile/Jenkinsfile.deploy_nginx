@@ -20,8 +20,13 @@ if (env.GIT_BRANCH){
     GIT_BRANCH=env.GIT_BRANCH
 }
 
+def TOOLSET_DOCKER_REGISTRY_BASEURL = "harbor.qianfan123.com/toolset"
+if (env.TOOLSET_DOCKER_REGISTRY_BASEURL){
+    TOOLSET_DOCKER_REGISTRY_BASEURL  = env.TOOLSET_DOCKER_REGISTRY_BASEURL
+}
+
 def YAML_FILE="kubernetes_double_pod_template.yaml"
-def toolset_image="harbor.qianfan123.com/toolset/toolsetcore:0.3.0"
+def toolset_image="${TOOLSET_DOCKER_REGISTRY_BASEURL}/toolsetcore:0.3.0"
 def docker_image="harbor.qianfan123.com/base/iac:0.1.0"
 def label_name="jenkins-job-k8s-deploy-nginx"
 

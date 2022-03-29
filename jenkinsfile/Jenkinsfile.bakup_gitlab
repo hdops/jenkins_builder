@@ -13,6 +13,11 @@ if (env.run_on_public){
     run_on_public=env.run_on_public
 }
 
+def TOOLSET_DOCKER_REGISTRY_BASEURL = "harbor.qianfan123.com/toolset"
+if (env.TOOLSET_DOCKER_REGISTRY_BASEURL){
+    TOOLSET_DOCKER_REGISTRY_BASEURL  = env.TOOLSET_DOCKER_REGISTRY_BASEURL
+}
+
 def toolset_image_version="0.3.0"
 
 pipeline{
@@ -28,7 +33,7 @@ pipeline{
         stage("start bakup"){
             steps{
                 script{
-                    withDockerContainer(image: "harbor.qianfan123.com/toolset/toolsetcore:${toolset_image_version}") {
+                    withDockerContainer(image: "${TOOLSET_DOCKER_REGISTRY_BASEURL}/toolsetcore:${toolset_image_version}") {
                         retry(2){
                             sh "DNET_PROFILE=integration_test DNET_PRODUCT=dnet TRUST_PUBLIC_IP=${run_on_public} hdops download_toolset --branch develop -p ."
                         }

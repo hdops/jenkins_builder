@@ -13,7 +13,10 @@ if (env.toolset_image_version){
 }
 
 
-
+def TOOLSET_DOCKER_REGISTRY_BASEURL = "harbor.qianfan123.com/toolset"
+if (env.TOOLSET_DOCKER_REGISTRY_BASEURL){
+    TOOLSET_DOCKER_REGISTRY_BASEURL  = env.TOOLSET_DOCKER_REGISTRY_BASEURL
+}
 
 
 def ci_git_server_baseurl= "http://github.app.hd123.cn:10080"
@@ -88,8 +91,8 @@ pipeline {
                         echo "active profile is ${params.DNET_PROFILE}"
                         echo "git branch is ${git_branch}"
 
-                        docker.image("harbor.qianfan123.com/toolset/toolsetcore:${toolset_image_version}").pull()
-                        docker.image("harbor.qianfan123.com/toolset/toolsetcore:${toolset_image_version}").inside  {
+                        docker.image("${TOOLSET_DOCKER_REGISTRY_BASEURL}/toolsetcore:${toolset_image_version}").pull()
+                        docker.image("${TOOLSET_DOCKER_REGISTRY_BASEURL}/toolsetcore:${toolset_image_version}").inside  {
                             // checkout code
                             retry(3){
                                 checkout([$class: 'GitSCM', branches: [[name: "*/${git_branch}"]],userRemoteConfigs: [[credentialsId: 'qianfan',url: "${ci_git_server_baseurl}/${git_project}.git"]]])

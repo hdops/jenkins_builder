@@ -31,6 +31,10 @@ if (params.limit!=""){
 if (params.vars!=""){
     add_args=add_args+" -e @${params.vars}"
 }
+def TOOLSET_DOCKER_REGISTRY_BASEURL = "harbor.qianfan123.com/toolset"
+if (env.TOOLSET_DOCKER_REGISTRY_BASEURL){
+    TOOLSET_DOCKER_REGISTRY_BASEURL  = env.TOOLSET_DOCKER_REGISTRY_BASEURL
+}
 pipeline {
     agent {label node}                
     stages {
@@ -60,7 +64,7 @@ pipeline {
                         echo "active profile is ${params.DNET_PROFILE}"
                         echo "product is ${params.DNET_PRODUCT}"
                         echo "workspace is $WORKSPACE"
-                        docker.image("harbor.qianfan123.com/toolset/toolsetcore:${toolset_image_version}").inside {
+                        docker.image("${TOOLSET_DOCKER_REGISTRY_BASEURL}/toolsetcore:${toolset_image_version}").inside {
                             retry(2){
                                 sh "wget -c http://dposclient.oss-cn-hangzhou.aliyuncs.com/toolset/dnet/develop/iac.tar.gz"
                             }
