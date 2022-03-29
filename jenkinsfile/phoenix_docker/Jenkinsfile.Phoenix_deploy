@@ -102,7 +102,7 @@ pipeline {
             }
             steps {
                 script{    
-                    sh "docker pull  ${TOOLSET_DOCKER_REGISTRY_BASEURL}toolset/phoenixcore:${version}"
+                    sh "docker pull  ${TOOLSET_DOCKER_REGISTRY_BASEURL}/phoenixcore:${version}"
                     withDockerContainer(args: "-v ${WORKSPACE}:/opt", image: "${TOOLSET_DOCKER_REGISTRY_BASEURL}/phoenixcore:${version}") {
                         sh "phoenix-tools version"
                         if (env.skipnochange) {
