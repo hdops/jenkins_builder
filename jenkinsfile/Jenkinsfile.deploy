@@ -20,6 +20,11 @@ if (env.toolset_image_version){
     toolset_image_version = env.toolset_image_version
 }
 
+def _toolset_image_version = toolset_image_version
+if (_toolset_image_version == "0.3.0-huawei" ){
+    toolset_image_version="0.3.0-private"
+}
+
 def run_on_public="None"
 if (env.run_on_public){
     run_on_public=env.run_on_public
@@ -66,7 +71,7 @@ pipeline {
 							sh "tar zxf toolset.tar.gz -C ${WORKSPACE}"
 						}
 					}else {
-					    withDockerContainer(image: "${TOOLSET_DOCKER_REGISTRY_BASEURL}/toolsetcore:${toolset_image_version}") {
+					    withDockerContainer(image: "${TOOLSET_DOCKER_REGISTRY_BASEURL}/toolsetcore:${_toolset_image_version}") {
                 	        echo "toolset path is ${WORKSPACE}"
 							echo "DNET_PROFILE=integration_test DNET_PRODUCT=dnet TRUST_PUBLIC_IP=${run_on_public} hdops download_toolset --branch ${params.GIT_BRANCH} -p ."
                 	        retry(2){
