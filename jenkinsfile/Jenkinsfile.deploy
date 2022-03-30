@@ -5,6 +5,11 @@ if (env.node){
     node ="master"
 }
 
+def TOOLSET_DOCKER_REGISTRY_BASEURL = "harbor.qianfan123.com/toolset"
+if (env.TOOLSET_DOCKER_REGISTRY_BASEURL){
+    TOOLSET_DOCKER_REGISTRY_BASEURL  = env.TOOLSET_DOCKER_REGISTRY_BASEURL
+}
+
 def whether_post="False"
 if (env.whether_post){
     whether_post =env.whether_post
@@ -13,6 +18,11 @@ if (env.whether_post){
 def toolset_image_version="0.3.0-private"
 if (env.toolset_image_version){
     toolset_image_version = env.toolset_image_version
+}
+
+def _toolset_image_version = toolset_image_version
+if (_toolset_image_version == "0.3.0-huawei" ){
+    toolset_image_version="0.3.0-private"
 }
 
 def run_on_public="None"
@@ -61,7 +71,7 @@ pipeline {
 							sh "tar zxf toolset.tar.gz -C ${WORKSPACE}"
 						}
 					}else {
-					    docker.image("harbor.qianfan123.com/toolset/toolsetcore:${toolset_image_version}").inside {
+					    withDockerContainer(image: "${TOOLSET_DOCKER_REGISTRY_BASEURL}/toolsetcore:${_toolset_image_version}") {
                 	        echo "toolset path is ${WORKSPACE}"
 							echo "DNET_PROFILE=integration_test DNET_PRODUCT=dnet TRUST_PUBLIC_IP=${run_on_public} hdops download_toolset --branch ${params.GIT_BRANCH} -p ."
                 	        retry(2){
@@ -87,7 +97,7 @@ pipeline {
 								sh "DNET_PRODUCT=${params.DNET_PRODUCT} DNET_PROFILE=${params.DNET_PROFILE} PRESET_IMAGE_VERSION=${i} RECEIVERS_WHEN_SUCCEED=${params.RECEIVERS_WHEN_SUCCEED}  hdops deploy db_upgrade_check --url ${env.BUILD_URL} --receivers ${params.receivers} --buildurl ${env.BUILD_URL}"
 							}
 						}else {
-						    docker.image("harbor.qianfan123.com/toolset/toolsetcore:${toolset_image_version}").inside {
+						    docker.image("${TOOLSET_DOCKER_REGISTRY_BASEURL}/toolsetcore:${toolset_image_version}").inside {
 								echo "validate docker image"
 								sh "DNET_PRODUCT=${params.DNET_PRODUCT} DNET_PROFILE=${params.DNET_PROFILE} PRESET_IMAGE_VERSION=${i} hdops deploy validate --subsystem  ${params.subsystem}"
 						        echo "rds upgrade && logAnalysis"
@@ -110,7 +120,7 @@ pipeline {
 		        			sh "DNET_AK=${params.DNET_AK} DNET_PRODUCT=${params.DNET_PRODUCT} DNET_PROFILE=${params.DNET_PROFILE} PRESET_IMAGE_VERSION=${i} hdops deploy appinstall --subsystem ${params.subsystem} --stackids ${params.stackIds}  --operate ${params.action} --tag ${params.tag}"
 						}
 					}else {
-					    docker.image("harbor.qianfan123.com/toolset/toolsetcore:${toolset_image_version}").inside {
+					    docker.image("${TOOLSET_DOCKER_REGISTRY_BASEURL}/toolsetcore:${toolset_image_version}").inside {
 					        sh "DNET_PRODUCT=${params.DNET_PRODUCT} DNET_PROFILE=${params.DNET_PROFILE} PRESET_IMAGE_VERSION=${i} hdops deploy image_download --subsystem ${params.subsystem} --stackids ${params.stackIds} --tag ${params.tag}"
 		        		    sh "DNET_AK=${params.DNET_AK} DNET_PRODUCT=${params.DNET_PRODUCT} DNET_PROFILE=${params.DNET_PROFILE} PRESET_IMAGE_VERSION=${i} hdops deploy appinstall --subsystem ${params.subsystem} --stackids ${params.stackIds}  --operate ${params.action} --tag ${params.tag}"
 					    }
