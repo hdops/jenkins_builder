@@ -38,7 +38,7 @@ pipeline {
             steps {
                  script {
                     if (env.deploy_shell){
-                        sh '{deploy_shell}'
+                        sh '${deploy_shell}'
                         }
                     else{
                         mysh ('ssh $host wget -qO /hdapp/ka_deploy.sh http://ka-storage.oss-cn-hangzhou.aliyuncs.com/cd_new/ka_deploy.sh', false)
