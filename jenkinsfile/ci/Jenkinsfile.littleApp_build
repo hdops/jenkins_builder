@@ -11,6 +11,9 @@ if (env.node_image){
 }
 
 def credentialsId="appGitLab"
+if (env.credentials_id){
+  credentialsId = env.credentials_id
+}
 
 pipeline {
     // agent {label node}

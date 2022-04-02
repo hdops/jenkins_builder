@@ -37,6 +37,10 @@ if (env.mvn_configfile){
 }
 
 def credentialsId="appGitLab"
+if (env.credentials_id){
+  credentialsId = env.credentials_id
+}
+
 def toolset_image_version="0.3.0"
 if (env.toolset_image_version){
     toolset_image_version = env.toolset_image_version

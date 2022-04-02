@@ -3,6 +3,9 @@ def git_project_branch='master'
 def toolset_image_version='0.3.0'
 def git_project_url='https://gitlab.hd123.com/qianfanops/develop_document.git'
 def credentialsId="appGitLab"
+if (env.credentials_id){
+  credentialsId = env.credentials_id
+}
 def share_url='https://gitlab.hd123.com/qianfanops/develop_document/-/blob/master/ChangeList.adoc'
 def to = ""
 def subject = ""
