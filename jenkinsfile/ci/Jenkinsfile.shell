@@ -9,7 +9,12 @@ if (env.maven_image){
 }else{
     maven_image ="harbor.qianfan123.com/base/maven:3.3.9_jdk8"
 }
+
 def credentialsId="appGitLab"
+if (env.credentials_id){
+  credentialsId = env.credentials_id
+}
+
 def mvn_configfile="jdk8"
 if (env.mvn_configfile){
     mvn_configfile =env.mvn_configfile

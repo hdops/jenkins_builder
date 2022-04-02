@@ -23,6 +23,9 @@ if (env.build_image){
 def docker_args="--rm -v /var/run/docker.sock:/var/run/docker.sock -v /usr/bin/docker:/usr/bin/docker -v /root/.docker/config.json:/root/.docker/config.json"
 
 def credentialsId="appGitLab"
+if (env.credentials_id){
+  credentialsId = env.credentials_id
+}
 
 def run_on_public="None"
 if (env.run_on_public){

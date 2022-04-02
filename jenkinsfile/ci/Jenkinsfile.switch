@@ -36,6 +36,9 @@ if (env.mvn_configfile){
 }
 
 def credentialsId="appGitLab"
+if (env.credentials_id){
+  credentialsId = env.credentials_id
+}
 
 
 def run_on_public="None"

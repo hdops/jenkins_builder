@@ -4,6 +4,9 @@ if (env.node){
 }
 
 def credentialsId="appGitLab"
+if (env.credentials_id){
+  credentialsId = env.credentials_id
+}
 
 //  主要需要 git + dokcer 环境
 def build_image= "harbor.qianfan123.com/base/golang:1.14.2"
