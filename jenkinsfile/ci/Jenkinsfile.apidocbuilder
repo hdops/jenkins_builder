@@ -10,13 +10,18 @@ if (env.GIT_PROJECT){
     GIT_PROJECT =env.GIT_PROJECT
 }
 
+def credentialsId="appGitLab"
+if (env.credentials_id){
+  credentialsId = env.credentials_id
+}
+
 def DURABLE= "$JENKINS_HOME/durable/$JOB_BASE_NAME"
 def CONTAINER = "$JOB_BASE_NAME"
 
 pipeline {
     agent {label node}
     environment {
-        APIDOC_CREDENTIAL = credentials("qianfan")
+        APIDOC_CREDENTIAL = credentials("${credentialsId}")
     }
     stages {
         stage('Get source') {
