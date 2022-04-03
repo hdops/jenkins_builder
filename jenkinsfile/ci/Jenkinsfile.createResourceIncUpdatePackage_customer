@@ -15,14 +15,17 @@ if (!env.on_k8s){
 if (env.set_on_k8s) {
     env.on_k8s=env.set_on_k8s
 }
+
+def toolset_image_version="0.3.0"
+
 pipeline {
 	agent {
-			    docker {
-			    label node
-			    image "harbor.qianfan123.com/toolset/toolsetcore:0.3.0"
-			    args '--rm -v /var/run/docker.sock:/var/run/docker.sock -v /usr/bin/docker:/usr/bin/docker --add-host=hd-hz-public.oss-cn-hangzhou-internal.aliyuncs.com:47.110.23.37'
-			    }
-             }
+        docker {
+        label node
+        image "harbor.qianfan123.com/toolset/toolsetcore:${toolset_image_version}"
+        args '--rm -v /var/run/docker.sock:/var/run/docker.sock -v /usr/bin/docker:/usr/bin/docker --add-host=hd-hz-public.oss-cn-hangzhou-internal.aliyuncs.com:47.110.23.37'
+        }
+     }
     options {
 	    timeout(time: 1, unit: 'HOURS')
     } 
@@ -34,17 +37,17 @@ pipeline {
         }
         stage('download_toolset'){ 
 			steps{
-                            echo "active profile is ${DNET_PROFILE}"
-                            echo "workspace is $WORKSPACE"
-                            retry(2){
-                                sh "set +x;TRUST_PUBLIC_IP=${run_on_public} hdops download_toolset --branch ${build_branch} -p ."
-                            }
-                            sh "tar zxf toolset.tar.gz -C $WORKSPACE"
+                echo "active profile is ${DNET_PROFILE}"
+                echo "workspace is $WORKSPACE"
+                retry(2){
+                    sh "set +x;TRUST_PUBLIC_IP=${run_on_public} hdops download_toolset --branch ${build_branch} -p ."
+                }
+                sh "tar zxf toolset.tar.gz -C $WORKSPACE"
 			}
 		}
         stage('createResourceIncUpdatePackage'){
 			steps{   
-                            sh "DNET_PRODUCT=${params.DNET_PRODUCT} DNET_PROFILE=${params.DNET_PROFILE} hdmon create_resource_inc_update_package --subsystem ${params.subsystem} --fromversion ${params.fromVersion} --toversion ${params.toVersion} --branch ${params.branch}"
+                sh "DNET_PRODUCT=${params.DNET_PRODUCT} DNET_PROFILE=${params.DNET_PROFILE} hdmon create_resource_inc_update_package --subsystem ${params.subsystem} --fromversion ${params.fromVersion} --toversion ${params.toVersion} --branch ${params.branch}"
 			}
 		}
     }
