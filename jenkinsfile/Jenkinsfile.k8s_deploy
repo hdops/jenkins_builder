@@ -19,7 +19,10 @@ def git_project_url="gitlab.hd123.com/qianfanops/kubernetes.git"
 if (env.git_project_url){
     git_project_url = env.git_project_url
 }
-
+def credentialsId="17643215-09f8-4a9a-b0ea-c8e49777ce1d"
+if (env.credentials_id){
+  credentialsId = env.credentials_id
+}
 def git_project_branch="develop"
 if (env.git_project_branch){
     git_project_branch = env.git_project_branch
@@ -86,7 +89,7 @@ pipeline {
                             argocd_proj = "${DNET_PRODUCT}"
                             argocd_repo = "${git_project_http}${git_project_url}"
                             k8s_namespace = "${DNET_PRODUCT}-${DNET_PROFILE}"
-                            git branch: "${git_project_branch}", credentialsId: '17643215-09f8-4a9a-b0ea-c8e49777ce1d', url: "${git_project_http}${git_project_url}"
+                            git branch: "${git_project_branch}", credentialsId: "${credentialsId}", url: "${git_project_http}${git_project_url}"
                             sh "sh deploy.sh ${DNET_PRODUCT} ${i} ${DNET_PROFILE} ${argocd_addr} ${argocd_user} ${argocd_password} \
                                 ${argocd_proj} ${argocd_repo} ${k8s_cluster} ${k8s_namespace} ${DNET_PROJECT} ${git_project_http}${git_token}@${git_project_url}"
                         }
@@ -116,7 +119,7 @@ pipeline {
                             argocd_proj = "${DNET_PRODUCT}"
                             argocd_repo = "${git_project_http}${git_project_url}"
                             k8s_namespace = "${DNET_PRODUCT}-${DNET_PROFILE}"
-                            git branch: "${git_project_branch}", credentialsId: '17643215-09f8-4a9a-b0ea-c8e49777ce1d', url: "${git_project_http}${git_project_url}"
+                            git branch: "${git_project_branch}", credentialsId: "${credentialsId}", url: "${git_project_http}${git_project_url}"
                             sh "sh deploy.sh ${DNET_PRODUCT} ${i} ${DNET_PROFILE} ${argocd_addr} ${argocd_user} ${argocd_password} \
                                 ${argocd_proj} ${argocd_repo} ${k8s_cluster} ${k8s_namespace} ${DNET_PROJECT} ${git_project_http}${git_token}@${git_project_url}"
                         }

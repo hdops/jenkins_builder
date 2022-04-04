@@ -7,6 +7,10 @@ if (env.node){
 if (!env.GIT_GROUP){
     env.GIT_GROUP="phoenix-config"
 }
+def credentialsId="17643215-09f8-4a9a-b0ea-c8e49777ce1d"
+if (env.credentials_id){
+  credentialsId = env.credentials_id
+}
 def run_on_public="None"
 if (env.run_on_public){
     run_on_public=env.run_on_public
@@ -32,7 +36,7 @@ pipeline {
         stage('下载phoenix config') {
             steps{
 
-                git branch: "${params.GIT_BRANCH}", credentialsId: '17643215-09f8-4a9a-b0ea-c8e49777ce1d', url: "http://gitlab.app.hd123.cn:10080/${GIT_GROUP}/${params.GIT_REPONAME}.git"
+                git branch: "${params.GIT_BRANCH}", credentialsId: "${credentialsId}", url: "http://gitlab.app.hd123.cn:10080/${GIT_GROUP}/${params.GIT_REPONAME}.git"
             }
         }
         stage('部署') {

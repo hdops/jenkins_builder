@@ -17,6 +17,10 @@ if (params.JENS_HOME){
 }
 
 def GITLAB_URL="http://gitlab.app.hd123.cn:10080"
+def credentialsId="17643215-09f8-4a9a-b0ea-c8e49777ce1d"
+if (env.credentials_id){
+  credentialsId = env.credentials_id
+}
 def YAML_FILE="application.yml"
 if (env.GITLAB_URL){
     GITLAB_URL =env.GITLAB_URL
@@ -42,7 +46,7 @@ pipeline {
         }
         stage('下载oas config') {
             steps{
-                git branch: "${params.GIT_BRANCH}", credentialsId: '17643215-09f8-4a9a-b0ea-c8e49777ce1d', url: "${GITLAB_URL}/${GIT_GROUP}/${params.GIT_REPONAME}.git"
+                git branch: "${params.GIT_BRANCH}", credentialsId: "${credentialsId}", url: "${GITLAB_URL}/${GIT_GROUP}/${params.GIT_REPONAME}.git"
             }
         }
 

@@ -18,7 +18,10 @@ def YAML_FILE="hdphoenixtoolsetcore.yaml"
 if (env.GITLAB_URL){
     GITLAB_URL =env.GITLAB_URL
 }
-
+def credentialsId="17643215-09f8-4a9a-b0ea-c8e49777ce1d"
+if (env.credentials_id){
+  credentialsId = env.credentials_id
+}
 def run_on_public="None"
 if (env.run_on_public){
     run_on_public=env.run_on_public
@@ -42,7 +45,7 @@ pipeline {
         }
         stage('下载phoenix_template') {
 			steps{
-                git branch: "${params.GIT_BRANCH}", credentialsId: '17643215-09f8-4a9a-b0ea-c8e49777ce1d', url: "${GITLAB_URL}/${GIT_GROUP}/${params.GIT_REPONAME}.git"
+                git branch: "${params.GIT_BRANCH}", credentialsId: "${credentialsId}", url: "${GITLAB_URL}/${GIT_GROUP}/${params.GIT_REPONAME}.git"
 			}
         }
         stage('install phoenix-tools') {

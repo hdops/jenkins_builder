@@ -15,7 +15,10 @@ def YAML_FILE="hdphoenixtoolsetcore.yaml"
 if (env.GITLAB_URL){
     GITLAB_URL =env.GITLAB_URL
 }
-
+def credentialsId="17643215-09f8-4a9a-b0ea-c8e49777ce1d"
+if (env.credentials_id){
+  credentialsId = env.credentials_id
+}
 if (!env.GIT_GROUP){
     env.GIT_GROUP="phoenix-config"
 }
@@ -54,7 +57,7 @@ pipeline {
         }
         stage('下载phoenix_template') {
 			steps{
-                git branch: "${params.GIT_BRANCH}", credentialsId: '17643215-09f8-4a9a-b0ea-c8e49777ce1d', url: "${GITLAB_URL}/${GIT_GROUP}/${params.GIT_REPONAME}.git"
+                git branch: "${params.GIT_BRANCH}", credentialsId: "${credentialsId}", url: "${GITLAB_URL}/${GIT_GROUP}/${params.GIT_REPONAME}.git"
 			}
         }
         stage('get crmVersion') {
@@ -119,7 +122,7 @@ pipeline {
                 script{
                     container("hdphoenixtoolsetcore")   {
                         sh "phoenix-tools version"
-                        git branch: "${params.GIT_BRANCH}", credentialsId: '17643215-09f8-4a9a-b0ea-c8e49777ce1d', url: "${GITLAB_URL}/${GIT_GROUP}/${params.GIT_REPONAME}.git"
+                        git branch: "${params.GIT_BRANCH}", credentialsId: "${credentialsId}", url: "${GITLAB_URL}/${GIT_GROUP}/${params.GIT_REPONAME}.git"
                         sh "chmod +x inventory.py"
                         sh "phoenix-tools hosts_init --workspace ${WORKSPACE} --dryrun ${params.dryrun}"
                     }
