@@ -10,7 +10,10 @@ if (env.whether_post){
 }else{
     whether_post ="False"
 }
-
+def credentialsId="17643215-09f8-4a9a-b0ea-c8e49777ce1d"
+if (env.credentials_id){
+  credentialsId = env.credentials_id
+}
 env.proxy_name="haproxy.service"
 env.proxy_host="172.17.12.219"
 
@@ -29,7 +32,7 @@ pipeline {
                 script{
                     deleteDir()
                     retry(3){
-                        checkout([$class: 'GitSCM', branches: [[name: "*/develop"]],userRemoteConfigs: [[credentialsId: 'qianfan',url: "https://gitlab.hd123.com/qianfanops/ldap_proxy.git"]]])
+                        checkout([$class: 'GitSCM', branches: [[name: "*/develop"]],userRemoteConfigs: [[credentialsId: "${credentialsId}",url: "https://gitlab.hd123.com/qianfanops/ldap_proxy.git"]]])
                     }
                     push_config()
                 }  

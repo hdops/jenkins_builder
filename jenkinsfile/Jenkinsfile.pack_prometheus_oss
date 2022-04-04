@@ -23,7 +23,10 @@ def ci_git_server_baseurl= "http://github.app.hd123.cn:10080"
 if (env.ci_git_server_baseurl){
     ci_git_server_baseurl = env.ci_git_server_baseurl
 }
-
+def credentialsId="17643215-09f8-4a9a-b0ea-c8e49777ce1d"
+if (env.credentials_id){
+  credentialsId = env.credentials_id
+}
 def run_unittest=true
 if (env.run_unittest){
     run_unittest = env.run_unittest.toBoolean()
@@ -47,7 +50,7 @@ pipeline {
 			steps{
                 script{
                    retry(3){
-                        checkout([$class: 'GitSCM', branches: [[name: "*/${env.gitlabBranch}"]],userRemoteConfigs: [[credentialsId: 'qianfan',url: "${ci_git_server_baseurl}/${git_project}.git"]]])
+                        checkout([$class: 'GitSCM', branches: [[name: "*/${env.gitlabBranch}"]],userRemoteConfigs: [[credentialsId: "${credentialsId}",url: "${ci_git_server_baseurl}/${git_project}.git"]]])
                    }
                    echo "TRUST_PUBLIC_IP is ${TRUST_PUBLIC_IP}"
                    echo "DNET_CLOUD_VENDOR is ${DNET_CLOUD_VENDOR}"
