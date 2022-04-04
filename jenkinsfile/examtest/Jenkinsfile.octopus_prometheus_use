@@ -14,6 +14,10 @@ if (env.exam_time){
 def toolset_image_version = "0.3.0"
 def git_project_branch = "develop"
 def git_project_url = "http://github.app.hd123.cn:10080/qianfanops/toolset-k8s-config.git"
+def credentialsId="17643215-09f8-4a9a-b0ea-c8e49777ce1d"
+if (env.credentials_id){
+  credentialsId = env.credentials_id
+}
 def body = "" 
 
 pipeline {
@@ -35,7 +39,7 @@ pipeline {
                         sh "false"
                     }
                     withDockerContainer(image: "harbor.qianfan123.com/toolset/toolsetcore:${toolset_image_version}") {
-                        git branch: "${git_project_branch}", credentialsId: '17643215-09f8-4a9a-b0ea-c8e49777ce1d', url: "${git_project_url}"
+                        git branch: "${git_project_branch}", credentialsId: "${credentialsId}", url: "${git_project_url}"
                         sh "python examtest_octopus_prometheus.py -a prepare"
                         sh "python examtest_octopus_prometheus.py -a topic"
                     }
@@ -55,7 +59,7 @@ pipeline {
                 script{
                     echo "考试结束，开始测评，请等待..."
                     withDockerContainer(image: "harbor.qianfan123.com/toolset/toolsetcore:${toolset_image_version}") {
-                        git branch: "${git_project_branch}", credentialsId: '17643215-09f8-4a9a-b0ea-c8e49777ce1d', url: "${git_project_url}"
+                        git branch: "${git_project_branch}", credentialsId: "${credentialsId}", url: "${git_project_url}"
                         body = sh(script: "python examtest_octopus_prometheus.py -a check", returnStdout: true)
                     }
                     echo "考试结果： \n${body}"

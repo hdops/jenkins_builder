@@ -23,7 +23,10 @@ def ci_git_server_baseurl= "http://github.app.hd123.cn:10080"
 if (env.ci_git_server_baseurl){
     ci_git_server_baseurl = env.ci_git_server_baseurl
 }
-
+def credentialsId="17643215-09f8-4a9a-b0ea-c8e49777ce1d"
+if (env.credentials_id){
+  credentialsId = env.credentials_id
+}
 def git_branch = "develop"
 if (env.git_branch){
     git_branch = env.git_branch
@@ -65,7 +68,7 @@ pipeline {
 
                             // checkout code
                             retry(3){
-                                checkout([$class: 'GitSCM', branches: [[name: "*/${git_branch}"]],userRemoteConfigs: [[credentialsId: 'qianfan',url: "${ci_git_server_baseurl}/${git_project}.git"]]])
+                                checkout([$class: 'GitSCM', branches: [[name: "*/${git_branch}"]],userRemoteConfigs: [[credentialsId: "${credentialsId}",url: "${ci_git_server_baseurl}/${git_project}.git"]]])
                             }
 
                             def status = sh(returnStatus:true,script:"DNET_PROFILE=${params.DNET_PROFILE} DNET_PRODUCT=${params.DNET_PRODUCT} hdops modify_version --image '${image}'")
@@ -95,7 +98,7 @@ pipeline {
                         docker.image("${TOOLSET_DOCKER_REGISTRY_BASEURL}/toolsetcore:${toolset_image_version}").inside  {
                             // checkout code
                             retry(3){
-                                checkout([$class: 'GitSCM', branches: [[name: "*/${git_branch}"]],userRemoteConfigs: [[credentialsId: 'qianfan',url: "${ci_git_server_baseurl}/${git_project}.git"]]])
+                                checkout([$class: 'GitSCM', branches: [[name: "*/${git_branch}"]],userRemoteConfigs: [[credentialsId: "${credentialsId}",url: "${ci_git_server_baseurl}/${git_project}.git"]]])
                             }
                             def status = sh(returnStatus:true,script:"DNET_PROFILE=${params.DNET_PROFILE} DNET_PRODUCT=${params.DNET_PRODUCT} hdops modify_version --image '${image}'")
                             if(status == 0){

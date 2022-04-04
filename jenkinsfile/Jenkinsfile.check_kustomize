@@ -19,7 +19,10 @@ def git_project_url="gitlab.hd123.com/qianfanops/kubernetes.git"
 if (env.git_project_url){
     git_project_url = env.git_project_url
 }
-
+def credentialsId="17643215-09f8-4a9a-b0ea-c8e49777ce1d"
+if (env.credentials_id){
+  credentialsId = env.credentials_id
+}
 def git_project_branch="develop"
 if (env.git_project_branch){
     git_project_branch = env.git_project_branch
@@ -30,7 +33,7 @@ def docker_image="harbor.qianfan123.com/toolset/argocd-cli:v2.0.0"
 def label_name="jenkins-job-k8s-check-kustomize"
 
 def func = {
-    git branch: "${git_project_branch}", credentialsId: '17643215-09f8-4a9a-b0ea-c8e49777ce1d', url: "${git_project_http}${git_project_url}"
+    git branch: "${git_project_branch}", credentialsId: "${credentialsId}", url: "${git_project_http}${git_project_url}"
     if ( currentBuild.changeSets != [] ) {
         def path=''
         for (changeLogSet in currentBuild.changeSets) {

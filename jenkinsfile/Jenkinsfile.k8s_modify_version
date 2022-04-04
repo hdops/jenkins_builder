@@ -14,7 +14,10 @@ def git_project_url="https://gitlab.hd123.com/qianfanops/kubernetes.git"
 if (env.git_project_url){
     git_project_url = env.git_project_url
 }
-
+def credentialsId="17643215-09f8-4a9a-b0ea-c8e49777ce1d"
+if (env.credentials_id){
+  credentialsId = env.credentials_id
+}
 def git_project_branch="develop"
 if (env.git_project_branch){
     git_project_branch = env.git_project_branch
@@ -32,7 +35,7 @@ def func = {
         String[] images = image_version_str_tmp[1].split(',')
         for ( String j : images ){
             image=j
-            git branch: "${git_project_branch}", credentialsId: '17643215-09f8-4a9a-b0ea-c8e49777ce1d', url: "${git_project_url}"
+            git branch: "${git_project_branch}", credentialsId: "${credentialsId}", url: "${git_project_url}"
             sh "sh modify_image_version.sh ${DNET_PRODUCT} ${image} ${DNET_PROFILE} ${version} ${DNET_PROJECT}"
             sh "git push https://${GIT_TOKEN_DATA_USR}:${GIT_TOKEN_DATA_PSW}@gitlab.hd123.com/qianfanops/kubernetes.git develop"
         }
