@@ -9,7 +9,7 @@ def maven_image=""
 if (env.maven_image){
     maven_image =env.maven_image
 }else{
-    maven_image ="harbor.qianfan123.com/base/maven:3.3.9_jdk8"
+    maven_image ="harbor.qianfan123.com/base/maven:3.6.3-jdk8"
 }
 
 def ci_git_server_baseurl= "https://gitlab.hd123.com"
