@@ -49,7 +49,7 @@ pipeline {
 				script {
                     echo "workspace is $WORKSPACE"
                     retry(3){
-                      git branch: "${git_project_branch}", credentialsId: "${credentialsId}", url: "${git_base_url}/${GIT_GROUP}/${GIT_REPONAME}.git"
+                      git branch: "${git_project_branch}", credentialsId: "${credentialsId}", url: "${git_base_url}/${git_project}.git"
                     }
                     sh "cat ${jenkins_job_config_file}"
                     sh 'git submodule update --init --recursive'
