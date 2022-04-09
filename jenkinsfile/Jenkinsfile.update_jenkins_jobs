@@ -43,7 +43,7 @@ pipeline {
 	    timeout(time: 6, unit: 'HOURS')
     }
     stages {
-        stage('更新jenkins_jobs') {
+        stage('git clone') {
 			steps{
 				script {
                     echo "workspace is $WORKSPACE"
@@ -51,9 +51,58 @@ pipeline {
                     sh "cat ${jenkins_job_config_file}"
                     sh 'git submodule update --init --recursive'
                     sh '''git submodule foreach "git pull origin master" '''
-                    sh "set +x;sh ${WORKSPACE}/${env.job_update_script}"
                     }
                 }
 			}
+		stage("build job"){
+		  steps{
+		    script{
+                withDockerContainer(args: "-v ${WORKSPACE}/jenkins:/root/jenkins -v ${WORKSPACE}/${jenkins_jobs_ini_config}:/root/jenkins_jobs.ini", image: "harbor.qianfan123.com/base/jenkins-job-builder:0.1.0") {
+                    echo "run unit test"
+                    sh "pytest -m unit --junitxml=junit.xml -sv"
+                }
+		    }
+		  }
+		}
+		stage("更新jenkins_jobs"){
+            steps{
+                script{
+                    sh "set +x;sh ${WORKSPACE}/${env.job_update_script}"
+                }
+            }
+		}
+    }
+
+    post{
+        failure{
+            script{
+                updateGitlabCommitStatus name: 'build', state: 'failed'
+                def subject = env.email_subject ? "[Jenkins]${env.email_subject}" : "[Jenkins]failure on Job ${env.JOB_NAME}"
+                def to = env.email_recipients ? "${env.email_recipients}" : "buhaiqing@hd123.com"
+                def body = env.email_body ? "${env.email_body}" : "failure on Job ${env.JOB_NAME} in ${env.BUILD_URL}"
+                // send email
+                emailext(recipientProviders: [[$class: 'DevelopersRecipientProvider']],subject: "${subject}", body: "${body}",attachLog:true)
+            }
         }
+        fixed{
+            script{
+                updateGitlabCommitStatus name: 'build', state: 'success'
+                def subject = env.email_subject ? "[Jenkins]${env.email_subject}" : "[Jenkins]fixed on Job ${env.JOB_NAME}"
+                def to = env.email_recipients ? "${env.email_recipients}" : "buhaiqing@hd123.com"
+                def body = env.email_body ? "${env.email_body}" : "fixed on Job ${env.JOB_NAME} in ${env.BUILD_URL}"
+                // send email
+                emailext(recipientProviders: [[$class: 'DevelopersRecipientProvider']],subject: "${subject}", body: "${body}",attachLog:true)
+            }
+        }
+        success{
+            script{
+                updateGitlabCommitStatus name: 'build', state: 'success'
+            }
+        }
+        always{
+            script{
+                junit allowEmptyResults: true, testResults: 'junit.xml'
+            }
+        }
+    }
 }
