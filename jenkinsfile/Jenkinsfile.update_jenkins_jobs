@@ -20,8 +20,9 @@ if (env.set_on_k8s) {
     env.on_k8s=env.set_on_k8s
 }
 
+def job_update_script = "jenkins_update.sh"
 if (env.job_update_script){
-    env.job_update_script = env.job_update_script
+    job_update_script = env.job_update_script
 }
 
 def git_base_url="http://github.app.hd123.cn:10080"
@@ -69,7 +70,7 @@ pipeline {
 		stage("更新jenkins_jobs"){
             steps{
                 script{
-                    sh "set +x;sh ${WORKSPACE}/${env.job_update_script}"
+                    sh "set +x;sh ${WORKSPACE}/${job_update_script}"
                 }
             }
 		}
