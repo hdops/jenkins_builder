@@ -32,7 +32,7 @@ if (env.set_on_k8s) {
 pipeline {
     agent {label node}
     options {   
-	    timeout(time: 3, unit: 'HOURS')
+	    timeout(time: 20, unit: 'MINUTES')
     }             
     stages {
 		stage('healthcheck') {
