@@ -30,16 +30,17 @@ def func = {
     }
     sh "tar zxf toolset.tar.gz -C ${WORKSPACE}"
     sh "DNET_PROJECT=${DNET_PROJECT} DNET_PRODUCT=${DNET_PRODUCT} DNET_PROFILE=${DNET_PROFILE} hdops kubernetes download_kubernetes -s None"
-    String[] image_version_str = image_version.split(';')
-    for ( String i : image_version_str ) {
-        String[] image_version_str_tmp = i.split(':')
-        version=image_version_str_tmp[0]
-        String[] images = image_version_str_tmp[1].split(',')
-        for ( String j : images ){
-            image=j
-            sh "DNET_PROJECT=${DNET_PROJECT} DNET_PRODUCT=${DNET_PRODUCT} DNET_PROFILE=${DNET_PROFILE} hdops kubernetes modify_version -s ${image} -v ${version}"
-        }
-    }
+    // String[] image_version_str = image_version.split(';')
+    // for ( String i : image_version_str ) {
+    //     String[] image_version_str_tmp = i.split(':')
+    //     version=image_version_str_tmp[0]
+    //     String[] images = image_version_str_tmp[1].split(',')
+    //     for ( String j : images ){
+    //         image=j
+    //         sh "DNET_PROJECT=${DNET_PROJECT} DNET_PRODUCT=${DNET_PRODUCT} DNET_PROFILE=${DNET_PROFILE} hdops kubernetes modify_version -s ${image} -v ${version}"
+    //     }
+    // }
+    sh "DNET_PROJECT=${DNET_PROJECT} DNET_PRODUCT=${DNET_PRODUCT} DNET_PROFILE=${DNET_PROFILE} hdops kubernetes modify_version -I ${image_version}"
     if (env.uploadRemoteJob){
         build job: "${uploadRemoteJob}", 
         parameters: [string(name: 'DNET_PROFILE', value: DNET_PROFILE), string(name: 'DNET_PRODUCT', value: DNET_PRODUCT), string(name: 'image', value: image_version)], 
