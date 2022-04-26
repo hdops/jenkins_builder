@@ -151,7 +151,7 @@ pipeline {
                 def to = env.email_recipients ? "${env.email_recipients}" : "yuzhiyuan@hd123.com"
                 def body = env.email_body ? "${env.email_body}" : "failure on Job ${env.JOB_NAME} in ${env.BUILD_URL}"
                 // send email
-                emailext(recipientProviders: [[$class: 'DevelopersRecipientProvider']],subject: "${subject}", body: "${body}",attachLog:true)
+                emailext(recipientProviders: [developers(),requestor(),culprits()],subject: "${subject}", body: "${body}",attachLog:true)
             }
         }
         fixed{
@@ -161,7 +161,7 @@ pipeline {
                 def to = env.email_recipients ? "${env.email_recipients}" : "yuzhiyuan@hd123.com"
                 def body = env.email_body ? "${env.email_body}" : "fixed on Job ${env.JOB_NAME} in ${env.BUILD_URL}"
                 // send email
-                emailext(recipientProviders: [[$class: 'DevelopersRecipientProvider']],subject: "${subject}", body: "${body}",attachLog:true)
+                emailext(recipientProviders: [developers(),requestor(),culprits()],subject: "${subject}", body: "${body}",attachLog:true)
             }
         }
         success{
