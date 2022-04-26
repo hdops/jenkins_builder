@@ -90,21 +90,8 @@ pipeline {
 						    fromVersion =now.format("yyyyMMdd", TimeZone.getTimeZone('UTC'))
 						}
 						echo "fromVersion:${fromVersion}"
-						def toVersion=""
-						if (env.toVersion){
-						    toVersion =env.toVersion
-						}else{
-						    toVersion =build_branch
-						}
-						echo "toVersion:${toVersion}"
-						def alias=""
-						if (env.alias){
-						    alias =env.alias
-						}else{
-						    alias =build_branch
-						}
 						echo "alias:${alias}"
-						build job: "${packageRemoteJob}", parameters: [string(name: 'DNET_PROFILE', value: DNET_PROFILE), string(name: 'subsystem', value: subsystem), string(name: 'BUILD_URL', value: BUILD_URL), string(name: 'fromVersion', value: fromVersion), string(name: 'toVersion', value: toVersion), string(name: 'alias', value: alias)], wait: true
+						build job: "${packageRemoteJob}", parameters: [string(name: 'DNET_PROFILE', value: DNET_PROFILE), string(name: 'subsystem', value: subsystem), string(name: 'BUILD_URL', value: BUILD_URL), string(name: 'fromVersion', value: fromVersion), string(name: 'toVersion', value: alias), string(name: 'alias', value: alias)], wait: true
 				}
 			}
 		}
