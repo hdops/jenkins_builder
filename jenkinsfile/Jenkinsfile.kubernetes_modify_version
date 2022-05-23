@@ -60,6 +60,9 @@ pipeline {
     options {
 	    timeout(time: 3, unit: 'HOURS')
     }
+    environment {
+        GITLAB_USER = credentials("${credentialsId}")
+    }
     stages {
         stage('advance prepare on k8s to read yaml') {
             when {
