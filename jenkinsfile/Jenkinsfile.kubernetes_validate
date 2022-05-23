@@ -70,8 +70,8 @@ pipeline {
                 environment name: 'on_k8s', value: 'True'
             }
             environment {
-                GIT_USER = GITLAB_USER_USR
-                GIT_PASSWORD = GITLAB_USER_PSW
+                GIT_USER = ${GITLAB_USER_USR}
+                GIT_PASSWORD = ${GITLAB_USER_PSW}
             }
             agent {
                 kubernetes{
@@ -94,8 +94,8 @@ pipeline {
                 environment name: 'on_k8s', value: 'False'
             }
             environment {
-                GIT_USER = GITLAB_USER_USR
-                GIT_PASSWORD = GITLAB_USER_PSW
+                GIT_USER = ${GITLAB_USER_USR}
+                GIT_PASSWORD = ${GITLAB_USER_PSW}
             }
             steps{
                 script {
