@@ -20,8 +20,6 @@ def docker_image="harbor.qianfan123.com/toolset/toolsetcore:0.3.0"
 def label_name="jenkins-job-kubernetes-modify-version"
 
 def func = {
-    GIT_USER=${GITLAB_USER_USR}
-    GIT_PASSWORD=${GITLAB_USER_PSW}
     retry(2){
         sh "DNET_PROFILE=integration_test DNET_PRODUCT=dnet TRUST_PUBLIC_IP=${run_on_public} hdops download_toolset --branch develop -p ."
     }
@@ -71,6 +69,10 @@ pipeline {
                 beforeAgent true
                 environment name: 'on_k8s', value: 'True'
             }
+            environment {
+                GIT_USER = GITLAB_USER_USR
+                GIT_PASSWORD = GITLAB_USER_PSW
+            }
             agent {
                 kubernetes{
                     cloud 'kubernetes'
@@ -90,6 +92,10 @@ pipeline {
             when {
                 beforeAgent true
                 environment name: 'on_k8s', value: 'False'
+            }
+            environment {
+                GIT_USER = GITLAB_USER_USR
+                GIT_PASSWORD = GITLAB_USER_PSW
             }
             steps{
                 script {
