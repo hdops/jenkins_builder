@@ -20,6 +20,8 @@ def docker_image="harbor.qianfan123.com/toolset/toolsetcore:0.3.0"
 def label_name="jenkins-job-kubernetes-modify-version"
 
 def func = {
+    GIT_USER=GITLAB_USER_USR
+    GIT_PASSWORD=GITLAB_USER_PSW
     retry(2){
         sh "DNET_PROFILE=integration_test DNET_PRODUCT=dnet TRUST_PUBLIC_IP=${run_on_public} hdops download_toolset --branch develop -p ."
     }
@@ -34,6 +36,9 @@ pipeline {
     agent {label node}
     options {
 	    timeout(time: 3, unit: 'HOURS')
+    }
+    environment {
+        GITLAB_USER = credentials("${credentialsId}")
     }
     stages {
         stage('advance prepare on k8s to read yaml') {
