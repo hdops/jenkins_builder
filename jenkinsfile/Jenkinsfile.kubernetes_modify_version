@@ -20,16 +20,22 @@ if (env.DNET_PROJECT){
     DNET_PROJECT=env.DNET_PROJECT
 }
 
+def credentialsId="appGitLab"
+if (env.credentials_id){
+  credentialsId = env.credentials_id
+}
+
 def YAML_FILE="kubernetes_pod_template.yaml"
 def docker_image="harbor.qianfan123.com/toolset/toolsetcore:0.3.0"
 def label_name="jenkins-job-kubernetes-modify-version"
 
 def func = {
+    prefix = 'DNET_PROJECT=${DNET_PROJECT} DNET_PRODUCT=${DNET_PRODUCT} DNET_PROFILE=${DNET_PROFILE} GIT_USER=${GITLAB_USER_USR} GIT_PASSWORD=${GITLAB_USER_PSW} '
     retry(2){
         sh "DNET_PROFILE=integration_test DNET_PRODUCT=dnet TRUST_PUBLIC_IP=${run_on_public} hdops download_toolset --branch develop -p ."
     }
     sh "tar zxf toolset.tar.gz -C ${WORKSPACE}"
-    sh "DNET_PROJECT=${DNET_PROJECT} DNET_PRODUCT=${DNET_PRODUCT} DNET_PROFILE=${DNET_PROFILE} hdops kubernetes download_kubernetes -s None"
+    sh prefix + "hdops kubernetes download_kubernetes -s None"
     // String[] image_version_str = image_version.split(';')
     // for ( String i : image_version_str ) {
     //     String[] image_version_str_tmp = i.split(':')
@@ -40,7 +46,7 @@ def func = {
     //         sh "DNET_PROJECT=${DNET_PROJECT} DNET_PRODUCT=${DNET_PRODUCT} DNET_PROFILE=${DNET_PROFILE} hdops kubernetes modify_version -s ${image} -v ${version}"
     //     }
     // }
-    sh "DNET_PROJECT=${DNET_PROJECT} DNET_PRODUCT=${DNET_PRODUCT} DNET_PROFILE=${DNET_PROFILE} hdops kubernetes modify_version -s None -I '${image_version}'"
+    sh prefix + "hdops kubernetes modify_version -s None -I '${image_version}'"
     if (env.uploadRemoteJob){
         build job: "${uploadRemoteJob}", 
         parameters: [string(name: 'DNET_PROFILE', value: DNET_PROFILE), string(name: 'DNET_PRODUCT', value: DNET_PRODUCT), string(name: 'image', value: image_version)], 
@@ -53,6 +59,9 @@ pipeline {
     agent {label node}
     options {
 	    timeout(time: 3, unit: 'HOURS')
+    }
+    environment {
+        GITLAB_USER = credentials("${credentialsId}")
     }
     stages {
         stage('advance prepare on k8s to read yaml') {

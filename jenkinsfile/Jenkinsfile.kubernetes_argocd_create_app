@@ -15,18 +15,24 @@ if (env.run_on_public){
     run_on_public=env.run_on_public
 }
 
+def credentialsId="appGitLab"
+if (env.credentials_id){
+  credentialsId = env.credentials_id
+}
+
 def YAML_FILE="kubernetes_pod_template.yaml"
 def docker_image="harbor.qianfan123.com/toolset/toolsetcore:0.3.0"
 def label_name="jenkins-job-kubernetes-modify-version"
 
 def func = {
+    prefix = 'DNET_PROJECT=${DNET_PROJECT} DNET_PRODUCT=${DNET_PRODUCT} DNET_PROFILE=${DNET_PROFILE} GIT_USER=${GITLAB_USER_USR} GIT_PASSWORD=${GITLAB_USER_PSW} '
     retry(2){
         sh "DNET_PROFILE=integration_test DNET_PRODUCT=dnet TRUST_PUBLIC_IP=${run_on_public} hdops download_toolset --branch develop -p ."
     }
     sh "tar zxf toolset.tar.gz -C ${WORKSPACE}"
-    sh "DNET_PROJECT=${DNET_PROJECT} DNET_PRODUCT=${DNET_PRODUCT} DNET_PROFILE=${DNET_PROFILE} hdops kubernetes download_kubernetes -s None"
-    sh "DNET_PROJECT=${DNET_PROJECT} DNET_PRODUCT=${DNET_PRODUCT} DNET_PROFILE=${DNET_PROFILE} hdops kubernetes validate --subsystem ${image}"
-    sh "DNET_PROJECT=${DNET_PROJECT} DNET_PRODUCT=${DNET_PRODUCT} DNET_PROFILE=${DNET_PROFILE} hdops kubernetes create_argocd_application --subsystem ${image} --stackids ${stackids}"
+    sh prefix + "hdops kubernetes download_kubernetes -s None"
+    sh prefix + "hdops kubernetes validate --subsystem ${image}"
+    sh prefix + "hdops kubernetes create_argocd_application --subsystem ${image} --stackids ${stackids}"
 }
 
 
@@ -34,6 +40,9 @@ pipeline {
     agent {label node}
     options {
 	    timeout(time: 3, unit: 'HOURS')
+    }
+    environment {
+        GITLAB_USER = credentials("${credentialsId}")
     }
     stages {
         stage('advance prepare on k8s to read yaml') {
