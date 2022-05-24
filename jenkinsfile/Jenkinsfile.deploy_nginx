@@ -20,6 +20,23 @@ if (env.GIT_BRANCH){
     GIT_BRANCH=env.GIT_BRANCH
 }
 
+def ci_git_server_baseurl= "http://github.app.hd123.cn:10080"
+if (env.ci_git_server_baseurl){
+    ci_git_server_baseurl = env.ci_git_server_baseurl
+}
+
+def credentialsId="17643215-09f8-4a9a-b0ea-c8e49777ce1d"
+if (env.credentials_id){
+  credentialsId = env.credentials_id
+}
+
+// qianfanops/toolset
+def git_project = "xxx"
+if (env.git_project){
+   git_project = env.git_project
+}
+
+
 def TOOLSET_DOCKER_REGISTRY_BASEURL = "harbor.qianfan123.com/toolset"
 if (env.TOOLSET_DOCKER_REGISTRY_BASEURL){
     TOOLSET_DOCKER_REGISTRY_BASEURL  = env.TOOLSET_DOCKER_REGISTRY_BASEURL
@@ -35,6 +52,13 @@ def func_toolsetcore = {
         sh "DNET_PROFILE=integration_test DNET_PRODUCT=dnet TRUST_PUBLIC_IP=${run_on_public} hdops download_toolset --branch ${GIT_BRANCH} -p ."
     }
     sh "tar zxf toolset.tar.gz -C ."
+}
+
+def func_git_toolset = {
+    // checkout code
+    retry(3){
+        checkout([$class: 'GitSCM', branches: [[name: "*/${GIT_BRANCH}"]],userRemoteConfigs: [[credentialsId: "${credentialsId}",url: "${ci_git_server_baseurl}/${git_project}.git"]]])
+    }
 }
 
 def func_deploy = {
@@ -86,7 +110,8 @@ pipeline {
                 script {
                     sh "docker pull ${toolset_image}"
                     withDockerContainer(args: "-v /root/.ssh:/root/.ssh", image: "${toolset_image}") {
-                        func_toolsetcore()
+                      //func_toolsetcore()
+                      func_git_toolset()
                     }
                 }
             }
