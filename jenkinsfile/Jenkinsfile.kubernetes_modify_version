@@ -20,7 +20,7 @@ if (env.DNET_PROJECT){
     DNET_PROJECT=env.DNET_PROJECT
 }
 
-def credentialsId="appGitLab"
+def credentialsId="qianfan"
 if (env.credentials_id){
   credentialsId = env.credentials_id
 }
