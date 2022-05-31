@@ -113,7 +113,7 @@ pipeline {
                             sh "pytest -m unit  --junitxml=junit.xml -sv"
                        }
                    }
-                   if ("${env.gitlabBranch}"!="jenkins"){
+                   if ("${env.gitlabBranch}"!="jenkins" && "${env.gitlabBranch}"!="erp"){
                        sh "DNET_CLOUD_VENDOR=${DNET_CLOUD_VENDOR} python update_toolset_oss.py -branch ${env.gitlabBranch}"
                    }
                 }
