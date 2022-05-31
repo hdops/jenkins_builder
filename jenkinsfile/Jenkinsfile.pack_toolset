@@ -113,7 +113,7 @@ pipeline {
                             sh "pytest -m unit  --junitxml=junit.xml -sv"
                        }
                    }
-                   if ("${env.gitlabBranch}"!="jenkins" && "${env.gitlabBranch}"!="erp" && !"${env.gitlabBranch}".startWith("k8s_")){
+                   if ("${env.gitlabBranch}"!="jenkins" && "${env.gitlabBranch}"!="erp" && !"${env.gitlabBranch}".startsWith("k8s_")){
                        sh "DNET_CLOUD_VENDOR=${DNET_CLOUD_VENDOR} python update_toolset_oss.py -branch ${env.gitlabBranch}"
                    }
                 }
