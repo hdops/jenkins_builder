@@ -13,6 +13,12 @@ def git_server_baseurl= "http://github.app.hd123.cn:10080"
 if (env.git_server_baseurl){
     git_server_baseurl = env.git_server_baseurl
 }
+
+def git_base_url="http://github.app.hd123.cn:10080"
+if (env.git_base_url){
+    git_base_url=env.git_base_url
+}
+
 def credentialsId="17643215-09f8-4a9a-b0ea-c8e49777ce1d"
 if (env.credentials_id){
   credentialsId = env.credentials_id
@@ -42,7 +48,7 @@ pipeline {
 			steps{
 				script {
                     echo "workspace is $WORKSPACE"
-                    git branch: "${params.GIT_BRANCH}", credentialsId: "${credentialsId}", url: "${git_server_baseurl}/${GIT_GROUP}/${GIT_REPONAME}.git"
+                    git branch: "${params.GIT_BRANCH}", credentialsId: "${credentialsId}", url: "${git_base_url}/${GIT_GROUP}/${GIT_REPONAME}.git"
                     sh "sh ${config_script_file}"
                     }
                 }
