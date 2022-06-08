@@ -20,7 +20,7 @@ if (env.DNET_PROJECT){
     DNET_PROJECT=env.DNET_PROJECT
 }
 
-def credentialsId="qianfan"
+def credentialsId="17643215-09f8-4a9a-b0ea-c8e49777ce1d"
 if (env.credentials_id){
   credentialsId = env.credentials_id
 }
