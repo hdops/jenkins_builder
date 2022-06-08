@@ -105,5 +105,12 @@ pipeline {
             }
         }
     }
+    post{
+      always{
+        script{
+            currentBuild.description = "${image}:${DNET_PROFILE}"
+        }
+      }
+    }
 }
 
