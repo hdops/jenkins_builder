@@ -205,10 +205,11 @@ pipeline {
                     script{
 
                         def subject = env.email_build_subject ? "[Jenkins]${env.email_build_subject}" : "[Jenkins]构建失败-${env.JOB_NAME}"
-                        def to = env.email_build_recipients ? "${env.email_build_recipients}" : "heweiwei@hd123.com"
+                        def to = env.email_build_recipients ? "${env.email_build_recipients}" : "shujun@hd123.com"
                         def body = env.email_build_body ? "${env.email_build_body}" : "${env.JOB_NAME}构建失败,更多信息请查阅：${BUILD_URL}"
                         // send email
-                        emailext subject: subject, to: to, body:body,attachLog:true
+                        // emailext subject: subject, to: to, body:body,attachLog:true
+                        emailext(recipientProviders: [developers(),requestor(),culprits()],subject: "${subject}", body: "${body}",attachLog:true)
                     }
                 }
             }
@@ -485,6 +486,25 @@ skipversionupdate=${skipversionupdate}""", remoteJenkinsName: "${remoteJenkins}"
                         build job: "${postBuildJob}", wait: false
                     }
                 }
+            }
+        }
+        failure{
+            script{
+                def subject = env.email_subject ? "[Jenkins]${env.email_subject}" : "[Jenkins]failure on Job ${env.JOB_NAME}"
+                def to = env.email_recipients ? "${env.email_recipients}" : "chenmin@hd123.com,zhoupeng@hd123.com,pengtiantian@hd123.com"
+                def body = env.email_body ? "${env.email_body}" : "failure on Job ${env.JOB_NAME} in ${env.BUILD_URL}"
+                // send email
+                emailext(recipientProviders: [developers(),requestor(),culprits()],subject: "${subject}", body: "${body}",attachLog:true)
+                emailext subject: subject, to: to, body:body,attachLog:true
+            }
+        }
+        fixed{
+            script{
+                def subject = env.email_subject ? "[Jenkins]${env.email_subject}" : "[Jenkins]fixed on Job ${env.JOB_NAME}"
+                def to = env.email_recipients ? "${env.email_recipients}" : "chenmin@hd123.com,zhoupeng@hd123.com,pengtiantian@hd123.com"
+                def body = env.email_body ? "${env.email_body}" : "fixed on Job ${env.JOB_NAME} in ${env.BUILD_URL}"
+                // send email
+                emailext(recipientProviders: [developers(),requestor(),culprits()],subject: "${subject}", body: "${body}",attachLog:true)
             }
         }
     }
