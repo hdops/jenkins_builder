@@ -488,5 +488,23 @@ skipversionupdate=${skipversionupdate}""", remoteJenkinsName: "${remoteJenkins}"
                 }
             }
         }
+        failure{
+            script{
+                def subject = env.email_subject ? "[Jenkins]${env.email_subject}" : "[Jenkins]failure on Job ${env.JOB_NAME}"
+                def to = env.email_recipients ? "${env.email_recipients}" : "buhaiqing@hd123.com"
+                def body = env.email_body ? "${env.email_body}" : "failure on Job ${env.JOB_NAME} in ${env.BUILD_URL}"
+                // send email
+                emailext(recipientProviders: [developers(),requestor(),culprits()],subject: "${subject}", body: "${body}",attachLog:true)
+            }
+        }
+        fixed{
+            script{
+                def subject = env.email_subject ? "[Jenkins]${env.email_subject}" : "[Jenkins]fixed on Job ${env.JOB_NAME}"
+                def to = env.email_recipients ? "${env.email_recipients}" : "buhaiqing@hd123.com"
+                def body = env.email_body ? "${env.email_body}" : "fixed on Job ${env.JOB_NAME} in ${env.BUILD_URL}"
+                // send email
+                emailext(recipientProviders: [developers(),requestor(),culprits()],subject: "${subject}", body: "${body}",attachLog:true)
+            }
+        }
     }
 }
