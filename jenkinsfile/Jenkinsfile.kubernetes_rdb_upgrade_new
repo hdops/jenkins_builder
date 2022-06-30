@@ -20,11 +20,14 @@ def docker_image="harbor.qianfan123.com/toolset/toolsetcore:0.3.0"
 def label_name="jenkins-job-kubernetes-modify-version"
 
 def func = {
+    prefix = 'DNET_PROJECT=${DNET_PROJECT} DNET_PRODUCT=${DNET_PRODUCT} DNET_PROFILE=${DNET_PROFILE} GIT_USER=${GITLAB_USER_USR} GIT_PASSWORD=${GITLAB_USER_PSW} '
     retry(2){
         sh "DNET_PROFILE=integration_test DNET_PRODUCT=dnet TRUST_PUBLIC_IP=${run_on_public} hdops download_toolset --branch develop -p ."
     }
     sh "tar zxf toolset.tar.gz -C ${WORKSPACE}"
-    sh "DNET_PROJECT=${DNET_PROJECT} DNET_PRODUCT=${DNET_PRODUCT} DNET_PROFILE=${DNET_PROFILE} hdops kubernetes db_upgrade_new --subsystem ${params.subsystem} --version ${params.version} --stackids ${params.stackids} --dblist ${params.dblist} ${params.skipversion} ${params.skipversionupdate} --receivers ${params.receivers} --timeout ${params.timeout} --threadcount ${params.threadcount}"
+    sh prefix + "hdops kubernetes download_kubernetes -s None"
+    sh prefix + "hdops kubernetes validate --subsystem ${image}"
+    sh prefix + "hdops kubernetes db_upgrade_new --subsystem ${params.subsystem} --version ${params.version} --stackids ${params.stackids} --dblist ${params.dblist} ${params.skipversion} ${params.skipversionupdate} --receivers ${params.receivers} --timeout ${params.timeout} --threadcount ${params.threadcount}"
     archiveArtifacts allowEmptyArchive: true, artifacts: 'dbinit_log*txt', followSymlinks: false
 }
 
