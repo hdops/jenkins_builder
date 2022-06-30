@@ -1,0 +1,109 @@
+if (!env.on_k8s){
+    env.on_k8s="False"
+}
+if (env.set_on_k8s) {
+    env.on_k8s=env.set_on_k8s
+}
+
+def node= "master"
+if (env.node){
+    node =env.node
+}
+
+def run_on_public="None"
+if (env.run_on_public){
+    run_on_public=env.run_on_public
+}
+
+def YAML_FILE="kubernetes_pod_template.yaml"
+def docker_image="harbor.qianfan123.com/toolset/toolsetcore:0.3.0"
+def label_name="jenkins-job-kubernetes-modify-version"
+
+def func = {
+    prefix = 'DNET_PROJECT=${DNET_PROJECT} DNET_PRODUCT=${DNET_PRODUCT} DNET_PROFILE=${DNET_PROFILE} GIT_USER=${GITLAB_USER_USR} GIT_PASSWORD=${GITLAB_USER_PSW} '
+    retry(2){
+        sh "DNET_PROFILE=integration_test DNET_PRODUCT=dnet TRUST_PUBLIC_IP=${run_on_public} hdops download_toolset --branch develop -p ."
+    }
+    sh "tar zxf toolset.tar.gz -C ${WORKSPACE}"
+    sh prefix + "hdops kubernetes download_kubernetes -s None"
+    sh prefix + "hdops kubernetes validate --subsystem ${params.subsystem}"
+    sh prefix + "hdops kubernetes db_upgrade_new --subsystem ${params.subsystem} --version ${params.version} --stackids ${params.stackids} --dblist ${params.dblist} ${params.skipversion} ${params.skipversionupdate} --receivers ${params.receivers} --timeout ${params.timeout} --threadcount ${params.threadcount}"
+    archiveArtifacts allowEmptyArchive: true, artifacts: 'dbinit_log*txt', followSymlinks: false
+}
+
+
+pipeline {
+    agent {label node}
+    options {
+	    timeout(time: 3, unit: 'HOURS')
+    }
+    stages {
+        stage('advance prepare on k8s to read yaml') {
+            when {
+                beforeAgent true
+                environment name: 'on_k8s', value: 'True'
+            }
+
+            steps {
+                script{
+                    echo "node : ${node}"
+                    echo "on_k8s : ${on_k8s}"
+                    kubernetesPodYamlData = readYaml file: "jenkinsfile/${YAML_FILE}"
+                    kubernetesPodYamlData.spec.containers[0].image = "${docker_image}"
+                    kubernetesPodYamlData.spec.containers[0].name = "${label_name}"
+                    kubernetesPodYamlData.metadata.labels.label = "${label_name}"
+                    writeYaml file: "${YAML_FILE}.tmp", data: kubernetesPodYamlData
+                    kubernetesPodReadYamlData = sh(script: "cat ${YAML_FILE}.tmp", returnStdout: true)
+                    echo "${kubernetesPodReadYamlData}"
+                } 
+            }
+        }
+        stage('delete workspace') {
+            steps{
+                deleteDir()
+            }
+        }
+        stage('数据库更新 on k8s') {
+            when {
+                beforeAgent true
+                environment name: 'on_k8s', value: 'True'
+            }
+            agent {
+                kubernetes{
+                    cloud 'kubernetes'
+                    yaml "${kubernetesPodReadYamlData}"
+                }
+            }
+            steps{
+                script{
+                    container("${label_name}") {
+                        func()
+                    }
+                }
+            }
+        }
+
+        stage('数据库更新 on docker') {
+            when {
+                beforeAgent true
+                environment name: 'on_k8s', value: 'False'
+            }
+            steps{
+                script {
+                    sh "docker pull ${docker_image}"
+                    withDockerContainer(args: "-v /root/.ssh:/root/.ssh", image: "${docker_image}") {
+                        func()
+                    }
+                }
+            }
+        }
+    }
+    post {
+        always {
+			script {
+				currentBuild.description = "${params.DNET_PROFILE}:${params.subsystem}:${params.skipversion}"
+			}
+		}
+    }
+}
+
