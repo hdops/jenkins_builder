@@ -17,7 +17,7 @@ if (env.run_on_public){
 
 def YAML_FILE="kubernetes_pod_template.yaml"
 def docker_image="harbor.qianfan123.com/toolset/toolsetcore:0.3.0"
-def label_name="jenkins-job-kubernetes-modify-version"
+def label_name="jenkins-job-kubernetes-rdb-upgrade"
 
 def func = {
     prefix = 'DNET_PROJECT=${DNET_PROJECT} DNET_PRODUCT=${DNET_PRODUCT} DNET_PROFILE=${DNET_PROFILE} GIT_USER=${GITLAB_USER_USR} GIT_PASSWORD=${GITLAB_USER_PSW} '
