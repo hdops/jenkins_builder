@@ -9,7 +9,7 @@ spec:
     namespace: opsapp
     image: ${image}
     command: ["sleep"]
-    args: ["1000"]
+    args: ["100000"]
     tty: true
     imagePullPolicy: "Always"
     volumeMounts:
