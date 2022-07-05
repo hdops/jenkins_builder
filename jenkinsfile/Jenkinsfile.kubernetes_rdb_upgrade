@@ -34,7 +34,7 @@ def func = {
     sh prefix + "hdops kubernetes validate --subsystem ${params.subsystem}"
     def status = sh(returnStatus:true, script:prefix + "hdops kubernetes db_upgrade --subsystem ${params.subsystem} --version ${params.version} --stackids ${params.stackids} --dblist ${params.dblist} ${params.skipversion} ${params.skipversionupdate} --receivers ${params.receivers} --timeout ${params.timeout} --threadcount ${params.threadcount}")
     archiveArtifacts allowEmptyArchive: true, artifacts: 'dbinit_log*txt', followSymlinks: false
-    if (status !=0 && status != 1) {
+    if (status != 0) {
         sh "`exit ${status}`"
     }
 }
