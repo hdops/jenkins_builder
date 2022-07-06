@@ -19,8 +19,8 @@ env.proxy_host="172.17.12.219"
 
 def push_config = {
     sh '''set +x;
-    scp ${WORKSPACE}/whiteip.lst ${proxy_host}:/hdapp/haproxy_ldap \
-    && ssh ${proxy_host} systemctl reload ${proxy_name}
+    scp -P 60501 ${WORKSPACE}/whiteip.lst ${proxy_host}:/hdapp/haproxy_ldap \
+    && ssh -p 60501 ${proxy_host} systemctl reload ${proxy_name}
     '''  
 }
 
@@ -43,7 +43,7 @@ pipeline {
                  script {
                         echo "等待服务重载..."
                         sh "set +x;sleep 3"
-                        def proxy_status=sh(script: "set +x;ssh ${proxy_host} systemctl status ${proxy_name}|grep Active|cut -d'(' -f1|cut -d':' -f2|sed 's/^[ ]*//g'", returnStdout:true).trim()
+                        def proxy_status=sh(script: "set +x;ssh -p 60501 ${proxy_host} systemctl status ${proxy_name}|grep Active|cut -d'(' -f1|cut -d':' -f2|sed 's/^[ ]*//g'", returnStdout:true).trim()
                         if(proxy_status != 'active'){
                             echo "配置有误或服务异常,已回退配置到上个版本;请检查修复并重新提交."
                             retry(2){
