@@ -15,17 +15,28 @@ if (env.run_on_public){
     run_on_public=env.run_on_public
 }
 
+def credentialsId="17643215-09f8-4a9a-b0ea-c8e49777ce1d"
+if (env.credentials_id){
+  credentialsId = env.credentials_id
+}
+
 def YAML_FILE="kubernetes_pod_template.yaml"
 def docker_image="harbor.qianfan123.com/toolset/toolsetcore:0.3.0"
-def label_name="jenkins-job-kubernetes-modify-version"
+def label_name="jenkins-job-kubernetes-rdb-upgrade"
 
 def func = {
+    prefix = 'DNET_PROJECT=${DNET_PROJECT} DNET_PRODUCT=${DNET_PRODUCT} DNET_PROFILE=${DNET_PROFILE} GIT_USER=${GITLAB_USER_USR} GIT_PASSWORD=${GITLAB_USER_PSW} '
     retry(2){
         sh "DNET_PROFILE=integration_test DNET_PRODUCT=dnet TRUST_PUBLIC_IP=${run_on_public} hdops download_toolset --branch develop -p ."
     }
     sh "tar zxf toolset.tar.gz -C ${WORKSPACE}"
-    sh "DNET_PROJECT=${DNET_PROJECT} DNET_PRODUCT=${DNET_PRODUCT} DNET_PROFILE=${DNET_PROFILE} hdops kubernetes db_upgrade --subsystem ${params.subsystem} --stackids ${params.stackids} --dblist ${params.dblist} ${params.skipversion} ${params.skipversionupdate} --receivers ${params.receivers} --timeout ${params.timeout} --threadcount ${params.threadcount} --tag ${params.tag} --nodethreadcount ${params.nodethreadcount} --buildurl ${env.BUILD_URL}"
+    sh prefix + "hdops kubernetes download_kubernetes -s None"
+    sh prefix + "hdops kubernetes validate --subsystem ${params.subsystem}"
+    def status = sh(returnStatus:true, script:prefix + "hdops kubernetes db_upgrade --subsystem ${params.subsystem} --version ${params.version} --stackids ${params.stackids} --dblist ${params.dblist} ${params.skipversion} ${params.skipversionupdate} --receivers ${params.receivers} --timeout ${params.timeout} --threadcount ${params.threadcount}")
     archiveArtifacts allowEmptyArchive: true, artifacts: 'dbinit_log*txt', followSymlinks: false
+    if (status != 0) {
+        sh "`exit ${status}`"
+    }
 }
 
 
@@ -33,6 +44,9 @@ pipeline {
     agent {label node}
     options {
 	    timeout(time: 3, unit: 'HOURS')
+    }
+    environment {
+        GITLAB_USER = credentials("${credentialsId}")
     }
     stages {
         stage('advance prepare on k8s to read yaml') {
