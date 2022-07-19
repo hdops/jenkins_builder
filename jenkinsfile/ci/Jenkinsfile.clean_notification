@@ -11,7 +11,7 @@ if (env.run_on_public){
 }
 
 def git_branch = "develop"
-def (GIT_BRANCH){
+if (GIT_BRANCH){
     git_branch = GIT_BRANCH
 }
 
