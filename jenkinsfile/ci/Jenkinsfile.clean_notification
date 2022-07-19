@@ -11,9 +11,6 @@ if (env.run_on_public){
 }
 
 def git_branch = "develop"
-if (GIT_BRANCH){
-    git_branch = GIT_BRANCH
-}
 
 def ci_days=30
 if (env.ci_days){
