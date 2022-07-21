@@ -24,7 +24,9 @@ if (env.set_on_k8s) {
     env.on_k8s=env.set_on_k8s
 }
 if (env.subsystem) {
-    env.add_args+="  -e iwms_system_from_job="+env.subsystem
+    //echo "add_args is ${add_args}"
+	//echo "subsystem is ${subsystem}"
+	env.add_args+="  -e iwms_system_from_job="+env.subsystem+"'"
 }
 pipeline {
     agent {label node}
@@ -46,6 +48,8 @@ pipeline {
                     else{
                         mysh ('ssh $host sudo  wget -qO /hdapp/ka_deploy_iwms.sh http://ka-storage.oss-cn-hangzhou.aliyuncs.com/cd_new/ka_deploy_iwms.sh', false)
                         mysh ("ssh $host sudo  sed -i 's%http://github.app.hd123.cn:10080%${git_base_url}%' /hdapp/ka_deploy_iwms.sh", false)
+						echo "playbook is ${playbook}"
+						echo "add_args is ${add_args}"
                         mysh ('ssh $host sudo  sh /hdapp/ka_deploy_iwms.sh ${toolset_x} ${envname} ${playbook} ${add_args}', false)
                         // sh "ansible-playbook -i ${params.inventory} ${params.playbook} --tags ${params.tags} ${add_args}"
                         // mysh ('scp -rp $host:/hdapp/heading/${appname}_*/apollodir/{*apollo,wiki*} .', true)
