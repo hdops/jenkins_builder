@@ -38,8 +38,6 @@ if (env.git_project){
    git_project = env.git_project
 }
 
-
-
 def run_on_public="None"
 if (env.run_on_public){
     run_on_public=env.run_on_public
@@ -54,7 +52,10 @@ pipeline {
     agent {label node}
 	options {   
 	    timeout(time: 5, unit: 'MINUTES')
-    }             
+    }
+    environment {
+        GITLAB_USER = credentials("${credentialsId}")
+    }    
     stages {
         stage('更改制品版本') {
 			steps{
@@ -75,8 +76,8 @@ pipeline {
                             if(status == 0){
                                 sh """
                                 git config --global credential.helper store
-                                git config user.email "appGitLab@hd123.com"
-                                git config user.name "appGitLab"
+                                git config user.email "${GITLAB_USER_USR}@hd123.com"
+                                git config user.name "${GITLAB_USER_USR}"
                                 git checkout ${git_branch}
                                 git pull
                                 git add .
@@ -104,8 +105,8 @@ pipeline {
                             if(status == 0){
                                 sh """
                                 git config --global credential.helper store
-                                git config user.email "appGitLab@hd123.com"
-                                git config user.name "appGitLab"
+                                git config user.email "${GITLAB_USER_USR}@hd123.com"
+                                git config user.name "${GITLAB_USER_USR}"
                                 git checkout ${git_branch}
                                 git pull
                                 git add .

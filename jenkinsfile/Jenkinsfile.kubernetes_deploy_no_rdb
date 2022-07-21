@@ -32,13 +32,6 @@ def func = {
     sh "tar zxf toolset.tar.gz -C ${WORKSPACE}"
     sh prefix + "hdops kubernetes download_kubernetes -s None"
     sh prefix + "hdops kubernetes validate --subsystem ${image}"
-
-    def status = sh(returnStatus:true, script:prefix + "hdops kubernetes db_upgrade --subsystem ${image} --stackids ${stackids} ${params.skipversion} ${params.skipversionupdate} --receivers ${receivers} --timeout ${timeout} --threadcount ${threadcount}")
-    archiveArtifacts allowEmptyArchive: true, artifacts: 'dbinit_log*txt', followSymlinks: false
-    if (status != 0) {
-        sh "`exit ${status}`"
-    }
-
     sh prefix + "hdops kubernetes appinstall --subsystem ${image} --stackids ${stackids} --checkstatus ${checkstatus}"
 }
 

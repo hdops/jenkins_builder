@@ -1,0 +1,74 @@
+def node=""
+if (env.node){
+    node =env.node
+}else{
+    node ="develop"
+}
+
+def run_on_public="None"
+if (env.run_on_public){
+    run_on_public=env.run_on_public
+}
+
+def git_branch = "develop"
+
+def ci_days=30
+if (env.ci_days){
+    ci_days=env.ci_days
+}
+
+def cd_days=30
+if (env.cd_days){
+    cd_days=env.cd_days
+}
+
+pipeline {
+	agent {label node}
+    options {
+	    timeout(time: 3, unit: 'HOURS')
+    }
+    stages {
+        stage('delete workspace') {
+            steps{
+                deleteDir()
+            }
+        }
+        stage('download_toolset'){ 
+			steps{
+                withDockerContainer(image: "harbor.qianfan123.com/toolset/toolsetcore:0.3.0") {
+                    retry(2){
+                        sh "DNET_PROFILE=integration_test DNET_PRODUCT=dnet TRUST_PUBLIC_IP=${run_on_public} hdops download_toolset --branch ${git_branch} -p ."
+                    }
+                    sh "tar zxf toolset.tar.gz -C ${WORKSPACE}"
+                }
+			}
+		}
+        stage('clean notification'){
+			steps{
+                withDockerContainer(image: "harbor.qianfan123.com/toolset/toolsetcore:0.3.0") {
+                    sh "hdops clean_notification -i ${ci_days} -d ${cd_days}"
+                }
+			}
+		}
+    }
+    post {
+        // 构建失败之后邮件通知
+        failure {
+            script {
+                def subject = "清理notification失败"
+                def to = env.email_build_recipients ? "${env.email_build_recipients}" : "yuzhiyuan@hd123.com"
+                def body = "清理notification失败, 更多信息请查阅：${BUILD_URL}"
+                emailext subject: subject, to: to,cc: "buhaiqing@hd123.com", body:body,attachLog:true
+            }
+        }
+        fixed {
+            script {
+                def subject = "清理notification已经修复"
+                def to = env.email_build_recipients ? "${env.email_build_recipients}" : "yuzhiyuan@hd123.com"
+                def body = "清理notification已经修复, 更多信息请查阅：${BUILD_URL}"
+                // send email
+                emailext subject: subject, to: to,cc: "buhaiqing@hd123.com", body:body,attachLog:true
+            }
+        }
+    }
+}
