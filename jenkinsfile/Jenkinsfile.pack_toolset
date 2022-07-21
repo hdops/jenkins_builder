@@ -100,10 +100,9 @@ pipeline {
                 echo "单元测试： $run_unittest"
                 script{
                     def git_commit_author = sh(returnStdout: true, script: 'git log -n 1 --pretty=format:"%an"')
-                    // 提交用户是qianfanauto时，不做单元测试
+                    // 提交用户是qianfanauto或opsCD时，不做单元测试
                     println("git commit author is " + git_commit_author)
-                    if (run_unittest && git_commit_author!='qianfanauto' && git_commit_author!='appGitLab'){
-                    //if (run_unittest){
+                    if (run_unittest && git_commit_author!='opsCD' && git_commit_author!='qianfanauto' && git_commit_author!='appGitLab'){
                        if ("${env.gitlabBranch}"=="jenkins"){
                             sh "git submodule update --init --recursive"
                             sh "git submodule foreach git pull origin master"
