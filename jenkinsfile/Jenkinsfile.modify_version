@@ -74,7 +74,7 @@ pipeline {
 
                             def status = sh(returnStatus:true,script:"DNET_PROFILE=${params.DNET_PROFILE} DNET_PRODUCT=${params.DNET_PRODUCT} hdops modify_version --image '${image}'")
                             def result = ci_git_server_baseurl.split("://")
-                            def git_url = result[0] + "://" + GITLAB_USER_USR + ":" + GITLAB_USER_PWD + "@" + result[1]
+                            def git_url = result[0] + "://" + GITLAB_USER_USR + ":" + GITLAB_USER_PSW + "@" + result[1]
                             if(status == 0){
                                 sh """
                                 git config --global credential.helper store
@@ -105,7 +105,7 @@ pipeline {
                             }
                             def status = sh(returnStatus:true,script:"DNET_PROFILE=${params.DNET_PROFILE} DNET_PRODUCT=${params.DNET_PRODUCT} hdops modify_version --image '${image}'")
                             def result = ci_git_server_baseurl.split("://")
-                            def git_url = result[0] + "://" + GITLAB_USER_USR + ":" + GITLAB_USER_PWD + "@" + result[1]
+                            def git_url = result[0] + "://" + GITLAB_USER_USR + ":" + GITLAB_USER_PSW + "@" + result[1]
                             if(status == 0){
                                 sh """
                                 git config --global credential.helper store
