@@ -73,16 +73,18 @@ pipeline {
                             }
 
                             def status = sh(returnStatus:true,script:"DNET_PROFILE=${params.DNET_PROFILE} DNET_PRODUCT=${params.DNET_PRODUCT} hdops modify_version --image '${image}'")
+                            def result = ci_git_server_baseurl.split("://")
+                            def git_url = result[0] + "://" + GITLAB_USER_USR + ":" + GITLAB_USER_PSW + "@" + result[1] + "/" + git_project + ".git"
                             if(status == 0){
                                 sh """
                                 git config --global credential.helper store
                                 git config user.email "${GITLAB_USER_USR}@hd123.com"
                                 git config user.name "${GITLAB_USER_USR}"
                                 git checkout ${git_branch}
-                                git pull
+                                git pull ${git_url} ${git_branch}:${git_branch}
                                 git add .
                                 git commit -m "[${DNET_PRODUCT}]update settings : ${image} in ${DNET_PROFILE} "
-                                git push
+                                git push ${git_url}
                                 """
                             }
                             if (status !=0 && status != 1) {
@@ -102,16 +104,18 @@ pipeline {
                                 checkout([$class: 'GitSCM', branches: [[name: "*/${git_branch}"]],userRemoteConfigs: [[credentialsId: "${credentialsId}",url: "${ci_git_server_baseurl}/${git_project}.git"]]])
                             }
                             def status = sh(returnStatus:true,script:"DNET_PROFILE=${params.DNET_PROFILE} DNET_PRODUCT=${params.DNET_PRODUCT} hdops modify_version --image '${image}'")
+                            def result = ci_git_server_baseurl.split("://")
+                            def git_url = result[0] + "://" + GITLAB_USER_USR + ":" + GITLAB_USER_PSW + "@" + result[1] + "/" + git_project + ".git"
                             if(status == 0){
                                 sh """
                                 git config --global credential.helper store
                                 git config user.email "${GITLAB_USER_USR}@hd123.com"
                                 git config user.name "${GITLAB_USER_USR}"
                                 git checkout ${git_branch}
-                                git pull
+                                git pull ${git_url} ${git_branch}:${git_branch}
                                 git add .
                                 git commit -m "[${DNET_PRODUCT}]update settings : ${image} in ${DNET_PROFILE} "
-                                git push
+                                git push ${git_url}
                                 """
                             }
                             if (status !=0 && status != 1) {
