@@ -70,6 +70,7 @@ pipeline {
                 script{
                 if ("${env.gitlabBranch}"!="jenkins"){
                        sh "yamllint -c .yamllint config/*/*.yml"
+                       sh "pytest -m unit  --junitxml=junit.xml -sv"
                    }
                 }
 		    }
@@ -99,6 +100,11 @@ pipeline {
         success{
             script{
                 updateGitlabCommitStatus name: 'build', state: 'success'
+            }
+        }
+        always{
+            script{
+                junit allowEmptyResults: true, testResults: 'junit.xml'
             }
         }
     }
