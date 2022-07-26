@@ -34,6 +34,9 @@ pipeline {
 	options {
 	    timeout(time: 3, unit: 'MINUTES')
     }
+    environment {
+        GITLAB_USER = credentials("${credentialsId}")
+    }
 
     stages {
         stage('advance prepare on k8s to read yaml') {
@@ -83,7 +86,7 @@ pipeline {
                     sh "docker pull  ${TOOLSET_DOCKER_REGISTRY_BASEURL}/phoenixcore:${version}"
                     withDockerContainer(args: "-v ${WORKSPACE}:/opt", image: "${TOOLSET_DOCKER_REGISTRY_BASEURL}/phoenixcore:${version}") {
                         sh "phoenix-tools version"
-                        sh "phoenix-tools envitem_diff --oldversion ${params.oldversion} --newversion ${params.newversion}"
+                        sh "GIT_USER=${GITLAB_USER_USR} GIT_PASSWORD=${GITLAB_USER_PSW}  phoenix-tools envitem_diff --oldversion ${params.oldversion} --newversion ${params.newversion}"
                     }
                 }
             }
