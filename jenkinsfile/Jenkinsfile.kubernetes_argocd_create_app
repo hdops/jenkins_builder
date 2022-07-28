@@ -20,8 +20,12 @@ if (env.credentials_id){
   credentialsId = env.credentials_id
 }
 
-def YAML_FILE="kubernetes_pod_template.yaml"
 def docker_image="harbor.qianfan123.com/toolset/toolsetcore:0.3.0"
+if (env.toolset_image){
+    docker_image = env.toolset_image
+}
+
+def YAML_FILE="kubernetes_pod_template.yaml"
 def label_name="jenkins-job-kubernetes-create-app"
 
 def func = {
