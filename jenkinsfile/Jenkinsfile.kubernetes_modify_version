@@ -30,6 +30,11 @@ if (env.toolset_image){
     docker_image = env.toolset_image
 }
 
+def nodeSelector_app="jenkins"
+if (env.nodeSelector_app){
+    nodeSelector_app = env.nodeSelector_app
+}
+
 def YAML_FILE="kubernetes_pod_template.yaml"
 def label_name="jenkins-job-kubernetes-modify-version"
 
@@ -82,6 +87,7 @@ pipeline {
                     kubernetesPodYamlData.spec.containers[0].image = "${docker_image}"
                     kubernetesPodYamlData.spec.containers[0].name = "${label_name}"
                     kubernetesPodYamlData.metadata.labels.label = "${label_name}"
+                    kubernetesPodYamlData.spec.nodeSelector.app = "${nodeSelector_app}"
                     writeYaml file: "${YAML_FILE}.tmp", data: kubernetesPodYamlData
                     kubernetesPodReadYamlData = sh(script: "cat ${YAML_FILE}.tmp", returnStdout: true)
                     echo "${kubernetesPodReadYamlData}"
