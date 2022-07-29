@@ -76,7 +76,7 @@ def func_ansible = {
     sh "ln -s ${WORKSPACE} /root/toolset"
 	sh "chmod +x ansible/*/*/inventory/*.py"
     echo "add_args: ${add_args}"
-    sh "cd /root/iac/ && ANSIBLE_HOST_KEY_CHECKING=False ansible-playbook -i /root/toolset/${params.inventory} /root/iac/${params.playbook} --tags ${params.tags} ${add_args}"
+    sh "cd /root/iac/ && ansible-playbook -i /root/toolset/${params.inventory} /root/iac/${params.playbook} --tags ${params.tags} ${add_args}"
 }
 
 
