@@ -25,7 +25,7 @@ if (params.limit!=""){
     add_args=add_args+" --limit ${params.limit}"
 }
 if (params.vars!=""){
-    add_args=add_args+" -e /root/toolset/@${params.vars}"
+    add_args=add_args+" -e @/root/toolset/${params.vars}"
 }
 def TOOLSET_DOCKER_REGISTRY_BASEURL = "harbor.qianfan123.com/toolset"
 if (env.TOOLSET_DOCKER_REGISTRY_BASEURL){
@@ -76,7 +76,7 @@ def func_ansible = {
     sh "ln -s ${WORKSPACE} /root/toolset"
 	sh "chmod +x ansible/*/*/inventory/*.py"
     echo "add_args: ${add_args}"
-    sh "cd /root/iac/ && ansible-playbook -i /root/toolset/${params.inventory} /root/iac/${params.playbook} --tags ${params.tags} ${add_args}"
+    sh "cd /root/iac/ && ANSIBLE_HOST_KEY_CHECKING=False ansible-playbook -i /root/toolset/${params.inventory} /root/iac/${params.playbook} --tags ${params.tags} ${add_args}"
 }
 
 
