@@ -1,19 +1,15 @@
-def node=""
+def node="master"
 if (env.node){
     node =env.node
-}else{
-    node ="master"
 }
+
 def whether_post=""
 if (env.whether_post){
     whether_post =env.whether_post
 }else{
     whether_post ="False"
 }
-def toolset_image_version="0.3.0-private"
-if (env.toolset_image_version){
-    toolset_image_version = env.toolset_image_version
-}
+
 def run_on_public="None"
 if (env.run_on_public){
     run_on_public=env.run_on_public
@@ -29,58 +25,148 @@ if (params.limit!=""){
     add_args=add_args+" --limit ${params.limit}"
 }
 if (params.vars!=""){
-    add_args=add_args+" -e @${params.vars}"
+    add_args=add_args+" -e @/root/toolset/${params.vars}"
 }
 def TOOLSET_DOCKER_REGISTRY_BASEURL = "harbor.qianfan123.com/toolset"
 if (env.TOOLSET_DOCKER_REGISTRY_BASEURL){
     TOOLSET_DOCKER_REGISTRY_BASEURL  = env.TOOLSET_DOCKER_REGISTRY_BASEURL
 }
+
+def GIT_BRANCH="develop"
+if (env.GIT_BRANCH){
+    GIT_BRANCH=env.GIT_BRANCH
+}
+
+def ci_git_server_baseurl= "http://github.app.hd123.cn:10080"
+if (env.ci_git_server_baseurl){
+    ci_git_server_baseurl = env.ci_git_server_baseurl
+}
+
+def credentialsId="17643215-09f8-4a9a-b0ea-c8e49777ce1d"
+if (env.credentials_id){
+  credentialsId = env.credentials_id
+}
+
+// qianfanops/toolset
+def git_project = "xxx"
+if (env.git_project){
+   git_project = env.git_project
+}
+
+def YAML_FILE="kubernetes_double_pod_template.yaml"
+def toolset_image="${TOOLSET_DOCKER_REGISTRY_BASEURL}/toolsetcore:0.3.0"
+def docker_image="harbor.qianfan123.com/base/iac:0.1.0"
+if (env.docker_image){
+   docker_image = env.docker_image
+}
+def label_name="jenkins-job-k8s-ansible"
+
+def func_toolsetcore = {
+    retry(2){
+        sh "DNET_PROFILE=integration_test DNET_PRODUCT=dnet TRUST_PUBLIC_IP=${run_on_public} hdops download_toolset --branch ${GIT_BRANCH} -p ."
+    }
+    sh "tar zxf toolset.tar.gz -C ."
+}
+
+def func_git_toolset = {
+    // checkout code
+    retry(3){
+        checkout([$class: 'GitSCM', branches: [[name: "*/${GIT_BRANCH}"]],userRemoteConfigs: [[credentialsId: "${credentialsId}",url: "${ci_git_server_baseurl}/${git_project}.git"]]])
+    }
+}
+
+def func_ansible = {
+    sh "ln -s ${WORKSPACE} /root/toolset"
+	sh "chmod +x ansible/*/*/inventory/*.py"
+    echo "add_args: ${add_args}"
+    sh "cd /root/iac/ && ansible-playbook -i /root/toolset/${params.inventory} /root/iac/${params.playbook} --tags ${params.tags} ${add_args}"
+}
+
+
 pipeline {
     agent {label node}                
     stages {
-	    stage('ansible') {
-			steps{
+        stage('advance prepare on k8s to read yaml') {
+            when {
+                beforeAgent true
+                environment name: 'on_k8s', value: 'True'
+            }
+
+            steps {
                 script{
-                    if(env.on_k8s == 'True'){
-                        container("hdtoolsetcore"){
-                            deleteDir()
-                            echo "active profile is ${params.DNET_PROFILE}"
-                            echo "product is ${params.DNET_PRODUCT}"
-                            echo "workspace is $WORKSPACE"
-                            retry(2){
-                                sh "wget -c http://dposclient.oss-cn-hangzhou.aliyuncs.com/toolset/dnet/develop/iac.tar.gz"
-                            }
-                            sh "tar zxf iac.tar.gz -C $WORKSPACE"
-                            retry(2){
-                                sh "DNET_PROFILE=integration_test DNET_PRODUCT=dnet TRUST_PUBLIC_IP=${run_on_public} hdops download_toolset --branch ${params.GIT_BRANCH} -p ."
-                            }
-                            sh "tar zxf toolset.tar.gz -C $WORKSPACE"
-                            sh "chmod +x ansible/*/*/inventory/*.py"
-                            echo "add_args: ${add_args}"
-                            sh "ansible-playbook -i ${params.inventory} ${params.playbook} --tags ${params.tags} ${add_args}"
-                        }
-                    }else{
-                        deleteDir()
-                        echo "active profile is ${params.DNET_PROFILE}"
-                        echo "product is ${params.DNET_PRODUCT}"
-                        echo "workspace is $WORKSPACE"
-                        docker.image("${TOOLSET_DOCKER_REGISTRY_BASEURL}/toolsetcore:${toolset_image_version}").inside {
-                            retry(2){
-                                sh "wget -c http://dposclient.oss-cn-hangzhou.aliyuncs.com/toolset/dnet/develop/iac.tar.gz"
-                            }
-                            sh "tar zxf iac.tar.gz -C $WORKSPACE"
-                            retry(2){
-                                sh "DNET_PROFILE=integration_test DNET_PRODUCT=dnet TRUST_PUBLIC_IP=${run_on_public} hdops download_toolset --branch ${params.GIT_BRANCH} -p ."
-                            }
-                            sh "tar zxf toolset.tar.gz -C $WORKSPACE"
-                            sh "chmod +x ansible/*/*/inventory/*.py"
-                            echo "add_args: ${add_args}"
-                            sh "ansible-playbook -i ${params.inventory} ${params.playbook} --tags ${params.tags} ${add_args}"
-                        }
+                    echo "node : ${node}"
+                    echo "on_k8s : ${on_k8s}"
+                    kubernetesPodYamlData = readYaml file: "jenkinsfile/${YAML_FILE}"
+                    kubernetesPodYamlData.spec.containers[0].image = "${toolset_image}"
+                    kubernetesPodYamlData.spec.containers[0].name = "${label_name}-toolset"
+                    kubernetesPodYamlData.spec.containers[1].image = "${docker_image}"
+                    kubernetesPodYamlData.spec.containers[1].name = "${label_name}"
+                    kubernetesPodYamlData.metadata.labels.label = "${label_name}"
+                    writeYaml file: "${YAML_FILE}.tmp", data: kubernetesPodYamlData
+                    kubernetesPodReadYamlData = sh(script: "cat ${YAML_FILE}.tmp", returnStdout: true)
+                    echo "${kubernetesPodReadYamlData}"
+                } 
+            }
+        }
+        stage('delete workspace') {
+            steps{
+                deleteDir()
+            }
+        }
+
+        stage('下载toolset on docker') {
+            when {
+                beforeAgent true
+                environment name: 'on_k8s', value: 'False'
+            }
+            steps{
+                script {
+                    sh "docker pull ${toolset_image}"
+                    withDockerContainer(args: "-v /root/.ssh:/root/.ssh", image: "${toolset_image}") {
+                      //func_toolsetcore()
+                      func_git_toolset()
                     }
-                    
                 }
-			}
+            }
+        }
+
+        stage('ansible-playbook on docker') {
+            when {
+                beforeAgent true
+                environment name: 'on_k8s', value: 'False'
+            }
+            steps{
+                script {
+                    sh "docker pull ${docker_image}"
+                    withDockerContainer(args: "-v /root/.ssh:/root/.ssh", image: "${docker_image}") {
+                        func_ansible()
+                    }
+                }
+            }
+        }
+
+        stage('ansible-playbook on k8s') {
+            when {
+                beforeAgent true
+                environment name: 'on_k8s', value: 'True'
+            }
+            agent {
+                kubernetes{
+                    cloud 'kubernetes'
+                    yaml "${kubernetesPodReadYamlData}"
+                }
+            }
+            steps{
+                script{
+                    container("${label_name}-toolset") {
+                        func_toolsetcore()
+                    }
+                    container("${label_name}") {
+                        sh "ln -s /hdiac/iac /root/iac"
+                        func_ansible()
+                    }
+                }
+            }
         }
         
     }
