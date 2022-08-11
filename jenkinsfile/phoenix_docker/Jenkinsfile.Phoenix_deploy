@@ -67,7 +67,7 @@ pipeline {
                 script{
                     if(fileExists('tests')){
                         withDockerContainer(args: "-v ${WORKSPACE}:${WORKSPACE}", image: "${TOOLSET_DOCKER_REGISTRY_BASEURL}/toolsetcore:0.3.0") {
-                            sh "pytest -m unit -sv"
+                            sh "pytest -m unit  --junitxml=junit.xml -sv "
                         }
                     }
                 }
@@ -192,6 +192,11 @@ pipeline {
                 def body = env.email_body ? "${env.email_body}" : "failure on Job ${env.JOB_NAME} in ${env.BUILD_URL}"
                 // send email
                 emailext subject: subject, to: to, body:body,attachLog:true
+            }
+        }
+        always{
+            script{
+                junit allowEmptyResults: true, testResults: 'junit.xml'
             }
         }
     }
