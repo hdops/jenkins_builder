@@ -7,7 +7,7 @@ if (env.node){
 def mysh(cmd, returnStatus) {
     return sh (script: '#!/bin/sh -e\n'+ cmd, returnStatus: returnStatus)
 }
-def whether_post="False"
+def whether_post="True"
 if (env.whether_post){
     whether_post =env.whether_post
 }
