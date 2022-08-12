@@ -5,7 +5,7 @@ if (env.node){
     node ="master"
 }
 def mysh(cmd, returnStatus) {
-    return sh (script: '#!/bin/bash -ilex -e\n'+ cmd, returnStatus: returnStatus)
+    return sh (script: '#!/bin/sh -e\n'+ cmd, returnStatus: returnStatus)
 }
 def whether_post="False"
 if (env.whether_post){
