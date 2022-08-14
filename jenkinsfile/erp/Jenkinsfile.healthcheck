@@ -49,21 +49,22 @@ pipeline {
         }
     }
 	post {
-
-    // 构建失败之后钉钉通知
-        failure {
-            script {
-                if (whether_post == "True") {
-                    dingTalk accessToken: "${DINGTALK_TOKEN}", imageUrl: '', jenkinsUrl: "${jenkinsUrl}", message: "构建失败 ${new Date().format("yyyy-MM-dd HH:mm:ss")}", notifyPeople: ''
-                }
+        failure{
+            script{
+                def subject = env.email_subject ? "[Jenkins]${env.email_subject}" : "[Jenkins]failure on Job ${env.JOB_NAME}"
+                def to = env.email_recipients ? "${env.email_recipients}" : "shujun@hd123.com"
+                def body = env.email_body ? "${env.email_body}" : "failure on Job ${env.JOB_NAME} in ${env.BUILD_URL}"
+                // send email
+                emailext subject: subject, to: to, body:body,attachLog:true
             }
         }
-	// 失败转成功之后钉钉通知
-        fixed {
-            script {
-                if (whether_post == "True") {
-                    dingTalk accessToken: "${DINGTALK_TOKEN}", imageUrl: '', jenkinsUrl: "${jenkinsUrl}", message: "恢复正常 ${new Date().format("yyyy-MM-dd HH:mm:ss")}", notifyPeople: ''
-                }
+        fixed{
+            script{
+                def subject = env.email_subject ? "[Jenkins]${env.email_subject}" : "[Jenkins]fixed on Job ${env.JOB_NAME}"
+                def to = env.email_recipients ? "${env.email_recipients}" : "shujun@hd123.com"
+                def body = env.email_body ? "${env.email_body}" : "fixed on Job ${env.JOB_NAME} in ${env.BUILD_URL}"
+                // send email
+                emailext subject: subject, to: to, body:body,attachLog:true
             }
         }
     }
