@@ -30,6 +30,10 @@ if (!env.on_k8s){
 if (env.set_on_k8s) {
     env.on_k8s=env.set_on_k8s
 }
+def desensitize="True"
+if (env.desensitize){
+    desensitize=env.set_on_k8s
+}
 pipeline {
     agent {label node}
 	options {   
@@ -48,7 +52,7 @@ pipeline {
                                 sh "DNET_PROFILE=integration_test DNET_PRODUCT=dnet TRUST_PUBLIC_IP=${run_on_public} hdops download_toolset --branch ${params.GIT_BRANCH} -p ."
                             }
                             sh "tar zxf toolset.tar.gz -C $WORKSPACE"
-                            sh "DNET_AK=${params.DNET_AK} DNET_PRODUCT=${params.DNET_PRODUCT} DNET_PROFILE=${params.DNET_PROFILE}  hdops generate_env_file --subsystem ${params.subsystem}  -S ${params.stackids}"
+                            sh "DNET_AK=${params.DNET_AK} DNET_PRODUCT=${params.DNET_PRODUCT} DNET_PROFILE=${params.DNET_PROFILE}  hdops generate_env_file --subsystem ${params.subsystem}  -S ${params.stackids} --desensitize ${desensitize}"
                             archiveArtifacts allowEmptyArchive: true, artifacts: 'envs/**/*', followSymlinks: false, onlyIfSuccessful: true
 
                         }
@@ -61,7 +65,7 @@ pipeline {
                                 sh "DNET_PROFILE=integration_test DNET_PRODUCT=dnet TRUST_PUBLIC_IP=${run_on_public} hdops download_toolset --branch ${params.GIT_BRANCH} -p ."
                             }
                             sh "tar zxf toolset.tar.gz -C $WORKSPACE"
-                            sh "DNET_AK=${params.DNET_AK} DNET_PRODUCT=${params.DNET_PRODUCT} DNET_PROFILE=${params.DNET_PROFILE}  hdops generate_env_file --subsystem ${params.subsystem}  -S ${params.stackids}"
+                            sh "DNET_AK=${params.DNET_AK} DNET_PRODUCT=${params.DNET_PRODUCT} DNET_PROFILE=${params.DNET_PROFILE}  hdops generate_env_file --subsystem ${params.subsystem}  -S ${params.stackids} --desensitize ${desensitize}"
                             archiveArtifacts allowEmptyArchive: true, artifacts: 'envs/**/*', followSymlinks: false, onlyIfSuccessful: true
                         }
                     }
