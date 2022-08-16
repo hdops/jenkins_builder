@@ -246,10 +246,10 @@ pipeline {
 				script{
                     def mvn_shell="mvn "
                     if (env.mvn_pom){
-                        mvn_shell+=" -f "+env.mvn_pom+" "+" compile dependency:list "
+                        mvn_shell+=" -f "+env.mvn_pom+" "+" dependency:list "
                     }
                     else{
-                        mvn_shell+=" compile  dependency:list "
+                        mvn_shell+=" dependency:list "
                     }
                     echo "mvn_configfile is ${mvn_configfile}"
                     configFileProvider([configFile(fileId:mvn_configfile, variable: 'maven_settings')]) {
