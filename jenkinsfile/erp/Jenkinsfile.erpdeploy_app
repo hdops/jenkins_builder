@@ -23,6 +23,10 @@ if (!env.on_k8s){
 if (env.set_on_k8s) {
     env.on_k8s=env.set_on_k8s
 }
+def credentialsId="17643215-09f8-4a9a-b0ea-c8e49777ce1d"
+if (env.credentials_id){
+  credentialsId = env.credentials_id
+}
 pipeline {
     agent {label node}
     options {  
@@ -34,6 +38,13 @@ pipeline {
                 deleteDir()
             }
         }
+        stage('download toolset_x') {
+            steps{
+                withCredentials([usernamePassword(credentialsId: "${credentialsId}", usernameVariable: 'username', passwordVariable: 'password')]){
+                       mysh ('''ssh $host "echo 'http://$username:$password@github.app.hd123.cn:10080\nhttps://$username:$password@gitlab.hd123.com' > /opt/.hdgit" ''', false)
+            }
+		}
+      }
         stage('deploy-app'){
             steps {
                  script {
