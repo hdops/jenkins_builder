@@ -251,10 +251,10 @@ pipeline {
 				script{
                     def mvn_shell="mvn "
                     if (env.mvn_pom){
-                        mvn_shell+=" -f "+env.mvn_pom+" "+" compile dependency:list "
+                        mvn_shell+=" -f "+env.mvn_pom+" "+" dependency:list "
                     }
                     else{
-                        mvn_shell+=" compile  dependency:list "
+                        mvn_shell+=" dependency:list "
                     }
                     echo "mvn_configfile is ${mvn_configfile}"
                     configFileProvider([configFile(fileId:mvn_configfile, variable: 'maven_settings')]) {
@@ -436,6 +436,21 @@ skipversionupdate=${skipversionupdate}""", remoteJenkinsName: "${remoteJenkins}"
                         // post_build
                         build job: "${postBuildJob}", parameters: [string(name: 'build_branch', value: build_branch)], wait: false
                     }
+                }
+                if (env.upload_wgt_file != "" && env.upload_wgt_file != null) {
+                    // archiveArtifacts
+                    archiveArtifacts '**/*.wgt' 
+                    // print 
+                    println(env.upload_wgt_file)
+                    echo "jenkins_build_url:${BUILD_URL}" 
+                    echo "type:${type}" 
+                    echo "gitlab_project:${gitlab_project}" 
+                    echo "jenkin_job:${jenkin_job}" 
+                    echo "label:${label}" 
+                    echo "is_new_publisher:${is_new_publisher}" 
+                    echo "is_autopublish:${is_autopublish}" 
+                    // post_build
+                    build job: "upload_wgt_file", parameters: [string(name: 'jenkins_build_url', value: BUILD_URL), string(name: 'type', value: type), string(name: 'gitlab_project', value: gitlab_project), string(name: 'jenkin_job', value: jenkin_job), string(name: 'label', value: label), string(name: 'is_new_publisher', value: is_new_publisher), string(name: 'is_autopublish', value: is_autopublish)], wait: false
                 }
             }
         }
