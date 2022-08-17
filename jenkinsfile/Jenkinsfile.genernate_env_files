@@ -32,7 +32,7 @@ if (env.set_on_k8s) {
 }
 def desensitize="True"
 if (env.desensitize){
-    desensitize=env.set_on_k8s
+    desensitize=env.desensitize
 }
 pipeline {
     agent {label node}
