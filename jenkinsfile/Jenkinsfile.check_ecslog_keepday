@@ -79,6 +79,7 @@ pipeline {
                 if (whether_post == "True") {
                     dingTalk accessToken: "${DINGTALK_TOKEN}", imageUrl: '', jenkinsUrl: "${jenkinsUrl}", message: "构建失败 ${new Date().format("yyyy-MM-dd HH:mm:ss")}", notifyPeople: ''
                 }
+                emailext(to: "buhaiqing@hd123.com",  subject: "fail to clean ecs log", body: "failure on Job ${env.BUILD_URL}",attachLog:true)
             }
         }
 	// 失败转成功之后钉钉通知
@@ -87,6 +88,7 @@ pipeline {
                 if (whether_post == "True") {
                     dingTalk accessToken: "${DINGTALK_TOKEN}", imageUrl: '', jenkinsUrl: "${jenkinsUrl}", message: "恢复正常 ${new Date().format("yyyy-MM-dd HH:mm:ss")}", notifyPeople: ''
                 }
+                emailext(to: "buhaiqing@hd123.com",  subject: "succeed to clean ecs log", body: "failure on Job ${env.BUILD_URL}",attachLog:true)
             }
         }
     }

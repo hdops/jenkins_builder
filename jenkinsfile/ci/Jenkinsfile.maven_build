@@ -109,8 +109,8 @@ pipeline {
         stage('pre-build-1') {
             steps{
                 script{
-                    echo "执行`mven help:effective-pom`,生成effectivepom.xml"
-                    def mvn_shell="mvn help:effective-pom -Doutput=effectivepom.xml"
+                    echo "执行`mven org.apache.maven.plugins:maven-help-plugin:3.2.0:effective-pom`,生成effectivepom.xml"
+                    def mvn_shell="mvn org.apache.maven.plugins:maven-help-plugin:3.2.0:effective-pom -Doutput=effectivepom.xml"
                     configFileProvider([configFile(fileId:mvn_configfile, variable: 'maven_settings')]) {
                         mvn_shell+=" -s $maven_settings"
                         echo "mvn_shell is ${mvn_shell}"
@@ -142,8 +142,8 @@ pipeline {
                             root_dir=env.mvn_pom.split('pom.xml')[0]+"/"
                             echo "切换目录"+root_dir
                             dir(root_dir){
-                                echo "执行`mven help:effective-pom`,生成"+root_dir+"/effectivepom.xml"
-                                def mvn_shell="mvn help:effective-pom -Doutput=effectivepom.xml"
+                                echo "执行`mven org.apache.maven.plugins:maven-help-plugin:3.2.0:effective-pom`,生成"+root_dir+"/effectivepom.xml"
+                                def mvn_shell="mvn org.apache.maven.plugins:maven-help-plugin:3.2.0:effective-pom -Doutput=effectivepom.xml"
                                 configFileProvider([configFile(fileId:mvn_configfile, variable: 'maven_settings')]) {
                                     mvn_shell+=" -s $maven_settings"
                                     echo "mvn_shell is ${mvn_shell}"
