@@ -44,6 +44,11 @@ pipeline {
 	    timeout(time: 5, unit: 'MINUTES')
     }
     stages {
+        stage('delete workspace') {
+            steps{
+                deleteDir()
+            }
+        }
         stage('更新jenkins_config') {
 			steps{
 				script {
