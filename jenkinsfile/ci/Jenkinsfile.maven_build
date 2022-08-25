@@ -47,6 +47,11 @@ if (env.mvn_configfile){
     mvn_configfile =env.mvn_configfile
 }
 
+def trust_public_ip="None"
+if (env.trust_public_ip){
+    trust_public_ip =env.trust_public_ip
+}
+
 def skipversion="--no-skipversion"
 if (env.skipversion){
     skipversion =env.skipversion
