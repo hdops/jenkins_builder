@@ -367,7 +367,7 @@ pipeline {
 				}
 			}
 		}
-        stage('deploy rbd'){
+        stage('deploy rdb'){
 			steps{
 				script{
 				    if (env.remote_deploy_rdb != "" && env.remote_deploy_rdb != null) {
