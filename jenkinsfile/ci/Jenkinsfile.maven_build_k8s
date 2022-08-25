@@ -104,8 +104,8 @@ pipeline {
         stage('pre-build-1') {
             steps{
                 script{
-                    echo "执行`mven help:effective-pom`,生成effectivepom.xml"
-                    def mvn_shell="mvn help:effective-pom -Doutput=effectivepom.xml"
+                    echo "执行`mven org.apache.maven.plugins:maven-help-plugin:3.2.0:effective-pom`,生成effectivepom.xml"
+                    def mvn_shell="mvn org.apache.maven.plugins:maven-help-plugin:3.2.0:effective-pom -Doutput=effectivepom.xml"
                     configFileProvider([configFile(fileId:mvn_configfile, variable: 'maven_settings')]) {
                         mvn_shell+=" -s $maven_settings"
                         echo "mvn_shell is ${mvn_shell}"
@@ -114,7 +114,7 @@ pipeline {
                 }
             }
         }
-        stage('pre-buil-2') {
+        stage('pre-build-2') {
             steps{
                  script {
                     docker.image("harbor.qianfan123.com/toolset/toolsetcore:${toolset_image_version}").inside("--rm -v ${WORKSPACE}:/opt --add-host=apidoc.hd123.com:172.17.10.53")  {
@@ -137,8 +137,8 @@ pipeline {
                             root_dir=env.mvn_pom.split('pom.xml')[0]+"/"
                             echo "切换目录"+root_dir
                             dir(root_dir){
-                                echo "执行`mven help:effective-pom`,生成"+root_dir+"/effectivepom.xml"
-                                def mvn_shell="mvn help:effective-pom -Doutput=effectivepom.xml"
+                                echo "执行`mven org.apache.maven.plugins:maven-help-plugin:3.2.0:effective-pom`,生成"+root_dir+"/effectivepom.xml"
+                                def mvn_shell="mvn org.apache.maven.plugins:maven-help-plugin:3.2.0:effective-pom -Doutput=effectivepom.xml"
                                 configFileProvider([configFile(fileId:mvn_configfile, variable: 'maven_settings')]) {
                                     mvn_shell+=" -s $maven_settings"
                                     echo "mvn_shell is ${mvn_shell}"
@@ -260,7 +260,7 @@ pipeline {
                     echo "BUILD_URL:${BUILD_URL}"
                     withDockerContainer(args: "--rm -v ${WORKSPACE}:/opt", image: "harbor.qianfan123.com/toolset/toolsetcore:${toolset_image_version}") {
                         echo "maven denpendency check"
-                        sh "DNET_PRODUCT=dnet DNET_PROFILE=integration_test hdmon maven_dependency_check --jenkins_url ${BUILD_URL} --isrelease False"
+                        sh "DNET_PRODUCT=dnet DNET_PROFILE=integration_test hdmon maven_dependency_check --jenkins_url ${BUILD_URL} --isrelease False "
                     }
 				}
 			}
@@ -367,7 +367,7 @@ pipeline {
 				}
 			}
 		}
-        stage('deploy rbd'){
+        stage('deploy rdb'){
 			steps{
 				script{
 				    if (env.remote_deploy_rdb != "" && env.remote_deploy_rdb != null) {

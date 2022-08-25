@@ -104,8 +104,8 @@ pipeline {
         stage('pre-build-1') {
             steps{
                 script{
-                    echo "执行`mven help:effective-pom`,生成effectivepom.xml"
-                    def mvn_shell="mvn help:effective-pom -Doutput=effectivepom.xml"
+                    echo "执行`mven org.apache.maven.plugins:maven-help-plugin:3.2.0:effective-pom`,生成effectivepom.xml"
+                    def mvn_shell="mvn org.apache.maven.plugins:maven-help-plugin:3.2.0:effective-pom -Doutput=effectivepom.xml"
                     configFileProvider([configFile(fileId:mvn_configfile, variable: 'maven_settings')]) {
                         mvn_shell+=" -s $maven_settings"
                         echo "mvn_shell is ${mvn_shell}"
@@ -137,8 +137,8 @@ pipeline {
                             root_dir=env.mvn_pom.split('pom.xml')[0]+"/"
                             echo "切换目录"+root_dir
                             dir(root_dir){
-                                echo "执行`mven help:effective-pom`,生成"+root_dir+"/effectivepom.xml"
-                                def mvn_shell="mvn help:effective-pom -Doutput=effectivepom.xml"
+                                echo "执行`mven org.apache.maven.plugins:maven-help-plugin:3.2.0:effective-pom`,生成"+root_dir+"/effectivepom.xml"
+                                def mvn_shell="mvn org.apache.maven.plugins:maven-help-plugin:3.2.0:effective-pom -Doutput=effectivepom.xml"
                                 configFileProvider([configFile(fileId:mvn_configfile, variable: 'maven_settings')]) {
                                     mvn_shell+=" -s $maven_settings"
                                     echo "mvn_shell is ${mvn_shell}"
@@ -463,6 +463,21 @@ skipversionupdate=${skipversionupdate}""", remoteJenkinsName: "${remoteJenkins}"
                         // post_build
                         build job: "${postBuildJob}", parameters: [string(name: 'build_branch', value: build_branch)], wait: false
                     }
+                }
+                if (env.upload_wgt_file != "" && env.upload_wgt_file != null) {
+                    // archiveArtifacts
+                    archiveArtifacts '**/*.wgt' 
+                    // print 
+                    println(env.upload_wgt_file)
+                    echo "jenkins_build_url:${BUILD_URL}" 
+                    echo "type:${type}" 
+                    echo "gitlab_project:${gitlab_project}" 
+                    echo "jenkin_job:${jenkin_job}" 
+                    echo "label:${label}" 
+                    echo "is_new_publisher:${is_new_publisher}" 
+                    echo "is_autopublish:${is_autopublish}" 
+                    // post_build
+                    build job: "upload_wgt_file", parameters: [string(name: 'jenkins_build_url', value: BUILD_URL), string(name: 'type', value: type), string(name: 'gitlab_project', value: gitlab_project), string(name: 'jenkin_job', value: jenkin_job), string(name: 'label', value: label), string(name: 'is_new_publisher', value: is_new_publisher), string(name: 'is_autopublish', value: is_autopublish)], wait: false
                 }
             }
         }
