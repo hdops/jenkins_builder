@@ -57,6 +57,11 @@ if (env.mvn_configfile){
     mvn_configfile =env.mvn_configfile
 }
 
+def skipversion="--no-skipversion"
+if (env.skipversion){
+    skipversion =env.skipversion
+}
+
 def skipversionupdate="--no-skipversionupdate"
 if (env.skipversionupdate){
     skipversionupdate =env.skipversionupdate
