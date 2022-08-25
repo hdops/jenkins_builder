@@ -57,6 +57,11 @@ if (env.skipversionupdate){
     skipversionupdate =env.skipversionupdate
 }
 
+def skipversion="--no-skipversion"
+if (env.skipversion){
+    skipversion =env.skipversion
+}
+
 def toolset_image_version="0.3.0"
 if (env.toolset_image_version){
     toolset_image_version = env.toolset_image_version
