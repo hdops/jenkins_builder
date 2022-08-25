@@ -94,7 +94,7 @@ pipeline {
                             echo "remoteJenkins is ${remoteJenkins}"
                             echo "remoteJob is ${remoteJob}"
                             // env
-                            triggerRemoteJob job: "${remoteJob}", maxConn: 3, parameters: """image=${image}
+                            triggerRemoteJob job: "${remoteJob}", maxConn: 3, parameters: """image=${subsystem}
 version=${ImageVersion}
     """, remoteJenkinsName: "${remoteJenkins}", useCrumbCache: false, useJobInfoCache: false, enhancedLogging: true
                         }
