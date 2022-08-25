@@ -52,14 +52,14 @@ if (env.trust_public_ip){
     trust_public_ip =env.trust_public_ip
 }
 
-def skipversion="--no-skipversion"
-if (env.skipversion){
-    skipversion =env.skipversion
-}
-
 def skipversionupdate="--no-skipversionupdate"
 if (env.skipversionupdate){
     skipversionupdate =env.skipversionupdate
+}
+
+def skipversion="--no-skipversion"
+if (env.skipversion){
+    skipversion =env.skipversion
 }
 
 def toolset_image_version="0.3.0"
