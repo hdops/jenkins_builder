@@ -78,7 +78,7 @@ pipeline {
                 if (env.customer){
                   customer = env.customer
                 }
-                emailext(to: "buhaiqing@hd123.com",  subject: "[${customer}]fail to check filebeat", body: "failure on Job ${env.BUILD_URL}",attachLog:true)
+                emailext(to: "buhaiqing@hd123.com",  subject: "[${customer}]fail to check filebeat", body: "failure on Job ${env.BUILD_URL}\n${jenkinsUrl}",attachLog:true)
             }
         }
 	// 失败转成功之后钉钉通知
