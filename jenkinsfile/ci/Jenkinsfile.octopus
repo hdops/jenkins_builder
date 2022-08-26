@@ -120,7 +120,7 @@ version=${ImageVersion}
                             echo "remoteJenkins is ${remoteJenkins}"
                             echo "remoteJob is ${remoteJob}"
                             // deploy
-                            triggerRemoteJob job: "${remoteJob}", maxConn: 3, parameters: """subsystem=${subsystem}""", remoteJenkinsName: "${remoteJenkins}", useCrumbCache: false, useJobInfoCache: false, enhancedLogging: true
+                            triggerRemoteJob job: "${remoteJob}", maxConn: 3, parameters: """image=${image}""", remoteJenkinsName: "${remoteJenkins}", useCrumbCache: false, useJobInfoCache: false, enhancedLogging: true
                         }
                     }
 				}
