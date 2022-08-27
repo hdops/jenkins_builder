@@ -134,5 +134,12 @@ pipeline {
             }
         }
     }
+    post{
+      always{
+        script{
+            currentBuild.description = "${image_version}:${DNET_PROFILE}"
+        }
+      }
+    }
 }
 
