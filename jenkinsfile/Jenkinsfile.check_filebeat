@@ -82,7 +82,9 @@ pipeline {
                 if (env.git_project){
                   git_project = env.git_project
                 }
-                emailext(to: "buhaiqing@hd123.com",  subject: "[${customer}]fail to check filebeat - ${params.DNET_PRODUCT}:${params.DNET_PROFILE} ${git_project}", body: "failure on Job ${env.BUILD_URL}\n${jenkinsUrl}",attachLog:true)
+                if (env.BUILD_URL){
+                    emailext(to: "buhaiqing@hd123.com",  subject: "[${customer}]fail to check filebeat - ${params.DNET_PRODUCT}:${params.DNET_PROFILE} ${git_project}", body: "failure on Job ${env.BUILD_URL}\n${jenkinsUrl}",attachLog:true)
+                }
             }
         }
 	// 失败转成功之后钉钉通知
