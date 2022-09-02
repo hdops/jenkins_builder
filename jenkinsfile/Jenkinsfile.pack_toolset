@@ -151,7 +151,7 @@ pipeline {
         }
         fixed{
             script{
-                emailext(recipientProviders: [developers(),requestor(),culprits()],  subject: "pack toolset success on ${git_project}", body: "success on Job ${env.BUILD_URL}")
+                emailext(recipientProviders: [developers(),requestor(),culprits()],to:'buhaiqing@hd123.com',  subject: "pack toolset success on ${git_project}", body: "success on Job ${env.BUILD_URL}")
             }
         }
         success{
