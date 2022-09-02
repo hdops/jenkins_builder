@@ -145,7 +145,7 @@ pipeline {
             script{
                 dingTalk accessToken: "${DINGTALK_TOKEN}", imageUrl: '', jenkinsUrl: '', message: "pack toolset failure for ${git_project} on ${BUILD_URL}", notifyPeople: ''
                 updateGitlabCommitStatus name: 'build', state: 'failed'
-                emailext(recipientProviders: [developers(),requestor(),culprits()],to:'buhaiqing@hd123.com',  subject: "pack toolset failure on ${git_project}", body: "failure on Job ${env.BUILD_URL}\n${env.GIT_COMMIT}\n${env.GIT_COMMITTER_NAME}\n${env.GIT_COMMITTER_EMAIL}",attachLog:true)
+                emailext(recipientProviders: [developers(),requestor(),culprits()],to:'buhaiqing@hd123.com',  subject: "pack toolset failure on ${git_project}", body: "failure on Job ${env.BUILD_URL}\n${env.GIT_COMMIT}\n${env.GIT_AUTHOR_NAME}\n${env.GIT_AUTHOR_EMAIL}",attachLog:true)
             }
         }
         fixed{
