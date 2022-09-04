@@ -5,6 +5,7 @@ if (env.node){
     node ="master"
 }
 def mysh(cmd, returnStatus) {
+    echo '#!/bin/sh -e\n'+ cmd
     return sh (script: '#!/bin/sh -e\n'+ cmd, returnStatus: returnStatus)
 }
 def git_base_url=""

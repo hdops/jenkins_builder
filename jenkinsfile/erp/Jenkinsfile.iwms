@@ -38,10 +38,14 @@ if (env.docker_image){
    docker_image = env.docker_image
 }
 
+def add_args = " "
+if (env.add_args) {
+    add_args = env.add_args
+}
 if (env.subsystem) {
     //echo "add_args is ${add_args}"
 	//echo "subsystem is ${subsystem}"
-	env.add_args+="  -e iwms_system_from_job="+env.subsystem
+	add_args+="  -e iwms_system_from_job="+env.subsystem
 }
 pipeline {
     agent {label node}
@@ -70,6 +74,7 @@ pipeline {
 						sh "curl -O http://ka-storage.oss-cn-hangzhou.aliyuncs.com/cd_new/init_cd_new.sh"
 						sh "sh init_cd_new.sh cd_new_develop"
 
+						sh "rm -rf /root/ka-toolset;mkdir -p /root/ka-toolset/ka_deploy"
 						sh "ln -s ${WORKSPACE}/${envname} /root/ka-toolset/ka_deploy/group_vars"
 
 						echo "playbook is ${playbook}"
