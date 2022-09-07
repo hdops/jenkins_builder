@@ -82,7 +82,7 @@ pipeline {
                 if (whether_post == "True") {
                     dingTalk accessToken: "${DINGTALK_TOKEN}", imageUrl: '', jenkinsUrl: "${jenkinsUrl}", message: "构建失败 ${new Date().format("yyyy-MM-dd HH:mm:ss")}", notifyPeople: ''
                 }
-                def subject = env.email_build_subject ? "[Jenkins]${env.email_build_subject}" : "[Jenkins]构建失败-${env.JOB_NAME}"
+                def subject = env.email_build_subject ? "[Jenkins]${env.email_build_subject}" : "[Jenkins]删除ES Snapshots失败-${env.JOB_NAME}"
                 def to = env.email_build_recipients ? "${env.email_build_recipients}" : "buhaiqing@hd123.com,heweiwei@hd123.com"
                 def body = env.email_build_body ? "${env.email_build_body}" : "${env.JOB_NAME}构建失败,更多信息请查阅：${BUILD_URL}"
                 // send email
