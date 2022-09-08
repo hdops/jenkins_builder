@@ -90,7 +90,7 @@ pipeline {
         always {
 			script {
 				archiveArtifacts allowEmptyArchive: true, artifacts: '*', followSymlinks: false
-                currentBuild.description = "${envname}:${playbook}"
+                currentBuild.description = "${envname}:${subsystem}"
 			}
 		}
     }
