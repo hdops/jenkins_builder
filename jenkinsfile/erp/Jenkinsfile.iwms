@@ -74,13 +74,13 @@ pipeline {
 						sh "curl -O http://ka-storage.oss-cn-hangzhou.aliyuncs.com/cd_new/init_cd_new.sh"
 						sh "sh init_cd_new.sh cd_new_develop"
 
-						sh "rm -rf /root/ka-toolset;mkdir -p /root/ka-toolset/ka_deploy"
-						sh "ln -s ${WORKSPACE}/${envname} /root/ka-toolset/ka_deploy/group_vars"
+						sh "rm -rf /opt/ka-toolset/ka_deploy/group_vars"
+						sh "ln -s ${WORKSPACE}/${envname} /opt/ka-toolset/ka_deploy/group_vars"
 
 						echo "playbook is ${playbook}"
 						echo "add_args is ${add_args}"
 						
-						sh "cd /opt/ka-toolset/ka_deploy/ &&  ansible-playbook -i /root/ka-toolset/ka_deploy/group_vars/iwmshosts  ${playbook} -e '@/root/ka-toolset/ka_deploy/group_vars/iwms.yaml' ${add_args}" 
+						sh "cd /opt/ka-toolset/ka_deploy/ &&  ansible-playbook -i group_vars/iwmshosts  ${playbook} -e '@group_vars/iwms.yaml' ${add_args}" 
                     }
                 }
             }
