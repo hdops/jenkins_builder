@@ -89,7 +89,7 @@ pipeline {
 	post {
         always {
 			script {
-				archiveArtifacts allowEmptyArchive: true, artifacts: '*', followSymlinks: false
+				archiveArtifacts allowEmptyArchive: true, artifacts: '*.envfile,*.log', followSymlinks: false
                 currentBuild.description = "${envname}:${subsystem}"
 			}
 		}
