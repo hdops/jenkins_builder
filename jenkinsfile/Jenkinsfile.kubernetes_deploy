@@ -89,10 +89,12 @@ pipeline {
         }
         stage('delete workspace') {
             steps{
-                if (check_config != "yes") {
-                    echo "请检查配置是否升级"
-                }
                 deleteDir()
+                script{
+                    if (check_config != "yes") {
+                        echo "请检查配置是否升级"
+                    }
+                }
             }
         }
         stage('部署 on k8s') {
