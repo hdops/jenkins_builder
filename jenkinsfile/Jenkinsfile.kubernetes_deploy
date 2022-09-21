@@ -93,7 +93,7 @@ pipeline {
                 script{
                     if (check_config != "yes") {
                         echo "请检查配置是否升级"
-                        exit 1
+                        sh 'exit 1' 
                     }
                 }
             }
