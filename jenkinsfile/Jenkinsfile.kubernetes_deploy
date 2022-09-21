@@ -30,6 +30,11 @@ if (env.nodeSelector_app){
     nodeSelector_app = env.nodeSelector_app
 }
 
+def check_config="yes"
+if (params.check_config){
+    check_config = params.check_config
+}
+
 def YAML_FILE="kubernetes_pod_template.yaml"
 def label_name="jenkins-job-kubernetes-deploy"
 
@@ -84,6 +89,9 @@ pipeline {
         }
         stage('delete workspace') {
             steps{
+                if (check_config != "yes") {
+                    echo "请检查配置是否升级"
+                }
                 deleteDir()
             }
         }
