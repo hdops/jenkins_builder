@@ -26,7 +26,7 @@ if (env.toolset_image){
 }
 
 def dryrun=""
-if (params.dryrun && params.dryrun==true){
+if (params.dryrun && params.dryrun=='true'){
     dryrun = "--dryrun"
 }
 
