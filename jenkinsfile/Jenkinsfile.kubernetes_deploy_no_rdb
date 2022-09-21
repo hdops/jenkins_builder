@@ -87,13 +87,17 @@ pipeline {
         }
         stage('delete workspace') {
             steps{
-                if (check_rdb != "yes") {
-                    echo "请检查数据库是否升级"
-                }
-                if (check_config != "yes") {
-                    echo "请检查配置是否升级"
-                }
                 deleteDir()
+                script{
+                    if (check_rdb != "yes") {
+                        echo "请检查数据库是否升级"
+                        exit 1
+                    }
+                    if (check_config != "yes") {
+                        echo "请检查配置是否升级"
+                        exit 1
+                    }
+                }
             }
         }
         stage('部署 on k8s') {
