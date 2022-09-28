@@ -114,6 +114,9 @@ pipeline {
         stage('pre-build-1') {
             steps{
                 script{
+                    if (env.skip_docker_check){
+                        return
+                    }
                     echo "执行`mven org.apache.maven.plugins:maven-help-plugin:3.2.0:effective-pom`,生成effectivepom.xml"
                     def mvn_shell="mvn org.apache.maven.plugins:maven-help-plugin:3.2.0:effective-pom -Doutput=effectivepom.xml"
                     configFileProvider([configFile(fileId:mvn_configfile, variable: 'maven_settings')]) {
@@ -127,6 +130,9 @@ pipeline {
         stage('pre-build-2') {
             steps{
                  script {
+                    if (env.skip_docker_check){
+                        return
+                    }
                     docker.image("harbor.qianfan123.com/toolset/toolsetcore:${toolset_image_version}").inside("--rm -v ${WORKSPACE}:/opt --add-host=apidoc.hd123.com:172.17.10.53")  {
                     //withDockerContainer(args: "--rm -v ${WORKSPACE}:/opt --add-host=apidoc.hd123.com:172.17.10.53", image: "harbor.qianfan123.com/toolset/toolsetcore:${toolset_image_version}") {
                         echo "服务白名单检查"
