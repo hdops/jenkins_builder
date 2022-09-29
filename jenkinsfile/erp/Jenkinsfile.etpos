@@ -43,6 +43,10 @@ if (env.add_args) {
     add_args = env.add_args
 }
 
+if (env.etpos_version){
+   add_args+=" -e etpos_version="+env.etpos_version
+}
+
 pipeline {
     agent {label node}
     options {
