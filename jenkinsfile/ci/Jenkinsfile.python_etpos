@@ -1,0 +1,88 @@
+def node="develop"
+if (env.node){
+    node =env.node
+}
+
+def ci_git_server_baseurl= "http://github.app.hd123.cn:10080"
+if (env.ci_git_server_baseurl){
+    ci_git_server_baseurl = env.ci_git_server_baseurl
+}
+
+def python_image= "harbor.qianfan123.com/base/python:3.8-slim-buster"
+if (env.python_image){
+    python_image =env.python_image
+}
+
+def credentialsId="appGitLab"
+if (env.credentials_id){
+  credentialsId = env.credentials_id
+}
+
+def run_on_public="None"
+if (env.run_on_public){
+    run_on_public=env.run_on_public
+}
+if (!env.on_k8s){
+    env.on_k8s="False"
+}
+if (env.set_on_k8s) {
+    env.on_k8s=env.set_on_k8s
+}
+
+def gitpath = "None"
+if (env.gitpath){
+    gitpath = env.gitpath
+}
+pipeline {
+    agent {
+		docker {
+		    label node
+            image "${python_image}"
+            args '--rm -v /var/run/docker.sock:/var/run/docker.sock -v /usr/bin/docker:/usr/bin/docker -v /root/.docker/config.json:/root/.docker/config.json '
+          }
+	}
+    options {
+	//     buildDiscarder(logRotator(numToKeepStr: '10'))
+	//     disableConcurrentBuilds()
+	//     disableResume()
+	    timeout(time: 1, unit: 'HOURS')
+    } 
+    stages {
+        stage('delete workspace'){
+		    when {
+			    expression {'Y' == "${params.deleteWorkspace}"}
+			}
+			steps{
+			    deleteDir()
+			}
+		}
+         stage('checkout') {
+             steps{ 
+				echo "checkout ${ci_git_server_baseurl}/${git_project}.git  branch:${build_branch}"
+				retry(5){
+				    checkout([$class: 'GitSCM', branches: [[name: "*/${build_branch}"]],userRemoteConfigs: [[credentialsId: "${credentialsId}",url: "${ci_git_server_baseurl}/${git_project}.git"]]])
+				}
+             }
+         }  
+		stage('build') {
+		    steps{
+				script{  
+					python_shell="cd pos/process  && mkdir target && cp src/docker/Dockerfile target && cp src/main/python/*.* target && cp src/main/resources/META-INF/*.* target"
+					echo "python_shell is ${python_shell}"
+					sh "  ${python_shell}"
+					if (env.docker_harbor && env.docker_harbor.endsWith('/')){
+					    docker_build_tag = env.docker_harbor + env.image + ":" + env.imageVersion
+					} else{
+					    docker_build_tag = env.docker_harbor + "/" + env.image + ":" + env.imageVersion
+					}
+					if (docker_build_tag){
+						echo "docker_build_tag is ${docker_build_tag}"
+						docker_build_shell = "cd pos/process/target &&  docker build -t " + docker_build_tag + " . && docker push " + docker_build_tag
+					    //echo "docker_build_shell is ${docker_build_shell}"
+						sh "  ${docker_build_shell}"  
+					}
+				}
+			} 
+		}
+    }
+}
