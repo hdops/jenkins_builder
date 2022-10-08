@@ -30,6 +30,16 @@ if (env.nodeSelector_app){
     nodeSelector_app = env.nodeSelector_app
 }
 
+def check_rdb="yes"
+if (params.check_rdb){
+    check_rdb = params.check_rdb
+}
+
+def check_config="yes"
+if (params.check_config){
+    check_config = params.check_config
+}
+
 def YAML_FILE="kubernetes_pod_template.yaml"
 def label_name="jenkins-job-kubernetes-deploy"
 
@@ -78,6 +88,16 @@ pipeline {
         stage('delete workspace') {
             steps{
                 deleteDir()
+                script{
+                    if (check_rdb != "yes") {
+                        echo "请检查数据库是否升级"
+                        sh 'exit 1' 
+                    }
+                    if (check_config != "yes") {
+                        echo "请检查配置是否升级"
+                        sh 'exit 1' 
+                    }
+                }
             }
         }
         stage('部署 on k8s') {

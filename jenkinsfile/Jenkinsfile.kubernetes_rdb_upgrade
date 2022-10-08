@@ -25,6 +25,11 @@ if (env.toolset_image){
     docker_image = env.toolset_image
 }
 
+def dryrun=""
+if (params.dryrun && params.dryrun=='true'){
+    dryrun = "--dryrun"
+}
+
 def nodeSelector_app="jenkins"
 if (env.nodeSelector_app){
     nodeSelector_app = env.nodeSelector_app
@@ -41,7 +46,7 @@ def func = {
     sh "tar zxf toolset.tar.gz -C ${WORKSPACE}"
     sh prefix + "hdops kubernetes download_kubernetes -s None"
     sh prefix + "hdops kubernetes validate --subsystem ${params.subsystem}"
-    def status = sh(returnStatus:true, script:prefix + "hdops kubernetes db_upgrade --subsystem ${params.subsystem} --version ${params.version} --stackids ${params.stackids} --dblist ${params.dblist} ${params.skipversion} ${params.skipversionupdate} --receivers ${params.receivers} --timeout ${params.timeout} --threadcount ${params.threadcount}")
+    def status = sh(returnStatus:true, script:prefix + "hdops kubernetes db_upgrade --subsystem ${params.subsystem} --version ${params.version} --stackids ${params.stackids} --dblist ${params.dblist} ${params.skipversion} ${params.skipversionupdate} --receivers ${params.receivers} --timeout ${params.timeout} --threadcount ${params.threadcount} ${dryrun}")
     archiveArtifacts allowEmptyArchive: true, artifacts: 'dbinit_log*txt', followSymlinks: false
     if (status != 0) {
         sh "`exit ${status}`"

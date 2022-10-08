@@ -38,17 +38,6 @@ if (env.docker_image){
    docker_image = env.docker_image
 }
 
-def add_args = " "
-if (env.add_args) {
-    add_args = env.add_args
-}
-if (env.subsystem) {
-    //echo "add_args is ${add_args}"
-	//echo "subsystem is ${subsystem}"
-	add_args+="  -e iwms_system_from_job="+env.subsystem
-	add_args+="  -e iwms_version_from_job="+env.iwms_version
-	add_args+="  -e iwms_ips_version_from_job="+env.iwms_ips_version
-}
 pipeline {
     agent {label node}
     options {
@@ -68,21 +57,15 @@ pipeline {
             }
         }
 
-        stage('ansible-playbook on ka-toolset-runenv') {
+        stage('pytest on archery') {
             steps{
                 script {
                     sh "docker pull ${docker_image}"
                     withDockerContainer(args: "-v /root/.ssh:/root/.ssh", image: "${docker_image}") {  
-						sh "curl -O http://ka-storage.oss-cn-hangzhou.aliyuncs.com/cd_new/init_cd_new.sh"
-						sh "sh init_cd_new.sh cd_new_develop"
-
-						sh "rm -rf /opt/ka-toolset/ka_deploy/group_vars"
-						sh "ln -s ${WORKSPACE}/${envname} /opt/ka-toolset/ka_deploy/group_vars"
-
-						echo "playbook is ${playbook}"
-						echo "add_args is ${add_args}"
-						
-						sh "cd /opt/ka-toolset/ka_deploy/ &&  ansible-playbook -i group_vars/iwmshosts  ${playbook} -e '@group_vars/iwms.yaml' ${add_args}" 
+						sh "ln -s ${WORKSPACE} /opt/ka-toolset"
+						//sh "cd /opt/ka-toolset &&  pytest -sv -m erp -k '$2' tests/" 
+						//sh "cd /opt/ka-toolset && /usr/local/python3/bin/pytest -sv -m iwms tests/" 
+						sh "cd /opt/ka-toolset && /usr/local/python3/bin/pytest -sv -m iwms tests/iwms*.py" 
                     }
                 }
             }
@@ -91,8 +74,8 @@ pipeline {
 	post {
         always {
 			script {
-				archiveArtifacts allowEmptyArchive: true, artifacts: '*.envfile,*.log', followSymlinks: false
-                currentBuild.description = "${envname}:${subsystem}"
+				archiveArtifacts allowEmptyArchive: true, artifacts: '*', followSymlinks: false
+                currentBuild.description = "pytest:iwms"
 			}
 		}
     }
