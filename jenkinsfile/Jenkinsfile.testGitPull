@@ -46,7 +46,7 @@ pipeline {
              }
              steps{ 
 				echo "checkout http://github.app.hd123.cn:10080/${git_project}.git  branch:${build_branch}" 
-                checkout([$class: 'GitSCM', branches: [[name: '*/${build_branch}']],userRemoteConfigs: [[url: 'http://github.app.hd123.cn:10080/${git_project}.git',credentialsId: "${credentialsId}"]]])
+                checkout([$class: 'GitSCM', branches: [[name: '*/${build_branch}']],extensions: [[$class: 'CloneOption', depth: 1, shallow: true]], userRemoteConfigs: [[url: 'http://github.app.hd123.cn:10080/${git_project}.git',credentialsId: "${credentialsId}"]]])
 				
 				echo "npm_shell is ${npm_shell}"
 				sh "  ${npm_shell}" 
