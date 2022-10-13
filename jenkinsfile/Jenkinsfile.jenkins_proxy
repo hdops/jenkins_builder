@@ -43,8 +43,9 @@ pipeline {
                  script {
                         echo "等待服务重载..."
                         sh "set +x;sleep 10"
-                        def proxy_status=sh(script: "set +x;ssh -p 22 ${proxy_host} docker ps |grep haproxy|wc -l", returnStdout:true).trim()
-                        if(proxy_status -lt 1){
+                        //def proxy_status=sh(script: "set +x;ssh -p 22 ${proxy_host} docker ps |grep haproxy|wc -l", returnStdout:true).trim()
+                        def proxy_status=sh(script: "set +x;ssh -p 22 ${proxy_host} docker ps -a -f name=haproxy --format '{{.Status}}'", returnStdout:true).trim()
+                        if(proxy_status != Up* ){
                             echo "配置有误或服务异常,已回退配置到上个版本;请检查修复并重新提交."
                             retry(2){
                                 sh '''set +x;cd $WORKSPACE && git reset --hard HEAD^ &>/dev/null''' 
