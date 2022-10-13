@@ -32,7 +32,7 @@ pipeline {
                 script{
                     deleteDir()
                     retry(3){
-                        checkout([$class: 'GitSCM', branches: [[name: "*/develop"]],extensions: [[$class: 'CloneOption', depth: 1, shallow: true]], userRemoteConfigs: [[credentialsId: "${credentialsId}",url: "https://gitlab.hd123.com/qianfanops/ldap_proxy.git"]]])
+                        checkout([$class: 'GitSCM', branches: [[name: "*/develop"]],extensions: [[$class: 'CloneOption', depth: 1, shallow: true]], userRemoteConfigs: [[credentialsId: "${credentialsId}",url: "https://gitlab.hd123.com/qianfanops/jenkins_proxy.git"]]])
                     }
                     push_config()
                 }  
