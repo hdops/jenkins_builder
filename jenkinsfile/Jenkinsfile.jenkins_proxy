@@ -1,0 +1,84 @@
+def node=""
+if (env.node){
+    node =env.node
+}else{
+    node ="master"
+}
+def whether_post=""
+if (env.whether_post){
+    whether_post =env.whether_post
+}else{
+    whether_post ="False"
+}
+def credentialsId="17643215-09f8-4a9a-b0ea-c8e49777ce1d"
+if (env.credentials_id){
+  credentialsId = env.credentials_id
+}
+env.proxy_name="haproxy.service"
+env.proxy_host="172.17.11.57"
+
+def push_config = {
+    sh '''set +x;
+    scp -P 22 ${WORKSPACE}/haproxy.cfg ${proxy_host}:/hdapp/haproxy/haproxy.cfg \
+    && ssh -p 22 ${proxy_host} docker restart haproxy
+    '''  
+}
+
+pipeline {
+    agent {label node}                
+    stages {
+	    stage('更新本地配置') {
+			steps{
+                script{
+                    deleteDir()
+                    retry(3){
+                        checkout([$class: 'GitSCM', branches: [[name: "*/develop"]],extensions: [[$class: 'CloneOption', depth: 1, shallow: true]], userRemoteConfigs: [[credentialsId: "${credentialsId}",url: "https://gitlab.hd123.com/qianfanops/ldap_proxy.git"]]])
+                    }
+                    push_config()
+                }  
+            }
+		}
+        stage('检测服务状态') {
+            steps{
+                 script {
+                        echo "等待服务重载..."
+                        sh "set +x;sleep 10"
+                        def proxy_status=sh(script: "set +x;ssh -p 22 ${proxy_host} docker ps |grep haproxy|wc -l", returnStdout:true).trim()
+                        if(proxy_status -lt 1){
+                            echo "配置有误或服务异常,已回退配置到上个版本;请检查修复并重新提交."
+                            retry(2){
+                                sh '''set +x;cd $WORKSPACE && git reset --hard HEAD^ &>/dev/null''' 
+                            }
+                            push_config()
+                            sh 'exit 1'                 
+                        } else {
+                            echo "服务正常;已增加新IP至白名单"
+                        }
+                 }
+            }
+        }
+    }
+	post {
+    // 构建失败之后钉钉通知
+        failure {
+            script {
+                if (whether_post == "True") {
+                    dingTalk accessToken: "${DINGTALK_TOKEN}", imageUrl: '', jenkinsUrl: "${jenkinsUrl}", message: "构建失败 ${new Date().format("yyyy-MM-dd HH:mm:ss")}", notifyPeople: ''
+                }
+                def subject = env.email_build_subject ? "[Jenkins]${env.email_build_subject}" : "[Jenkins]构建失败-${env.JOB_NAME}"
+                def to = env.email_build_recipients ? "${env.email_build_recipients}" : "lishuaiqi@hd123.com"
+                def body = env.email_build_body ? "${env.email_build_body}" : "${env.JOB_NAME}构建失败,更多信息请查阅：${BUILD_URL}"
+                // send email
+                emailext(recipientProviders: [developers(),requestor(),culprits()],subject: "${subject}", body: "${body}",attachLog:true)
+            }
+        }
+	// 失败转成功之后钉钉通知
+        fixed {
+            script {
+                if (whether_post == "True") {
+                    dingTalk accessToken: "${DINGTALK_TOKEN}", imageUrl: '', jenkinsUrl: "${jenkinsUrl}", message: "恢复正常 ${new Date().format("yyyy-MM-dd HH:mm:ss")}", notifyPeople: ''
+                }
+            }
+        }
+    }
+}
