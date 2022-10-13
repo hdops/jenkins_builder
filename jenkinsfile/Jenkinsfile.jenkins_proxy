@@ -19,8 +19,8 @@ env.proxy_host="172.17.11.57"
 
 def push_config = {
     sh '''set +x;
-    scp -P 22 ${WORKSPACE}/haproxy.cfg ${proxy_host}:/hdapp/haproxy/haproxy.cfg \
-    && ssh -p 22 ${proxy_host} docker restart haproxy
+    scp -P 60501 ${WORKSPACE}/haproxy.cfg ${proxy_host}:/hdapp/haproxy/haproxy.cfg \
+    && ssh -p 60501 ${proxy_host} docker restart haproxy
     '''  
 }
 
@@ -43,8 +43,9 @@ pipeline {
                  script {
                         echo "等待服务重载..."
                         sh "set +x;sleep 10"
-                        def proxy_status=sh(script: "set +x;ssh -p 22 ${proxy_host} docker ps -a -f name=haproxy --format '{{.Status}}'", returnStdout:true).trim()
-                        if(!proxy_status.startsWith('Up') ){
+                        def proxy_status=sh(script: "set +x;ssh -p 60501 ${proxy_host} docker ps -a -f name=haproxy --format '{{.Status}}'", returnStdout:true).trim()
+                        echo "${proxy_status}"
+                        if(!proxy_status.startsWith("Up") ){
                             echo "配置有误或服务异常,已回退配置到上个版本;请检查修复并重新提交."
                             retry(2){
                                 sh '''set +x;cd $WORKSPACE && git reset --hard HEAD^ &>/dev/null''' 
