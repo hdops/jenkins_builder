@@ -67,7 +67,7 @@ pipeline {
                 script{
                     if(fileExists('tests')){
                         withDockerContainer(args: "-v ${WORKSPACE}:${WORKSPACE}", image: "${TOOLSET_DOCKER_REGISTRY_BASEURL}/toolsetcore:0.3.0") {
-                            sh "pytest -m unit  --junitxml=junit.xml -sv "
+                            sh "pytest -m unit  --junitxml=junit.xml -sv --capture sys"
                         }
                     }
                 }

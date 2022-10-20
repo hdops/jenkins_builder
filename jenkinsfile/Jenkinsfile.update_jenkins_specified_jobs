@@ -82,7 +82,7 @@ pipeline {
                     if ( cfgname != '' ) {
                         withDockerContainer(args: "-v ${WORKSPACE}/jenkins:/root/jenkins -v ${WORKSPACE}/${jenkins_jobs_ini_config}:/root/jenkins_jobs.ini", image: "harbor.qianfan123.com/base/jenkins-job-builder:0.1.0") {
                             echo "run unit test"
-                            sh "pytest -m unit --junitxml=junit.xml -sv"
+                            sh "pytest -m unit --junitxml=junit.xml -sv --capture sys"
 
                             echo "cfgname is: ${cfgname}"
                             String[] cfgstr = cfgname.split(',')
