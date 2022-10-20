@@ -70,7 +70,7 @@ pipeline {
                 script{
                 if ("${env.gitlabBranch}"!="jenkins"){
                        sh "yamllint -c .yamllint config/*/*.yml"
-                       sh "pytest -m unit  --junitxml=junit.xml -sv"
+                       sh "pytest -m unit  --junitxml=junit.xml -sv --capture sys"
                    }
                 }
 		    }
