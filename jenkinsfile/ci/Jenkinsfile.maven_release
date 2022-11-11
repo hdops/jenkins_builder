@@ -160,7 +160,7 @@ pipeline {
         stage('pre-build-mvn-enforcer') {
             steps{
                 script{
-                    def _file = = new File("maven_enforce.xml")
+                    def _file = new File("maven_enforce.xml")
                     if (_file.exists()){
                         def mvn_shell="mvn validate -f maven_enforce.xml"
                         configFileProvider([configFile(fileId:mvn_configfile, variable: 'maven_settings')]) {
