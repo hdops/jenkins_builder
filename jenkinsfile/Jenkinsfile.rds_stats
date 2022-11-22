@@ -66,5 +66,10 @@ pipeline {
                 emailext(recipientProviders: [developers(),requestor(),culprits()],to:'buhaiqing@hd123.com',  subject: "rds_stats failure", body: "failure on Job ${env.BUILD_URL}\n${env.GIT_COMMIT}",attachLog:true)
             }
         }
+        fixed{
+            script{
+                emailext(recipientProviders: [developers(),requestor(),culprits()],to:'buhaiqing@hd123.com',  subject: "rds_stats succeed", body: "succeed on Job ${env.BUILD_URL}\n${env.GIT_COMMIT}",attachLog:true)
+            }
+        }
     }
 }
