@@ -49,10 +49,10 @@ pipeline {
 			    script{
 					if(env.on_k8s == 'True'){
 						container("hdtoolsetcore"){
-							sh "hdops s_sync_ecs_usage_quantile -v aliyun"
+							sh "hdops sync_ecs_usage_quantile -v aliyun"
 						}
 					}else {
-						sh "hdops s_sync_ecs_usage_quantile -v aliyun"
+						sh "hdops sync_ecs_usage_quantile -v aliyun"
 					}
 				}
 			}
