@@ -64,5 +64,10 @@ pipeline {
                 emailext(recipientProviders: [developers(),requestor(),culprits()],to:'buhaiqing@hd123.com',  subject: "ecs_stats_quantile failure", body: "failure on Job ${env.BUILD_URL}\n${env.GIT_COMMIT}",attachLog:true)
             }
         }
+        fix{
+          script{
+                emailext(recipientProviders: [developers(),requestor(),culprits()],to:'buhaiqing@hd123.com',  subject: "ecs_stats_quantile succeed", body: "succeed on Job ${env.BUILD_URL}\n${env.GIT_COMMIT}",attachLog:true)
+            }
+        }
     }
 }
