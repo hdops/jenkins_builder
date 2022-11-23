@@ -49,12 +49,12 @@ pipeline {
 			    script{
 					if(env.on_k8s == 'True'){
 						container("hdtoolsetcore"){
-							sh "hdops sync_mongdb_usage -v aliyun"
-							sh "hdops sync_rds_info_usage -v aliyun"
+							sh "hdops sync_mongdb_usage -v ${vendor}"
+							sh "hdops sync_rds_info_usage -v ${vendor}"
 						}
 					}else {
-						sh "hdops sync_mongdb_usage -v aliyun"
-						sh "hdops sync_rds_info_usage -v aliyun"
+						sh "hdops sync_mongdb_usage -v ${vendor}"
+						sh "hdops sync_rds_info_usage -v ${vendor}"
 					}
 				}
 			}
