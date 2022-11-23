@@ -49,10 +49,10 @@ pipeline {
 			    script{
 					if(env.on_k8s == 'True'){
 						container("hdtoolsetcore"){
-							sh "hdops sync_ecs_stat_info -v aliyun"
+							sh "hdops sync_ecs_stat_info -v ${vendor}"
 						}
 					}else {
-						sh "hdops sync_ecs_stat_info -v aliyun"
+						sh "hdops sync_ecs_stat_info -v ${vendor}"
 					}
 				}
 			}

@@ -3,6 +3,11 @@ if (env.node){
     node =env.node
 }
 
+// 多值以逗号分隔
+def project = "海鼎生产"
+if (env.project){
+  project = env.project
+}
 def vendor = "aliyun"
 if (env.vendor){
   vendor = env.vendor
@@ -43,16 +48,16 @@ pipeline {
 	    timeout(time: 1, unit: 'HOURS')
     } 
     stages {
-
-        stage('rds_stats_quantile'){
+    // 传统Docker容器化部署
+        stage('ecs container usage quantile'){
 			steps{
 			    script{
 					if(env.on_k8s == 'True'){
 						container("hdtoolsetcore"){
-							sh "hdops sync_rds_usage_quantile -v ${vendor}"
+							sh "hdops run_container_stats -v ${vendor}"
 						}
 					}else {
-						sh "hdops sync_rds_usage_quantile -v ${vendor}"
+						sh "hdops run_container_stats -v ${vendor}"
 					}
 				}
 			}
@@ -61,12 +66,12 @@ pipeline {
     post{
         failure{
             script{
-                emailext(recipientProviders: [developers(),requestor(),culprits()],to:'buhaiqing@hd123.com',  subject: "rds_stats_quantile failure", body: "failure on Job ${env.BUILD_URL}\n${env.GIT_COMMIT}",attachLog:true)
+                emailext(recipientProviders: [developers(),requestor(),culprits()],to:'buhaiqing@hd123.com',  subject: "ecs_container_usage_quantile failure", body: "failure on Job ${env.BUILD_URL}\n${env.GIT_COMMIT}",attachLog:true)
             }
         }
         fixed{
             script{
-                emailext(recipientProviders: [developers(),requestor(),culprits()],to:'buhaiqing@hd123.com',  subject: "rds_stats_quantile succeed", body: "succeed on Job ${env.BUILD_URL}\n${env.GIT_COMMIT}",attachLog:true)
+                emailext(recipientProviders: [developers(),requestor(),culprits()],to:'buhaiqing@hd123.com',  subject: "ecs_container_usage_quantile succeed", body: "succeed on Job ${env.BUILD_URL}\n${env.GIT_COMMIT}",attachLog:true)
             }
         }
     }
