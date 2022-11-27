@@ -45,7 +45,7 @@ pipeline {
 	//     buildDiscarder(logRotator(numToKeepStr: '10'))
 	//     disableConcurrentBuilds()
 	//     disableResume()
-	    timeout(time: 1, unit: 'HOURS')
+	    timeout(time: 6, unit: 'HOURS')
     } 
     stages {
     // 传统Docker容器化部署
