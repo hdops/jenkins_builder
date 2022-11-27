@@ -3,6 +3,11 @@ if (env.node){
     node =env.node
 }
 
+def project="鼎力云,海鼎生产,海鼎公司"
+if (env.project){
+  project = env.project
+}
+
 def vendor = "aliyun"
 if (env.vendor){
   vendor = env.vendor
@@ -49,10 +54,10 @@ pipeline {
 			    script{
 					if(env.on_k8s == 'True'){
 						container("hdtoolsetcore"){
-							sh "hdops sync_ecs_usage_quantile -v ${vendor}"
+							sh "hdops sync_ecs_usage_quantile -v ${vendor} -p ${project}"
 						}
 					}else {
-						sh "hdops sync_ecs_usage_quantile -v ${vendor}"
+						sh "hdops sync_ecs_usage_quantile -v ${vendor} -p ${project}"
 					}
 				}
 			}
