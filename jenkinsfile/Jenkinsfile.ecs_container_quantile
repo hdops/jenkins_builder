@@ -54,10 +54,10 @@ pipeline {
 			    script{
 					if(env.on_k8s == 'True'){
 						container("hdtoolsetcore"){
-							sh "hdops run_container_stats -v ${vendor}"
+							sh "hdops run_container_stats -v ${vendor} -p ${project}"
 						}
 					}else {
-						sh "hdops run_container_stats -v ${vendor}"
+						sh "hdops run_container_stats -v ${vendor} -p ${project}"
 					}
 				}
 			}
