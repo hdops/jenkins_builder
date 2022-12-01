@@ -61,7 +61,6 @@ pipeline {
     post{
         failure{
             script{
-            script{
                 emailext(recipientProviders: [developers(),requestor(),culprits()],to:'buhaiqing@hd123.com',  subject: "redis_stats_quantile failure", body: "failure on Job ${env.BUILD_URL}\n${env.GIT_COMMIT}",attachLog:true)
             }
         }
