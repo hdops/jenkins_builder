@@ -3,7 +3,7 @@ if (env.node){
     node =env.node
 }
 
-def project = "联华,海鼎生产,鼎力云,海鼎非生产"
+def project = "联华"
 if (env.project){
   project = env.project
 }
