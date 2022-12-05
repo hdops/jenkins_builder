@@ -13,6 +13,11 @@ if (env.vendor){
   vendor = env.vendor
 }
 
+def toolset_image_version="0.3.0"
+if (env.toolset_image_version){
+    toolset_image_version = env.toolset_image_version
+}
+
 def run_on_public="None"
 if (env.run_on_public){
     run_on_public=env.run_on_public
@@ -57,6 +62,7 @@ pipeline {
 							sh "hdops run_container_stats -v ${vendor} -p ${project}"
 						}
 					}else {
+					    sh "docker pull harbor.qianfan123.com/toolset/toolsetcore:${toolset_image_version}"
 						sh "hdops run_container_stats -v ${vendor} -p ${project}"
 					}
 				}
