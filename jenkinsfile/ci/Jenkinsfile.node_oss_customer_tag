@@ -18,9 +18,9 @@ if (env.credentials_id){
   credentialsId = env.credentials_id
 }
 
-def build_branch="develop"
-if (params.build_branch){
-    build_branch =params.build_branch
+def build_tag="M2.6.5-221204"
+if (params.build_tag){
+    build_tag =params.build_tag
 }
 
 def packageRemoteJob="createResourcePackage"
@@ -68,9 +68,9 @@ pipeline {
 		}
          stage('checkout & build') {
              steps{
-				echo "checkout ${ci_git_server_baseurl}/${git_project}.git  branch:${build_branch}"
+				echo "checkout ${ci_git_server_baseurl}/${git_project}.git  tag:${build_tag}"
 				retry(5){
-                    checkout([$class: 'GitSCM', branches: [[name: '*/${build_branch}']],extensions: [[$class: 'CloneOption', depth: 1, shallow: true]], userRemoteConfigs: [[url: "${ci_git_server_baseurl}/${git_project}.git",credentialsId: "${credentialsId}"]]])
+                    checkout([$class: 'GitSCM', branches: [[name: 'refs/tags/${build_tag}']],extensions: [[$class: 'CloneOption', depth: 1, shallow: true]], userRemoteConfigs: [[url: "${ci_git_server_baseurl}/${git_project}.git",credentialsId: "${credentialsId}"]]])
                 }
 				
 				echo "npm_shell is ${npm_shell}"
@@ -89,7 +89,7 @@ pipeline {
 						if (env.fromVersion){
 						    fromVersion =env.fromVersion
 						}else{
-						    fromVersion =build_branch
+						    fromVersion =build_tag
 						}
 						echo "fromVersion:${fromVersion}"
 						echo "alias:${alias}"
@@ -99,7 +99,7 @@ pipeline {
 		}
         stage('部署'){
 		    when {
-			    expression {'develop' == "${build_branch}"}
+			    expression {'develop' == "${build_tag}"}
 			}
 			steps{
 					script{
@@ -109,7 +109,7 @@ pipeline {
 							if (env.fromVersion){
 							    fromVersion =env.fromVersion
 							}else{
-							    fromVersion =build_branch
+							    fromVersion =build_tag
 							}
 							oss_resources = env.subsystem + "-" + fromVersion+ "-" + env.alias + ".tar.gz"
 							echo "oss_resources:${oss_resources}" 
