@@ -149,5 +149,23 @@ pipeline {
                 } 
             }
         }
+        post {
+        // 构建失败之后钉钉通知
+            failure {
+                script {
+                    if (whether_post == "True") {
+                        dingTalk accessToken: "${DINGTALK_TOKEN}", imageUrl: '', jenkinsUrl: "${jenkinsUrl}", message: "构建失败 ${new Date().format("yyyy-MM-dd HH:mm:ss")}", notifyPeople: ''
+                    }
+                }
+            }
+        // 失败转成功之后钉钉通知
+            fixed {
+                script {
+                    if (whether_post == "True") {
+                        dingTalk accessToken: "${DINGTALK_TOKEN}", imageUrl: '', jenkinsUrl: "${jenkinsUrl}", message: "恢复正常 ${new Date().format("yyyy-MM-dd HH:mm:ss")}", notifyPeople: ''
+                    }
+                }
+            }
+        }
     }
 }
