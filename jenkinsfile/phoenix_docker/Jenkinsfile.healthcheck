@@ -149,7 +149,8 @@ pipeline {
                 } 
             }
         }
-        post {
+    }
+    post {
         // 构建失败之后钉钉通知
             failure {
                 script {
@@ -167,5 +168,4 @@ pipeline {
                 }
             }
         }
-    }
 }
