@@ -156,7 +156,7 @@ pipeline {
             script {
                 if (env.dingding == "True") {
                     echo "dingtoken: ${DINGTALK_TOKEN}"
-                    dingTalk accessToken: "${DINGTALK_TOKEN}", imageUrl: '', jenkinsUrl: "${jenkinsUrl}", message: "构建失败 ${new Date().format("yyyy-MM-dd HH:mm:ss")}", notifyPeople: ''
+                    dingTalk accessToken: "${DINGTALK_TOKEN}", imageUrl: '', jenkinsUrl: "${jenkinsUrl}", message: "通知：构建失败 ${new Date().format("yyyy-MM-dd HH:mm:ss")}", notifyPeople: ''
                 }
             }
         }
@@ -165,7 +165,7 @@ pipeline {
             script {
                 if (env.dingding == "True") {
                     echo "dingtoken: ${DINGTALK_TOKEN}"
-                    dingTalk accessToken: "${DINGTALK_TOKEN}", imageUrl: '', jenkinsUrl: "${jenkinsUrl}", message: "恢复正常 ${new Date().format("yyyy-MM-dd HH:mm:ss")}", notifyPeople: ''
+                    dingTalk accessToken: "${DINGTALK_TOKEN}", imageUrl: '', jenkinsUrl: "${jenkinsUrl}", message: "通知：恢复正常 ${new Date().format("yyyy-MM-dd HH:mm:ss")}", notifyPeople: ''
                 }
             }
         }
