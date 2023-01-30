@@ -47,8 +47,8 @@ pipeline {
 	agent {
         docker {
         label node
-        image "harbor.qianfan123.com/toolset/toolsetcore:${toolset_image_version}"
-        args '-v /var/run/docker.sock:/var/run/docker.sock -v /usr/bin/docker:/usr/bin/docker --add-host=hd-hz-public.oss-cn-hangzhou-internal.aliyuncs.com:47.110.23.37'
+        image "harbor.qianfan123.com/base/python:3.10.7-slim-buster-hd"
+        args '--rm -v /var/run/docker.sock:/var/run/docker.sock -v /usr/bin/docker:/usr/bin/docker -v /root/.docker/config.json:/root/.docker/config.json  --add-host=maven.qianfan123.com:172.17.0.82 --add-host=github.app.hd123.cn:172.17.10.58 --add-host=gitlab.hd123.com:172.17.12.219 '
         }
     }
     options {
