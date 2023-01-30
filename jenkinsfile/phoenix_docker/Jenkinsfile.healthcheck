@@ -150,4 +150,24 @@ pipeline {
             }
         }
     }
+    post {
+    // 构建失败之后钉钉通知
+        failure {
+            script {
+                if (env.dingding == "True") {
+                    echo "dingtoken: ${DINGTALK_TOKEN}"
+                    dingTalk accessToken: "${DINGTALK_TOKEN}", imageUrl: '', jenkinsUrl: "${jenkinsUrl}", message: "通知：构建失败 ${new Date().format("yyyy-MM-dd HH:mm:ss")}", notifyPeople: ''
+                }
+            }
+        }
+    // 失败转成功之后钉钉通知
+        fixed {
+            script {
+                if (env.dingding == "True") {
+                    echo "dingtoken: ${DINGTALK_TOKEN}"
+                    dingTalk accessToken: "${DINGTALK_TOKEN}", imageUrl: '', jenkinsUrl: "${jenkinsUrl}", message: "通知：恢复正常 ${new Date().format("yyyy-MM-dd HH:mm:ss")}", notifyPeople: ''
+                }
+            }
+        }
+    }
 }

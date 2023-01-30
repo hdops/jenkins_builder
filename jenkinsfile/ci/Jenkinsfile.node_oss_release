@@ -82,7 +82,7 @@ git checkout ${releaseBranchName}
 git pull
 git checkout ${build_branch}
 git pull
-git merge -s recursive -X theirs ${releaseBranchName} -m '版本发布' --allow-unrelated-histories
+git merge -s recursive -X theirs ${releaseBranchName} -m '版本发布'
 git push origin ${build_branch}
 git tag ${releaseVersion}
 git push --tags"""

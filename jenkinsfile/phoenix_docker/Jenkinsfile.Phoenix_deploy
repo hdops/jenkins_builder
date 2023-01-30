@@ -36,6 +36,10 @@ if (!env.on_k8s){
 if (env.set_on_k8s) {
     env.on_k8s=env.set_on_k8s
 }
+def dryrunStr=""
+if (dryrun=="True") {
+    dryrunStr="--dryrun"
+}
 pipeline {
     agent {label node}
 
@@ -110,15 +114,15 @@ pipeline {
                         sh "phoenix-tools version"
                         if (env.skipnochange) {
                             if (env.tag) {
-                               sh "phoenix-tools ${params.action} ${params.skipversion} --skipupgrade ${params.skipupgrade} --skipnochange ${params.skipnochange} --tag ${params.tag}"
+                               sh "phoenix-tools ${params.action} ${params.skipversion} --skipupgrade ${params.skipupgrade} --skipnochange ${params.skipnochange} --tag ${params.tag} ${dryrunStr}"
                             } else {
-                                sh "phoenix-tools ${params.action} ${params.skipversion} --skipupgrade ${params.skipupgrade} --skipnochange ${params.skipnochange}"
+                                sh "phoenix-tools ${params.action} ${params.skipversion} --skipupgrade ${params.skipupgrade} --skipnochange ${params.skipnochange} ${dryrunStr}"
                             }
                         } else {
                             if (env.tag) {
-                                sh "phoenix-tools ${params.action} ${params.skipversion} --skipupgrade ${params.skipupgrade} --tag ${params.tag}"
+                                sh "phoenix-tools ${params.action} ${params.skipversion} --skipupgrade ${params.skipupgrade} --tag ${params.tag} ${dryrunStr}"
                             } else {
-                                sh "phoenix-tools ${params.action} ${params.skipversion} --skipupgrade ${params.skipupgrade}"
+                                sh "phoenix-tools ${params.action} ${params.skipversion} --skipupgrade ${params.skipupgrade} ${dryrunStr}"
                             }
                         }      
                     }
@@ -167,15 +171,15 @@ pipeline {
                         git branch: "${params.GIT_BRANCH}", credentialsId: "${credentialsId}", url: "${GITLAB_URL}/${GIT_GROUP}/${params.GIT_REPONAME}.git"
                         if (env.skipnochange) {
                             if (env.tag) {
-                               sh "phoenix-tools ${params.action} ${params.skipversion} --skipupgrade ${params.skipupgrade} --skipnochange ${params.skipnochange} --tag ${params.tag}"
+                               sh "phoenix-tools ${params.action} ${params.skipversion} --skipupgrade ${params.skipupgrade} --skipnochange ${params.skipnochange} --tag ${params.tag} ${dryrunStr}"
                             } else {
-                                sh "phoenix-tools ${params.action} ${params.skipversion} --skipupgrade ${params.skipupgrade} --skipnochange ${params.skipnochange}"
+                                sh "phoenix-tools ${params.action} ${params.skipversion} --skipupgrade ${params.skipupgrade} --skipnochange ${params.skipnochange} ${dryrunStr}"
                             }
                         } else {
                             if (env.tag) {
-                                sh "phoenix-tools ${params.action} ${params.skipversion} --skipupgrade ${params.skipupgrade} --tag ${params.tag}"
+                                sh "phoenix-tools ${params.action} ${params.skipversion} --skipupgrade ${params.skipupgrade} --tag ${params.tag} ${dryrunStr}"
                             } else {
-                                sh "phoenix-tools ${params.action} ${params.skipversion} --skipupgrade ${params.skipupgrade}"
+                                sh "phoenix-tools ${params.action} ${params.skipversion} --skipupgrade ${params.skipupgrade} ${dryrunStr}"
                             }
                         } 
                     }
