@@ -84,6 +84,7 @@ pipeline {
                            retry(3){
                               checkout([$class: 'GitSCM', branches: [[name: "*/master"]], extensions: [[$class: 'CloneOption', depth: 1, noTags: true, reference: '', shallow: true]], userRemoteConfigs: [[credentialsId: "${credentialsId}",url: "http://github.app.hd123.cn:10080/k8s_config_checker.git"]]])
                            }
+                           sh  "pip install -i http://pypi.douban.com/simple --trusted-host pypi.douban.com -r requirements.txt"
                            sh "git submodule update --init --recursive"
                            sh "git submodule foreach git pull origin master"
                            sh "TOOLSET_PATH=${WORKSPACE} pytest -m \"${env.gitlabBranch} and eureka_client_enable \"  --junitxml=junit.xml -sv --capture sys"
