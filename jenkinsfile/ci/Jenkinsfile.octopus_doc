@@ -1,0 +1,54 @@
+def node="master"
+if (env.node){
+    node =env.node
+}
+
+def credentialsId="appGitLab"
+if (env.credentials_id){
+  credentialsId = env.credentials_id
+}
+
+def build_image= "docker.io/python:3.9"
+if (env.build_image){
+    build_image =env.build_image
+}
+
+def build_branch="master"
+
+pipeline {
+    // agent {label node}
+    agent {
+		docker {
+            image "${build_image}"
+            label node
+          }
+	}
+    options {
+	    timeout(time: 1, unit: 'HOURS')
+    } 
+    stages {
+        stage('delete workspace'){
+			steps{
+			    deleteDir()
+			}
+		}
+         stage('checkout') {
+             steps{
+                script {
+                    echo "checkout https://gitlab.hd123.com/qianfanops/ops-cmdb.git  branch:${build_branch}"
+                    retry(3){
+                        checkout([$class: 'GitSCM', branches: [[name: '*/${build_branch}']],extensions: [[$class: 'CloneOption', depth: 1, shallow: true]], userRemoteConfigs: [[url: "https://gitlab.hd123.com/qianfanops/ops-cmdb.git",credentialsId: "${credentialsId}"]]])
+                    }
+                }
+             }
+         } 
+        stage('deploy'){
+			steps{
+				script{
+				    sh "pip install -i https://pypi.tuna.tsinghua.edu.cn/simple --trusted-host pypi.tuna.tsinghua.edu.cn -r requirements.txt"
+                    sh "python update_docs.py"
+				}
+			}
+		}
+    }
+}
