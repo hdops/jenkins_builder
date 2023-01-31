@@ -43,8 +43,7 @@ pipeline {
         stage('deploy'){
 			steps{
 				script{
-				    sh "pip install -i https://pypi.tuna.tsinghua.edu.cn/simple --trusted-host pypi.tuna.tsinghua.edu.cn -r requirements.txt"
-                    sh "python update_docs.py"
+				    sh "cd manual; pip install -i https://pypi.tuna.tsinghua.edu.cn/simple --trusted-host pypi.tuna.tsinghua.edu.cn -r requirements.txt && python update_docs.py"
 				}
 			}
 		}
