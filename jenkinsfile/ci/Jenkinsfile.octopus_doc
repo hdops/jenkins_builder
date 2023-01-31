@@ -13,13 +13,6 @@ if (env.build_image){
     build_image =env.build_image
 }
 
-def git_base_url="https://gitlab.hd123.com/"
-if (env.git_base_url){
-    git_base_url=env.git_base_url
-}
-
-def build_branch="develop"
-def git_project="qianfanops/ops-cmdb"
 
 pipeline {
     // agent {label node}
@@ -41,9 +34,8 @@ pipeline {
          stage('checkout') {
              steps{
                 script {
-                    echo "checkout ${git_base_url}/${git_project}.git  branch:${build_branch}"
                     retry(3){
-                        checkout([$class: 'GitSCM', branches: [[name: '*/${build_branch}']],extensions: [[$class: 'CloneOption', depth: 1, shallow: true]], userRemoteConfigs: [[url: "${git_base_url}/${git_project}.git",credentialsId: "${credentialsId}"]]])
+                        checkout([$class: 'GitSCM', branches: [[name: '*/master']],extensions: [[$class: 'CloneOption', depth: 1, shallow: true]], userRemoteConfigs: [[url: "https://gitlab.hd123.com/qianfanops/ops-cmdb.git",credentialsId: "${credentialsId}"]]])
                     }
                 }
              }
