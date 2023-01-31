@@ -13,7 +13,6 @@ if (env.build_image){
     build_image =env.build_image
 }
 
-def build_branch="master"
 
 pipeline {
     // agent {label node}
@@ -35,9 +34,8 @@ pipeline {
          stage('checkout') {
              steps{
                 script {
-                    echo "checkout https://gitlab.hd123.com/qianfanops/ops-cmdb.git  branch:${build_branch}"
                     retry(3){
-                        checkout([$class: 'GitSCM', branches: [[name: '*/${build_branch}']],extensions: [[$class: 'CloneOption', depth: 1, shallow: true]], userRemoteConfigs: [[url: "https://gitlab.hd123.com/qianfanops/ops-cmdb.git",credentialsId: "${credentialsId}"]]])
+                        checkout([$class: 'GitSCM', branches: [[name: '*/master']],extensions: [[$class: 'CloneOption', depth: 1, shallow: true]], userRemoteConfigs: [[url: "https://gitlab.hd123.com/qianfanops/ops-cmdb.git",credentialsId: "${credentialsId}"]]])
                     }
                 }
              }
@@ -45,8 +43,7 @@ pipeline {
         stage('deploy'){
 			steps{
 				script{
-				    sh "pip install -i https://pypi.tuna.tsinghua.edu.cn/simple --trusted-host pypi.tuna.tsinghua.edu.cn -r requirements.txt"
-                    sh "python update_docs.py"
+				    sh "cd manual; pip install -i https://pypi.tuna.tsinghua.edu.cn/simple --trusted-host pypi.tuna.tsinghua.edu.cn -r requirements.txt && python update_docs.py"
 				}
 			}
 		}
