@@ -37,7 +37,7 @@ if (env.set_on_k8s) {
     env.on_k8s=env.set_on_k8s
 }
 def dryrunStr=""
-if (dryrun && dryrun=="True") {
+if (params.dryrun && params.dryrun=="True") {
     dryrunStr="--dryrun"
 }
 pipeline {
