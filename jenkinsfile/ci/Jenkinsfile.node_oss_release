@@ -43,6 +43,10 @@ if (!env.on_k8s){
 if (env.set_on_k8s) {
     env.on_k8s=env.set_on_k8s
 }
+def allow_histories=""
+if (env.allow_histories){
+	 allow_histories=env.allow_histories
+}
 pipeline {
 	agent {label node}
     options {
@@ -82,7 +86,7 @@ git checkout ${releaseBranchName}
 git pull
 git checkout ${build_branch}
 git pull
-git merge -s recursive -X theirs ${releaseBranchName} -m '版本发布'
+git merge -s recursive -X theirs ${releaseBranchName} -m '版本发布' ${allow_histories}
 git push origin ${build_branch}
 git tag ${releaseVersion}
 git push --tags"""
