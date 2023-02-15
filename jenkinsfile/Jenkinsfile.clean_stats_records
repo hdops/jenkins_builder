@@ -3,7 +3,7 @@ if (env.node){
     node =env.node
 }
 
-def days = "30"
+def days = "15"
 if (env.days){
   days = env.days
 }
