@@ -90,7 +90,7 @@ pipeline {
                         	echo "执行 mvn dependency:copy "
                         	sh "mvn dependency:copy -Dartifact=${groupId}:${artifactId}:${artifactVersion}:zip:bin -DoutputDirectory=. -s $maven_settings"
                         	echo "准备 ${artifactId} "
-							prepare_shell = "unzip -o ${artifactId}*.zip  && cd  ${artifactId}-${artifactVersion} && rm -rf dist/* && cp -rf ${VUE_APP_PUBLIC_PATH}/* dist" 
+							prepare_shell = "unzip -o ${artifactId}*.zip  && cd  ${artifactId}-${artifactVersion} && mkdir -p dist && rm -rf dist/* && cp -rf ${VUE_APP_PUBLIC_PATH}/* dist" 
 							sh "  ${prepare_shell}"
 						}
                     }
