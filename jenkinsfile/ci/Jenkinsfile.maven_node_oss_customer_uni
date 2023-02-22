@@ -8,7 +8,7 @@ if (env.maven_image){
     maven_image =env.maven_image
 }
 
-def node_image= "harbor.qianfan123.com/base/node:12.18.0-hd"
+def node_image= "harbor.qianfan123.com/base/node:12.20.0-hd"
 if (env.node_image){
     node_image =env.node_image
 }
@@ -108,7 +108,7 @@ pipeline {
                 script{
 					if(env.run_rebuild == 'Y'){
 						echo "build ${artifactId} "
-						sh " node -v && cd  ${artifactId}-${artifactVersion}  && yarn && yarn build && tar czvf ../${artifactId}.tar.gz dist" 
+						sh " node -v && cd  ${artifactId}-${artifactVersion} && yarn && node cmd/build.js ${VUE_APP_PUBLIC_PATH} && cd dist && mv ${VUE_APP_PUBLIC_PATH} dist && tar czvf ../../${artifactId}.tar.gz dist"
 						archiveArtifacts '*.tar.gz'
 					}else {	 
 				    	echo "config ${artifactId}-${artifactVersion} "
