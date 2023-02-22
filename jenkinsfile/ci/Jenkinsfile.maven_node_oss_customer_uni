@@ -108,7 +108,7 @@ pipeline {
                 script{
 					if(env.run_rebuild == 'Y'){
 						echo "build ${artifactId} "
-						sh " node -v && cd  ${artifactId}-${artifactVersion}  && yarn && yarn build && tar czvf ../${artifactId}.tar.gz dist" 
+						sh " node -v && cd  ${artifactId}-${artifactVersion}  && yarn && node cmd/build.js ${VUE_APP_PUBLIC_PATH} && tar czvf ../${artifactId}.tar.gz dist" 
 						archiveArtifacts '*.tar.gz'
 					}else {	 
 				    	echo "config ${artifactId}-${artifactVersion} "
