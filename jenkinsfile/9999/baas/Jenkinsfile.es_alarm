@@ -41,7 +41,7 @@ pipeline {
 								sh "DNET_PROFILE=integration_test DNET_PRODUCT=dnet TRUST_PUBLIC_IP=${run_on_public} hdops download_toolset --branch ${params.GIT_BRANCH} -p ."
 							}
 							sh "tar zxf toolset.tar.gz -C $WORKSPACE"
-							sh "DNET_CLOUD_VENDOR=${params.DNET_CLOUD_VENDOR} DNET_AK=${params.DNET_AK} DNET_PROFILE=${params.DNET_PROFILE} hdmon es_any_bbw --configfile --cfgname ${params.cfgname}"
+							sh "DNET_CLOUD_VENDOR=${params.DNET_CLOUD_VENDOR} DNET_AK=${params.DNET_AK} DNET_PROFILE=${params.DNET_PROFILE} hdmon es_any_bbw --configfile ${params.cfgname}"
 						}
 					}else {
 					    docker.image("harbor.qianfan123.com/toolset/toolsetcore:${toolset_image_version}").inside  {
@@ -52,7 +52,7 @@ pipeline {
                                 sh "DNET_PROFILE=integration_test DNET_PRODUCT=dnet TRUST_PUBLIC_IP=${run_on_public} hdops download_toolset --branch ${params.GIT_BRANCH} -p ."
                             }
                             sh "tar zxf toolset.tar.gz -C $WORKSPACE"
-                            sh "DNET_CLOUD_VENDOR=${params.DNET_CLOUD_VENDOR} DNET_AK=${params.DNET_AK} DNET_PROFILE=${params.DNET_PROFILE} hdmon es_any_bbw --configfile --cfgname ${params.cfgname}"
+                            sh "DNET_CLOUD_VENDOR=${params.DNET_CLOUD_VENDOR} DNET_AK=${params.DNET_AK} DNET_PROFILE=${params.DNET_PROFILE} hdmon es_any_bbw --configfile ${params.cfgname}"
                         }
 					}
 				}
