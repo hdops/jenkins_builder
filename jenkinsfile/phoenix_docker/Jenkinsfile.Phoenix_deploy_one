@@ -33,6 +33,10 @@ if (!env.on_k8s){
 if (env.set_on_k8s) {
     env.on_k8s=env.set_on_k8s
 }
+def dryrunStr=""
+if (params.dryrun && params.dryrun=="True") {
+    dryrunStr="--dryrun"
+}
 pipeline {
     agent {label node}
 	options {
@@ -108,7 +112,7 @@ pipeline {
                     sh "docker pull  ${TOOLSET_DOCKER_REGISTRY_BASEURL}/phoenixcore:${version}"
                     withDockerContainer(args: "-v ${WORKSPACE}:/opt", image: "${TOOLSET_DOCKER_REGISTRY_BASEURL}/phoenixcore:${version}") {
                         sh "phoenix-tools version"
-                        sh "phoenix-tools ${params.action} ${params.skipversion}  --subsystem ${params.subsystem} --skipupgrade ${params.skipupgrade} --tag ${params.tag}"
+                        sh "phoenix-tools ${params.action} ${params.skipversion}  --subsystem ${params.subsystem} --skipupgrade ${params.skipupgrade} --tag ${params.tag} ${dryrunStr}"
                     }
                 }
             }
@@ -147,7 +151,7 @@ pipeline {
                 script{
                     container("hdphoenixtoolsetcore")   {
                         sh "phoenix-tools version"
-                        sh "phoenix-tools ${params.action} ${params.skipversion}  --subsystem ${params.subsystem} --skipupgrade ${params.skipupgrade} --tag ${params.tag}"
+                        sh "phoenix-tools ${params.action} ${params.skipversion}  --subsystem ${params.subsystem} --skipupgrade ${params.skipupgrade} --tag ${params.tag} ${dryrunStr}"
                     }
                 } 
             }
