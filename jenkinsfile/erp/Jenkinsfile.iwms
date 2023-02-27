@@ -46,8 +46,6 @@ if (env.subsystem) {
     //echo "add_args is ${add_args}"
 	//echo "subsystem is ${subsystem}"
 	add_args+="  -e iwms_system_from_job="+env.subsystem
-	add_args+="  -e iwms_version_from_job="+env.iwms_version
-	add_args+="  -e iwms_ips_version_from_job="+env.iwms_ips_version
 }
 pipeline {
     agent {label node}
