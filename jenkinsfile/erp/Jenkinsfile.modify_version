@@ -1,0 +1,91 @@
+def node="master"
+if (env.node){
+    node =env.node
+}
+
+def ci_git_server_baseurl= "http://github.app.hd123.cn:10080"
+if (env.ci_git_server_baseurl){
+    ci_git_server_baseurl = env.ci_git_server_baseurl
+}
+def credentialsId="17643215-09f8-4a9a-b0ea-c8e49777ce1d"
+if (env.credentials_id){
+  credentialsId = env.credentials_id
+}
+def git_branch = "erp"
+if (env.git_branch){
+    git_branch = env.git_branch
+}
+
+// qianfanops/toolset_h6std
+def git_project = "qianfanops/toolset_h6std"
+if (env.git_project){
+   git_project = env.git_project
+}
+
+pipeline {
+    agent {label node}
+	options {
+	    timeout(time: 15, unit: 'MINUTES')
+    }
+    environment {
+        GITLAB_USER = credentials("${credentialsId}")
+    }    
+    stages {
+        stage('更改制品版本') {
+			steps{
+				script {
+                        deleteDir()  
+                        echo "git branch is ${git_branch}"
+ 
+                        // checkout code
+                        retry(3){
+                            checkout([$class: 'GitSCM', branches: [[name: "*/${git_branch}"]],extensions: [[$class: 'CloneOption', depth: 1, shallow: true]], userRemoteConfigs: [[credentialsId: "${credentialsId}",url: "${ci_git_server_baseurl}/${git_project}.git"]]])
+                        }
+                        // iwmscmdb.yaml
+                        def cmdb = readYaml file: envname+'/'+cmdb_yaml
+                        // input images
+                        echo "image is ${params.image}"
+                        def inputs = image.split(';')
+                        for ( i = 0 ; i < inputs.length; i++){
+                            def s = inputs[i]
+                            _s =s.split(':')
+                            version = _s[0]
+                            images = (_s[1]).split(',')
+                            for( j = 0; j< images.length;j++){ 
+								for( k = 0; k< cmdb['subsystems'].size();k++){  
+								    if(cmdb['subsystems'][k].image_name==images[j]) {
+								        if(cmdb['subsystems'][k].version==version) {
+								            println(images[j] + ": 版本已是  "+version+"，无需升级！ ")
+								        }
+								        else {
+								            println(images[j] + ": 版本从 " +cmdb['subsystems'][k].version + "变更为 "+version)  
+								            cmdb['subsystems'][k].version=version 
+								        }
+								    }
+								}
+                            }  
+                        }
+                        writeYaml file: envname+'/'+cmdb_yaml, data: cmdb, overwrite: true
+
+                        def result = ci_git_server_baseurl.split("://")
+                        def git_url = result[0] + "://" + GITLAB_USER_USR + ":" + GITLAB_USER_PSW + "@" + result[1] + "/" + git_project + ".git"
+
+                        sh """
+                            git config --global credential.helper store
+							git config user.email "${GITLAB_USER_USR}@hd123.com"
+                            git config user.name "${GITLAB_USER_USR}"
+							git checkout ${git_branch}
+                            git pull ${git_url} ${git_branch}:${git_branch}
+							git add .
+							git commit -m "update ${envname}/${cmdb_yaml} : ${image}  "
+							git push ${git_url}
+                        """
+
+                }
+			}
+
+        }
+        
+    }
+
+}
