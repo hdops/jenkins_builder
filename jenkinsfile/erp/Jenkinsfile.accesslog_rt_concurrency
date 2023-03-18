@@ -1,0 +1,62 @@
+// toolset_x Git repo, 查询erp分支下production/cmdb.yaml
+def git_repo = ""
+if (env.git_repo){
+  git_repo = env.git_repo
+}
+
+def project="xx"
+if (env.project){
+  project= env.project
+}
+
+def apps='hdpos4-dist,pasoreport-web,h4cs-dist,jposbo'
+if (env.apps){
+   apps = env.apps
+}
+
+def node="master"
+if (env.node){
+  node=env.node
+}
+
+def credentialsId="17643215-09f8-4a9a-b0ea-c8e49777ce1d"
+if (env.credentials_id){
+  credentialsId = env.credentials_id
+}
+pipeline {
+    agent {
+        docker {
+            label "${node}"
+            image "harbor.qianfan123.com/toolset/erp_accesslog_etl:1.0.0"
+            alwaysPull true
+        }
+    }
+    options {
+	    timeout(time: 2, unit: 'HOURS')
+	    buildDiscarder(logRotator(numToKeepStr: '10'))
+    }
+    triggers {
+        cron "H 8 * * *" // 每天8点执行一次
+    }
+
+    stages{
+        //stage('delete workspace') {
+        //    steps{
+        //        deleteDir()
+        //    }
+        //}
+        stage('checkout'){
+            steps{
+                script{
+                    retry(3){
+                        checkout([$class: 'GitSCM', branches: [[name: "*/erp"]],extensions: [[$class: 'CloneOption', depth: 1, shallow: true]], userRemoteConfigs: [[credentialsId: "${credentialsId}",url: "${git_repo}"]]])
+                    }
+
+                    sh "cp -r /opt/* ${WORKSPACE} "
+                    sh "python3 erp_accesslog_etl.py --project=${project} --apps=${apps}"
+                }
+
+            }
+        }
+    }
+}
