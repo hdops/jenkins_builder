@@ -60,8 +60,6 @@ pipeline {
                        echo "DNET_PRIVATE_BUCKET is ${DNET_PRIVATE_BUCKET}"
                        echo "DNET_PRIVATE_REGION is ${DNET_PRIVATE_REGION}"
                    }
-
-
                 }
 			}
 		}
