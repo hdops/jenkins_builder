@@ -73,6 +73,13 @@ pipeline {
                 }
 		    }
 		}
+		stage('run test'){
+		    steps{
+		        script{
+		            sh "pytest -m unit  --junitxml=junit.xml -sv --capture sys"
+		        }
+		    }
+		}
 		stage("package && upload"){
             steps{
                 script{
