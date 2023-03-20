@@ -60,8 +60,6 @@ pipeline {
                        echo "DNET_PRIVATE_BUCKET is ${DNET_PRIVATE_BUCKET}"
                        echo "DNET_PRIVATE_REGION is ${DNET_PRIVATE_REGION}"
                    }
-
-
                 }
 			}
 		}
@@ -73,6 +71,13 @@ pipeline {
                        sh "pytest -m unit  --junitxml=junit.xml -sv --capture sys"
                    }
                 }
+		    }
+		}
+		stage('run test'){
+		    steps{
+		        script{
+		            sh "pytest -m unit  --junitxml=junit.xml -sv --capture sys"
+		        }
 		    }
 		}
 		stage("package && upload"){
@@ -87,9 +92,9 @@ pipeline {
     post{
         failure{
             script{
-                dingTalk accessToken: "${DINGTALK_TOKEN}", imageUrl: '', jenkinsUrl: '', message: "pack toolset failure for ${git_project} on ${BUILD_URL}", notifyPeople: ''
+                dingTalk accessToken: "${DINGTALK_TOKEN}", imageUrl: '', jenkinsUrl: '', message: "pack prometheus repo failure for ${git_project} on ${BUILD_URL}", notifyPeople: ''
                 updateGitlabCommitStatus name: 'build', state: 'failed'
-                emailext(recipientProviders: [developers(),requestor(),culprits()],  subject: "pack toolset failure on ${git_project}", body: "failure on Job ${env.BUILD_URL}",attachLog:true)
+                emailext(recipientProviders: [developers(),requestor(),culprits()],  subject: "pack prometheus repo failure on ${git_project}", body: "failure on Job ${env.BUILD_URL}",attachLog:true)
             }
         }
         fixed{
