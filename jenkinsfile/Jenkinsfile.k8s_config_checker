@@ -64,7 +64,7 @@ pipeline {
                    retry(3){
                         checkout([$class: 'GitSCM', branches: [[name: "*/${env.gitlabBranch}"]], extensions: [[$class: 'CloneOption', depth: 1, noTags: true, reference: '', shallow: true]], userRemoteConfigs: [[credentialsId: "${credentialsId}",url: "${ci_git_server_baseurl}/${git_project}.git"]]])
                    }
-                   sh "cp -r /opt/tests/* ${WORKSPACE} "
+                   sh "cp -r /opt/tests/* ${WORKSPACE}/tests "
                    sh "pytest -m unit  --junitxml=junit.xml -sv --capture sys"
                 }
 			}
