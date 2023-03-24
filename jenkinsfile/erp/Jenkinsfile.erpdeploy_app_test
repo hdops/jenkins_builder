@@ -48,7 +48,7 @@ pipeline {
         stage('download toolset_x') {
             steps{
                 withCredentials([usernamePassword(credentialsId: "${credentialsId}", usernameVariable: 'username', passwordVariable: 'password')]){
-                       mysh ('''ssh $host sudo "echo 'http://$username:$password@github.app.hd123.cn:10080\nhttps://$username:$password@gitlab.hd123.com\nhttps://$username:$password@github-argocd.hd123.com' > /opt/.hdgit" ''', false)
+                       mysh ('''ssh $host sudo "echo 'http://$username:$password@github.app.hd123.cn:10080\nhttps://$username:$password@gitlab.hd123.com\nhttps://$username:$password@github-argocd.hd123.com' > /opt/.hdgit_app_${build_number}" ''', false)
             }
 		}
       }
