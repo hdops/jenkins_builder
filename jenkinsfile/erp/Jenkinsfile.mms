@@ -3,16 +3,6 @@ if (env.node){
     node =env.node
 }
 
-def run_on_public="None"
-if (env.run_on_public){
-    run_on_public=env.run_on_public
-}
-if (!env.on_k8s){
-    env.on_k8s="False"
-}
-if (env.set_on_k8s) {
-    env.on_k8s=env.set_on_k8s
-}
 def GIT_BRANCH="erp"
 if (env.GIT_BRANCH){
     GIT_BRANCH=env.GIT_BRANCH
@@ -26,9 +16,8 @@ def credentialsId="17643215-09f8-4a9a-b0ea-c8e49777ce1d"
 if (env.credentials_id){
   credentialsId = env.credentials_id
 }
- 
-// qianfanops/toolset
-def git_project = "xxx"
+
+def git_project = "qianfanops/toolset_h6std"
 if (env.git_project){
    git_project = env.git_project
 }
@@ -38,15 +27,31 @@ if (env.docker_image){
    docker_image = env.docker_image
 }
 
+def CD_NEW_BRANCH="cd_new_develop"
+if (env.CD_NEW_BRANCH){
+    CD_NEW_BRANCH=env.CD_NEW_BRANCH
+}
+
+def inventory = "group_vars/mmshosts"
+if (env.inventory) {
+    inventory = env.inventory
+}
+
+def group_vars = "group_vars/mms.yaml"
+if (env.group_vars) {
+    group_vars = env.group_vars
+}
+
 def add_args = " "
 if (env.add_args) {
     add_args = env.add_args
 }
 
+
 if (env.subsystem) {
     //echo "add_args is ${add_args}"
 	//echo "subsystem is ${subsystem}"
-	add_args+="  -e mms_system_from_job="+env.subsystem
+	add_args+="  -e systems_from_job="+env.subsystem
 	add_args+="  -e mms_version_from_job="+env.mms_version
 }
 
@@ -75,15 +80,17 @@ pipeline {
                     sh "docker pull ${docker_image}"
                     withDockerContainer(args: "-v /root/.ssh:/root/.ssh", image: "${docker_image}") {  
 						sh "curl -O http://ka-storage.oss-cn-hangzhou.aliyuncs.com/cd_new/init_cd_new.sh"
-						sh "sh init_cd_new.sh cd_new_develop"
+						sh "sh init_cd_new.sh ${CD_NEW_BRANCH}"
 
 						sh "rm -rf /opt/ka-toolset/ka_deploy/group_vars"
 						sh "ln -s ${WORKSPACE}/${envname} /opt/ka-toolset/ka_deploy/group_vars"
 
+						echo "inventory is ${inventory}"
 						echo "playbook is ${playbook}"
+						echo "group_vars is ${group_vars}"
 						echo "add_args is ${add_args}"
-						
-						sh "cd /opt/ka-toolset/ka_deploy/ &&  ansible-playbook -i group_vars/mmshosts  ${playbook} -e '@group_vars/mms.yaml' ${add_args}" 
+
+						sh "cd /opt/ka-toolset/ka_deploy/ &&  ansible-playbook -i ${inventory}  ${playbook} -e '@${group_vars}' ${add_args}"
                     }
                 }
             }
