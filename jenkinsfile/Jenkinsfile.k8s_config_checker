@@ -42,7 +42,7 @@ def toolset_image_version="1.0.0"
 if (env.toolset_image_version){
     toolset_image_version = env.toolset_image_version
 }
-def git_commit_author=""
+
 pipeline {
 	agent {
         docker {
@@ -65,7 +65,7 @@ pipeline {
                    retry(3){
                         checkout([$class: 'GitSCM', branches: [[name: "*/${env.gitlabBranch}"]], extensions: [[$class: 'CloneOption', depth: 1, noTags: true, reference: '', shallow: true]], userRemoteConfigs: [[credentialsId: "${credentialsId}",url: "${ci_git_server_baseurl}/${git_project}.git"]]])
                    }
-                   git_commit_author = sh(returnStdout: true, script: 'git log -n 1 --pretty=format:"%an"')
+
                    //sh "mkdir ${WORKSPACE}/tests"
                    sh """
                    if [ ! -d "${WORKSPACE}/tests" ]; then
@@ -82,6 +82,7 @@ pipeline {
     post{
         failure{
             script{
+                def git_commit_author = sh(returnStdout: true, script: 'git log -n 1 --pretty=format:"%an"')
                 if (git_commit_author!='qianfanauto' && git_commit_author!='opsCD'){
                     dingTalk accessToken: "${DINGTALK_TOKEN}", imageUrl: '', jenkinsUrl: '', message: "k8s_config_checker failure for ${git_project} on ${BUILD_URL}", notifyPeople: ''
                     updateGitlabCommitStatus name: 'build', state: 'failed'
@@ -92,6 +93,7 @@ pipeline {
         }
         fixed{
             script{
+                def git_commit_author = sh(returnStdout: true, script: 'git log -n 1 --pretty=format:"%an"')
                 if (git_commit_author!='qianfanauto' && git_commit_author!='opsCD'){
                     emailext(recipientProviders: [developers(),requestor(),culprits()],to: "${git_commit_author}@hd123.com,buhaiqing@hd123.com", subject: "k8s_config_checker success on ${git_project}", body: "success on Job ${env.BUILD_URL}")
                 }
