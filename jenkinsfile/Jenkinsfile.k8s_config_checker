@@ -65,10 +65,6 @@ pipeline {
                    retry(3){
                        checkout([$class: 'GitSCM', branches: [[name: "*/${env.gitlabBranch}"]], extensions: [[$class: 'CloneOption', depth: 1, noTags: true, reference: '', shallow: true]], userRemoteConfigs: [[credentialsId: "${credentialsId}",url: "${ci_git_server_baseurl}/${git_project}.git"]]])
                    }
-                   docker.image("harbor.qianfan123.com/toolset/toolsetcore:${toolset_image_version}").inside {
-                       def git_commit_author = sh(returnStdout: true, script: 'git log -n 1 --pretty=format:"%an"')
-                   }
-
 
                    //sh "mkdir ${WORKSPACE}/tests"
                    sh """
@@ -87,7 +83,6 @@ pipeline {
     post{
         failure{
             script{
-                echo "Commit Author : ${git_commit_author}"
                 dingTalk accessToken: "${DINGTALK_TOKEN}", imageUrl: '', jenkinsUrl: '', message: "k8s_config_checker failure for ${git_project} on ${BUILD_URL}", notifyPeople: ''
                 updateGitlabCommitStatus name: 'build', state: 'failed'
                 emailext(recipientProviders: [developers(),requestor(),culprits()],to:"buhaiqing@hd123.com",  subject: "k8s_config_checker failure on ${git_project}", body: "failure on Job ${env.BUILD_URL}\n${env.GIT_COMMIT}",attachLog:true)
