@@ -59,6 +59,11 @@ pipeline {
     stages {
 
         stage('checkout scm & config test'){
+            when {
+               expression{
+                    (git_commit_author!='qianfanauto') && (git_commit_author!='opsCD')
+               }
+            }
 			steps{
                 script{
                    retry(3){
@@ -80,15 +85,19 @@ pipeline {
     post{
         failure{
             script{
-                dingTalk accessToken: "${DINGTALK_TOKEN}", imageUrl: '', jenkinsUrl: '', message: "k8s_config_checker failure for ${git_project} on ${BUILD_URL}", notifyPeople: ''
-                updateGitlabCommitStatus name: 'build', state: 'failed'
+                if (git_commit_author!='qianfanauto' && git_commit_author!='opsCD'){
+                    dingTalk accessToken: "${DINGTALK_TOKEN}", imageUrl: '', jenkinsUrl: '', message: "k8s_config_checker failure for ${git_project} on ${BUILD_URL}", notifyPeople: ''
+                    updateGitlabCommitStatus name: 'build', state: 'failed'
 
-                emailext(recipientProviders: [developers(),requestor(),culprits()],  subject: "k8s_config_checker failure on ${git_project}", body: "failure on Job ${env.BUILD_URL}\n${env.GIT_COMMIT}",attachLog:true)
+                    emailext(recipientProviders: [developers(),requestor(),culprits()],to:"${git_commit_author}@hd123.com,buhaiqing@hd123.com"  subject: "k8s_config_checker failure on ${git_project}", body: "failure on Job ${env.BUILD_URL}\n${env.GIT_COMMIT}",attachLog:true)
+                }
             }
         }
         fixed{
             script{
-                emailext(recipientProviders: [developers(),requestor(),culprits()],  subject: "k8s_config_checker success on ${git_project}", body: "success on Job ${env.BUILD_URL}")
+                if (git_commit_author!='qianfanauto' && git_commit_author!='opsCD'){
+                    emailext(recipientProviders: [developers(),requestor(),culprits()],to: "${git_commit_author}@hd123.com,buhaiqing@hd123.com"  subject: "k8s_config_checker success on ${git_project}", body: "success on Job ${env.BUILD_URL}")
+                }
             }
         }
         success{
