@@ -63,9 +63,9 @@ pipeline {
 			steps{
                 script{
                    retry(3){
-                       def scmVars = checkout([$class: 'GitSCM', branches: [[name: "*/${env.gitlabBranch}"]], extensions: [[$class: 'CloneOption', depth: 1, noTags: true, reference: '', shallow: true]], userRemoteConfigs: [[credentialsId: "${credentialsId}",url: "${ci_git_server_baseurl}/${git_project}.git"]]])
+                       checkout([$class: 'GitSCM', branches: [[name: "*/${env.gitlabBranch}"]], extensions: [[$class: 'CloneOption', depth: 1, noTags: true, reference: '', shallow: true]], userRemoteConfigs: [[credentialsId: "${credentialsId}",url: "${ci_git_server_baseurl}/${git_project}.git"]]])
                    }
-                   echo "${scmVars}"
+
 
                    //sh "mkdir ${WORKSPACE}/tests"
                    sh """
@@ -83,20 +83,14 @@ pipeline {
     post{
         failure{
             script{
-                if ("${env.GIT_COMMITTER_NAME}"!='qianfanauto' && "${env.GIT_COMMITTER_NAME}"!='opsCD'){
-                    dingTalk accessToken: "${DINGTALK_TOKEN}", imageUrl: '', jenkinsUrl: '', message: "k8s_config_checker failure for ${git_project} on ${BUILD_URL}", notifyPeople: ''
-                    updateGitlabCommitStatus name: 'build', state: 'failed'
-
-                    emailext(recipientProviders: [developers(),requestor(),culprits()],to:"${env.GIT_COMMITTER_NAME}@hd123.com,buhaiqing@hd123.com",  subject: "k8s_config_checker failure on ${git_project}", body: "failure on Job ${env.BUILD_URL}\n${env.GIT_COMMIT}",attachLog:true)
-                }
+                dingTalk accessToken: "${DINGTALK_TOKEN}", imageUrl: '', jenkinsUrl: '', message: "k8s_config_checker failure for ${git_project} on ${BUILD_URL}", notifyPeople: ''
+                updateGitlabCommitStatus name: 'build', state: 'failed'
+                emailext(recipientProviders: [developers(),requestor(),culprits()],to:"buhaiqing@hd123.com",  subject: "k8s_config_checker failure on ${git_project}", body: "failure on Job ${env.BUILD_URL}\n${env.GIT_COMMIT}",attachLog:true)
             }
         }
         fixed{
             script{
-                def git_commit_author = sh(returnStdout: true, script: 'git log -n 1 --pretty=format:"%an"')
-                if (git_commit_author!='qianfanauto' && git_commit_author!='opsCD'){
-                    emailext(recipientProviders: [developers(),requestor(),culprits()],to: "${env.GIT_COMMITTER_NAME}@hd123.com,buhaiqing@hd123.com", subject: "k8s_config_checker success on ${git_project}", body: "success on Job ${env.BUILD_URL}")
-                }
+                emailext(recipientProviders: [developers(),requestor(),culprits()],to: "${env.GIT_COMMITTER_NAME}@hd123.com,buhaiqing@hd123.com", subject: "k8s_config_checker success on ${git_project}", body: "success on Job ${env.BUILD_URL}")
             }
         }
         success{
