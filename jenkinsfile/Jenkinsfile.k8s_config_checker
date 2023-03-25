@@ -90,7 +90,7 @@ pipeline {
         }
         fixed{
             script{
-                emailext(recipientProviders: [developers(),requestor(),culprits()],to: "${env.GIT_COMMITTER_NAME}@hd123.com,buhaiqing@hd123.com", subject: "k8s_config_checker success on ${git_project}", body: "success on Job ${env.BUILD_URL}")
+                emailext(recipientProviders: [developers(),requestor(),culprits()],to: "buhaiqing@hd123.com", subject: "k8s_config_checker success on ${git_project}", body: "success on Job ${env.BUILD_URL}")
             }
         }
         success{
