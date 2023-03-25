@@ -83,12 +83,12 @@ pipeline {
                 dingTalk accessToken: "${DINGTALK_TOKEN}", imageUrl: '', jenkinsUrl: '', message: "k8s_config_checker failure for ${git_project} on ${BUILD_URL}", notifyPeople: ''
                 updateGitlabCommitStatus name: 'build', state: 'failed'
 
-                emailext(recipientProviders: [developers(),requestor(),culprits()],to: "buhaiqing@hd123.com",  subject: "k8s_config_checker failure on ${git_project}", body: "failure on Job ${env.BUILD_URL}\n${env.GIT_COMMIT}",attachLog:true)
+                emailext(recipientProviders: [developers(),requestor(),culprits()],  subject: "k8s_config_checker failure on ${git_project}", body: "failure on Job ${env.BUILD_URL}\n${env.GIT_COMMIT}",attachLog:true)
             }
         }
         fixed{
             script{
-                emailext(recipientProviders: [developers(),requestor(),culprits()],to: "buhaiqing@hd123.com",  subject: "k8s_config_checker success on ${git_project}", body: "success on Job ${env.BUILD_URL}")
+                emailext(recipientProviders: [developers(),requestor(),culprits()],  subject: "k8s_config_checker success on ${git_project}", body: "success on Job ${env.BUILD_URL}")
             }
         }
         success{
