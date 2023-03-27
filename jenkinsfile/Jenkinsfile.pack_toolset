@@ -43,6 +43,7 @@ if (env.toolset_image_version){
     toolset_image_version = env.toolset_image_version
 }
 
+def git_commit_author =""
 pipeline {
 	agent {
         docker {
@@ -63,6 +64,7 @@ pipeline {
                    retry(3){
                         checkout([$class: 'GitSCM', branches: [[name: "*/${env.gitlabBranch}"]], extensions: [[$class: 'CloneOption', depth: 1, noTags: true, reference: '', shallow: true]], userRemoteConfigs: [[credentialsId: "${credentialsId}",url: "${ci_git_server_baseurl}/${git_project}.git"]]])
                    }
+                   def git_commit_author = sh(returnStdout: true, script: 'git log -n 1 --pretty=format:"%an"')
                    echo "TRUST_PUBLIC_IP is ${TRUST_PUBLIC_IP}"
                    echo "DNET_CLOUD_VENDOR is ${DNET_CLOUD_VENDOR}"
 
@@ -145,12 +147,16 @@ pipeline {
             script{
                 dingTalk accessToken: "${DINGTALK_TOKEN}", imageUrl: '', jenkinsUrl: '', message: "pack toolset failure for ${git_project} on ${BUILD_URL}", notifyPeople: ''
                 updateGitlabCommitStatus name: 'build', state: 'failed'
-                emailext(recipientProviders: [developers(),requestor(),culprits()],to: "${git_commit_author}@hd123.com,buhaiqing@hd123.com",  subject: "pack toolset failure on ${git_project}", body: "failure on Job ${env.BUILD_URL}\n${env.GIT_COMMIT}",attachLog:true)
+                if (run_unittest && git_commit_author!='opsCD' && git_commit_author!='qianfanauto' && git_commit_author!='appGitLab'){
+                    emailext(recipientProviders: [developers(),requestor(),culprits()],to: "${git_commit_author}@hd123.com,buhaiqing@hd123.com",  subject: "pack toolset failure on ${git_project}", body: "failure on Job ${env.BUILD_URL}\n${env.GIT_COMMIT}",attachLog:true)
+                }
             }
         }
         fixed{
             script{
-                emailext(recipientProviders: [developers(),requestor(),culprits()],to: "buhaiqing@hd123.com",  subject: "pack toolset success on ${git_project}", body: "success on Job ${env.BUILD_URL}")
+                if (run_unittest && git_commit_author!='opsCD' && git_commit_author!='qianfanauto' && git_commit_author!='appGitLab'){
+                    emailext(recipientProviders: [developers(),requestor(),culprits()],to: "buhaiqing@hd123.com",  subject: "pack toolset success on ${git_project}", body: "success on Job ${env.BUILD_URL}")
+                }
             }
         }
         success{
