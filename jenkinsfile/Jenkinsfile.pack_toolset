@@ -64,7 +64,7 @@ pipeline {
                    retry(3){
                         checkout([$class: 'GitSCM', branches: [[name: "*/${env.gitlabBranch}"]], extensions: [[$class: 'CloneOption', depth: 1, noTags: true, reference: '', shallow: true]], userRemoteConfigs: [[credentialsId: "${credentialsId}",url: "${ci_git_server_baseurl}/${git_project}.git"]]])
                    }
-                   def git_commit_author = sh(returnStdout: true, script: 'git log -n 1 --pretty=format:"%an"')
+                   git_commit_author = sh(returnStdout: true, script: 'git log -n 1 --pretty=format:"%an"')
                    echo "TRUST_PUBLIC_IP is ${TRUST_PUBLIC_IP}"
                    echo "DNET_CLOUD_VENDOR is ${DNET_CLOUD_VENDOR}"
 
@@ -101,7 +101,7 @@ pipeline {
             steps{
                 echo "单元测试： $run_unittest"
                 script{
-                    def git_commit_author = sh(returnStdout: true, script: 'git log -n 1 --pretty=format:"%an"')
+                    git_commit_author = sh(returnStdout: true, script: 'git log -n 1 --pretty=format:"%an"')
                     // 提交用户是qianfanauto或opsCD时，不做单元测试
                     println("git commit author is " + git_commit_author)
                     if (run_unittest && git_commit_author!='opsCD' && git_commit_author!='qianfanauto' && git_commit_author!='appGitLab'){
