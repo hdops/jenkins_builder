@@ -87,7 +87,7 @@ pipeline {
                             echo "cfgname is: ${cfgname}"
                             String[] cfgstr = cfgname.split(',')
                             for ( String i : cfgstr ){
-                                if ( i == "" ) {
+                                if ( i == "" || i == "jenkins_update.sh" || i == "jenkins/default.yml" ) {
                                     continue
                                 }
                                 out = sh(script: "[ -d ${i} ] && echo -n 'true' || echo -n 'false' ", returnStdout: true)
