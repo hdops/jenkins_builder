@@ -24,6 +24,7 @@ def update_shell="jenkins-jobs --conf /root/jenkins_jobs.ini update --workers 5"
 def ignore_templates="/templates/|/ops/jenkins.yml"
 
 def error_yaml_file=""
+def git_commit_author =""
 
 pipeline {
 	agent {
@@ -48,6 +49,7 @@ pipeline {
                         git branch: "${git_project_branch}", credentialsId: "${credentialsId}", url: "${git_base_url}/${git_project}.git"
                         sh 'git submodule update --init --recursive'
                         sh 'git submodule foreach "git pull origin master"'
+                        git_commit_author = sh(returnStdout: true, script: 'git log -n 1 --pretty=format:"%an"')
                     }
                 }
             }
@@ -151,7 +153,7 @@ pipeline {
                 def to = env.email_recipients ? "${env.email_recipients}" : "buhaiqing@hd123.com"
                 def body = env.email_body ? "${env.email_body}" : "failure on Job ${env.JOB_NAME} in ${env.BUILD_URL}"
                 // send email
-                emailext(recipientProviders: [requestor(),culprits()],to:'buhaiqing@hd123.com',subject: "${subject}", body: "${body}",attachLog:true)
+                emailext(recipientProviders: [requestor(),culprits()],to:'${git_commit_author}@hd123.com,buhaiqing@hd123.com',subject: "${subject}", body: "${body}",attachLog:true)
             }
         }
         fixed{
@@ -161,7 +163,7 @@ pipeline {
                 def to = env.email_recipients ? "${env.email_recipients}" : "buhaiqing@hd123.com"
                 def body = env.email_body ? "${env.email_body}" : "fixed on Job ${env.JOB_NAME} in ${env.BUILD_URL}"
                 // send email
-                emailext(recipientProviders: [requestor(),culprits()],,to:'buhaiqing@hd123.com',subject: "${subject}", body: "${body}",attachLog:true)
+                emailext(recipientProviders: [requestor(),culprits()],to:'buhaiqing@hd123.com',subject: "${subject}", body: "${body}",attachLog:true)
             }
         }
         success{
