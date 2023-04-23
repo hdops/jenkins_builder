@@ -1,0 +1,86 @@
+def node="develop"
+if (env.node){
+    node =env.node
+}
+
+def ci_git_server_baseurl= "https://gitlab.hd123.com"
+if (env.ci_git_server_baseurl){
+    ci_git_server_baseurl = env.ci_git_server_baseurl
+}
+
+def gradle_image= "harbor.qianfan123.com/base/hd_jdk:8u162-Android9-CentOS7"
+if (env.gradle_image){
+    gradle_image =env.gradle_image
+}
+
+def credentialsId="appGitLab"
+if (env.credentials_id){
+  credentialsId = env.credentials_id
+}
+
+def gitpath = "None"
+if (env.gitpath){
+    gitpath = env.gitpath
+}
+pipeline {
+    agent {
+		docker {
+            alwaysPull true
+		    label node
+            image "${gradle_image}"
+            args "--rm -v /usr/share/zoneinfo/Asia/Shanghai:/etc/localtime -v /etc/timezone:/etc/timezone -v /var/run/docker.sock:/var/run/docker.sock -v /usr/bin/docker:/usr/bin/docker  -v /root/.docker/config.json:/root/.docker/config.json  --add-host=maven.qianfan123.com:172.17.0.82 --add-host=github.app.hd123.cn:172.17.10.58 --add-host=gitlab.hd123.com:172.17.12.219 --entrypoint='' "
+          }
+	}
+    options {
+	    timeout(time: 1, unit: 'HOURS')
+    } 
+    stages {
+        stage('delete workspace'){
+		    when {
+			    expression {'Y' == "${params.deleteWorkspace}"}
+			}
+			steps{
+			    deleteDir()
+			}
+		}
+         stage('checkout') {
+             steps{ 
+				echo "checkout ${ci_git_server_baseurl}/${git_project}.git  branch:${build_branch}"
+				retry(5){
+				    checkout([$class: 'GitSCM', branches: [[name: "*/${build_branch}"]],userRemoteConfigs: [[credentialsId: "${credentialsId}",url: "${ci_git_server_baseurl}/${git_project}.git"]]])
+				}
+             }
+         }
+		stage('build') {
+		    steps{
+				script{  
+                        def gradle_build_shell="sh "
+					    gradle_build_shell+=env.gradle_build
+					    echo "gradle_build_shell is ${gradle_build_shell}"
+					    sh "  ${gradle_build_shell}"
+				}
+			} 
+		}
+    }
+    post{
+        success{
+            script{
+                if (env.post_shell){
+                    sh """
+                    ${env.post_shell}
+                    """
+                }
+                if (env.uploadJob != "" && env.uploadJob != null) {
+                    // archiveArtifacts
+                    archiveArtifacts '**/*.apk'
+                    // print
+                    println(env.uploadJob)
+                    echo "jenkins_build_url:${BUILD_URL}"
+                    echo "oss_prefix:${oss_prefix}"
+                    // post_build
+                    build job: "${uploadJob}", parameters: [string(name: 'jenkins_build_url', value: BUILD_URL), string(name: 'oss_prefix', value: oss_prefix)], wait: false
+                }
+            }
+        }
+    }
+}
