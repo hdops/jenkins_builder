@@ -70,12 +70,13 @@ pipeline {
 				script{  
 					echo "npm_shell is ${npm_shell}"
 					sh "  ${npm_shell}"
-					if (env.docker_harbor && env.docker_harbor.endsWith('/')){
-					    docker_build_tag = env.docker_harbor + env.image + ":" + env.imageVersion
-					} else{
-					    docker_build_tag = env.docker_harbor + "/" + env.image + ":" + env.imageVersion
-					}
-					if (docker_build_tag){
+					if (env.docker_harbor){
+						echo "docker_harbor is ${docker_harbor}"
+						if (env.docker_harbor.endsWith('/')){
+					    	docker_build_tag = env.docker_harbor + env.image + ":" + env.imageVersion
+						} else{
+						    docker_build_tag = env.docker_harbor + "/" + env.image + ":" + env.imageVersion
+						}
 						echo "docker_build_tag is ${docker_build_tag}"
 						docker_build_shell = "docker build -t " + docker_build_tag + " . && docker push " + docker_build_tag
 					    //echo "docker_build_shell is ${docker_build_shell}"
@@ -171,5 +172,31 @@ image=${subsystem}""", remoteJenkinsName: "${remoteJenkins}", useCrumbCache: fal
 				}
 			}
 		}
+    }
+    post{
+        success{
+            script{
+                if (env.post_shell){
+                    sh """
+                    ${env.post_shell}
+                    """
+                }
+                if (env.upload_wgt_file != "" && env.upload_wgt_file != null) {
+                    // archiveArtifacts
+                    archiveArtifacts '**/*.wgt' 
+                    // print 
+                    println(env.upload_wgt_file)
+                    echo "jenkins_build_url:${BUILD_URL}" 
+                    echo "type:${type}" 
+                    echo "gitlab_project:${gitlab_project}" 
+                    echo "jenkin_job:${jenkin_job}" 
+                    echo "label:${label}" 
+                    echo "is_new_publisher:${is_new_publisher}" 
+                    echo "is_autopublish:${is_autopublish}" 
+                    // post_build
+                    build job: "upload_wgt_file", parameters: [string(name: 'jenkins_build_url', value: BUILD_URL), string(name: 'type', value: type), string(name: 'gitlab_project', value: gitlab_project), string(name: 'jenkin_job', value: jenkin_job), string(name: 'label', value: label), string(name: 'is_new_publisher', value: is_new_publisher), string(name: 'is_autopublish', value: is_autopublish)], wait: false
+                }
+            }
+        }
     }
 }
