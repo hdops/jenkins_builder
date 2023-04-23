@@ -176,31 +176,46 @@ pipeline {
 		stage('build') {
 		    steps{
 				script{  
-						def mvn_shell="mvn "
-                        // release:prepare -DreleaseVersion=${releaseVersion} -DdevelopmentVersion=${developVersion}  release:perform
-						def mvn_goals=" release:prepare -DreleaseVersion=${params.releaseVersion} -DdevelopmentVersion=${params.developVersion}  release:perform "
+						// def mvn_shell="mvn "
+						def mvn_prepare_shell="mvn "
+						def mvn_perform_shell="mvn "
+						// def mvn_goals=" release:prepare -DreleaseVersion=${params.releaseVersion} -DdevelopmentVersion=${params.developVersion}  release:perform "
+						def mvn_prepare_goals="release:prepare -DreleaseVersion=${params.releaseVersion} -DdevelopmentVersion=${params.developVersion}  "
+						// mvn release:perform -Pdeploy -Pdocker -Darguments="-DskipTests=true"
+						def mvn_perform_goals="release:perform "
                         if (env.mvn_profile){
-                            mvn_goals+=" "+env.mvn_profile
+                            // mvn_goals+=" "+env.mvn_profile
+                            mvn_prepare_goals+=" "+env.mvn_profile
+                            mvn_perform_goals+=" "+env.mvn_profile
                             }
                         if (env.mvn_pom){
-                            mvn_shell+=" -f "+env.mvn_pom+" "+mvn_goals
+                            //mvn_shell+=" -f "+env.mvn_pom+" "+mvn_goals
+                            mvn_prepare_shell+="-f "+env.mvn_pom+" "+mvn_prepare_goals
+                            mvn_perform_shell+="-f "+env.mvn_pom+" "+mvn_perform_goals
                             }
                         else{
-                            mvn_shell+=mvn_goals
+                            // mvn_shell+=mvn_goals
+                            mvn_prepare_shell+=mvn_prepare_goals
+                            mvn_perform_shell+=mvn_perform_goals
                             }
                         if (env.mvn_release_options == null){
                             env.mvn_release_options = '-Pdocker -Darguments="-Dmaven.test.skip=true -Dmaven.javadoc.skip=true"'
                             echo "mvn_release_options is ${mvn_release_options}"
                             }
-                        mvn_shell+=env.mvn_release_options
+                        // mvn_shell+=env.mvn_release_options
+                        mvn_perform_shell+=env.mvn_release_options
                         echo "mvn_configfile is ${mvn_configfile}"
                         configFileProvider([configFile(fileId:mvn_configfile, variable: 'maven_settings')]) {
-                                mvn_shell+="  -s $maven_settings"
-                                echo "mvn_shell is ${mvn_shell}"
+                                // mvn_shell+="  -s $maven_settings"
+                                mvn_prepare_shell+=" -s $maven_settings"
+                                mvn_perform_shell+=" -s $maven_settings"
+                                echo "mvn_prepare_shell is ${mvn_prepare_shell}"
+                                echo "mvn_perform_shell is ${mvn_perform_shell}"
                                 sh "git config credential.helper store"
                                 sh "git config  user.email appGitLab@hd123.com"
                                 sh "git config  user.name appGitLab"
-                                sh "${mvn_shell}"
+                                sh "${mvn_prepare_shell}"
+                                sh "${mvn_perform_shell}"
                             }
 				}
 			} 
