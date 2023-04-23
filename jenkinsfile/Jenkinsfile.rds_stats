@@ -51,10 +51,14 @@ pipeline {
 						container("hdtoolsetcore"){
 							sh "hdops sync_mongdb_usage -v ${vendor}"
 							sh "hdops sync_rds_info_usage -v ${vendor}"
+							sh "hdops sync_clb_info -v ${vendor}"
+							sh "hdops sync_eipinfo -v ${vendor}"
 						}
 					}else {
 						sh "hdops sync_mongdb_usage -v ${vendor}"
 						sh "hdops sync_rds_info_usage -v ${vendor}"
+						sh "hdops sync_clb_info -v ${vendor}"
+						sh "hdops sync_eipinfo -v ${vendor}"
 					}
 				}
 			}
