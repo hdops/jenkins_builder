@@ -10,7 +10,7 @@ if (env.whether_post){
 }else{
     whether_post ="True"
 }
-def toolset_image_version="0.3.0-jdk8"
+def toolset_image_version="0.3.0"
 if (env.toolset_image_version){
     toolset_image_version = env.toolset_image_version
 }
@@ -52,11 +52,9 @@ pipeline {
                     }else {
                        docker.image("harbor.qianfan123.com/toolset/toolsetcore:${toolset_image_version}").inside  {
                             retry(2){
-								echo "gitlab project $gitlab_project"
-								echo "type is $type"
 								echo "${params.jenkins_build_url}"
+								echo "oss_prefix is ${params.oss_prefix}"
 								echo "hdops iwms_android_upload --jenkins_build_url ${params.jenkins_build_url} --oss_prefix ${params.oss_prefix} "
-								echo "tag is $tag"
                                 sh "DNET_PROFILE=integration_test DNET_PRODUCT=dnet TRUST_PUBLIC_IP=${run_on_public} hdops download_toolset --branch develop -p ."
                                 sh "tar zxf toolset.tar.gz -C ${WORKSPACE}"
                                 sh "hdops iwms_android_upload --jenkins_build_url ${params.jenkins_build_url} --oss_prefix ${params.oss_prefix} "
