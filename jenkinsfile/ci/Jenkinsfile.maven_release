@@ -201,6 +201,8 @@ pipeline {
                         if (env.mvn_release_options == null){
                             env.mvn_release_options = '-Pdocker -Darguments="-Dmaven.test.skip=true -Dmaven.javadoc.skip=true"'
                             echo "mvn_release_options is ${mvn_release_options}"
+							// baas等默认跳过单元测试
+							mvn_prepare_shell+=env.mvn_release_options
                             }
                         // mvn_shell+=env.mvn_release_options
                         mvn_perform_shell+=env.mvn_release_options
