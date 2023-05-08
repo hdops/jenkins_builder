@@ -183,8 +183,9 @@ pipeline {
 						def mvn_prepare_goals="release:prepare -DreleaseVersion=${params.releaseVersion} -DdevelopmentVersion=${params.developVersion}  "
 						// mvn release:perform -Pdeploy -Pdocker -Darguments="-DskipTests=true"
 						def mvn_perform_goals="release:perform "
-                        if (env.mvn_profile){
-                            // mvn_goals+=" "+env.mvn_profile
+                        if (env.mvn_profile == null){
+                            env.mvn_profile = '-Pdocker'
+                            echo "mvn_profile is ${mvn_profile}"
                             mvn_prepare_goals+=" "+env.mvn_profile
                             mvn_perform_goals+=" "+env.mvn_profile
                             }
@@ -198,8 +199,14 @@ pipeline {
                             mvn_prepare_shell+=mvn_prepare_goals
                             mvn_perform_shell+=mvn_perform_goals
                             }
+                        if (env.unite_test == null){
+                            env.mvn_prepare_options = '-Darguments="-Dmaven.test.skip=true -Dmaven.javadoc.skip=true"'
+                            echo "mvn_prepare_options is ${mvn_prepare_options}"
+							// baas等默认跳过单元测试
+							mvn_prepare_shell+=env.mvn_prepare_options
+                            }
                         if (env.mvn_release_options == null){
-                            env.mvn_release_options = '-Pdocker -Darguments="-Dmaven.test.skip=true -Dmaven.javadoc.skip=true"'
+                            env.mvn_release_options = '-Darguments="-Dmaven.test.skip=true -Dmaven.javadoc.skip=true"'
                             echo "mvn_release_options is ${mvn_release_options}"
 							// baas等默认跳过单元测试
 							mvn_prepare_shell+=env.mvn_release_options
