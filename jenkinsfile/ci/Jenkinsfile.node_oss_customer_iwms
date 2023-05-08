@@ -1,0 +1,139 @@
+def node="develop"
+if (env.node){
+    node =env.node
+}
+
+def node_image= "harbor.qianfan123.com/base/node:9.11.2"
+if (env.node_image){
+    node_image =env.node_image
+}
+
+def build_tag="M2.12.0"
+if (params.build_tag){
+    build_tag =params.build_tag
+}
+
+def packageRemoteJob="createResourcePackage"
+if (env.packageRemoteJob){
+    packageRemoteJob = env.packageRemoteJob
+}
+
+def uploadRemoteJob="upload_to_oss_customer"
+if (env.uploadRemoteJob){
+    uploadRemoteJob = env.uploadRemoteJob
+}
+
+def run_on_public="None"
+if (env.run_on_public){
+    run_on_public=env.run_on_public
+}
+if (!env.on_k8s){
+    env.on_k8s="False"
+}
+if (env.set_on_k8s) {
+    env.on_k8s=env.set_on_k8s
+}
+pipeline {
+	agent {
+        docker {
+          image "${node_image}"
+          args '--add-host=devops-gitlab.hd123.com:118.178.114.72 --rm -v /var/run/docker.sock:/var/run/docker.sock -v /usr/bin/docker:/usr/bin/docker -v /hdapp/npm:/root/.npm  -v /root/.npmrc:/root/.npmrc'
+          label node
+        }
+	}
+    options {
+	//     buildDiscarder(logRotator(numToKeepStr: '10'))
+	//     disableConcurrentBuilds()
+	//     disableResume()
+	    timeout(time: 1, unit: 'HOURS')
+    } 
+    stages {
+        stage('delete workspace'){
+		    when {
+			    expression {'Y' == "${params.deleteWorkspace}"}
+			}
+			steps{
+			    deleteDir()
+			}
+		}
+         stage('build') {
+             steps{
+				script{
+						echo "download ${params.jenkins_job_url} "
+						//prepare_shell = "wget -O iwms-web.tar.gz  ${params.jenkins_job_url} && tar -xf iwms-web.tar.gz  && rm -f iwms-web.tar.gz"
+						prepare_shell = "curl -O -u qianfan:headingqianfan ${params.jenkins_job_url} && tar -xf iwms-web.tar.gz  && rm -f iwms-web.tar.gz"
+						echo "prepare_shell is ${prepare_shell}"
+						sh "  ${prepare_shell}" 
+						
+						echo "read  dist/serverConfig.json"
+						def serverConfig = readJSON file: 'dist/serverConfig.json'
+						// println(serverConfig  )
+						println("API_SERVER 默认值是 : "+serverConfig.API_SERVER  )
+						println("BMS_URL 默认值是 : "+serverConfig.BMS_URL  )
+						
+						echo "config iwms-web "
+						if (env.API_SERVER != "" && env.API_SERVER != null) {
+						    echo "API_SERVER is ${env.API_SERVER}"
+							serverConfig.API_SERVER=API_SERVER
+						}
+					
+						if (env.BMS_URL != "" && env.BMS_URL != null) {
+						    echo "BMS_URL is ${env.BMS_URL}"
+							serverConfig.BMS_URL=BMS_URL
+						}
+						//println(serverConfig  )
+						//writeJSON file: 'dist/serverConfig.json', json: serverConfig
+						writeJSON file: 'dist/serverConfig.json', json: serverConfig, pretty: 1
+						
+						echo "check  dist/serverConfig.json"
+						sh " cat dist/serverConfig.json" 
+						
+						echo "archive iwms-web"
+						archive_shell = "tar czvf iwms-web.tar.gz dist" 
+						echo "archive_shell is ${archive_shell}"
+						sh "  ${archive_shell}"  
+						archiveArtifacts '*.tar.gz' 
+				}
+             }
+         }   
+        stage('打包'){
+			steps{
+				script{
+						echo "subsystem:${subsystem}"
+						echo "BUILD_URL:${BUILD_URL}"
+						// def now = new Date() 
+						// fromVersion =now.format("yyyyMMdd", TimeZone.getTimeZone('UTC'))
+						def fromVersion = ""
+						if (env.fromVersion){
+						    fromVersion =env.fromVersion
+						}else{
+						    fromVersion =build_tag
+						}
+						echo "fromVersion:${fromVersion}"
+						echo "alias:${alias}"
+						build job: "${packageRemoteJob}", parameters: [string(name: 'DNET_PROFILE', value: DNET_PROFILE), string(name: 'subsystem', value: subsystem), string(name: 'BUILD_URL', value: BUILD_URL), string(name: 'fromVersion', value: fromVersion), string(name: 'toVersion', value: alias), string(name: 'alias', value: alias)], wait: true
+				}
+			}
+		}
+        stage('部署'){
+		    when {
+			    expression {DNET_PROFILE ==~ /(integration_test|uat)/ }
+			}
+			steps{
+					script{  
+							echo "subsystem:${subsystem}"
+							def oss_resources=""
+							def fromVersion = ""
+							if (env.fromVersion){
+							    fromVersion =env.fromVersion
+							}else{
+							    fromVersion =build_tag
+							}
+							oss_resources = env.subsystem + "-" + fromVersion+ "-" + env.alias + ".tar.gz"
+							echo "oss_resources:${oss_resources}" 
+							build job: "${uploadRemoteJob}", parameters: [string(name: 'DNET_PROFILE', value: DNET_PROFILE), string(name: 'subsystem', value: subsystem), string(name: 'oss_resources', value: oss_resources)], wait: false
+				}
+			}
+		}
+    }
+}
