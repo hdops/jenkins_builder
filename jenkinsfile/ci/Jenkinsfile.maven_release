@@ -185,10 +185,10 @@ pipeline {
 						def mvn_perform_goals="release:perform "
                         if (env.mvn_profile == null){
                             env.mvn_profile = '-Pdocker'
-                            echo "mvn_profile is ${mvn_profile}"
-                            mvn_prepare_goals+=" "+env.mvn_profile
-                            mvn_perform_goals+=" "+env.mvn_profile
                             }
+                        echo "mvn_profile is ${mvn_profile}"
+                        mvn_prepare_goals+=" "+env.mvn_profile
+                        mvn_perform_goals+=" "+env.mvn_profile
                         if (env.mvn_pom){
                             //mvn_shell+=" -f "+env.mvn_pom+" "+mvn_goals
                             mvn_prepare_shell+="-f "+env.mvn_pom+" "+mvn_prepare_goals
@@ -200,19 +200,18 @@ pipeline {
                             mvn_perform_shell+=mvn_perform_goals
                             }
                         if (env.unite_test == null){
+							// baas等默认跳过单元测试
                             env.mvn_prepare_options = '-Darguments="-Dmaven.test.skip=true -Dmaven.javadoc.skip=true"'
                             echo "mvn_prepare_options is ${mvn_prepare_options}"
-							// baas等默认跳过单元测试
-							mvn_prepare_shell+=env.mvn_prepare_options
+						    mvn_prepare_shell+=" "+env.mvn_prepare_options
                             }
                         if (env.mvn_release_options == null){
-                            env.mvn_release_options = '-Darguments="-Dmaven.test.skip=true -Dmaven.javadoc.skip=true"'
-                            echo "mvn_release_options is ${mvn_release_options}"
 							// baas等默认跳过单元测试
-							mvn_prepare_shell+=env.mvn_release_options
+                            env.mvn_release_options = '-Darguments="-Dmaven.test.skip=true -Dmaven.javadoc.skip=true"'
                             }
+                        echo "mvn_release_options is ${mvn_release_options}"
                         // mvn_shell+=env.mvn_release_options
-                        mvn_perform_shell+=env.mvn_release_options
+                        mvn_perform_shell+=" "+env.mvn_release_options
                         echo "mvn_configfile is ${mvn_configfile}"
                         configFileProvider([configFile(fileId:mvn_configfile, variable: 'maven_settings')]) {
                                 // mvn_shell+="  -s $maven_settings"
