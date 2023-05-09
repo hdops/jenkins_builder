@@ -1,0 +1,81 @@
+import jenkins.model.*
+
+// toolset_x Git repo, 查询erp分支下production/cmdb.yaml
+def git_repo = "https://gitlab.hd123.com/qianfanops/cruise_report.git"
+if (env.git_repo){
+  git_repo = env.git_repo
+}
+
+def customer="振华生产"
+if (env.customer){
+  project= env.customer
+}
+
+def node="master"
+if (env.node){
+  node=env.node
+}
+
+def credentialsId="17643215-09f8-4a9a-b0ea-c8e49777ce1d"
+if (env.credentials_id){
+  credentialsId = env.credentials_id
+}
+pipeline {
+    agent {
+        docker {
+            label "${node}"
+            image "harbor.qianfan123.com/toolset/cuise_report:v1.0.0"
+            alwaysPull true
+        }
+    }
+    options {
+	    timeout(time: 2, unit: 'HOURS')
+	    buildDiscarder(logRotator(numToKeepStr: '10'))
+    }
+    //  triggers {
+    //     cron "0 0 * * 5" //每周五0点运行
+    //  }
+
+    stages{
+        stage('delete workspace') {
+            steps{
+                deleteDir()
+				echo "customer is ${params.customer}"
+            }
+        }
+        stage('checkout'){
+            steps{
+                script{
+                    retry(3){
+                        checkout([$class: 'GitSCM', branches: [[name: "*/develop"]],extensions: [[$class: 'CloneOption', depth: 1, shallow: true]], userRemoteConfigs: [[credentialsId: "${credentialsId}",url: "${git_repo}"]]])
+                    }
+					String[] data = env.customer.split(',')
+                    println(data)
+                    tasks = [:]
+                    data.each{ i ->
+                    echo "生成巡检报告 "+ i
+
+                    sh """
+                    cd ${WORKSPACE}/project/
+                    python generate_k8scluster_grafana.py $i
+				 	python generate_k8scluster_report.py $i
+				 	"""
+                    }
+				 	sh """
+				 	mkdir dashboard
+					cd dashboard
+					git clone http://github.app.hd123.cn:10080/qianfanops/dashboard.git -b develop
+					cp -r ../project/out/* ./dashboard/
+					cd dashboard
+					git add .
+                    git commit -m "自动巡检"
+                    git push http://github.app.hd123.cn:10080/qianfanops/dashboard.git
+  					"""
+
+                }
+
+            }
+
+        }
+    }
+}
