@@ -24,7 +24,7 @@ pipeline {
     agent {
         docker {
             label "${node}"
-            image "harbor.qianfan123.com/toolset/cruise_report:1.0.0"
+            image "harbor.qianfan123.com/toolset/cuise_report:v1.0.0"
             alwaysPull true
         }
     }
@@ -84,7 +84,7 @@ pipeline {
                 emailext(recipientProviders: [developers(),requestor(),culprits()],to:'zhangweib@hd123.com',  subject: "自动巡检job fiailure", body: "failure on Job ${env.BUILD_URL}\n${env.customer}生成报告失败",attachLog:true)
             }
         }
-        fixed{
+        succeed{
             script{
                 emailext(recipientProviders: [developers(),requestor(),culprits()],to:'zhangweib@hd123.com',  subject: "自动巡检job succeed", body: "succeed on Job ${env.BUILD_URL}\n${env.customer}生成报告成功",attachLog:true)
             }
