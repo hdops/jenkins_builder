@@ -81,12 +81,12 @@ pipeline {
     post {
         failure {
             script{
-                emailext(recipientProviders: [developers(),requestor(),culprits()],to:'zhangweib@hd123.com',  subject: "自动巡检job fiailure", body: "failure on Job ${env.BUILD_URL}\n${env.customer}生成报告失败",attachLog:true)
+                emailext(recipientProviders: [developers(),requestor(),culprits()],to:'zhangweib@hd123.com',  subject: "k8s集群自动巡检job失败，请查看", body: "failure on Job ${env.BUILD_URL}\n${env.customer}生成报告失败",attachLog:true)
             }
         }
         success {
             script{
-                emailext(recipientProviders: [developers(),requestor(),culprits()],to:'zhangweib@hd123.com',  subject: "自动巡检job succeed", body: "succeed on Job ${env.BUILD_URL}\n${env.customer}生成报告成功",attachLog:true)
+                emailext(recipientProviders: [developers(),requestor(),culprits()],to:'xuhao@hd123.com,zhangweib@hd123.com',  subject: "k8s集群自动巡检报告已生成，请编写巡检总结", body: "succeed on Job ${env.BUILD_URL}\n${env.customer}生成报告成功",attachLog:true)
             }
         }
     }
