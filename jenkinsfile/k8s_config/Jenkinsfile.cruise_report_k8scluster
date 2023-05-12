@@ -78,4 +78,16 @@ pipeline {
 
         }
     }
+    post{
+        failure{
+            script{
+                emailext(recipientProviders: [developers(),requestor(),culprits()],to:'zhangweib@hd123.com',  subject: "k8s_cruise_report_run failure", body: "failure on Job ${env.BUILD_URL}\n${env.GIT_COMMIT}",attachLog:true)
+            }
+        }
+        fixed{
+            script{
+                emailext(recipientProviders: [developers(),requestor(),culprits()],to:'zhangweib@hd123.com',  subject: "k8s_cruise_report_run succeed", body: "succeed on Job ${env.BUILD_URL}\n${env.GIT_COMMIT}",attachLog:true)
+            }
+        }
+    }
 }
