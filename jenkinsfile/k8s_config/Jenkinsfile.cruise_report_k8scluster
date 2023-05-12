@@ -79,14 +79,9 @@ pipeline {
         }
     }
     post{
-        failure{
+        always{
             script{
                 emailext(recipientProviders: [developers(),requestor(),culprits()],to:'zhangweib@hd123.com',  subject: "自动巡检job fiailure", body: "failure on Job ${env.BUILD_URL}\n${env.customer}生成报告失败",attachLog:true)
-            }
-        }
-        succeed{
-            script{
-                emailext(recipientProviders: [developers(),requestor(),culprits()],to:'zhangweib@hd123.com',  subject: "自动巡检job succeed", body: "succeed on Job ${env.BUILD_URL}\n${env.customer}生成报告成功",attachLog:true)
             }
         }
     }
