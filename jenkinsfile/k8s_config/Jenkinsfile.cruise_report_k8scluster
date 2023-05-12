@@ -24,7 +24,7 @@ pipeline {
     agent {
         docker {
             label "${node}"
-            image "harbor.qianfan123.com/toolset/cuise_report:v1.0.0"
+            image "harbor.qianfan123.com/toolset/cruise_report:1.0.0"
             alwaysPull true
         }
     }
