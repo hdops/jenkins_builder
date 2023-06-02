@@ -49,7 +49,7 @@ if (env.skipversionupdate){
 pipeline {
     agent {docker {
             image "${maven_image}"
-            <span class="highlighter highlight-on">label</span> node
+            label node
             args "${docker_args}"
           }}
     options {
