@@ -1,0 +1,105 @@
+def node=""
+if (env.node){
+    node =env.node
+}else{
+    node ="develop"
+}
+
+def maven_image=""
+if (env.maven_image){
+    maven_image =env.maven_image
+}else{
+    maven_image ="harbor.qianfan123.com/base/maven:3.3.9_jdk8"
+}
+
+def ci_git_server_baseurl= "https://osgitlab.liugong.com"
+if (env.ci_git_server_baseurl){
+    ci_git_server_baseurl = env.ci_git_server_baseurl
+}
+
+def credentialsId="liugong"
+if (env.credentials_id){
+  credentialsId = env.credentials_id
+}
+
+def source_code_management=""
+if (env.source_code_management){
+    source_code_management =env.source_code_management
+}else{
+    source_code_management ="git"
+}
+
+def docker_args="--rm -v /var/run/docker.sock:/var/run/docker.sock -v /usr/bin/docker:/usr/bin/docker --add-host=maven.qianfan123.com:172.17.0.82 --add-host=apidoc.hd123.com:172.17.10.53 --add-host=github.app.hd123.cn:172.17.10.58 --add-host=gitlab.hd123.com:172.17.12.219 --add-host=devops-gitlab.hd123.com:118.178.114.72 --add-host osgitlab.liugong.com:34.209.45.242"
+if (env.maven_repository){
+    docker_args+=" -v "+env.maven_repository
+}else{
+    docker_args+=" -v /hdapp/java:/hdapp/java"
+}
+
+def mvn_configfile="liugong"
+if (env.mvn_configfile){
+    mvn_configfile =env.mvn_configfile
+}
+
+def skipversionupdate="--no-skipversionupdate"
+if (env.skipversionupdate){
+    skipversionupdate =env.skipversionupdate
+}
+
+pipeline {
+    agent {docker {
+            image "${maven_image}"
+            <span class="highlighter highlight-on">label</span> node
+            args "${docker_args}"
+          }}
+    options {
+	    timeout(time: 1, unit: 'HOURS')
+    }
+    stages {
+        stage('delete workspace') {
+            steps{
+                deleteDir()
+            }
+        }
+        stage('checkout') {
+            steps{
+                script{
+                    if (source_code_management == "git"){
+                        echo "checkout ${ci_git_server_baseurl}/${git_project}.git  branch:${build_branch}"
+                        retry(5){
+                            checkout([$class: 'GitSCM', branches: [[name: "${build_branch}"]],userRemoteConfigs: [[credentialsId: "${credentialsId}",url: "${ci_git_server_baseurl}/${git_project}.git"]]])
+                        }
+                    } else if (source_code_management == "svn"){
+                        echo "${svn_server_baseurl}/${svn_project}/${build_branch}"
+                        retry(5){
+                            checkout([$class: 'SubversionSCM', additionalCredentials: [], excludedCommitMessages: '', excludedRegions: '', excludedRevprop: '', excludedUsers: '', filterChangelog: false, ignoreDirPropChanges: false, includedRegions: '', locations: [[cancelProcessOnExternalsFail: false, credentialsId: 'hddenv', depthOption: 'infinity', ignoreExternalsOption: true, local: '.', remote: "${svn_server_baseurl}/${svn_project}/${build_branch}"]], quietOperation: true, workspaceUpdater: [$class: 'CheckoutUpdater']])
+                        }
+                    }
+                }
+            }
+        }
+		stage('build') {
+		    steps{
+				script{
+						def mvn_shell="mvn "
+                        if (env.mvn_pom){
+                            mvn_shell+=" -f "+env.mvn_pom+" "+env.mvn_goals
+                            }
+                        else{
+                            mvn_shell+=env.mvn_goals
+                            }
+                        if (env.mvn_options){
+                            echo "mvn_options is ${mvn_options}"
+                            mvn_shell+=" -D"+env.mvn_options+"=true"
+                            }
+                        echo "mvn_configfile is ${mvn_configfile}"
+                        configFileProvider([configFile(fileId:mvn_configfile, variable: 'maven_settings')]) {
+                                mvn_shell+="  -s $maven_settings"
+                                echo "mvn_shell is ${mvn_shell}"
+                                sh "${mvn_shell}"
+                            }
+				}
+			}
+		}
+    }
+}
