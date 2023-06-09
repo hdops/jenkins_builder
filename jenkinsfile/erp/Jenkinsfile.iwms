@@ -90,7 +90,7 @@ pipeline {
 						echo "group_vars is ${group_vars}"
 						echo "add_args is ${add_args}"
 
-						sh "cd /opt/ka-toolset/ka_deploy/ &&  ansible-playbook -i ${inventory}  ${playbook} -e '@${group_vars}' ${add_args}"
+						sh "cd /opt/ka-toolset/ka_deploy/ &&  ansible-playbook -i ${inventory}  ${playbook} -e '@${group_vars}' -e '@group_vars/apollo.yaml' ${add_args}"
                     }
                 }
             }
