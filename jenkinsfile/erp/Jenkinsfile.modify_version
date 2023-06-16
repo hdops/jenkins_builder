@@ -43,6 +43,7 @@ pipeline {
                         }
                         // iwmscmdb.yaml
                         def cmdb = readYaml file: envname+'/'+cmdb_yaml
+                        println( "cmdb 版本是  "+cmdb['apiVersion'])
                         // input images
                         echo "image is ${params.image}"
                         def inputs = image.split(';')
@@ -51,19 +52,38 @@ pipeline {
                             _s =s.split(':')
                             version = _s[0]
                             images = (_s[1]).split(',')
-                            for( j = 0; j< images.length;j++){ 
-								for( k = 0; k< cmdb['subsystems'].size();k++){  
+                            for( j = 0; j< images.length;j++){
+								for( k = 0; k< cmdb['subsystems'].size();k++){
 								    if(cmdb['subsystems'][k].image_name==images[j]) {
-								        if(cmdb['subsystems'][k].version==version) {
-								            println(images[j] + ": 版本已是  "+version+"，无需升级！ ")
+								        // cmdb version 1
+								        if(cmdb['apiVersion'] != null){
+								            // 修改 containers 定义
+								            for( l = 0; l< cmdb['containers'].size();l++){
+								                if(cmdb['containers'][l].image_name==images[j]) {
+								                 if(cmdb['containers'][l].c_version==version) {
+								                        println(cmdb['containers'][l].c_id + ": 版本已经是  "+version)
+								                    }
+								                    else {
+								                        println(cmdb['containers'][l].c_id + ": 版本从 " +cmdb['containers'][l].c_version + "变更为 "+version)
+								                        cmdb['containers'][l].c_version=version
+								                 }
+								                }
+								            }
 								        }
-								        else {
-								            println(images[j] + ": 版本从 " +cmdb['subsystems'][k].version + "变更为 "+version)  
-								            cmdb['subsystems'][k].version=version 
+
+								        else{
+								            // cmdb version 0
+                                            if(cmdb['subsystems'][k].version==version) {
+								                println(images[j] + ": 版本已是  "+version+"，无需升级！ ")
+								            }
+								            else {
+								                println(images[j] + ": 版本从 " +cmdb['subsystems'][k].version + "变更为 "+version)
+								                cmdb['subsystems'][k].version=version
+								            }
 								        }
 								    }
 								}
-                            }  
+                            }
                         }
                         writeYaml file: envname+'/'+cmdb_yaml, data: cmdb, overwrite: true
 
