@@ -55,6 +55,11 @@ if (env.subsystem) {
 	add_args+="  -e mms_version_from_job="+env.mms_version
 }
 
+if (env.cmdb_yaml) {
+	add_args+="  -e cmdb_yaml="+env.cmdb_yaml
+}
+
+
 pipeline {
     agent {label node}
     options {
@@ -90,7 +95,7 @@ pipeline {
 						echo "group_vars is ${group_vars}"
 						echo "add_args is ${add_args}"
 
-						sh "cd /opt/ka-toolset/ka_deploy/ &&  ansible-playbook -i ${inventory}  ${playbook} -e '@${group_vars}' -e '@group_vars/apollo.yaml' ${add_args}"
+						sh "cd /opt/ka-toolset/ka_deploy/ &&  chmod +x inventory/inventory.py &&  ansible-playbook -i ${inventory}  ${playbook} -e '@${group_vars}' -e '@group_vars/apollo.yaml' ${add_args}"
                     }
                 }
             }
