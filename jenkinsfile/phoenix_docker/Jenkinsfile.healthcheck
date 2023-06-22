@@ -98,7 +98,9 @@ pipeline {
                             sh "phoenix-tools healthcheck --dingding ${dingding} --tag ${params.tag}"
                         }                        
                     } else {
-                        withDockerContainer(args: "-v ${WORKSPACE}:/opt", image: "${TOOLSET_DOCKER_REGISTRY_BASEURL}/phoenixcore:${version}") {
+                        def random = new Random()
+                        def randomNumber = random.nextInt(2000)+1
+                        withDockerContainer(args: "-v ${WORKSPACE}:/opt --name phoenixcore-${randomNumber}", image: "${TOOLSET_DOCKER_REGISTRY_BASEURL}/phoenixcore:${version}") {
                             sh "phoenix-tools version"
                             sh "phoenix-tools healthcheck --tag ${params.tag}"
                         }                        
