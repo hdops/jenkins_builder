@@ -70,7 +70,9 @@ pipeline {
             steps{
                 script{
                     if(fileExists('tests')){
-                        withDockerContainer(args: "-v ${WORKSPACE}:${WORKSPACE}", image: "${TOOLSET_DOCKER_REGISTRY_BASEURL}/toolsetcore:0.3.0") {
+                        def random = new Random()
+                        def randomNumber = random.nextInt(2000)+1
+                        withDockerContainer(args: "-v ${WORKSPACE}:${WORKSPACE}", image: "${TOOLSET_DOCKER_REGISTRY_BASEURL}/toolsetcore:0.3.0 --name  toolsetcore-${randomNumber}") {
                             sh "pytest -m unit  --junitxml=junit.xml -sv "
                         }
                     }
@@ -109,8 +111,10 @@ pipeline {
             }
             steps {
                 script{    
+                    def random = new Random()
+                    def randomNumber = random.nextInt(2000)+1
                     sh "docker pull  ${TOOLSET_DOCKER_REGISTRY_BASEURL}/phoenixcore:${version}"
-                    withDockerContainer(args: "-v ${WORKSPACE}:/opt", image: "${TOOLSET_DOCKER_REGISTRY_BASEURL}/phoenixcore:${version}") {
+                    withDockerContainer(args: "-v ${WORKSPACE}:/opt", image: "${TOOLSET_DOCKER_REGISTRY_BASEURL}/phoenixcore:${version} --name phoenixcore-${randomNumber}") {
                         sh "phoenix-tools version"
                         sh "phoenix-tools ${params.action} ${params.skipversion}  --subsystem ${params.subsystem} --skipupgrade ${params.skipupgrade} --tag ${params.tag} ${dryrunStr}"
                     }
