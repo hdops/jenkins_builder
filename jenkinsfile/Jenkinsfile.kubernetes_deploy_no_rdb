@@ -74,6 +74,8 @@ pipeline {
                 script{
                     echo "node : ${node}"
                     echo "on_k8s : ${on_k8s}"
+                    echo "GIT_USER : ${GITLAB_USER_USR}"
+                    echo "GIT_PASSWORD : ${GITLAB_USER_PSW}"
                     kubernetesPodYamlData = readYaml file: "jenkinsfile/${YAML_FILE}"
                     kubernetesPodYamlData.spec.containers[0].image = "${docker_image}"
                     kubernetesPodYamlData.spec.containers[0].name = "${label_name}"
