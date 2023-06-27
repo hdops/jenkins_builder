@@ -6,16 +6,12 @@ metadata:
 spec:
   containers:
   - name: jenkins-job
-    namespace: opsapp
     image: ${image}
     command: ["sleep"]
     args: ["100000"]
     tty: true
     imagePullPolicy: "Always"
     volumeMounts:
-    - mountPath: "/root/.ssh"
-      name: "volume-0"
-      readOnly: false
     - mountPath: "/home/jenkins/agent"
       name: "workspace-volum"
       readOnly: false
@@ -26,16 +22,11 @@ spec:
       name: "workspace-volum"
       readOnly: false
   volumes:
-  - name: "volume-0"
-    secret:
-      defaultMode: 384
-      secretName: "jenkins-ssh-key"
   - emptyDir:
       medium: ""
     name: "workspace-volum"
   imagePullSecrets:
+  - name: "harbor.qianfan123.com"
   - name: "harbor-admin"
-  nodeSelector:
-    app: "jenkins"
   serviceAccount: "jenkins"
   restartPolicy: "Never"
