@@ -34,6 +34,7 @@ spec:
     name: "workspace-volum"
   imagePullSecrets:
   - name: "harbor.qianfan123.com"
+  - name: "harbor-admin"
 #  nodeSelector:
 #    app: "jenkins"
   serviceAccount: "jenkins"
