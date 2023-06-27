@@ -68,7 +68,6 @@ pipeline {
                     kubernetesPodYamlData.spec.containers[0].image = "${docker_image}"
                     kubernetesPodYamlData.spec.containers[0].name = "${label_name}"
                     kubernetesPodYamlData.metadata.labels.label = "${label_name}"
-                    kubernetesPodYamlData.spec.nodeSelector.app = "${nodeSelector_app}"
                     writeYaml file: "${YAML_FILE}.tmp", data: kubernetesPodYamlData
                     kubernetesPodReadYamlData = sh(script: "cat ${YAML_FILE}.tmp", returnStdout: true)
                     echo "${kubernetesPodReadYamlData}"
