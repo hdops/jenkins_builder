@@ -28,5 +28,6 @@ spec:
   imagePullSecrets:
   - name: "harbor.qianfan123.com"
   - name: "harbor-admin"
+  - name: "harborka.qianfan123.com"
   serviceAccount: "jenkins"
   restartPolicy: "Never"
