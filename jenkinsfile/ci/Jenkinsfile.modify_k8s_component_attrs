@@ -1,0 +1,58 @@
+def node=""
+if (env.node){
+    node =env.node
+}else{
+    node ="develop"
+}
+
+
+def ci_git_server_baseurl= "http://github.app.hd123.cn:10080"
+if (env.ci_git_server_baseurl){
+    ci_git_server_baseurl = env.ci_git_server_baseurl
+}
+
+def docker_image=""
+if (env.docker_image){
+    docker_image =env.docker_image
+}else{
+    docker_image ="harbor.qianfan123.com/toolset/k8s_config_checker:1.0.0"
+}
+
+
+def credentialsId="appGitLab"
+if (env.credentials_id){
+  credentialsId = env.credentials_id
+}
+
+def run_on_public="None"
+if (env.run_on_public){
+    run_on_public=env.run_on_public
+}
+
+pipeline {
+    agent {docker {
+            image "${docker_image}"
+            label node
+            args '--rm -v /var/run/docker.sock:/var/run/docker.sock -v /usr/bin/docker:/usr/bin/docker -v /root/.docker/config.json:/root/.docker/config.json  --add-host=maven.qianfan123.com:172.17.0.82 --add-host=github.app.hd123.cn:172.17.10.58 --add-host=gitlab.hd123.com:172.17.12.219 '
+            alwaysPull true
+          }}
+    options {
+	    buildDiscarder(logRotator(numToKeepStr: '20'))
+	    disableConcurrentBuilds()
+	    disableResume()
+	    timeout(time: 1, unit: 'HOURS')
+    }
+    stages {
+        stage('modify component attrs') {
+            steps{
+              script{
+                echo "python modify_component_attrs.py -project ${env.project} -profile ${env.profile} -app ${env.app} -stack {env.stack} -hpa_min {env.hpa_min} -hpa_max ${env.hpa_max} -replicas ${env.replicas} -cpu_requests_m {env.cpu_requests_m} -cpu_limits_m ${env.cpu_limits_m} -mem_requests_mi {env.mem_requests_mi} -mem_limits_mi {env.mem_limits_mi} -jvm_config {env.jvm_config}"
+                sh "python modify_component_attrs.py -project ${env.project} -profile ${env.profile} -app ${env.app} -stack {env.stack} -hpa_min {env.hpa_min} -hpa_max ${env.hpa_max} -replicas ${env.replicas} -cpu_requests_m {env.cpu_requests_m} -cpu_limits_m ${env.cpu_limits_m} -mem_requests_mi {env.mem_requests_mi} -mem_limits_mi {env.mem_limits_mi} -jvm_config {env.jvm_config}"
+              }
+
+            }
+        }
+
+    }
+
+}
