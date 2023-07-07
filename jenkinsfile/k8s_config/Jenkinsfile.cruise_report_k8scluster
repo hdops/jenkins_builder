@@ -50,6 +50,7 @@ pipeline {
                         checkout([$class: 'GitSCM', branches: [[name: "*/develop"]],extensions: [[$class: 'CloneOption', depth: 1, shallow: true]], userRemoteConfigs: [[credentialsId: "${credentialsId}",url: "${git_repo}"]]])
                     }
 					sh """
+					pip install jira==3.1.1
 				 	cd ${WORKSPACE}/project/
                     python jira_manager.py
   					"""
