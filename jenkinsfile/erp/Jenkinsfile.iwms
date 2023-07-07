@@ -52,7 +52,7 @@ if (env.subsystem) {
     //echo "add_args is ${add_args}"
 	//echo "subsystem is ${subsystem}"
 	add_args+="  -e systems_from_job="+env.subsystem
-	add_args+="  -e mms_version_from_job="+env.mms_version
+	//add_args+="  -e mms_version_from_job="+env.mms_version
 }
 
 if (env.cmdb_yaml) {

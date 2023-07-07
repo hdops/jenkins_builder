@@ -88,7 +88,7 @@ pipeline {
             steps {
                 script{
                     def random = new Random()
-                    def randomNumber = random.nextInt(2000)+1
+                    def randomNumber = random.nextInt(20000)+1
                     sh "docker pull  ${TOOLSET_DOCKER_REGISTRY_BASEURL}/phoenixcore:${version}"
                     if (env.dingding == "True") {
                         withDockerContainer(args: "-v ${WORKSPACE}:/opt --name phoenixcore-${randomNumber}", image: "${TOOLSET_DOCKER_REGISTRY_BASEURL}/phoenixcore:${version}") {

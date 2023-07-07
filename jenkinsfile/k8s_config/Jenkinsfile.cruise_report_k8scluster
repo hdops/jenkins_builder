@@ -49,6 +49,11 @@ pipeline {
                     retry(3){
                         checkout([$class: 'GitSCM', branches: [[name: "*/develop"]],extensions: [[$class: 'CloneOption', depth: 1, shallow: true]], userRemoteConfigs: [[credentialsId: "${credentialsId}",url: "${git_repo}"]]])
                     }
+					sh """
+				 	cd ${WORKSPACE}/project/
+                    python jira_manager.py
+  					"""
+
 					String[] data = env.customer.split(',')
                     println(data)
                     tasks = [:]
