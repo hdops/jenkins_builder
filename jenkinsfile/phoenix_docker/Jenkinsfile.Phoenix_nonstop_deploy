@@ -31,21 +31,28 @@ if (!env.on_k8s){
 if (env.set_on_k8s) {
     env.on_k8s=env.set_on_k8s
 }
-
+def wait_time_second="60"
+if (env.wait_time_second){
+    wait_time_second=env.wait_time_second
+}
 def func = {
     sh "phoenix-tools version"
-    echo "注: 6.22.0后版本才支持该功能"
+    echo "注: 6.40.0后版本才支持该功能"
     
     echo "开始 ${params.subsystem} blue 节点更新"
     sh "phoenix-tools change_erueka --subsystem ${params.subsystem}  --tag blue"
+	echo "等待${wait_time_second}s用于配置刷新"
+	sh "sleep ${wait_time_second}"
     sh "phoenix-tools ${params.action} ${params.skipversion} --subsystem ${params.subsystem} --skipupgrade ${params.skipupgrade} --tag blue"
 
     echo "开始 ${params.subsystem} green 节点更新"
     sh "phoenix-tools change_erueka --subsystem ${params.subsystem}  --tag green"
+	echo "等待${wait_time_second}s用于配置刷新"
+	sh "sleep ${wait_time_second}"
     sh "phoenix-tools ${params.action} ${params.skipversion} --subsystem ${params.subsystem} --skipupgrade ${params.skipupgrade} --tag green"
 
-    echo "上线 ${params.subsystem} 全部节点"
-    sh "phoenix-tools change_erueka --subsystem ${params.subsystem}  --tag None"
+    // echo "上线 ${params.subsystem} 全部节点"
+    // sh "phoenix-tools change_erueka --subsystem ${params.subsystem}  --tag None"
     echo "${params.subsystem} 不停服升级完毕"
 }
 
@@ -123,7 +130,7 @@ pipeline {
                     def random = new Random()
                     def randomNumber = random.nextInt(2000)+1
                     sh "docker pull  ${TOOLSET_DOCKER_REGISTRY_BASEURL}/phoenixcore:${version}"
-                    withDockerContainer(args: "-v ${WORKSPACE}:/opt", image: "${TOOLSET_DOCKER_REGISTRY_BASEURL}/phoenixcore:${version} --name  phoenixcore-${randomNumber}") {
+                    withDockerContainer(args: "-v ${WORKSPACE}:/opt  --name  phoenixcore-${randomNumber} ", image: "${TOOLSET_DOCKER_REGISTRY_BASEURL}/phoenixcore:${version}") {
                         func()    
                     }
                 }

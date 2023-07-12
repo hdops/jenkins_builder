@@ -81,9 +81,11 @@ pipeline {
                 environment name: 'on_k8s', value: 'False'
             }
             steps {
-                script{    
+                script{
+                    def random = new Random()
+                    def randomNumber = random.nextInt(2000)+1
                     sh "docker pull  ${TOOLSET_DOCKER_REGISTRY_BASEURL}/phoenixcore:${version}"
-                    withDockerContainer(args: "-v ${WORKSPACE}:/opt", image: "${TOOLSET_DOCKER_REGISTRY_BASEURL}/phoenixcore:${version}") {
+                    withDockerContainer(args: "-v ${WORKSPACE}:/opt --name phoenixcore-${randomNumber}", image: "${TOOLSET_DOCKER_REGISTRY_BASEURL}/phoenixcore:${version}") {
                         sh "phoenix-tools version"
                         sh "phoenix-tools dataimport ptonline --jira ${params.jira} --max_load_threads ${params.max_load_threads} --critical_load_threads ${params.critical_load_threads}  --rdb_host ${params.rdb_host}  --rdb_port ${params.rdb_port}  --rdb_username ${params.rdb_username}  --rdb_password ${params.rdb_password}  --rdb_dbname ${params.rdb_dbname} --dryrun ${params.dryrun}"
                     }
