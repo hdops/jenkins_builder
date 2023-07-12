@@ -86,7 +86,7 @@ pipeline {
                     def random = new Random()
                     def randomNumber = random.nextInt(2000)+1
                     sh "docker pull  ${TOOLSET_DOCKER_REGISTRY_BASEURL}/phoenixcore:${version}"
-                    withDockerContainer(args: "-v ${WORKSPACE}:/opt", image: "${TOOLSET_DOCKER_REGISTRY_BASEURL}/phoenixcore:${version} --name phoenixcore-${randomNumber}") {
+                    withDockerContainer(args: "-v ${WORKSPACE}:/opt  --name phoenixcore-${randomNumber} ", image: "${TOOLSET_DOCKER_REGISTRY_BASEURL}/phoenixcore:${version} ") {
                         sh "phoenix-tools version"
                         sh "phoenix-tools  cache_artifacts --dryrun ${dryrun}"
                     }
