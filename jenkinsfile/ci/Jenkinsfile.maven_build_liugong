@@ -46,6 +46,8 @@ if (env.skipversionupdate){
     skipversionupdate =env.skipversionupdate
 }
 
+def git_timeout=30
+
 pipeline {
     agent {docker {
             image "${maven_image}"
@@ -65,9 +67,9 @@ pipeline {
             steps{
                 script{
                     if (source_code_management == "git"){
-                        echo "checkout ${ci_git_server_baseurl}/${git_project}.git  branch:${build_branch}"
+                        echo "checkout ${ci_git_server_baseurl}/${git_project}.git  branch:${build_branch}  timeout:${git_timeout}m"
                         retry(5){
-                            checkout([$class: 'GitSCM', branches: [[name: "${build_branch}"]],userRemoteConfigs: [[credentialsId: "${credentialsId}",url: "${ci_git_server_baseurl}/${git_project}.git"]]])
+                            checkout([$class: 'GitSCM', timeout:${git_timeout},branches: [[name: "${build_branch}"]],userRemoteConfigs: [[credentialsId: "${credentialsId}",url: "${ci_git_server_baseurl}/${git_project}.git"]]])
                         }
                     } else if (source_code_management == "svn"){
                         echo "${svn_server_baseurl}/${svn_project}/${build_branch}"
