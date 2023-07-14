@@ -46,7 +46,9 @@ pipeline {
                             sh "DINGTALK_TOKEN=${DINGTALK_TOKEN} hdmon restore_es --index ${params.index} --cfgname ${params.cfgname}"
                         }
                     }else {
-                        docker.image("${TOOLSET_DOCKER_REGISTRY_BASEURL}/toolsetcore:${toolset_image_version}").inside  {
+                        def random = new Random()
+                        def randomNumber = random.nextInt(2000)+1
+                        docker.image("${TOOLSET_DOCKER_REGISTRY_BASEURL}/toolsetcore:${toolset_image_version}").inside("--name toolsetcore-${randomNumber}")  {
                             echo "profile is ${params.DNET_PROFILE}"
                             retry(2){
                                 sh "DNET_PROFILE=integration_test DNET_PRODUCT=dnet TRUST_PUBLIC_IP=${run_on_public} hdops download_toolset --branch ${params.GIT_BRANCH} -p ."
