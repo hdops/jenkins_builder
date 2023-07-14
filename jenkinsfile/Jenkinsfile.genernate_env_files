@@ -57,7 +57,9 @@ pipeline {
 
                         }
                     }else {
-                        docker.image("${TOOLSET_DOCKER_REGISTRY_BASEURL}/toolsetcore:${toolset_image_version}").inside  {
+                        def random = new Random()
+                        def randomNumber = random.nextInt(2000)+1
+                        docker.image("${TOOLSET_DOCKER_REGISTRY_BASEURL}/toolsetcore:${toolset_image_version}").inside("--name toolsetcore-${randomNumber}")  {
                             echo "active profile is ${params.DNET_PROFILE}"
                             echo "product is ${params.DNET_PRODUCT}"
                             echo "workspace is $WORKSPACE"

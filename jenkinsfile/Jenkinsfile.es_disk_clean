@@ -57,8 +57,9 @@ pipeline {
                             sh "DINGTALK_TOKEN=${DINGTALK_TOKEN} DNET_PROFILE=${params.DNET_PROFILE}  DNET_PRODUCT=${params.DNET_PRODUCT} hdmon clean_es_data --host ${params.host} --port ${params.port} --username ${params.username} --password ${params.password} --keepday ${params.keepday}"
                         }
                     }else {
-
-                        docker.image("${TOOLSET_DOCKER_REGISTRY_BASEURL}/toolsetcore:${toolset_image_version}").inside  {
+                        def random = new Random()
+                        def randomNumber = random.nextInt(2000)+1
+                        docker.image("${TOOLSET_DOCKER_REGISTRY_BASEURL}/toolsetcore:${toolset_image_version}").inside("--name toolsetcore-${randomNumber}")  {
                             echo "active profile is ${params.DNET_PROFILE}"
                             echo "toolset path is ${WORKSPACE}"
                             echo "sub systems are ${params.subsystem}"
