@@ -45,8 +45,8 @@ pipeline {
         stage('modify component attrs') {
             steps{
               script{
-                echo "python /opt/modify_component_attrs.py -project ${env.project} -profile ${env.profile} -app ${env.app} -stack {env.stack} -hpa_min {env.hpa_min} -hpa_max ${env.hpa_max} -replicas ${env.replicas} -cpu_requests_m {env.cpu_requests_m} -cpu_limits_m ${env.cpu_limits_m} -mem_requests_mi {env.mem_requests_mi} -mem_limits_mi {env.mem_limits_mi} -jvm_config {env.jvm_config} -enable_argocd_sync {env.enable_argocd_sync}"
-                sh "python /opt/modify_component_attrs.py -project ${env.project} -profile ${env.profile} -app ${env.app} -stack {env.stack} -hpa_min {env.hpa_min} -hpa_max ${env.hpa_max} -replicas ${env.replicas} -cpu_requests_m {env.cpu_requests_m} -cpu_limits_m ${env.cpu_limits_m} -mem_requests_mi {env.mem_requests_mi} -mem_limits_mi {env.mem_limits_mi} -jvm_config {env.jvm_config} -enable_argocd_sync {env.enable_argocd_sync}"
+                echo "python /opt/modify_component_attrs.py -project '${env.project}' -profile '${env.profile}' -app '${env.app}' -stack '${env.stack}' -hpa_min '${env.hpa_min}' -hpa_max '${env.hpa_max}' -replicas '${env.replicas}' -cpu_requests_m '${env.cpu_requests_m}' -cpu_limits_m '${env.cpu_limits_m}' -mem_requests_mi '$'{env.mem_requests_mi}' -mem_limits_mi '${env.mem_limits_mi}' -jvm_config '${env.jvm_config}' -enable_argocd_sync '${env.enable_argocd_sync}'"
+                sh   "python /opt/modify_component_attrs.py -project '${env.project}' -profile '${env.profile}' -app '${env.app}' -stack '${env.stack}' -hpa_min '${env.hpa_min}' -hpa_max '${env.hpa_max}' -replicas '${env.replicas}' -cpu_requests_m '${env.cpu_requests_m}' -cpu_limits_m '${env.cpu_limits_m}' -mem_requests_mi '$'{env.mem_requests_mi}' -mem_limits_mi '${env.mem_limits_mi}' -jvm_config '${env.jvm_config}' -enable_argocd_sync '${env.enable_argocd_sync}'"
               }
 
             }
