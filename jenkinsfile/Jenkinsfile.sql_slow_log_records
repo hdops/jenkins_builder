@@ -39,6 +39,10 @@ pipeline{
 			}
 		}
         stage("start Sql Check"){
+            when {
+                beforeAgent true
+                environment name: 'on_k8s', value: 'False'
+            }
             steps{
                 script{
                     withDockerContainer(image: "harbor.qianfan123.com/toolset/toolsetcore:${toolset_image_version}") {
