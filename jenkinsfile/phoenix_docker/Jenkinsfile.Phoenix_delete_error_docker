@@ -7,6 +7,11 @@ if (!env.GIT_GROUP){
     env.GIT_GROUP="phoenix-config"
 }
 
+def customer= ""
+if (env.customer){
+  customer = env.customer + " - "
+}
+
 def GITLAB_URL="http://gitlab.app.hd123.cn:10080"
 def YAML_FILE="hdphoenixtoolsetcore.yaml"
 if (env.GITLAB_URL){
@@ -71,7 +76,7 @@ pipeline {
         failure{
             script{
 
-                def subject = env.email_subject ? "[Jenkins]${env.email_subject}" : "[Jenkins]failure on Job ${env.JOB_NAME}"
+                def subject = env.email_subject ? "${customer}[Jenkins]${env.email_subject}" : "[Jenkins]failure on Job ${env.JOB_NAME}"
                 def to = env.email_recipients ? "${env.email_recipients}" : "buhaiqing@hd123.com"
                 def body = env.email_body ? "${env.email_body}" : "failure on Job ${env.JOB_NAME}"
                 // send email
