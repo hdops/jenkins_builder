@@ -50,9 +50,11 @@ pipeline {
 					if(env.on_k8s == 'True'){
 						container("hdtoolsetcore"){
 							sh "hdops sync_redis_usage -v ${vendor}"
+							sh "hdops sync_private_sourece_stat_info -v ${vendor}"
 						}
 					}else {
 						sh "hdops sync_redis_usage -v ${vendor}"
+						sh "hdops sync_private_sourece_stat_info -v ${vendor}"
 					}
 				}
 			}
