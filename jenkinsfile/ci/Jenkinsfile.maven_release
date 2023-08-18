@@ -152,7 +152,7 @@ pipeline {
                     }
                     withDockerContainer(args: "--rm -v ${WORKSPACE}:/opt", image: "harbor.qianfan123.com/toolset/toolsetcore:${toolset_image_version}") {
                         echo "服务META-INF检查"
-                        sh "DNET_PRODUCT=dnet DNET_PROFILE=integration_test hdmon maven_meta_inf_check ${pom_path}"
+                        sh "DNET_PRODUCT=dnet GIT_SITE=${ci_git_server_baseurl} GIT_PROJECT=${git_project} GIT_BRANCH=${build_branch}   DNET_PROFILE=integration_test hdmon maven_meta_inf_check ${pom_path}"
                     }
                  }
             }
