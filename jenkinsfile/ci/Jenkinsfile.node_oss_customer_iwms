@@ -69,8 +69,7 @@ pipeline {
 				script{
                     if (params.jenkins_job_url != "" && params.jenkins_job_url != null) {
 						echo "download ${params.jenkins_job_url} "
-						//prepare_shell = "wget -O iwms-web.tar.gz  ${params.jenkins_job_url} && tar -xf iwms-web.tar.gz  && rm -f iwms-web.tar.gz"
-						prepare_shell = "curl -O -u qianfan:headingqianfan ${params.jenkins_job_url} && tar -xf iwms-web.tar.gz  && rm -f iwms-web.tar.gz"
+						prepare_shell = "curl -O -u qianfan:headingqianfan ${params.jenkins_job_url} && tar -xf ${subsystem}.tar.gz  && rm -f ${subsystem}.tar.gz"
 						echo "prepare_shell is ${prepare_shell}"
 						sh "  ${prepare_shell}" 
 						
@@ -80,7 +79,7 @@ pipeline {
 						println("API_SERVER 默认值是 : "+serverConfig.API_SERVER  )
 						println("BMS_URL 默认值是 : "+serverConfig.BMS_URL  )
 						
-						echo "config iwms-web "
+						echo "config ${subsystem} "
 						if (env.API_SERVER != "" && env.API_SERVER != null) {
 						    echo "API_SERVER is ${env.API_SERVER}"
 							serverConfig.API_SERVER=API_SERVER
@@ -97,8 +96,8 @@ pipeline {
 						echo "check  dist/serverConfig.json"
 						sh " cat dist/serverConfig.json" 
 						
-						echo "archive iwms-web"
-						archive_shell = "tar czvf iwms-web.tar.gz dist" 
+						echo "archive ${subsystem}"
+						archive_shell = "tar czvf ${subsystem}.tar.gz dist" 
 						echo "archive_shell is ${archive_shell}"
 						sh "  ${archive_shell}"  
 						archiveArtifacts '*.tar.gz' 
@@ -121,11 +120,11 @@ pipeline {
                         echo "clean workspace "
                         sh "rm -f *.zip"
                         echo "执行 mvn dependency:get "
-                        sh "mvn dependency:get -DremoteRepositories=http://maven.hd123.cn/repository/${repositoryId} -DgroupId=${groupId} -DartifactId=${artifactId} -Dversion=${build_tag}  -Dpackaging=zip -Dtransitive=false -s $maven_settings"
+                        sh "mvn dependency:get -DremoteRepositories=http://maven.hd123.cn/repository/${repositoryId} -DgroupId=${groupId} -DartifactId=${subsystem} -Dversion=${build_tag}  -Dpackaging=zip -Dtransitive=false -s $maven_settings"
                         echo "执行 mvn dependency:copy "
-                        sh "mvn dependency:copy -Dartifact=${groupId}:${artifactId}:${build_tag}:zip -DoutputDirectory=. -s $maven_settings"
-                        echo "准备 ${artifactId} "
-						prepare_shell = "unzip -o ${artifactId}*.zip  && rm -f ${artifactId}*.zip" 
+                        sh "mvn dependency:copy -Dartifact=${groupId}:${subsystem}:${build_tag}:zip -DoutputDirectory=. -s $maven_settings"
+                        echo "准备 ${subsystem} "
+						prepare_shell = "unzip -o ${subsystem}*.zip  && rm -f ${subsystem}*.zip" 
 						echo "prepare_shell is ${prepare_shell}"
 						sh "  ${prepare_shell}" 
 						
@@ -135,7 +134,7 @@ pipeline {
 						println("API_SERVER 默认值是 : "+serverConfig.API_SERVER  )
 						println("BMS_URL 默认值是 : "+serverConfig.BMS_URL  )
 						
-						echo "config iwms-web "
+						echo "config ${subsystem} "
 						if (env.API_SERVER != "" && env.API_SERVER != null) {
 						    echo "API_SERVER is ${env.API_SERVER}"
 							serverConfig.API_SERVER=API_SERVER
@@ -152,8 +151,8 @@ pipeline {
 						echo "check  dist/serverConfig.json"
 						sh " cat dist/serverConfig.json" 
 						
-						echo "archive iwms-web"
-						archive_shell = "tar czvf iwms-web.tar.gz dist" 
+						echo "archive ${subsystem}"
+						archive_shell = "tar czvf ${subsystem}.tar.gz dist" 
 						echo "archive_shell is ${archive_shell}"
 						sh "  ${archive_shell}"  
 						archiveArtifacts '*.tar.gz' 
