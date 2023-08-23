@@ -1,0 +1,106 @@
+def node="develop"
+if (env.node){
+    node =env.node
+}
+
+def node_image= "harbor.qianfan123.com/base/node:10.14.2-hd-zip"
+if (env.node_image){
+    node_image =env.node_image
+}
+def maven_image= "harbor.qianfan123.com/base/maven:3.3.9_jdk8"
+if (env.maven_image){
+    maven_image =env.maven_image
+}
+def mvn_configfile="jdk8"
+if (env.mvn_configfile){
+    mvn_configfile =env.mvn_configfile
+}
+
+def ci_git_server_baseurl= "http://github.app.hd123.cn:10080"
+if (env.ci_git_server_baseurl){
+    ci_git_server_baseurl = env.ci_git_server_baseurl
+}
+
+def credentialsId="appGitLab"
+if (env.credentials_id){
+  credentialsId = env.credentials_id
+}
+
+def build_branch="develop"
+if (params.build_branch){
+    build_branch =params.build_branch
+}
+
+def packageRemoteJob="createResourcePackage"
+if (env.packageRemoteJob){
+    packageRemoteJob = env.packageRemoteJob
+}
+
+def uploadRemoteJob="qianfan-front-web-oss"
+if (env.uploadRemoteJob){
+    uploadRemoteJob = env.uploadRemoteJob
+}
+
+def run_on_public="None"
+if (env.run_on_public){
+    run_on_public=env.run_on_public
+}
+if (!env.on_k8s){
+    env.on_k8s="False"
+}
+if (env.set_on_k8s) {
+    env.on_k8s=env.set_on_k8s
+}
+pipeline {
+	agent {label node}
+    options {
+	    timeout(time: 1, unit: 'HOURS')
+    } 
+    stages {
+        stage('delete workspace'){
+		    when {
+			    expression {'Y' == "${params.deleteWorkspace}"}
+			}
+			steps{
+			    deleteDir()
+			}
+		}
+         stage('checkout & build') {
+             agent {docker {
+                     image "${node_image}"
+                     label node
+                     args '--rm -v /hdapp/npm:/root/.npm -v /root/.npmrc:/root/.npmrc'
+                   }}
+             steps{
+				echo "checkout ${ci_git_server_baseurl}/${git_project}.git  tag:${build_tag}"
+				retry(5){
+                    checkout([$class: 'GitSCM', branches: [[name: 'refs/tags/${build_tag}']],extensions: [[$class: 'CloneOption', depth: 1, shallow: true]], userRemoteConfigs: [[url: "${ci_git_server_baseurl}/${git_project}.git",credentialsId: "${credentialsId}"]]])
+                }
+				
+				echo "npm_shell is ${npm_shell}"
+				sh "  ${npm_shell}" 
+				sh "rm -f /hdapp/jenkins/agent/${node}/workspace/iWMS/*.zip && cp ${artifactId}.zip /hdapp/jenkins/agent/${node}/workspace/iWMS/" 
+				archiveArtifacts '*.zip' 
+             }
+         }  
+         stage('mvn deploy') {
+            agent {
+			    docker {
+			    image "${maven_image}"
+                label node
+			    args "--rm --add-host=maven.qianfan123.com:172.17.0.82  -v /hdapp/java:/hdapp/java" 
+			    }
+             }
+            steps{
+			    //deleteDir()
+                script{
+                    configFileProvider([configFile(fileId:mvn_configfile, variable: 'maven_settings')]) { 
+                        sh "cp /hdapp/jenkins/agent/${node}/workspace/iWMS/${artifactId}.zip ." 
+                        echo "执行 mvn deploy:deploy-file " 
+                        sh "mvn deploy:deploy-file -Dfile=${artifactId}.zip -DgroupId=${groupId} -DartifactId=${artifactId} -Dversion=${build_tag} -Dpackaging=zip -DrepositoryId=${repositoryId} -Durl=http://maven.qianfan123.com/repository/${repositoryId}/ -s $maven_settings"
+                    }
+                }
+            }
+         }  
+    }
+}

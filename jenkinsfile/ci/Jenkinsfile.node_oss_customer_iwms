@@ -3,9 +3,17 @@ if (env.node){
     node =env.node
 }
 
-def node_image= "harbor.qianfan123.com/base/node:9.11.2"
+def node_image= "harbor.qianfan123.com/base/node:10.14.2-hd-zip"
 if (env.node_image){
     node_image =env.node_image
+}
+def maven_image= "harbor.qianfan123.com/base/maven:3.3.9_jdk8"
+if (env.maven_image){
+    maven_image =env.maven_image
+}
+def mvn_configfile="jdk8"
+if (env.mvn_configfile){
+    mvn_configfile =env.mvn_configfile
 }
 
 def build_tag="M2.12.0"
@@ -34,13 +42,7 @@ if (env.set_on_k8s) {
     env.on_k8s=env.set_on_k8s
 }
 pipeline {
-	agent {
-        docker {
-          image "${node_image}"
-          args '--add-host=devops-gitlab.hd123.com:118.178.114.72 --rm -v /var/run/docker.sock:/var/run/docker.sock -v /usr/bin/docker:/usr/bin/docker -v /hdapp/npm:/root/.npm  -v /root/.npmrc:/root/.npmrc'
-          label node
-        }
-	}
+	agent {label node}
     options {
 	//     buildDiscarder(logRotator(numToKeepStr: '10'))
 	//     disableConcurrentBuilds()
@@ -56,9 +58,16 @@ pipeline {
 			    deleteDir()
 			}
 		}
-         stage('build') {
+        stage('build from jenkins') {
+              agent {
+			    docker {
+			    image "${node_image}"
+			    args '--rm --add-host=devops-gitlab.hd123.com:118.178.114.72 -v /hdapp/npm:/root/.npm  -v /root/.npmrc:/root/.npmrc'
+			    }
+             }
              steps{
 				script{
+                    if (params.jenkins_job_url != "" && params.jenkins_job_url != null) {
 						echo "download ${params.jenkins_job_url} "
 						//prepare_shell = "wget -O iwms-web.tar.gz  ${params.jenkins_job_url} && tar -xf iwms-web.tar.gz  && rm -f iwms-web.tar.gz"
 						prepare_shell = "curl -O -u qianfan:headingqianfan ${params.jenkins_job_url} && tar -xf iwms-web.tar.gz  && rm -f iwms-web.tar.gz"
@@ -93,9 +102,66 @@ pipeline {
 						echo "archive_shell is ${archive_shell}"
 						sh "  ${archive_shell}"  
 						archiveArtifacts '*.tar.gz' 
+                    }
 				}
              }
          }   
+        stage('build from mvn') {
+              agent {
+			    docker {
+			    image "${maven_image}"
+			    args "--rm --add-host=maven.qianfan123.com:172.17.0.82  -v /hdapp/java:/hdapp/java" 
+			    }
+             }
+            steps{
+			    //deleteDir()
+                script{
+                if (env.groupId != "" && env.groupId != null) {
+                    configFileProvider([configFile(fileId:mvn_configfile, variable: 'maven_settings')]) {
+                        echo "clean workspace "
+                        sh "rm -f *.zip"
+                        echo "执行 mvn dependency:get "
+                        sh "mvn dependency:get -DremoteRepositories=http://maven.hd123.cn/repository/${repositoryId} -DgroupId=${groupId} -DartifactId=${artifactId} -Dversion=${build_tag}  -Dpackaging=zip -Dtransitive=false -s $maven_settings"
+                        echo "执行 mvn dependency:copy "
+                        sh "mvn dependency:copy -Dartifact=${groupId}:${artifactId}:${build_tag}:zip -DoutputDirectory=. -s $maven_settings"
+                        echo "准备 ${artifactId} "
+						prepare_shell = "unzip -o ${artifactId}*.zip  && rm -f ${artifactId}*.zip" 
+						echo "prepare_shell is ${prepare_shell}"
+						sh "  ${prepare_shell}" 
+						
+						echo "read  dist/serverConfig.json"
+						def serverConfig = readJSON file: 'dist/serverConfig.json'
+						// println(serverConfig  )
+						println("API_SERVER 默认值是 : "+serverConfig.API_SERVER  )
+						println("BMS_URL 默认值是 : "+serverConfig.BMS_URL  )
+						
+						echo "config iwms-web "
+						if (env.API_SERVER != "" && env.API_SERVER != null) {
+						    echo "API_SERVER is ${env.API_SERVER}"
+							serverConfig.API_SERVER=API_SERVER
+						}
+					
+						if (env.BMS_URL != "" && env.BMS_URL != null) {
+						    echo "BMS_URL is ${env.BMS_URL}"
+							serverConfig.BMS_URL=BMS_URL
+						}
+						//println(serverConfig  )
+						//writeJSON file: 'dist/serverConfig.json', json: serverConfig
+						writeJSON file: 'dist/serverConfig.json', json: serverConfig, pretty: 1
+						
+						echo "check  dist/serverConfig.json"
+						sh " cat dist/serverConfig.json" 
+						
+						echo "archive iwms-web"
+						archive_shell = "tar czvf iwms-web.tar.gz dist" 
+						echo "archive_shell is ${archive_shell}"
+						sh "  ${archive_shell}"  
+						archiveArtifacts '*.tar.gz' 
+                    }
+                }
+                }
+            }
+         }
         stage('打包'){
 			steps{
 				script{
