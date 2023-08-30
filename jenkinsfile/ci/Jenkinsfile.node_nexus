@@ -72,15 +72,24 @@ pipeline {
                      args '--rm -v /hdapp/npm:/root/.npm -v /root/.npmrc:/root/.npmrc'
                    }}
              steps{
+                script{
+				if (env.build_tag != "" && env.build_tag != null) { 
 				echo "checkout ${ci_git_server_baseurl}/${git_project}.git  tag:${build_tag}"
 				retry(5){
                     checkout([$class: 'GitSCM', branches: [[name: 'refs/tags/${build_tag}']],extensions: [[$class: 'CloneOption', depth: 1, shallow: true]], userRemoteConfigs: [[url: "${ci_git_server_baseurl}/${git_project}.git",credentialsId: "${credentialsId}"]]])
                 }
-				
+                }
+                if (env.build_branch != "" && env.build_branch != null) { 
+				echo "checkout ${ci_git_server_baseurl}/${git_project}.git  branch:${build_branch}"
+				retry(5){
+				    checkout([$class: 'GitSCM', branches: [[name: "*/${build_branch}"]],userRemoteConfigs: [[credentialsId: "${credentialsId}",url: "${ci_git_server_baseurl}/${git_project}.git"]]])
+				}
+                }
 				echo "npm_shell is ${npm_shell}"
 				sh "  ${npm_shell}" 
 				sh "rm -f /hdapp/jenkins/agent/${node}/workspace/iWMS/*.zip && cp ${artifactId}.zip /hdapp/jenkins/agent/${node}/workspace/iWMS/" 
 				archiveArtifacts '*.zip' 
+				}
              }
          }  
          stage('mvn deploy') {
@@ -96,8 +105,17 @@ pipeline {
                 script{
                     configFileProvider([configFile(fileId:mvn_configfile, variable: 'maven_settings')]) { 
                         sh "cp /hdapp/jenkins/agent/${node}/workspace/iWMS/${artifactId}.zip ." 
+                        
+						if (env.build_tag != "" && env.build_tag != null) {
+						echo "版本号取 tag:${build_tag}"
+						imageVersion =build_tag
+						}
+						if (env.imageVersion != "" && env.imageVersion != null) {
+						echo "版本号取 branch:${imageVersion}-SNAPSHOT"
+						imageVersion =imageVersion+ "-SNAPSHOT"
+						}
                         echo "执行 mvn deploy:deploy-file " 
-                        sh "mvn deploy:deploy-file -Dfile=${artifactId}.zip -DgroupId=${groupId} -DartifactId=${artifactId} -Dversion=${build_tag} -Dpackaging=zip -DrepositoryId=${repositoryId} -Durl=http://maven.qianfan123.com/repository/${repositoryId}/ -s $maven_settings"
+                        sh "mvn deploy:deploy-file -Dfile=${artifactId}.zip -DgroupId=${groupId} -DartifactId=${artifactId} -Dversion=${imageVersion} -Dpackaging=zip -DrepositoryId=${repositoryId} -Durl=http://maven.qianfan123.com/repository/${repositoryId}/ -s $maven_settings"
                     }
                 }
             }
