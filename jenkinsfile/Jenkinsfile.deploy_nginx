@@ -63,7 +63,6 @@ def func_git_toolset = {
 
 def func_deploy = {
     sh "rm -rf /root/toolset"
-    sh "rm -rf /root/iac"
     sh "ln -s ${WORKSPACE} /root/toolset"
     sh "cd /root/iac/ && ansible-playbook -i /root/toolset/openresty_config/${base_update_config}/${base_update_config_environment}/inventory -e @/root/toolset/openresty_config/${base_update_config}/${base_update_config_environment}/main.yml /root/iac/hdiac/openresty/main-docker.yml --tags ${tags}"
 }
