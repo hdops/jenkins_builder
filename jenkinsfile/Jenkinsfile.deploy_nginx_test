@@ -126,7 +126,7 @@ pipeline {
             steps{
                 script {
                     sh "docker pull ${docker_image}"
-                    withDockerContainer(args: "-v /root/.ssh:/root/.ssh", image: "${docker_image}") {
+                    withDockerContainer(args: "-v /root/.ssh:/root/.ssh --entrypoint=''", image: "${docker_image}") {
                         func_deploy()
                     }
                 }
