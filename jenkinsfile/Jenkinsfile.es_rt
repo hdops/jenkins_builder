@@ -30,7 +30,7 @@ if (env.set_on_k8s) {
 pipeline {
     agent {label node}
 	options {   
-	    timeout(time: 30, unit: 'MINUTES')
+	    timeout(time: 10, unit: 'MINUTES')
     }         
     stages {
         stage('es_rt') {

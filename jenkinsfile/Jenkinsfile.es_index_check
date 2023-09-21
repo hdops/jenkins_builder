@@ -29,7 +29,7 @@ if (env.set_on_k8s) {
 pipeline {
     agent {label node}
 	options {   
-	    timeout(time: 3, unit: 'HOURS')
+	    timeout(time: 6, unit: 'MINUTES')
     }               
     stages {
         stage('es索引检查') {
