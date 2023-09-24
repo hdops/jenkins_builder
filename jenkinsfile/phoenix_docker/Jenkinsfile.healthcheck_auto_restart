@@ -91,12 +91,12 @@ pipeline {
                     def randomNumber = random.nextInt(20000)+1
                     sh "docker pull  ${TOOLSET_DOCKER_REGISTRY_BASEURL}/phoenixcore:${version}"
                     if (env.dingding == "True") {
-                        withDockerContainer(args: "-v ${WORKSPACE}:/opt --name phoenixcore-${randomNumber}", image: "${TOOLSET_DOCKER_REGISTRY_BASEURL}/phoenixcore:${version}") {
+                        withDockerContainer(args: " --rm -v ${WORKSPACE}:/opt --name phoenixcore-${randomNumber}", image: "${TOOLSET_DOCKER_REGISTRY_BASEURL}/phoenixcore:${version}") {
                             sh "phoenix-tools version"
                             sh "phoenix-tools healthcheck --dingding ${dingding} --tag ${params.tag}"
                         }                        
                     } else {
-                        withDockerContainer(args: "-v ${WORKSPACE}:/opt --name phoenixcore-${randomNumber}", image: "${TOOLSET_DOCKER_REGISTRY_BASEURL}/phoenixcore:${version}") {
+                        withDockerContainer(args: " --rm -v ${WORKSPACE}:/opt --name phoenixcore-${randomNumber}", image: "${TOOLSET_DOCKER_REGISTRY_BASEURL}/phoenixcore:${version}") {
                             sh "phoenix-tools version"
                             sh "phoenix-tools healthcheck --tag ${params.tag}"
                         }                        
