@@ -99,6 +99,28 @@ pipeline {
                     }
                 }
             }
+            post{
+                success{
+                    script{
+                        if (env.email_recipients != "" && env.email_recipients != null) {
+                            def subject = env.email_build_subject ? "[Jenkins]${env.email_build_subject}" : "[Jenkins]部署${env.envname}环境${subsystem}成功"
+                            def body = env.email_build_body ? "${env.email_build_body}" : "${env.JOB_NAME}部署${env.envname}环境${subsystem}成功"
+                            // send email
+                            emailext subject: subject, to: env.email_recipients, body:body,attachLog:true
+                        }
+                    }
+                }
+                failure{
+                    script{
+                        if (env.email_recipients != "" && env.email_recipients != null) {
+                            def subject = env.email_build_subject ? "[Jenkins]${env.email_build_subject}" : "[Jenkins]部署${env.envname}环境${subsystem}失败"
+                            def body = env.email_build_body ? "${env.email_build_body}" : "${env.JOB_NAME}部署${env.envname}环境${subsystem}失败"
+                            // send email
+                            emailext subject: subject, to: env.email_recipients, body:body,attachLog:true
+                        }
+                    }
+                }
+            }
         }
     }
 	post {
