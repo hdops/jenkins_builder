@@ -197,7 +197,7 @@ pipeline {
 
                 def subject = env.email_subject ? "${customer}[Jenkins]${env.email_subject}" : "${customer}[Jenkins]failure on Job ${env.JOB_NAME}"
                 def to = env.email_recipients ? "${env.email_recipients}" : "buhaiqing@hd123.com"
-                def body = env.email_body ? "${env.email_body}" : "failure on Job ${env.JOB_NAME} in ${env.BUILD_URL}"
+                def body = env.email_body ? "${env.email_body}" : "[${customer}]failure on Job ${env.JOB_NAME} in ${env.BUILD_URL}"
                 // send email
                 emailext subject: subject, to: to, body:body,attachLog:true
             }
