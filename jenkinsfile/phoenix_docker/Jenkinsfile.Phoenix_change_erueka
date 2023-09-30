@@ -108,9 +108,11 @@ pipeline {
                 environment name: 'on_k8s', value: 'False'
             }
             steps {
-                script{    
+                script{
+                    def random = new Random()
+                    def randomNumber = random.nextInt(20000)+1
                     sh "docker pull  ${TOOLSET_DOCKER_REGISTRY_BASEURL}/phoenixcore:${version}"
-                    withDockerContainer(args: "-v ${WORKSPACE}:/opt", image: "${TOOLSET_DOCKER_REGISTRY_BASEURL}/phoenixcore:${version}") {
+                    withDockerContainer(args: "-v ${WORKSPACE}:/opt --name phoenixcore-${randomNumber}", image: "${TOOLSET_DOCKER_REGISTRY_BASEURL}/phoenixcore:${version}") {
                         func()    
                     }
                 }
