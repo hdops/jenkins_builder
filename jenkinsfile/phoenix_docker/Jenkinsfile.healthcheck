@@ -93,7 +93,7 @@ pipeline {
                 script{    
                     sh "docker pull  ${TOOLSET_DOCKER_REGISTRY_BASEURL}/phoenixcore:${version}"
                     if (env.dingding == "True") {
-                        withDockerContainer(args: "--rm -v ${WORKSPACE}:/opt", image: "${TOOLSET_DOCKER_REGISTRY_BASEURL}/phoenixcore:${version}") {
+                        withDockerContainer(args: "-v ${WORKSPACE}:/opt", image: "${TOOLSET_DOCKER_REGISTRY_BASEURL}/phoenixcore:${version}") {
                             sh "phoenix-tools version"
                             sh "phoenix-tools healthcheck --dingding ${dingding} --tag ${params.tag}"
                         }                        
