@@ -35,7 +35,7 @@ if (env.source_code_management){
     source_code_management ="git"
 }
 
-def docker_args="--rm -v /var/run/docker.sock:/var/run/docker.sock -v /usr/bin/docker:/usr/bin/docker --add-host=maven.qianfan123.com:172.17.0.82 --add-host=apidoc.hd123.com:172.17.10.53 --add-host=github.app.hd123.cn:172.17.10.58 --add-host=gitlab.hd123.com:172.17.12.219 "
+def docker_args="--rm -v /var/run/docker.sock:/var/run/docker.sock -v /usr/bin/docker:/usr/bin/docker --add-host=maven.qianfan123.com:172.17.0.82 --add-host=apidoc.hd123.com:172.17.10.53 --add-host=github.app.hd123.cn:172.17.10.58 --add-host=gitlab.hd123.com:172.17.12.219 --add-host=devops-gitlab.hd123.com:118.178.114.72"
 if (env.maven_repository){
     docker_args+=" -v "+env.maven_repository
 }else{
@@ -47,9 +47,24 @@ if (env.mvn_configfile){
     mvn_configfile =env.mvn_configfile
 }
 
+def maven_help_plugin_version="3.2.0"
+if (env.maven_help_plugin_version){
+    maven_help_plugin_version =env.maven_help_plugin_version
+}
+
+def trust_public_ip="None"
+if (env.trust_public_ip){
+    trust_public_ip =env.trust_public_ip
+}
+
 def skipversionupdate="--no-skipversionupdate"
 if (env.skipversionupdate){
     skipversionupdate =env.skipversionupdate
+}
+
+def skipversion="--no-skipversion"
+if (env.skipversion){
+    skipversion =env.skipversion
 }
 
 def toolset_image_version="0.3.0"
@@ -104,8 +119,8 @@ pipeline {
         stage('pre-build-1') {
             steps{
                 script{
-                    echo "执行`mven help:effective-pom`,生成effectivepom.xml"
-                    def mvn_shell="mvn help:effective-pom -Doutput=effectivepom.xml"
+                    echo "执行`mven org.apache.maven.plugins:maven-help-plugin:$maven_help_plugin_version:effective-pom`,生成effectivepom.xml"
+                    def mvn_shell="mvn org.apache.maven.plugins:maven-help-plugin:$maven_help_plugin_version:effective-pom -Doutput=effectivepom.xml"
                     configFileProvider([configFile(fileId:mvn_configfile, variable: 'maven_settings')]) {
                         mvn_shell+=" -s $maven_settings"
                         echo "mvn_shell is ${mvn_shell}"
@@ -137,8 +152,8 @@ pipeline {
                             root_dir=env.mvn_pom.split('pom.xml')[0]+"/"
                             echo "切换目录"+root_dir
                             dir(root_dir){
-                                echo "执行`mven help:effective-pom`,生成"+root_dir+"/effectivepom.xml"
-                                def mvn_shell="mvn help:effective-pom -Doutput=effectivepom.xml"
+                                echo "执行`mven org.apache.maven.plugins:maven-help-plugin:$maven_help_plugin_version:effective-pom`,生成"+root_dir+"/effectivepom.xml"
+                                def mvn_shell="mvn org.apache.maven.plugins:maven-help-plugin:$maven_help_plugin_version:effective-pom -Doutput=effectivepom.xml"
                                 configFileProvider([configFile(fileId:mvn_configfile, variable: 'maven_settings')]) {
                                     mvn_shell+=" -s $maven_settings"
                                     echo "mvn_shell is ${mvn_shell}"
@@ -154,7 +169,7 @@ pipeline {
                     }
                     withDockerContainer(args: "--rm -v ${WORKSPACE}:/opt", image: "harbor.qianfan123.com/toolset/toolsetcore:${toolset_image_version}") {
                         echo "服务META-INF检查"
-                        sh "DNET_PRODUCT=dnet GIT_SITE=${ci_git_server_baseurl} GIT_PROJECT=${git_project} GIT_BRANCH=${build_branch}   DNET_PROFILE=integration_test hdmon maven_meta_inf_check ${pom_path}"
+                        sh "DNET_PRODUCT=dnet DNET_PROFILE=integration_test hdmon maven_meta_inf_check ${pom_path}"
                     }
                  }
             }
@@ -401,6 +416,39 @@ skipversionupdate=${skipversionupdate}""", remoteJenkinsName: "${remoteJenkins}"
 				}
 			}
 		}
+        stage('deploy on k8s'){
+			steps{
+				script{
+				    if (env.remote_deploy_k8s_cfg!=null && env.remote_deploy_k8s_cfg != "") {
+						// remote_deploy
+                        println(env.remote_deploy_k8s_cfg)
+                        String[] data = env.remote_deploy_k8s_cfg.split('&')
+                        println(data)
+                        count = data.size()
+                        tasks = [:]
+                        data.each{ i ->
+                            String[] item = i.split(';')
+                            println(item)
+                            remoteJenkins = item[0]
+                            remoteJob = item[1]
+                            DNET_PROFILE = item[2]
+                            if (item.size() > 3)  {
+                                DNET_PRODUCT=item[3]
+                            }
+                            echo "remoteJenkins is ${remoteJenkins}"
+                            echo "remoteJob is ${remoteJob}"
+                            echo "DNET_PROFILE is ${DNET_PROFILE}"
+                            echo "DNET_PRODUCT is ${DNET_PRODUCT}"
+                            // deploy
+                            triggerRemoteJob job: "${remoteJob}", maxConn: 3, parameters: """DNET_PROFILE=${DNET_PROFILE}
+image=${subsystem}
+skipversion=${skipversion}
+skipversionupdate=${skipversionupdate}""", remoteJenkinsName: "${remoteJenkins}", useCrumbCache: false, useJobInfoCache: false, enhancedLogging: true
+                        }
+                    }
+				}
+			}
+		}
     }
     post{
         success{
@@ -433,7 +481,7 @@ skipversionupdate=${skipversionupdate}""", remoteJenkinsName: "${remoteJenkins}"
                 }
                 if (env.upload_wgt_file != "" && env.upload_wgt_file != null) {
                     // archiveArtifacts
-                    archiveArtifacts 'frontend/uni-app-portal/dist/build/app-plus/*.wgt' 
+                    archiveArtifacts '**/*.wgt' 
                     // print 
                     println(env.upload_wgt_file)
                     echo "jenkins_build_url:${BUILD_URL}" 

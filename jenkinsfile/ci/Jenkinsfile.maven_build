@@ -190,6 +190,14 @@ pipeline {
                             }
                         echo "mvn_configfile is ${mvn_configfile}"
                         configFileProvider([configFile(fileId:mvn_configfile, variable: 'maven_settings')]) {
+                                echo "mvn clean package"
+                                sh "mvn clean package  -s $maven_settings"
+                            }
+                        withDockerContainer(args: "--rm -v ${WORKSPACE}:${WORKSPACE}", image: "harbor.qianfan123.com/toolset/toolsetcore:${toolset_image_version}") {
+                            echo "hdmon sc230911 -p ${WORKSPACE}"
+                            sh "hdmon sc230911 -p ${WORKSPACE} "
+                        }
+                        configFileProvider([configFile(fileId:mvn_configfile, variable: 'maven_settings')]) {
                                 mvn_shell+="  -s $maven_settings"
                                 echo "mvn_shell is ${mvn_shell}"
                                 sh "${mvn_shell}"
