@@ -68,7 +68,7 @@ pipeline {
                         mysh ("ssh $host sudo sed -i 's%deploynum%app_${build_number}%g' /hdapp/.ka_deploy_app_${build_number}.sh", false)
                         mysh ("ssh $host sudo sh /hdapp/.ka_deploy_app_${build_number}.sh ${toolset_x} ${envname} $appname appinstall $version $config_gen", false)
                         mysh ("ssh $host sudo rm -f /hdapp/ka_deploy_app_*.sh* /hdapp/.ka_deploy_app_${build_number}.sh", false)
-                        mysh ('scp -rp $host:/hdapp/heading/basic_auth/basic_auth* .', true)
+                        mysh ('scp -rp $host:/hdapp/heading/basic-auth/basic_auth* .', true)
                     }
                 }
             }
