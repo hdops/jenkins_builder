@@ -51,7 +51,7 @@ def func = {
     sh "tar zxf toolset.tar.gz -C ${WORKSPACE}"
     sh prefix + "hdops kubernetes download_kubernetes -s None"
     sh prefix + "hdops kubernetes validate --subsystem ${image}"
-    sh "ping argo-uat.aiyingshi.net.cn"
+    sh "ping argo-uat.aiyingshi.net.cn -c 3"
     sh prefix + "hdops kubernetes appinstall --subsystem ${image} --stackids ${stackids} --checkstatus ${checkstatus}"
 }
 
