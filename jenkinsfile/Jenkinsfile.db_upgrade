@@ -48,7 +48,7 @@ pipeline {
 							echo "toolset path is ${WORKSPACE}"
 							echo "sub systems are ${params.subsystem}"
 							echo "skip version is ${params.skipversion}"
-							retry(2){
+							retry(3){
 								sh "DNET_PROFILE=integration_test DNET_PRODUCT=dnet TRUST_PUBLIC_IP=${run_on_public} hdops download_toolset --branch ${params.GIT_BRANCH} -p ."
 							}
 							sh "tar zxf toolset.tar.gz -C ${WORKSPACE}"
@@ -78,7 +78,7 @@ pipeline {
                             echo "toolset path is ${WORKSPACE}"
                             echo "sub systems are ${params.subsystem}"
                             echo "skip version is ${params.skipversion}"
-                            retry(2){
+                            retry(3){
                                 sh "DNET_PROFILE=integration_test DNET_PRODUCT=dnet TRUST_PUBLIC_IP=${run_on_public} hdops download_toolset --branch ${params.GIT_BRANCH} -p ."
                             }
                             sh "tar zxf toolset.tar.gz -C ${WORKSPACE}"
