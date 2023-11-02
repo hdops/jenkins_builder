@@ -41,7 +41,7 @@ pipeline {
 	//     disableConcurrentBuilds()
 	//     disableResume()
 	    timeout(time: 4, unit: 'HOURS')
-	    retry(2)
+	 //   retry(2)
     } 
     stages {
 
@@ -50,16 +50,32 @@ pipeline {
 			    script{
 					if(env.on_k8s == 'True'){
 						container("hdtoolsetcore"){
-							sh "hdops sync_mongdb_usage -v ${vendor}"
-							sh "hdops sync_rds_info_usage -v ${vendor}"
-							sh "hdops sync_clb_info -v ${vendor}"
-							sh "hdops sync_eipinfo -v ${vendor}"
+						    retry(2){
+							  sh "hdops sync_mongdb_usage -v ${vendor}"
+							}
+							retry(2){
+							  sh "hdops sync_rds_info_usage -v ${vendor}"
+							}
+							retry(2){
+							  sh "hdops sync_clb_info -v ${vendor}"
+							}
+							retry(2){
+							  sh "hdops sync_eipinfo -v ${vendor}"
+							}
 						}
 					}else {
-						sh "hdops sync_mongdb_usage -v ${vendor}"
-						sh "hdops sync_rds_info_usage -v ${vendor}"
-						sh "hdops sync_clb_info -v ${vendor}"
-						sh "hdops sync_eipinfo -v ${vendor}"
+					    retry(2){
+						  sh "hdops sync_mongdb_usage -v ${vendor}"
+						}
+						retry(2){
+						  sh "hdops sync_rds_info_usage -v ${vendor}"
+						}
+						retry(2){
+						  sh "hdops sync_clb_info -v ${vendor}"
+						}
+						retry(2){
+						  sh "hdops sync_eipinfo -v ${vendor}"
+						}
 					}
 				}
 			}
