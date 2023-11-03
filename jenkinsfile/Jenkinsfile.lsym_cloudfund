@@ -1,0 +1,42 @@
+pipeline{
+    agent{
+      docker{
+        label "master"
+        image "harbor.qianfan123.com/toolset/k8s_config_checker:1.0.0"
+        args '--rm -v /var/run/docker.sock:/var/run/docker.sock -v /usr/bin/docker:/usr/bin/docker -v /root/.docker/config.json:/root/.docker/config.json  --add-host=maven.qianfan123.com:172.17.0.82 --add-host=github.app.hd123.cn:172.17.10.58 --add-host=gitlab.hd123.com:172.17.12.219 '
+        alwaysPull true
+      }
+    }
+    options{
+      buildDiscarder(logRotator(numToKeepStr: '12')) // 保留记录数12
+      disableConcurrentBuilds() // 不并发构建
+      timeout(time: 120, unit: 'MINUTES')
+      retry(2)
+    }
+    //triggers {
+      //  cron "30 7 * * *" // 每天8点20分执行一次
+    //}
+
+    stages{
+        stage("run script"){
+          steps{
+            sh "python cloudfund/lsym_cloundfund.py"
+          }
+        }
+    }
+    post{
+        always{
+            echo "========always========"
+        }
+        success{
+            echo "========pipeline executed successfully ========"
+        }
+        failure{
+            echo "========pipeline execution failed========"
+            emailext(recipientProviders: [developers(),requestor(),culprits()],to:'buhaiqing@hd123.com',  subject: "ak_account_stats failure", body: "failure on Job ${env.BUILD_URL}\n${env.GIT_COMMIT}",attachLog:true)
+        }
+        fixed{
+            emailext(recipientProviders: [developers(),requestor(),culprits()],to:'buhaiqing@hd123.com',  subject: "ak_account_stats failure", body: "fixed on Job ${env.BUILD_URL}\n${env.GIT_COMMIT}",attachLog:true)
+        }
+    }
+}
