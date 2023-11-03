@@ -100,7 +100,7 @@ pipeline {
                     } else {
                         def random = new Random()
                         def randomNumber = random.nextInt(20000)+1
-                        withDockerContainer(args: "--rm -v ${WORKSPACE}:/opt --name phoenixcore-${randomNumber}", image: "${TOOLSET_DOCKER_REGISTRY_BASEURL}/phoenixcore:${version}") {
+                        withDockerContainer(args: "-v ${WORKSPACE}:/opt --name phoenixcore-${randomNumber}", image: "${TOOLSET_DOCKER_REGISTRY_BASEURL}/phoenixcore:${version}") {
                             sh "phoenix-tools version"
                             sh "phoenix-tools healthcheck --tag ${params.tag}"
                         }                        
