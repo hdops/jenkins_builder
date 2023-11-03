@@ -6,7 +6,7 @@ if (env.ci_git_server_baseurl){
 pipeline{
     agent{
       docker{
-        label "master & develop"
+        label "master || develop"
         image "harbor.qianfan123.com/toolset/k8s_config_checker:1.0.0"
         args '--rm -v /var/run/docker.sock:/var/run/docker.sock -v /usr/bin/docker:/usr/bin/docker -v /root/.docker/config.json:/root/.docker/config.json  --add-host=maven.qianfan123.com:172.17.0.82 --add-host=github.app.hd123.cn:172.17.10.58 --add-host=gitlab.hd123.com:172.17.12.219 '
         alwaysPull true
