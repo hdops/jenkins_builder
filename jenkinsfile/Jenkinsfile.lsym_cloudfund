@@ -2,6 +2,10 @@ def ci_git_server_baseurl= "http://github.app.hd123.cn:10080"
 if (env.ci_git_server_baseurl){
     ci_git_server_baseurl = env.ci_git_server_baseurl
 }
+def credentialsId="17643215-09f8-4a9a-b0ea-c8e49777ce1d"
+if (env.credentials_id){
+  credentialsId = env.credentials_id
+}
 
 pipeline{
     agent{
