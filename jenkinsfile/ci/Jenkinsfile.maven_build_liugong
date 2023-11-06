@@ -95,7 +95,7 @@ pipeline {
                             mvn_package_shell+=" -D"+env.mvn_options+"=true"
                             }
                         echo "mvn_configfile is ${mvn_configfile}"
-                        withDockerContainer(args: "--rm -v ${WORKSPACE}:${WORKSPACE}", image: "harbor.qianfan123.com/toolset/toolsetcore:${toolset_image_version}") {
+                        withDockerContainer(args: "--rm -v ${WORKSPACE}:${WORKSPACE}", image: "harbor.qianfan123.com/toolset/toolsetcore:0.3.0") {
                             sh "hdmon sc230911_precheck -p ${WORKSPACE} "
                         }
                         configFileProvider([configFile(fileId:mvn_configfile, variable: 'maven_settings')]) {
@@ -103,7 +103,7 @@ pipeline {
                                 echo "mvn_package_shell is ${mvn_package_shell}"
                                 sh "${mvn_package_shell}"
                             }
-                        withDockerContainer(args: "--rm -v ${WORKSPACE}:${WORKSPACE}", image: "harbor.qianfan123.com/toolset/toolsetcore:${toolset_image_version}") {
+                        withDockerContainer(args: "--rm -v ${WORKSPACE}:${WORKSPACE}", image: "harbor.qianfan123.com/toolset/toolsetcore:0.3.0") {
                             sh "hdmon sc230911 -p ${WORKSPACE} "
                         }
                         configFileProvider([configFile(fileId:mvn_configfile, variable: 'maven_settings')]) {
