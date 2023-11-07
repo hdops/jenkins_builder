@@ -1,3 +1,59 @@
+// 发送消息到企微机器人
+def send_wecom_text(String token,String text){
+    def url = "https://qyapi.weixin.qq.com/cgi-bin/webhook/send?key=" + token
+    def ReqBody = """{
+            "msgtype": "text",
+            "text": {
+                "content": "${text}"
+            }
+            }"""
+
+    def response = httpRequest acceptType: 'APPLICATION_JSON_UTF8',
+                consoleLogResponseBody: false,
+                contentType: 'APPLICATION_JSON_UTF8',
+                httpMode: 'POST',
+                ignoreSslErrors: true,
+                requestBody: ReqBody,
+                responseHandle: 'NONE',
+                url: "${url}",
+                quiet: true
+    if (response.status == 200) {
+        echo "Request successful"
+        echo "Response body: ${response.content}"
+    } else {
+        echo "Request failed with status ${response.status}"
+    }
+
+}
+
+// 发送消息到钉钉机器人
+def send_dingtalk_text(String token,String text){
+    def url = "https://oapi.dingtalk.com/robot/send?access_token=" + token
+    def ReqBody = """{
+            "msgtype": "text",
+            "text": {
+                "content": "${text}"
+            }
+            }"""
+
+    def response = httpRequest acceptType: 'APPLICATION_JSON_UTF8',
+                consoleLogResponseBody: false,
+                contentType: 'APPLICATION_JSON_UTF8',
+                httpMode: 'POST',
+                ignoreSslErrors: true,
+                requestBody: ReqBody,
+                responseHandle: 'NONE',
+                url: "${url}",
+                quiet: true
+    if (response.status == 200) {
+        echo "Request successful"
+        echo "Response body: ${response.content}"
+    } else {
+        echo "Request failed with status ${response.status}"
+    }
+
+}
+
 def node=""
 if (env.node){
     node =env.node
