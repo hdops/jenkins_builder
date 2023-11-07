@@ -130,6 +130,7 @@ pipeline {
 		    steps{
 				script{
 						def mvn_shell="mvn "
+						def mvn_package_shell="mvn clean package"
                         if (env.mvn_pom){
                             mvn_shell+=" -f "+env.mvn_pom+" "+env.mvn_goals
                             }
@@ -139,8 +140,20 @@ pipeline {
                         if (env.mvn_options){
                             echo "mvn_options is ${mvn_options}"
                             mvn_shell+=" -D"+env.mvn_options+"=true"
+                            mvn_package_shell+=" -D"+env.mvn_options+"=true"
                             }
                         echo "mvn_configfile is ${mvn_configfile}"
+                        withDockerContainer(args: "--rm -v ${WORKSPACE}:${WORKSPACE}", image: "harbor.qianfan123.com/toolset/toolsetcore:${toolset_image_version}") {
+                            sh "hdmon sc230911_precheck -p ${WORKSPACE} "
+                        }
+                        configFileProvider([configFile(fileId:mvn_configfile, variable: 'maven_settings')]) {
+                                mvn_package_shell+="  -s $maven_settings"
+                                echo "mvn_package_shell is ${mvn_package_shell}"
+                                sh "${mvn_package_shell}"
+                            }
+                        withDockerContainer(args: "--rm -v ${WORKSPACE}:${WORKSPACE}", image: "harbor.qianfan123.com/toolset/toolsetcore:${toolset_image_version}") {
+                            sh "hdmon sc230911 -p ${WORKSPACE} "
+                        }
                         configFileProvider([configFile(fileId:mvn_configfile, variable: 'maven_settings')]) {
                                 mvn_shell+="  -s $maven_settings"
                                 echo "mvn_shell is ${mvn_shell}"
