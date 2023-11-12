@@ -45,10 +45,10 @@ pipeline{
         }
         failure{
             echo "========pipeline execution failed========"
-            emailext(recipientProviders: [developers(),requestor(),culprits()],to:'buhaiqing@hd123.com',  subject: "ak_account_stats failure", body: "failure on Job ${env.BUILD_URL}\n${env.GIT_COMMIT}",attachLog:true)
+            emailext(recipientProviders: [developers(),requestor(),culprits()],to:'buhaiqing@hd123.com',  subject: "lsym duizhang failure", body: "failure on Job ${env.BUILD_URL}\n${env.GIT_COMMIT}",attachLog:true)
         }
         fixed{
-            emailext(recipientProviders: [developers(),requestor(),culprits()],to:'buhaiqing@hd123.com',  subject: "ak_account_stats failure", body: "fixed on Job ${env.BUILD_URL}\n${env.GIT_COMMIT}",attachLog:true)
+            emailext(recipientProviders: [developers(),requestor(),culprits()],to:'buhaiqing@hd123.com',  subject: "lsym duizhang  fixed", body: "fixed on Job ${env.BUILD_URL}\n${env.GIT_COMMIT}",attachLog:true)
         }
     }
 }
