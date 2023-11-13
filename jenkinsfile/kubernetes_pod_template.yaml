@@ -4,10 +4,6 @@ metadata:
   labels:
     label: jenkins-job
 spec:
-  hostAliases:
-  - ip: 10.255.150.101
-    hostnames:
-    - argocd-test.wenchao.ae
   containers:
   - name: jenkins-job
     image: ${image}
