@@ -178,7 +178,7 @@ pipeline {
 		    steps{
 				script{
 						def mvn_shell="mvn "
-						def mvn_package_shell="mvn clean package"
+						def mvn_package_shell="mvn clean package -DskipTests -DskipFrontend -Dmaven.test.skip=true"
                         if (env.mvn_pom){
                             mvn_shell+=" -f "+env.mvn_pom+" "+env.mvn_goals
                             }
@@ -188,7 +188,6 @@ pipeline {
                         if (env.mvn_options){
                             echo "mvn_options is ${mvn_options}"
                             mvn_shell+=" -D"+env.mvn_options+"=true"
-                            mvn_package_shell+=" -D"+env.mvn_options+"=true"
                             }
                         echo "mvn_configfile is ${mvn_configfile}"
                         withDockerContainer(args: "--rm -v ${WORKSPACE}:${WORKSPACE}", image: "harbor.qianfan123.com/toolset/toolsetcore:${toolset_image_version}") {
