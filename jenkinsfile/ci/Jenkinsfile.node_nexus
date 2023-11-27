@@ -36,6 +36,11 @@ if (!env.on_k8s){
 if (env.set_on_k8s) {
     env.on_k8s=env.set_on_k8s
 }
+def toolset_image_version="0.3.0"
+if (env.toolset_image_version){
+    toolset_image_version = env.toolset_image_version
+}
+
 pipeline {
 	agent {label node}
     options {
@@ -73,7 +78,10 @@ pipeline {
 				echo "npm_shell is ${npm_shell}"
 				sh "  ${npm_shell}" 
 				sh "rm -f /hdapp/jenkins/agent/${node}/workspace/iWMS/*.zip && cp ${artifactId}.zip /hdapp/jenkins/agent/${node}/workspace/iWMS/" 
-				archiveArtifacts '*.zip' 
+				archiveArtifacts '*.zip'
+				withDockerContainer(args: "--rm -v ${WORKSPACE}:/opt", image: "harbor.qianfan123.com/toolset/toolsetcore:${toolset_image_version}") {
+                    sh "DNET_PRODUCT=dnet GIT_SITE=${ci_git_server_baseurl} GIT_PROJECT=${git_project} GIT_BRANCH=${build_branch} DNET_PROFILE=integration_test hdmon nodejs_integration --path /opt --jenkins_url ${BUILD_URL}"
+                }
 				}
              }
          }  
