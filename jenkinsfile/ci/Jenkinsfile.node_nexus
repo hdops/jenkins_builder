@@ -25,6 +25,7 @@ def credentialsId="appGitLab"
 if (env.credentials_id){
   credentialsId = env.credentials_id
 }
+def git_branch="develop"
 
 def run_on_public="None"
 if (env.run_on_public){
@@ -65,12 +66,14 @@ pipeline {
                 script{
 				if (params.build_tag != "" && params.build_tag != null) { 
 				echo "checkout ${ci_git_server_baseurl}/${git_project}.git  tag:${build_tag}"
+				git_branch=build_tag
 				retry(5){
                     checkout([$class: 'GitSCM', branches: [[name: 'refs/tags/${build_tag}']],extensions: [[$class: 'CloneOption', depth: 1, shallow: true]], userRemoteConfigs: [[url: "${ci_git_server_baseurl}/${git_project}.git",credentialsId: "${credentialsId}"]]])
                 }
                 }
                 if (params.build_branch != "" && params.build_branch != null) { 
 				echo "checkout ${ci_git_server_baseurl}/${git_project}.git  branch:${build_branch}"
+				git_branch=build_branch
 				retry(5){
 				    checkout([$class: 'GitSCM', branches: [[name: "*/${build_branch}"]],userRemoteConfigs: [[credentialsId: "${credentialsId}",url: "${ci_git_server_baseurl}/${git_project}.git"]]])
 				}
@@ -80,7 +83,7 @@ pipeline {
 				sh "rm -f /hdapp/jenkins/agent/${node}/workspace/iWMS/*.zip && cp ${artifactId}.zip /hdapp/jenkins/agent/${node}/workspace/iWMS/" 
 				archiveArtifacts '*.zip'
 				withDockerContainer(args: "--rm -v ${WORKSPACE}:/opt", image: "harbor.qianfan123.com/toolset/toolsetcore:${toolset_image_version}") {
-                    sh "DNET_PRODUCT=dnet GIT_SITE=${ci_git_server_baseurl} GIT_PROJECT=${git_project} GIT_BRANCH=${build_branch} DNET_PROFILE=integration_test hdmon nodejs_integration --path /opt --jenkins_url ${BUILD_URL}"
+                    sh "DNET_PRODUCT=dnet GIT_SITE=${ci_git_server_baseurl} GIT_PROJECT=${git_project} GIT_BRANCH=${git_branch} DNET_PROFILE=integration_test hdmon nodejs_integration --path /opt --jenkins_url ${BUILD_URL}"
                 }
 				}
              }
