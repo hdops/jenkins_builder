@@ -46,9 +46,12 @@ def label_name="jenkins-job-kubernetes-deploy"
 
 def func = {
     BUILD_TRIGGER_BY = "${currentBuild.getBuildCauses()[0].shortDescription} / ${currentBuild.getBuildCauses()[0].userId}"
-    echo "BUILD_TRIGGER_BY: ${BUILD_TRIGGER_BY}"
+    def parts= BUILD_TRIGGER_BY.replace("Started by user ","").split('/')
 
-    prefix = 'BUILD_USER=${BUILD_USER} BUILD_USER_ID=${BUILD_USER_ID} JENKINS_URL=${BUILD_URL} DNET_PROJECT=${DNET_PROJECT} DNET_PRODUCT=${DNET_PRODUCT} DNET_PROFILE=${DNET_PROFILE} GIT_USER=${GITLAB_USER_USR} GIT_PASSWORD=${GITLAB_USER_PSW} '
+    def userName = "${parts[0]?.trim()}"
+    def userId "${parts[1]?.trim()}"
+
+    prefix = 'BUILD_USER=${userName} BUILD_USER_ID=${userId} JENKINS_URL=${BUILD_URL} DNET_PROJECT=${DNET_PROJECT} DNET_PRODUCT=${DNET_PRODUCT} DNET_PROFILE=${DNET_PROFILE} GIT_USER=${GITLAB_USER_USR} GIT_PASSWORD=${GITLAB_USER_PSW} '
     retry(2){
         sh "DNET_PROFILE=integration_test DNET_PRODUCT=dnet TRUST_PUBLIC_IP=${run_on_public} hdops download_toolset --branch develop -p ."
     }
