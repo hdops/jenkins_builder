@@ -44,14 +44,18 @@ def func = {
 
     def userName = "${parts[0]?.trim()}"
     def userId = "${parts[1]?.trim()}"
+    echo "BUILD_TRIGGER_BY is ${BUILD_TRIGGER_BY}"
+    echo "parts is ${parts}"
+    echo "userName is ${userName}"
+    echo "userId is ${userId}"
 
-    prefix = 'BUILD_USER=${BUILD_USER} BUILD_USER_ID=${BUILD_USER_ID} JENKINS_URL=${BUILD_URL} DNET_PROJECT=${DNET_PROJECT} DNET_PRODUCT=${DNET_PRODUCT} DNET_PROFILE=${DNET_PROFILE} GIT_USER=${GITLAB_USER_USR} GIT_PASSWORD=${GITLAB_USER_PSW} '
+    prefix = 'JENKINS_URL=${BUILD_URL} DNET_PROJECT=${DNET_PROJECT} DNET_PRODUCT=${DNET_PRODUCT} DNET_PROFILE=${DNET_PROFILE} GIT_USER=${GITLAB_USER_USR} GIT_PASSWORD=${GITLAB_USER_PSW} '
     retry(2){
         sh "DNET_PROFILE=integration_test DNET_PRODUCT=dnet TRUST_PUBLIC_IP=${run_on_public} hdops download_toolset --branch develop -p ."
     }
     sh "tar zxf toolset.tar.gz -C ${WORKSPACE}"
-    sh prefix + "hdops kubernetes download_kubernetes -s None"
-    sh prefix + "hdops kubernetes validate --subsystem ${image}"
+    sh prefix + " BUILD_USER=${userName} BUILD_USER_ID=${userId} hdops kubernetes download_kubernetes -s None"
+    sh prefix + " BUILD_USER=${userName} BUILD_USER_ID=${userId} hdops kubernetes validate --subsystem ${image}"
 
     def status = sh(returnStatus:true, script:prefix + "hdops kubernetes db_upgrade --subsystem ${image} --stackids ${stackids} ${params.skipversion} ${params.skipversionupdate} --receivers ${receivers} --timeout ${timeout} --threadcount ${threadcount}")
     archiveArtifacts allowEmptyArchive: true, artifacts: 'dbinit_log*txt', followSymlinks: false
@@ -59,7 +63,7 @@ def func = {
         sh "`exit ${status}`"
     }
 
-    sh prefix + "hdops kubernetes appinstall --subsystem ${image} --stackids ${stackids} --checkstatus ${checkstatus}"
+    sh prefix + " BUILD_USER=${userName} BUILD_USER_ID=${userId} hdops kubernetes appinstall --subsystem ${image} --stackids ${stackids} --checkstatus ${checkstatus}"
 }
 
 
