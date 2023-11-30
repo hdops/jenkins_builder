@@ -43,6 +43,7 @@ if (params.check_config){
 def YAML_FILE="kubernetes_pod_template.yaml"
 def label_name="jenkins-job-kubernetes-deploy"
 
+
 def func = {
     prefix = 'BUILD_USER=${env.BUILD_USER} BUILD_USER_ID=${env.BUILD_USER_ID} JENKINS_URL=${BUILD_URL} DNET_PROJECT=${DNET_PROJECT} DNET_PRODUCT=${DNET_PRODUCT} DNET_PROFILE=${DNET_PROFILE} GIT_USER=${GITLAB_USER_USR} GIT_PASSWORD=${GITLAB_USER_PSW} '
     retry(2){
