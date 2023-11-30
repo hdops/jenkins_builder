@@ -50,6 +50,10 @@ def func = {
 
     def userName = "${parts[0]?.trim()}"
     def userId = "${parts[1]?.trim()}"
+    echo "BUILD_TRIGGER_BY is ${BUILD_TRIGGER_BY}"
+    echo "parts is ${parts}"
+    echo "userName is ${userName}"
+    echo "userId is ${userName}"
 
     prefix = 'BUILD_USER=${userName} BUILD_USER_ID=${userId} JENKINS_URL=${BUILD_URL} DNET_PROJECT=${DNET_PROJECT} DNET_PRODUCT=${DNET_PRODUCT} DNET_PROFILE=${DNET_PROFILE} GIT_USER=${GITLAB_USER_USR} GIT_PASSWORD=${GITLAB_USER_PSW} '
     retry(2){
