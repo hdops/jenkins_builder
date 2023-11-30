@@ -49,7 +49,7 @@ def func = {
     def parts= BUILD_TRIGGER_BY.replace("Started by user ","").split('/')
 
     def userName = "${parts[0]?.trim()}"
-    def userId "${parts[1]?.trim()}"
+    def userId = "${parts[1]?.trim()}"
 
     prefix = 'BUILD_USER=${userName} BUILD_USER_ID=${userId} JENKINS_URL=${BUILD_URL} DNET_PROJECT=${DNET_PROJECT} DNET_PRODUCT=${DNET_PRODUCT} DNET_PROFILE=${DNET_PROFILE} GIT_USER=${GITLAB_USER_USR} GIT_PASSWORD=${GITLAB_USER_PSW} '
     retry(2){
