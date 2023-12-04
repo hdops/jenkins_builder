@@ -7,6 +7,11 @@ if (env.credentials_id){
   credentialsId = env.credentials_id
 }
 
+def action = 'lstupdtime'
+if (env.action){
+ action = env.action
+}
+
 pipeline{
     agent{
       docker{
@@ -16,14 +21,7 @@ pipeline{
         alwaysPull true
       }
     }
-    parameters {
-        choice(
-            choices: ['lstupdtime', 'billdate'],
-            description: 'billdate:取数逻辑1,按账单日志查询;lstupdtime: 取数逻辑2,  根据最后修改时间查 ',
-            name: 'action'，
-            defaultValue: 'lstupdtime'
-        )
-    }
+
     options{
       buildDiscarder(logRotator(numToKeepStr: '12')) // 保留记录数12
       disableConcurrentBuilds() // 不并发构建
@@ -52,10 +50,10 @@ pipeline{
         }
         failure{
             echo "========pipeline execution failed========"
-            emailext(recipientProviders: [developers(),requestor(),culprits()],to:'buhaiqing@hd123.com',  subject: "lsym duizhang failure", body: "failure on Job ${env.BUILD_URL}\n${env.GIT_COMMIT}",attachLog:true)
+            emailext(recipientProviders: [developers(),requestor(),culprits()],to:'buhaiqing@hd123.com',  subject: "lsym bill download failure", body: "failure on Job ${env.BUILD_URL}\n${env.GIT_COMMIT}",attachLog:true)
         }
         fixed{
-            emailext(recipientProviders: [developers(),requestor(),culprits()],to:'buhaiqing@hd123.com',  subject: "lsym duizhang  fixed", body: "fixed on Job ${env.BUILD_URL}\n${env.GIT_COMMIT}",attachLog:true)
+            emailext(recipientProviders: [developers(),requestor(),culprits()],to:'buhaiqing@hd123.com',  subject: "lsym bill download  fixed", body: "fixed on Job ${env.BUILD_URL}\n${env.GIT_COMMIT}",attachLog:true)
         }
     }
 }
