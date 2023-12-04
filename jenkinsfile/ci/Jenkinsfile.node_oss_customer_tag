@@ -81,7 +81,7 @@ pipeline {
 				sh "  ${npm_shell}" 
 				archiveArtifacts '*.tar.gz'
 				withDockerContainer(args: "--rm -v ${WORKSPACE}:/opt", image: "harbor.qianfan123.com/toolset/toolsetcore:${toolset_image_version}") {
-                        sh "DNET_PRODUCT=dnet GIT_SITE=${ci_git_server_baseurl} GIT_PROJECT=${git_project} GIT_BRANCH=${build_branch} DNET_PROFILE=integration_test hdmon nodejs_integration --path /opt --jenkins_url ${BUILD_URL}"
+                        sh "DNET_PRODUCT=dnet GIT_SITE=${ci_git_server_baseurl} GIT_PROJECT=${git_project} GIT_BRANCH=${build_tag} DNET_PROFILE=integration_test hdmon nodejs_integration --path /opt --jenkins_url ${BUILD_URL}"
                 }
              }
          }  
