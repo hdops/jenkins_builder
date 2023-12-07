@@ -22,7 +22,7 @@ pipeline{
       }
     }
     parameters {
-        string (defaultValue: "NA", description: '最后修改时间,默认值NA,自动触发时使用; 手动触发按2023-12-02样式输入', name: 'lstupdtime', trim: true)
+        string (defaultValue: "NA", description: '最后修改时间,默认值NA,自动触发时使用; 指定日期拉取数据，比如输入2023-12-04，就是拉取大于2023-12-04 小于 2023-12-05号的数据，也即2023-12-04当天有变化的数据。', name: 'lstupdtime', trim: true)
     }
 
     options{
