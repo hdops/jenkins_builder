@@ -28,7 +28,7 @@ pipeline{
     options{
       buildDiscarder(logRotator(numToKeepStr: '12')) // 保留记录数12
       disableConcurrentBuilds() // 不并发构建
-      timeout(time: 120, unit: 'MINUTES')
+      timeout(time: 60, unit: 'MINUTES')
     }
     //triggers {
       //  cron "30 7 * * *" // 每天8点20分执行一次
