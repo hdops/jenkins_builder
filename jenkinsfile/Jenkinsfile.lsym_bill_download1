@@ -1,0 +1,62 @@
+def ci_git_server_baseurl= "http://github.app.hd123.cn:10080"
+if (env.ci_git_server_baseurl){
+    ci_git_server_baseurl = env.ci_git_server_baseurl
+}
+def credentialsId="17643215-09f8-4a9a-b0ea-c8e49777ce1d"
+if (env.credentials_id){
+  credentialsId = env.credentials_id
+}
+
+def action = 'lstupdtime'
+if (env.action){
+ action = env.action
+}
+
+pipeline{
+    agent{
+      docker{
+        label "master"
+        image "harbor.qianfan123.com/toolset/k8s_config_checker:1.0.0"
+        args '--rm -v /var/run/docker.sock:/var/run/docker.sock -v /usr/bin/docker:/usr/bin/docker -v /root/.docker/config.json:/root/.docker/config.json  --add-host=maven.qianfan123.com:172.17.0.82 --add-host=github.app.hd123.cn:172.17.10.58 --add-host=gitlab.hd123.com:172.17.12.219 '
+        alwaysPull true
+      }
+    }
+    parameters {
+        string (defaultValue: "NA", description: '最后修改时间,默认值NA,自动触发时使用; 手动触发按2023-12-02样式输入', name: 'lstupdtime', trim: true)
+    }
+
+    options{
+      buildDiscarder(logRotator(numToKeepStr: '12')) // 保留记录数12
+      disableConcurrentBuilds() // 不并发构建
+      timeout(time: 120, unit: 'MINUTES')
+    }
+    //triggers {
+      //  cron "30 7 * * *" // 每天8点20分执行一次
+    //}
+
+    stages{
+        stage("run script"){
+          steps{
+            retry(5){
+              checkout([$class: 'GitSCM', branches: [[name: "${build_branch}"]],userRemoteConfigs: [[credentialsId: "${credentialsId}",url: "${ci_git_server_baseurl}/${git_project}.git"]]])
+            }
+            sh "lstupdtime=${params.lstupdtime} python lsym_bill_download.py -action lstupdtime"
+          }
+        }
+    }
+    post{
+        always{
+            echo "========always========"
+        }
+        success{
+            echo "========pipeline executed successfully ========"
+        }
+        failure{
+            echo "========pipeline execution failed========"
+            emailext(recipientProviders: [developers(),requestor(),culprits()],to:'buhaiqing@hd123.com',  subject: "lsym bill download failure", body: "failure on Job ${env.BUILD_URL}\n${env.GIT_COMMIT}",attachLog:true)
+        }
+        fixed{
+            emailext(recipientProviders: [developers(),requestor(),culprits()],to:'buhaiqing@hd123.com',  subject: "lsym bill download  fixed", body: "fixed on Job ${env.BUILD_URL}\n${env.GIT_COMMIT}",attachLog:true)
+        }
+    }
+}
