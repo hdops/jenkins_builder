@@ -27,9 +27,6 @@ pipeline{
       disableConcurrentBuilds() // 不并发构建
       timeout(time: 60, unit: 'MINUTES')
     }
-    //triggers {
-      //  cron "30 7 * * *" // 每天8点20分执行一次
-    //}
 
     stages{
         stage("run script"){
