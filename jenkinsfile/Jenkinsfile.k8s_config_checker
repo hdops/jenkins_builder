@@ -94,7 +94,7 @@ pipeline {
                     emailext(recipientProviders: [developers(),requestor(),culprits()],to:"${git_commit_author}@hd123.com,buhaiqing@hd123.com",  subject: "[${env.gitlabBranch}] k8s_config_checker failure on ${git_project}", body: "[${env.gitlabBranch}]failure on Job ${env.BUILD_URL}\n${env.GIT_COMMIT}",attachLog:true)
                 }
                 prefix = 'JENKINS_URL=${BUILD_URL} BUILD_RESULT=${BUILD_RESULT} '
-                sh prefix + " BUILD_USER_ID=${git_commit_author} python  update_config_checker_event.py"
+                sh prefix + " BUILD_USER_ID=${git_commit_author} python  /opt/update_config_checker_event.py"
             }
         }
         fixed{
