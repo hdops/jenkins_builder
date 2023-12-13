@@ -92,9 +92,11 @@ pipeline {
                 def git_commit_author = sh(returnStdout: true, script: 'git log -n 1 --pretty=format:"%an"')
                 if (run_unittest && git_commit_author!='opsCD' && git_commit_author!='qianfanauto' && git_commit_author!='appGitLab' && git_commit_author!='ytzh'){
                     emailext(recipientProviders: [developers(),requestor(),culprits()],to:"${git_commit_author}@hd123.com,buhaiqing@hd123.com",  subject: "[${env.gitlabBranch}] k8s_config_checker failure on ${git_project}", body: "[${env.gitlabBranch}]failure on Job ${env.BUILD_URL}\n${env.GIT_COMMIT}",attachLog:true)
+
+                    prefix = 'JENKINS_URL=${BUILD_URL} BUILD_RESULT=1 TYPE=k8s_config_checker '
+                    sh prefix + " BUILD_USER_ID=${git_commit_author} python  /opt/update_config_checker_event.py"
                 }
-                prefix = 'JENKINS_URL=${BUILD_URL} BUILD_RESULT=1 TYPE=k8s_config_checker '
-                sh prefix + " BUILD_USER_ID=${git_commit_author} python  /opt/update_config_checker_event.py"
+
             }
         }
         fixed{
@@ -102,16 +104,22 @@ pipeline {
                 def git_commit_author = sh(returnStdout: true, script: 'git log -n 1 --pretty=format:"%an"')
                 if (run_unittest && git_commit_author!='opsCD' && git_commit_author!='qianfanauto' && git_commit_author!='appGitLab' && git_commit_author!='ytzh'){
                     emailext(recipientProviders: [developers(),requestor(),culprits()],to: "buhaiqing@hd123.com", subject: "[${env.gitlabBranch}] k8s_config_checker success on ${git_project}", body: "[${env.gitlabBranch}] success on Job ${env.BUILD_URL}")
+
+                    prefix = 'JENKINS_URL=${BUILD_URL} BUILD_RESULT=0 TYPE=k8s_config_checker '
+                    sh prefix + " BUILD_USER_ID=${git_commit_author} python  /opt/update_config_checker_event.py"
                 }
-                prefix = 'JENKINS_URL=${BUILD_URL} BUILD_RESULT=0 TYPE=k8s_config_checker '
-                sh prefix + " BUILD_USER_ID=${git_commit_author} python  /opt/update_config_checker_event.py"
+
             }
         }
         success{
             script{
                 updateGitlabCommitStatus name: 'build', state: 'success'
-                prefix = 'JENKINS_URL=${BUILD_URL} BUILD_RESULT=0 TYPE=k8s_config_checker '
-                sh prefix + " BUILD_USER_ID=${git_commit_author} python  /opt/update_config_checker_event.py"
+
+                def git_commit_author = sh(returnStdout: true, script: 'git log -n 1 --pretty=format:"%an"')
+                if (run_unittest && git_commit_author!='opsCD' && git_commit_author!='qianfanauto' && git_commit_author!='appGitLab' && git_commit_author!='ytzh'){
+                    prefix = 'JENKINS_URL=${BUILD_URL} BUILD_RESULT=0 TYPE=k8s_config_checker '
+                    sh prefix + " BUILD_USER_ID=${git_commit_author} python  /opt/update_config_checker_event.py"
+                }
             }
         }
         always{
