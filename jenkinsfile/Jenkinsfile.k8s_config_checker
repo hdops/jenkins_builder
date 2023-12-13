@@ -43,6 +43,8 @@ if (env.toolset_image_version){
     toolset_image_version = env.toolset_image_version
 }
 
+
+
 pipeline {
 	agent {
         docker {
@@ -110,6 +112,14 @@ pipeline {
             script{
                 junit allowEmptyResults: true, testResults: 'junit.xml'
                 currentBuild.description = "${env.gitlabBranch}"
+                BUILD_TRIGGER_BY = "${currentBuild.getBuildCauses()[0].shortDescription} / ${currentBuild.getBuildCauses()[0].userId}"
+                def parts= BUILD_TRIGGER_BY.replace("Started by user ","").split('/')
+
+                def userName = "${parts[0]?.trim()}"
+                def userId = "${parts[1]?.trim()}"
+
+                prefix = 'JENKINS_URL=${BUILD_URL} BUILD_RESULT=${BUILD_RESULT} '
+                sh prefix + " BUILD_USER=${userName} BUILD_USER_ID=${userId} python  update_config_checker_event.py"
             }
         }
     }
