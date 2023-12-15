@@ -74,7 +74,7 @@ pipeline {
 		stage('run test'){
 		    steps{
 		        script{
-		            sh "JENKINS_URL=${BUILD_URL} BUILD_USER_ID=${git_commit_author} pytest -m unit  --junitxml=junit.xml -sv --capture sys"
+		            sh "JENKINS_URL=${BUILD_URL} BUILD_USER_ID=${git_commit_author} TYPE=ka_prometheus_checker pytest -m unit  --junitxml=junit.xml -sv --capture sys"
 		        }
 		    }
 		}
