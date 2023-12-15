@@ -36,8 +36,10 @@ pipeline {
 	agent {
         docker {
         label node
-        image "harbor.qianfan123.com/toolset/toolsetcore:0.3.0"
+        //image "harbor.qianfan123.com/toolset/toolsetcore:0.3.0"
+        image "harbor.qianfan123.com/toolset/k8s_config_checker:1.0.0"
         args '-v /var/run/docker.sock:/var/run/docker.sock -v /usr/bin/docker:/usr/bin/docker --add-host=hd-hz-public.oss-cn-hangzhou-internal.aliyuncs.com:47.110.23.37'
+        alwaysPull true
         }
     }
     options {
