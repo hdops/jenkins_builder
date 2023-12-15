@@ -47,7 +47,6 @@ pipeline {
         gitLabConnection('toolset')
     }
     stages {
-
         stage('checkout scm'){
 			steps{
                 script{
