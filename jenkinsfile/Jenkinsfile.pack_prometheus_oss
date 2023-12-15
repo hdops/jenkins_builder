@@ -31,6 +31,11 @@ def run_unittest=true
 if (env.run_unittest){
     run_unittest = env.run_unittest.toBoolean()
 }
+def TOOLSET_DOCKER_REGISTRY_BASEURL = "harbor.qianfan123.com/toolset"
+if (env.TOOLSET_DOCKER_REGISTRY_BASEURL){
+    TOOLSET_DOCKER_REGISTRY_BASEURL  = env.TOOLSET_DOCKER_REGISTRY_BASEURL
+}
+
 def git_commit_author =""
 pipeline {
 	agent {
@@ -76,8 +81,11 @@ pipeline {
 		stage("package && upload"){
             steps{
                 script{
-                    echo "python update_toolset_oss.py -branch ${env.gitlabBranch}"
-                    sh "DNET_CLOUD_VENDOR=${DNET_CLOUD_VENDOR} python update_toolset_oss.py -branch ${env.gitlabBranch} -filename prometheus"
+                    withDockerContainer(args: "-v ${WORKSPACE}:${WORKSPACE} ", image: "${TOOLSET_DOCKER_REGISTRY_BASEURL}/toolsetcore:0.3.0") {
+                        echo "python update_toolset_oss.py -branch ${env.gitlabBranch}"
+                        sh "DNET_CLOUD_VENDOR=${DNET_CLOUD_VENDOR} python update_toolset_oss.py -branch ${env.gitlabBranch} -filename prometheus"
+                    }
+
                 }
             }
 		}
