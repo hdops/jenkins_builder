@@ -77,7 +77,7 @@ pipeline {
                        """
                        sh "cp -r /opt/tests/* ${WORKSPACE}/tests "
                        prefix = 'JENKINS_URL=${BUILD_URL} BUILD_USER_ID=${git_commit_author} TYPE=k8s_app_accelerator_checker '
-                       sh prefix + "pytest -m unit tests/gitlab_cfg_test.py  --junitxml=junit.xml -sv --capture sys"
+                       sh prefix + "pytest -m app_accelerator tests  --junitxml=junit.xml -sv --capture sys"
                    }
                 }
 			}
