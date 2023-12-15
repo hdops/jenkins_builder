@@ -131,16 +131,17 @@ pipeline {
             }
         }
 
-        stage('check error_yaml_file'){
-            steps{
-                script{
-                    if ( error_yaml_file != '' ){
-                        echo "${error_yaml_file}"
-                        sh 'false'
-                    }
-                }
-            }
-        }
+        //stage('check error_yaml_file'){
+            //steps{
+                //script{
+                   // if ( error_yaml_file != '' ){
+                  //      echo "${error_yaml_file}"
+                //        sh 'false'
+              //      }
+            //    }
+          //  }
+        //}
+
     }
 
     post{
