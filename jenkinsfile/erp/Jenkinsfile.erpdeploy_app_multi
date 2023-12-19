@@ -56,7 +56,7 @@ pipeline {
         stage('download toolset_x') {
             steps{
                 script{
-                    def profile = 'production'
+                    def profile = '${envname}'
                     def config = readYaml(file: "${profile}/erpcmdb.yaml")
                     def filteredObjects = config.containers.findAll { it.containeralias == "${params.app_name}_${profile}" }
                     def hostIds = filteredObjects.collect { it.host_id }
