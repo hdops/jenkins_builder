@@ -35,6 +35,11 @@ if (params.check_config){
     check_config = params.check_config
 }
 
+def source =""
+if (params.source){
+    source = params.source
+}
+
 def YAML_FILE="kubernetes_pod_template.yaml"
 def label_name="jenkins-job-kubernetes-deploy"
 
@@ -49,7 +54,7 @@ def func = {
     //echo "userName is ${userName}"
     //echo "userId is ${userId}"
 
-    prefix = 'JENKINS_URL=${BUILD_URL} DNET_PROJECT=${DNET_PROJECT} DNET_PRODUCT=${DNET_PRODUCT} DNET_PROFILE=${DNET_PROFILE} GIT_USER=${GITLAB_USER_USR} GIT_PASSWORD=${GITLAB_USER_PSW} '
+    prefix = 'JENKINS_URL=${BUILD_URL} DNET_PROJECT=${DNET_PROJECT} DNET_PRODUCT=${DNET_PRODUCT} SOURCE=${source} DNET_PROFILE=${DNET_PROFILE} GIT_USER=${GITLAB_USER_USR} GIT_PASSWORD=${GITLAB_USER_PSW} '
     retry(2){
         sh "DNET_PROFILE=integration_test DNET_PRODUCT=dnet TRUST_PUBLIC_IP=${run_on_public} hdops download_toolset --branch develop -p ."
     }
