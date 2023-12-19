@@ -46,17 +46,17 @@ pipeline {
                 deleteDir()
             }
         }
-        stage('checkout'){
+        stage('checkout erpcmdb.yaml'){
             steps{
                 script{
-                    checkout changelog: false, scm: [$class: 'GitSCM', branches: [[name: '*/erp']], extensions: [[$class: 'SparseCheckoutPaths', sparseCheckoutPaths: [[path: '${envname}/erpcmdb.yaml']]]], userRemoteConfigs: [[credentialsId: '${credentialsId}', url: 'http://github.app.hd123.cn:10080/qianfanops/toolset_h6std.git']]]
+                    checkout changelog: false, scm: [$class: 'GitSCM', branches: [[name: '*/erp']], extensions: [[$class: 'SparseCheckoutPaths', sparseCheckoutPaths: [[path: "${envname}/erpcmdb.yaml"]]]], userRemoteConfigs: [[credentialsId: '${credentialsId}', url: "${git_base_url}/qianfanops/${toolset_x}.git"]]]
                 }
             }
         }
-        stage('download toolset_x') {
+        stage('multi app install') {
             steps{
                 script{
-                    def profile = '${envname}'
+                    def profile = "${envname}"
                     def config = readYaml(file: "${profile}/erpcmdb.yaml")
                     def filteredObjects = config.containers.findAll { it.containeralias == "${params.app_name}_${profile}" }
                     def hostIds = filteredObjects.collect { it.host_id }
