@@ -1,0 +1,94 @@
+def node=""
+if (env.node){
+    node =env.node
+}else{
+    node ="master"
+}
+def mysh(cmd, returnStatus) {
+    return sh (script: '#!/bin/sh -e\n'+ cmd, returnStatus: returnStatus)
+}
+def git_base_url=""
+if (env.git_base_url){
+    git_base_url =env.git_base_url
+}else{
+    git_base_url ="http://github.app.hd123.cn:10080"
+}
+def deploy_dir=""
+if (env.deploy_dir){
+    deploy_dir =env.deploy_dir
+}else{
+    deploy_dir ="/hdapp:/hdapp"
+}
+def dnet_project=env.DNET_PROJECT
+def build_number=env.BUILD_NUMBER
+def run_on_public="None"
+if (env.run_on_public){
+    run_on_public=env.run_on_public
+}
+if (!env.on_k8s){
+    env.on_k8s="False"
+}
+if (env.set_on_k8s) {
+    env.on_k8s=env.set_on_k8s
+}
+def credentialsId="17643215-09f8-4a9a-b0ea-c8e49777ce1d"
+if (env.credentials_id){
+  credentialsId = env.credentials_id
+}
+pipeline {
+    agent {label node}
+    options {
+	    timeout(time: 2, unit: 'HOURS')
+    }
+    stages {
+        stage('delete workspace') {
+            steps{
+                deleteDir()
+            }
+        }
+        stage('checkout erpcmdb.yaml'){
+            steps{
+                script{
+                    checkout changelog: false, scm: [$class: 'GitSCM', branches: [[name: '*/erp']], extensions: [[$class: 'SparseCheckoutPaths', sparseCheckoutPaths: [[path: "${envname}/erpcmdb.yaml"]]]], userRemoteConfigs: [[credentialsId: '${credentialsId}', url: "${git_base_url}/qianfanops/${toolset_x}.git"]]]
+                }
+            }
+        }
+        stage('multi app install') {
+            steps{
+                script{
+                    def profile = "${envname}"
+                    def config = readYaml(file: "${profile}/erpcmdb.yaml")
+                    def filteredObjects = config.containers.findAll { it.containeralias == "${params.appname}_${profile}" }
+                    def hostIds = filteredObjects.collect { it.host_id }
+                    
+                    echo "Host IDs: ${hostIds}"
+                    def filteredHostIPs = config.hosts.findAll{hostIds.contains(it.host_id)}.collect{it.host_ip}
+
+                withCredentials([usernamePassword(credentialsId: "${credentialsId}", usernameVariable: 'username', passwordVariable: 'password')]){
+                    for (ip in filteredHostIPs){
+                        echo "${ip} - ${params.appname}"
+                        mysh ("ssh $ip sudo 'echo http://$username:$password@github.app.hd123.cn:10080 > /opt/.hdgit && echo https://$username:$password@gitlab.hd123.com >> /opt/.hdgit && echo https://$username:$password@github-argocd.hd123.com >> /opt/.hdgit'", false)
+                        mysh ("ssh $ip sudo wget -qO /hdapp/.ka_deploy_app_${build_number}.sh http://ka-storage.oss-cn-hangzhou.aliyuncs.com/cd_new/ka_deploy.sh", false)
+                        mysh ("ssh $ip sudo mv /opt/.hdgit /opt/.hdgit_app_${build_number}", false)
+                        mysh ("ssh $ip sudo sed -i 's%http://github.app.hd123.cn:10080%${git_base_url}%' /hdapp/.ka_deploy_app_${build_number}.sh", false)
+                        mysh ("ssh $ip sudo sed -i 's%ka_project%${dnet_project}%' /hdapp/.ka_deploy_app_${build_number}.sh", false)
+                        mysh ("ssh $ip sudo sed -i 's%/hdapp:/hdapp%${deploy_dir}%' /hdapp/.ka_deploy_app_${build_number}.sh", false)
+                        mysh ("ssh $ip sudo sed -i 's%deploynum%app_${build_number}%g' /hdapp/.ka_deploy_app_${build_number}.sh", false)
+                        mysh ("ssh $ip sudo sh /hdapp/.ka_deploy_app_${build_number}.sh ${toolset_x} ${envname} ${params.appname} appinstall $version false", false)
+                        mysh ("ssh $ip sudo rm -f /hdapp/ka_deploy_app_*.sh* /hdapp/.ka_deploy_app_${build_number}.sh", false)
+                        mysh ("scp -rp $ip:/hdapp/heading/${params.appname}_*/apollodir/{*apollo,wiki*} .", true)
+                        }
+                    }
+                }
+            }
+        }
+    }
+	post {
+        always {
+			script {
+				archiveArtifacts allowEmptyArchive: true, artifacts: '*', followSymlinks: false
+                currentBuild.description = "${params.appname}:${params.version}"
+			}
+		}
+    }
+}
