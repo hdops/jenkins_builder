@@ -58,7 +58,7 @@ pipeline {
                 script{
                     def profile = "${envname}"
                     def config = readYaml(file: "${profile}/erpcmdb.yaml")
-                    def filteredObjects = config.containers.findAll { it.containeralias == "${params.app_name}_${profile}" }
+                    def filteredObjects = config.containers.findAll { it.containeralias == "${params.appname}_${profile}" }
                     def hostIds = filteredObjects.collect { it.host_id }
                     
                     echo "Host IDs: ${hostIds}"
@@ -66,7 +66,7 @@ pipeline {
 
                 withCredentials([usernamePassword(credentialsId: "${credentialsId}", usernameVariable: 'username', passwordVariable: 'password')]){
                     for (ip in filteredHostIPs){
-                        echo "${ip} - ${params.app_name}"
+                        echo "${ip} - ${params.appname}"
                         mysh ("ssh $ip sudo 'echo http://$username:$password@github.app.hd123.cn:10080 > /opt/.hdgit && echo https://$username:$password@gitlab.hd123.com >> /opt/.hdgit && echo https://$username:$password@github-argocd.hd123.com >> /opt/.hdgit'", false)
                         mysh ("ssh $ip sudo wget -qO /hdapp/.ka_deploy_app_${build_number}.sh http://ka-storage.oss-cn-hangzhou.aliyuncs.com/cd_new/ka_deploy.sh", false)
                         mysh ("ssh $ip sudo mv /opt/.hdgit /opt/.hdgit_app_${build_number}", false)
@@ -74,9 +74,9 @@ pipeline {
                         mysh ("ssh $ip sudo sed -i 's%ka_project%${dnet_project}%' /hdapp/.ka_deploy_app_${build_number}.sh", false)
                         mysh ("ssh $ip sudo sed -i 's%/hdapp:/hdapp%${deploy_dir}%' /hdapp/.ka_deploy_app_${build_number}.sh", false)
                         mysh ("ssh $ip sudo sed -i 's%deploynum%app_${build_number}%g' /hdapp/.ka_deploy_app_${build_number}.sh", false)
-                        mysh ("ssh $ip sudo sh /hdapp/.ka_deploy_app_${build_number}.sh ${toolset_x} ${envname} ${params.app_name} appinstall $version false", false)
+                        mysh ("ssh $ip sudo sh /hdapp/.ka_deploy_app_${build_number}.sh ${toolset_x} ${envname} ${params.appname} appinstall $version false", false)
                         mysh ("ssh $ip sudo rm -f /hdapp/ka_deploy_app_*.sh* /hdapp/.ka_deploy_app_${build_number}.sh", false)
-                        mysh ("scp -rp $ip:/hdapp/heading/${params.app_name}_*/apollodir/{*apollo,wiki*} .", true)
+                        mysh ("scp -rp $ip:/hdapp/heading/${params.appname}_*/apollodir/{*apollo,wiki*} .", true)
                         }
                     }
                 }
@@ -87,7 +87,7 @@ pipeline {
         always {
 			script {
 				archiveArtifacts allowEmptyArchive: true, artifacts: '*', followSymlinks: false
-                currentBuild.description = "${params.app_name}:${params.version}"
+                currentBuild.description = "${params.appname}:${params.version}"
 			}
 		}
     }
