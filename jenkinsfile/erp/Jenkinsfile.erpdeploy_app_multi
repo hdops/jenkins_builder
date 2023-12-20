@@ -74,7 +74,7 @@ pipeline {
                         mysh ("ssh $ip sudo sed -i 's%ka_project%${dnet_project}%' /hdapp/.ka_deploy_app_${build_number}.sh", false)
                         mysh ("ssh $ip sudo sed -i 's%/hdapp:/hdapp%${deploy_dir}%' /hdapp/.ka_deploy_app_${build_number}.sh", false)
                         mysh ("ssh $ip sudo sed -i 's%deploynum%app_${build_number}%g' /hdapp/.ka_deploy_app_${build_number}.sh", false)
-                        mysh ("ssh $ip sudo sh /hdapp/.ka_deploy_app_${build_number}.sh ${toolset_x} ${envname} ${params.appname} appinstall $version false", false)
+                        mysh ("ssh $ip sudo sh /hdapp/.ka_deploy_app_${build_number}.sh ${toolset_x} ${envname} ${params.appname} appinstall $version ${params.config_gen}", false)
                         mysh ("ssh $ip sudo rm -f /hdapp/ka_deploy_app_*.sh* /hdapp/.ka_deploy_app_${build_number}.sh", false)
                         mysh ("scp -rp $ip:/hdapp/heading/${params.appname}_*/apollodir/{*apollo,wiki*} .", true)
                         }
