@@ -38,7 +38,7 @@ def build_number=env.BUILD_NUMBER
 def toolset_image_version="0.3.0"
 
 def func = {
-    def status = sh(returnStatus:true, script: "hdops kpos_integration --path ${WORKSPACE} --profile ${params.kpos_profile} --app_mgr_url ${params.app_mgr_url} --version ${params.version} --build_number $build_number")
+    def status = sh(returnStatus:false, script: "hdops kpos_integration --path ${WORKSPACE} --profile ${params.kpos_profile} --app_mgr_url ${params.app_mgr_url} --version ${params.version} --build_number $build_number")
     if (status != 0) {
         sh "`exit ${status}`"
     }
