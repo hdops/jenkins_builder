@@ -89,7 +89,7 @@ pipeline {
                         withDockerContainer(image: "harbor.qianfan123.com/toolset/toolsetcore:${toolset_image_version}"){
                             retry(2){
                                 echo "workspace is $WORKSPACE"
-                                sh "hdops kpos_integration --path ${WORKSPACE} --profile ${params.kpos_profile} --app_mgr_url ${params.app_mgr_url} --version ${params.version} --build_number $build_number"
+                                sh "hdops kpos_integration --path ${WORKSPACE} --profile ${params.kpos_profile} --app_mgr_url ${params.app_mgr_url} --version ${params.version} --build_number $build_number --token $app_mgr_token"
                             }
                         }
                     }
