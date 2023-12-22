@@ -82,7 +82,9 @@ pipeline {
                     if ( cfgname != '' ) {
                         withDockerContainer(args: "-v ${WORKSPACE}/jenkins:/root/jenkins -v ${WORKSPACE}/${jenkins_jobs_ini_config}:/root/jenkins_jobs.ini", image: "harbor.qianfan123.com/base/jenkins-job-builder:0.1.0") {
                             echo "run unit test"
-                            sh "pytest -m unit --junitxml=junit.xml -sv --capture sys"
+                            def git_commit_author = sh(returnStdout: true, script: 'git log -n 1 --pretty=format:"%an"')
+                            prefix = 'JENKINS_URL=${BUILD_URL} BUILD_USER_ID=${git_commit_author}  '
+                            sh prefix + " pytest -m unit --junitxml=junit.xml -sv --capture sys"
 
                             echo "cfgname is: ${cfgname}"
                             String[] cfgstr = cfgname.split(',')
