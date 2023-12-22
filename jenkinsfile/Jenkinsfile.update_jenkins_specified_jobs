@@ -80,14 +80,14 @@ pipeline {
             steps{
                 script {
                     if ( cfgname != '' ) {
-                        //withDockerContainer(args: "-v ${WORKSPACE}/jenkins:/root/jenkins -v ${WORKSPACE}/${jenkins_jobs_ini_config}:/root/jenkins_jobs.ini", image: "harbor.qianfan123.com/toolset/k8s_config_checker:1.0.0") {
-                          //  def git_commit_author = sh(returnStdout: true, script: 'git log -n 1 --pretty=format:"%an"')
-                        //}
+                        withDockerContainer(args: "-v ${WORKSPACE}/jenkins:/root/jenkins -v ${WORKSPACE}/${jenkins_jobs_ini_config}:/root/jenkins_jobs.ini", image: "harbor.qianfan123.com/toolset/k8s_config_checker:1.0.0") {
+                            def git_commit_author = sh(returnStdout: true, script: 'git log -n 1 --pretty=format:"%an"')
+                        }
                         sh "docker pull harbor.qianfan123.com/base/jenkins-job-builder:0.1.0"
                         withDockerContainer(args: "-v ${WORKSPACE}/jenkins:/root/jenkins -v ${WORKSPACE}/${jenkins_jobs_ini_config}:/root/jenkins_jobs.ini", image: "harbor.qianfan123.com/base/jenkins-job-builder:0.1.0") {
                             echo "run unit test"
-                            //prefix = 'JENKINS_URL=${BUILD_URL} BUILD_USER_ID=${git_commit_author}  '
-                            sh " pytest -m unit --junitxml=junit.xml -sv --capture sys"
+                            prefix = 'JENKINS_URL=${BUILD_URL} BUILD_USER_ID=${git_commit_author}  '
+                            sh prefix + " pytest -m unit --junitxml=junit.xml -sv --capture sys"
 
                             echo "cfgname is: ${cfgname}"
                             String[] cfgstr = cfgname.split(',')
