@@ -84,7 +84,7 @@ pipeline {
                             def git_commit_author = sh(returnStdout: true, script: 'git log -n 1 --pretty=format:"%an"')
                         }
                         sh "docker pull harbor.qianfan123.com/base/jenkins-job-builder:0.1.0"
-                        withDockerContainer(args: "-v ${WORKSPACE}/jenkins:/root/jenkins -v ${WORKSPACE}/${jenkins_jobs_ini_config}:/root/jenkins_jobs.ini", image: "harbor.qianfan123.com/base/jenkins-job-builder:0.1.0") {
+                        withDockerContainer(args: "-v ${WORKSPACE}/jenkins:/root/jenkins -v ${WORKSPACE}/${jenkins_jobs_ini_config}:/root/jenkins_jobs.ini  --add-host=kube-eventer-sinker.hd123.com:47.99.180.32", image: "harbor.qianfan123.com/base/jenkins-job-builder:0.1.0") {
                             echo "run unit test"
                             prefix = 'JENKINS_URL=${BUILD_URL} BUILD_USER_ID=${git_commit_author}  '
                             sh prefix + " pytest -m unit --junitxml=junit.xml -sv --capture sys"
