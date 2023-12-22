@@ -92,7 +92,7 @@ pipeline {
                             echo "cfgname is: ${cfgname}"
                             String[] cfgstr = cfgname.split(',')
                             for ( String i : cfgstr ){
-                                if ( i == "" || i == "jenkins_update.sh" || i == "jenkins/default.yml"  || i == "config/jenkins-jcac-plugin.yaml" || i =="config/jenkins.yaml") {
+                                if ( i == "" || i.endsWith(".py") || i == "jenkins_update.sh" || i == "jenkins/default.yml"  || i == "config/jenkins-jcac-plugin.yaml" || i =="config/jenkins.yaml") {
                                     continue
                                 }
                                 out = sh(script: "[ -d ${i} ] && echo -n 'true' || echo -n 'false' ", returnStdout: true)
