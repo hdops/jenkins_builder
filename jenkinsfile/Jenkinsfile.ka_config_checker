@@ -73,6 +73,7 @@ pipeline {
                    sh "rm -fr src/tests"
                    sh "mkdir src/tests"
                    sh "cp -r tests/* src/tests"
+                   git_commit_author = "${env.gitlabUserUsername}"
                    prefix = 'JENKINS_URL=${BUILD_URL} TYPE=ka_config_checker '
                    if ("${env.gitlabBranch}"=="erp"){
                      sh prefix + " BUILD_USER_ID=${git_commit_author} pytest -m erp  --junitxml=junit.xml -sv --capture sys"
