@@ -77,10 +77,14 @@ pipeline {
                    prefix = 'JENKINS_URL=${BUILD_URL} TYPE=ka_config_checker '
                    if ("${env.gitlabBranch}"=="erp"){
                      dir("${WORKSPACE}/src"){
+                       sh 'git submodule update --init --recursive'
+                       sh 'git submodule foreach "git pull origin master"'
                        sh prefix + " BUILD_USER_ID=${git_commit_author} pytest -m erp  --junitxml=junit.xml -sv --capture sys"
                      }
                    }else if ("${env.gitlabBranch}"=="jenkins"){
                      dir("${WORKSPACE}/src"){
+                       sh 'git submodule update --init --recursive'
+                       sh 'git submodule foreach "git pull origin master"'
                        sh prefix + " BUILD_USER_ID=${git_commit_author} pytest -m jenkins  --junitxml=junit.xml -sv --capture sys"
                      }
                    }
