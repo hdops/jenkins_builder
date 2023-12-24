@@ -114,7 +114,7 @@ pipeline {
         }
         always{
             script{
-                junit allowEmptyResults: true, testResults: 'junit.xml'
+                junit allowEmptyResults: true, testResults: 'src/junit.xml'
                 currentBuild.description = "${env.gitlabBranch}"
 
 
