@@ -64,6 +64,7 @@ pipeline {
         stage('checkout scm & config test'){
 			steps{
                 script{
+                   deleteDir()
                    retry(2){
                      checkout([$class: 'GitSCM', branches: [[name: "*/master"]], extensions: [[$class: 'CloneOption', depth: 1, noTags: true, reference: '', shallow: true]], userRemoteConfigs: [[credentialsId: "${credentialsId}",url: "https://gitlab.hd123.com/qianfanops/ka_config_checker.git"]]])
                    }
