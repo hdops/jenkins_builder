@@ -76,9 +76,13 @@ pipeline {
                    git_commit_author = "${env.gitlabUserUsername}"
                    prefix = 'JENKINS_URL=${BUILD_URL} TYPE=ka_config_checker '
                    if ("${env.gitlabBranch}"=="erp"){
-                     sh prefix + " BUILD_USER_ID=${git_commit_author} pytest -m erp  --junitxml=junit.xml -sv --capture sys"
+                     dir("${WORKSPACE}/src"){
+                       sh prefix + " BUILD_USER_ID=${git_commit_author} pytest -m erp  --junitxml=junit.xml -sv --capture sys"
+                     }
                    }else if ("${env.gitlabBranch}"=="jenkins"){
-                     sh prefix + " BUILD_USER_ID=${git_commit_author} pytest -m jenkins  --junitxml=junit.xml -sv --capture sys"
+                     dir("${WORKSPACE}/src"){
+                       sh prefix + " BUILD_USER_ID=${git_commit_author} pytest -m jenkins  --junitxml=junit.xml -sv --capture sys"
+                     }
                    }
                 }
 			}
@@ -88,14 +92,14 @@ pipeline {
     post{
         failure{
             script{
-                dingTalk accessToken: "${DINGTALK_TOKEN}", imageUrl: '', jenkinsUrl: '', message: "k8s_config_checker failure for ${git_project} on ${BUILD_URL}", notifyPeople: ''
+                dingTalk accessToken: "${DINGTALK_TOKEN}", imageUrl: '', jenkinsUrl: '', message: "ka_config_checker failure for ${env.gitlabSourceRepoSshUrl} on ${BUILD_URL}", notifyPeople: ''
                 updateGitlabCommitStatus name: 'build', state: 'failed'
             }
         }
         fixed{
             script{
                 if (run_unittest && git_commit_author!='opsCD' && git_commit_author!='qianfanauto' && git_commit_author!='appGitLab' && git_commit_author!='ytzh'){
-                    emailext(recipientProviders: [developers(),requestor(),culprits()],to: "buhaiqing@hd123.com", subject: "[${env.gitlabBranch}] k8s_config_checker success on ${git_project}", body: "[${env.gitlabBranch}] success on Job ${env.BUILD_URL}")
+                    emailext(recipientProviders: [developers(),requestor(),culprits()],to: "buhaiqing@hd123.com", subject: "[${env.gitlabBranch}] k8s_config_checker success on ${env.gitlabSourceRepoSshUrl}", body: "[${env.gitlabBranch}] success on Job ${env.BUILD_URL}")
                 }
             }
         }
