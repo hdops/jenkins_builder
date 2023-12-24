@@ -1,0 +1,115 @@
+import jenkins.model.*
+
+def node="master"
+if (env.node){
+    node =env.node
+
+}
+def DINGTALK_TOKEN = 'c809dcef2819cae9f4baa46c46d4e4c9864af899ae81b7145987d026cc51a87a'
+if (env.DINGTALK_TOKEN){
+   DINGTALK_TOKEN = env.DINGTALK_TOKEN
+}
+def run_on_public="None"
+if (env.run_on_public){
+    run_on_public=env.run_on_public
+}
+if (!env.on_k8s){
+    env.on_k8s="False"
+}
+if (env.set_on_k8s) {
+    env.on_k8s=env.set_on_k8s
+}
+def ci_git_server_baseurl= "http://github.app.hd123.cn:10080"
+if (env.ci_git_server_baseurl){
+    ci_git_server_baseurl = env.ci_git_server_baseurl
+}
+def credentialsId="17643215-09f8-4a9a-b0ea-c8e49777ce1d"
+if (env.credentials_id){
+  credentialsId = env.credentials_id
+}
+def run_unittest=true
+if (env.run_unittest){
+    run_unittest = env.run_unittest.toBoolean()
+}
+
+def TOOLSET_DOCKER_REGISTRY_BASEURL = "harbor.qianfan123.com/toolset"
+if (env.TOOLSET_DOCKER_REGISTRY_BASEURL){
+    TOOLSET_DOCKER_REGISTRY_BASEURL  = env.TOOLSET_DOCKER_REGISTRY_BASEURL
+}
+
+def jjb_docker_image="${TOOLSET_DOCKER_REGISTRY_BASEURL}/k8s_config_checker:1.0.0"
+def toolset_image_version="1.0.0"
+if (env.toolset_image_version){
+    toolset_image_version = env.toolset_image_version
+}
+
+
+
+pipeline {
+	agent {
+        docker {
+            label node
+            image "harbor.qianfan123.com/toolset/k8s_config_checker:${toolset_image_version}"
+            args '-v /var/run/docker.sock:/var/run/docker.sock -v /usr/bin/docker:/usr/bin/docker --add-host=hd-hz-public.oss-cn-hangzhou-internal.aliyuncs.com:47.110.23.37 --add-host=kube-eventer-sinker.hd123.com:47.99.180.32'
+            alwaysPull true
+        }
+    }
+    options {
+	    timeout(time: 1, unit: 'HOURS')
+        gitLabConnection('toolset')
+    }
+    stages {
+
+
+        stage('checkout scm & config test'){
+			steps{
+                script{
+                   retry(2){
+                     checkout([$class: 'GitSCM', branches: [[name: "*/master"]], extensions: [[$class: 'CloneOption', depth: 1, noTags: true, reference: '', shallow: true]], userRemoteConfigs: [[credentialsId: "${credentialsId}",url: "https://gitlab.hd123.com/qianfanops/ka_config_checker.git"]]])
+                   }
+                   retry(3){
+                       checkout([$class: 'GitSCM', branches: [[name: "*/${env.gitlabBranch}"]], extensions: [[$class: 'CloneOption', depth: 1, noTags: true, reference: '', shallow: true], [$class: 'RelativeTargetDirectory', relativeTargetDir: 'src']], userRemoteConfigs: [[credentialsId: "${credentialsId}",url: "${gitlabSourceRepoHttpUrl}"]]])
+                   }
+                   sh "rm -fr src/tests"
+                   sh "mkdir src/tests"
+                   sh "cp -r tests/* src/tests"
+                   prefix = 'JENKINS_URL=${BUILD_URL} TYPE=ka_config_checker '
+                   if ("${env.gitlabBranch}"=="erp"){
+                     sh prefix + " BUILD_USER_ID=${git_commit_author} pytest -m erp  --junitxml=junit.xml -sv --capture sys"
+                   }else if ("${env.gitlabBranch}"=="jenkins"){
+                     sh prefix + " BUILD_USER_ID=${git_commit_author} pytest -m jenkins  --junitxml=junit.xml -sv --capture sys"
+                   }
+                }
+			}
+		}
+
+    }
+    post{
+        failure{
+            script{
+                dingTalk accessToken: "${DINGTALK_TOKEN}", imageUrl: '', jenkinsUrl: '', message: "k8s_config_checker failure for ${git_project} on ${BUILD_URL}", notifyPeople: ''
+                updateGitlabCommitStatus name: 'build', state: 'failed'
+            }
+        }
+        fixed{
+            script{
+                if (run_unittest && git_commit_author!='opsCD' && git_commit_author!='qianfanauto' && git_commit_author!='appGitLab' && git_commit_author!='ytzh'){
+                    emailext(recipientProviders: [developers(),requestor(),culprits()],to: "buhaiqing@hd123.com", subject: "[${env.gitlabBranch}] k8s_config_checker success on ${git_project}", body: "[${env.gitlabBranch}] success on Job ${env.BUILD_URL}")
+                }
+            }
+        }
+        success{
+            script{
+                updateGitlabCommitStatus name: 'build', state: 'success'
+            }
+        }
+        always{
+            script{
+                junit allowEmptyResults: true, testResults: 'junit.xml'
+                currentBuild.description = "${env.gitlabBranch}"
+
+
+            }
+        }
+    }
+}
