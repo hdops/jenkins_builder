@@ -68,6 +68,7 @@ pipeline {
                    retry(2){
                      checkout([$class: 'GitSCM', branches: [[name: "*/master"]], extensions: [[$class: 'CloneOption', depth: 1, noTags: true, reference: '', shallow: true]], userRemoteConfigs: [[credentialsId: "${credentialsId}",url: "https://gitlab.hd123.com/qianfanops/ka_config_checker.git"]]])
                    }
+                   sh "rm -fr .git"
                    retry(3){
                        checkout([$class: 'GitSCM', branches: [[name: "*/${env.gitlabBranch}"]], extensions: [[$class: 'CloneOption', depth: 1, noTags: true, reference: '', shallow: true], [$class: 'RelativeTargetDirectory', relativeTargetDir: 'src']], userRemoteConfigs: [[credentialsId: "${credentialsId}",url: "${gitlabSourceRepoHttpUrl}"]]])
                    }
