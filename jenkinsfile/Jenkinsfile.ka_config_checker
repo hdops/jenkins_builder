@@ -74,7 +74,7 @@ pipeline {
                    sh "rm -fr src/tests"
                    sh "mkdir src/tests"
                    sh "cp -r tests/* src/tests"
-                   git_commit_author = "${env.gitlabUserUsername}"
+                   git_commit_author = "${env.gitlabUserName}"
                    prefix = 'JENKINS_URL=${BUILD_URL} TYPE=ka_config_checker '
                    if ("${env.gitlabBranch}"=="erp"){
                      dir("${WORKSPACE}/src"){
