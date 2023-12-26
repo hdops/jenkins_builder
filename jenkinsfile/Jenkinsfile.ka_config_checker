@@ -1,4 +1,5 @@
 import jenkins.model.*
+import java.net.URL
 
 def node="master"
 if (env.node){
@@ -71,12 +72,22 @@ pipeline {
                    retry(3){
                        checkout([$class: 'GitSCM', branches: [[name: "*/${env.gitlabBranch}"]], extensions: [[$class: 'CloneOption', depth: 1, noTags: true, reference: '', shallow: true], [$class: 'RelativeTargetDirectory', relativeTargetDir: 'src']], userRemoteConfigs: [[credentialsId: "${credentialsId}",url: "${gitlabSourceRepoHttpUrl}"]]])
                    }
+                   def url ="${gitlabSourceRepoHttpUrl}"
+                   def parsedUrl = new URL(url)
+                   def path = parsedUrl.path
+                   def git_group = path.split("/")[1]
+                   println("git group is "+git_group)
+
                    sh "rm -fr src/tests"
                    sh "mkdir src/tests"
                    sh "cp -r tests/* src/tests"
                    //git_commit_author = "" //"${env.gitlabUserName}"
                    prefix = 'JENKINS_URL=${BUILD_URL} TYPE=ka_config_checker '
-                   if ("${env.gitlabBranch}"=="erp"){
+                   if (git_group=="phoenix-config"){
+                        dir("${WORKSPACE}/src"){
+                          echo "runnig crm cases"
+                        }
+                   }else if ("${env.gitlabBranch}"=="erp"){
                      dir("${WORKSPACE}/src"){
                        git_commit_author = sh(returnStdout: true, script: 'git log -n 1 --pretty=format:"%an"')
                        sh prefix + " BUILD_USER_ID=${git_commit_author} GIT_BRANCH=${env.gitlabBranch} GIT_URL=${gitlabSourceRepoHttpUrl} pytest -m erp  --junitxml=junit.xml -sv --capture sys"
