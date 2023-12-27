@@ -85,7 +85,8 @@ pipeline {
                    prefix = 'JENKINS_URL=${BUILD_URL} TYPE=ka_config_checker '
                    if (git_group=="phoenix-config"){
                         dir("${WORKSPACE}/src"){
-                          echo "runnig crm cases"
+                          git_commit_author = sh(returnStdout: true, script: 'git log -n 1 --pretty=format:"%an"')
+                          sh prefix + " BUILD_USER_ID=${git_commit_author} GIT_BRANCH=${env.gitlabBranch} GIT_URL=${gitlabSourceRepoHttpUrl} pytest -m crm  --junitxml=junit.xml -sv --capture sys"
                         }
                    }else if ("${env.gitlabBranch}"=="erp"){
                      dir("${WORKSPACE}/src"){

@@ -40,7 +40,9 @@ pipeline{
             retry(5){
               checkout([$class: 'GitSCM', branches: [[name: "${build_branch}"]],userRemoteConfigs: [[credentialsId: "${credentialsId}",url: "${ci_git_server_baseurl}/${git_project}.git"]]])
             }
-            sh "lstupdtime=${params.lstupdtime} python lsym_bill_download.py -action lstupdtime"
+            retry(2){
+                sh "lstupdtime=${params.lstupdtime} python lsym_bill_download.py -action lstupdtime"
+            }
           }
         }
     }
