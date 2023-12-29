@@ -76,7 +76,7 @@ pipeline {
                        fi
                        """
                        sh "cp -r /opt/tests/* ${WORKSPACE}/tests "
-                       sh "pytest -m unit tests/config_test.py  --junitxml=junit.xml -sv --capture sys"
+                       sh "BRANCH=${env.gitlabBranch} pytest -m unit tests/config_test.py  --junitxml=junit.xml -sv --capture sys"
                    }
                 }
 			}
