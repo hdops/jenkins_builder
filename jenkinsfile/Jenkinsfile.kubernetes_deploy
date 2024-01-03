@@ -112,7 +112,7 @@ pipeline {
                     kubernetesPodYamlData.spec.containers[0].image = "${docker_image}"
                     kubernetesPodYamlData.spec.containers[0].name = "${label_name}"
                     kubernetesPodYamlData.metadata.labels.label = "${label_name}"
-                    // DOPS-62459
+                    // DOPS-62459 渲染的模板中增加自定义hosts
                     if (env.custom_hosts == 'true') {
                         if (kubernetesPodYamlData.spec.hostAliases == null) {
                             kubernetesPodYamlData.spec.hostAliases = []
