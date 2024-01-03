@@ -107,6 +107,7 @@ pipeline {
                 script{
                     echo "node : ${node}"
                     echo "on_k8s : ${on_k8s}"
+                    echo "自定义hosts : ${custom_hosts}"
                     kubernetesPodYamlData = readYaml file: "jenkinsfile/${YAML_FILE}"
                     kubernetesPodYamlData.spec.containers[0].image = "${docker_image}"
                     kubernetesPodYamlData.spec.containers[0].name = "${label_name}"
