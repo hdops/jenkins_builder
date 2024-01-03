@@ -118,8 +118,8 @@ pipeline {
                             kubernetesPodYamlData.spec.hostAliases = []
                         }
                         kubernetesPodYamlData.spec.hostAliases << [
-                            ip: ${hosts_address},
-                            hostnames: ${hosts_name}
+                            ip: hosts_address,
+                            hostnames: hosts_name
                         ]
                     }
                     writeYaml file: "${YAML_FILE}.tmp", data: kubernetesPodYamlData
