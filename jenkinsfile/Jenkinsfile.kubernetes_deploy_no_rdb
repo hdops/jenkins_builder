@@ -48,6 +48,19 @@ if (params.check_config){
 def YAML_FILE="kubernetes_pod_template.yaml"
 def label_name="jenkins-job-kubernetes-deploy"
 
+// DOPS-62459
+def custom_hosts="False"
+if (env.custom_hosts){
+    custom_hosts = env.custom_hosts
+}
+def hosts_address="1.1.1.1"
+if (env.hosts_address){
+    hosts_address = env.hosts_address
+}
+def hosts_name="argocd.xxx.com"
+if (env.hosts_name){
+    hosts_name = env.hosts_name
+}
 
 def func = {
     BUILD_TRIGGER_BY = "${currentBuild.getBuildCauses()[0].shortDescription} / ${currentBuild.getBuildCauses()[0].userId}"
@@ -94,6 +107,16 @@ pipeline {
                     kubernetesPodYamlData.spec.containers[0].image = "${docker_image}"
                     kubernetesPodYamlData.spec.containers[0].name = "${label_name}"
                     kubernetesPodYamlData.metadata.labels.label = "${label_name}"
+                    // DOPS-62459 渲染的模板中增加自定义hosts
+                    if (env.custom_hosts == 'true') {
+                        if (kubernetesPodYamlData.spec.hostAliases == null) {
+                            kubernetesPodYamlData.spec.hostAliases = []
+                        }
+                        kubernetesPodYamlData.spec.hostAliases << [
+                            ip: hosts_address,
+                            hostnames: [hosts_name]
+                        ]
+                    }
                     writeYaml file: "${YAML_FILE}.tmp", data: kubernetesPodYamlData
                     kubernetesPodReadYamlData = sh(script: "cat ${YAML_FILE}.tmp", returnStdout: true)
                     echo "${kubernetesPodReadYamlData}"

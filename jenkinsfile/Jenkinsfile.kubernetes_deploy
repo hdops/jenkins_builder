@@ -40,24 +40,22 @@ if (params.source){
     source = params.source
 }
 
+def YAML_FILE="kubernetes_pod_template.yaml"
+def label_name="jenkins-job-kubernetes-deploy"
+
 // DOPS-62459
 def custom_hosts="False"
 if (env.custom_hosts){
     custom_hosts = env.custom_hosts
 }
-
 def hosts_address="1.1.1.1"
 if (env.hosts_address){
     hosts_address = env.hosts_address
 }
-
 def hosts_name="argocd.xxx.com"
 if (env.hosts_name){
     hosts_name = env.hosts_name
 }
-
-def YAML_FILE="kubernetes_pod_template.yaml"
-def label_name="jenkins-job-kubernetes-deploy"
 
 def func = {
     BUILD_TRIGGER_BY = "${currentBuild.getBuildCauses()[0].shortDescription} / ${currentBuild.getBuildCauses()[0].userId}"
@@ -107,7 +105,6 @@ pipeline {
                 script{
                     echo "node : ${node}"
                     echo "on_k8s : ${on_k8s}"
-                    echo "自定义hosts : ${custom_hosts}"
                     kubernetesPodYamlData = readYaml file: "jenkinsfile/${YAML_FILE}"
                     kubernetesPodYamlData.spec.containers[0].image = "${docker_image}"
                     kubernetesPodYamlData.spec.containers[0].name = "${label_name}"
