@@ -100,7 +100,7 @@ pipeline {
                        git_commit_author = sh(returnStdout: true, script: 'git log -n 1 --pretty=format:"%an"')
                        sh prefix + " BUILD_USER_ID=${git_commit_author} GIT_BRANCH=${env.gitlabBranch} GIT_URL=${gitlabSourceRepoHttpUrl} pytest -m jenkins  --junitxml=junit.xml -sv --capture sys"
                      }
-                   }else if if ("${env.gitlabBranch}"=="develop"){
+                   }else if ("${env.gitlabBranch}"=="develop"){
                      dir("${WORKSPACE}/src"){
                        git_commit_author = sh(returnStdout: true, script: 'git log -n 1 --pretty=format:"%an"')
                        sh prefix + " BUILD_USER_ID=${git_commit_author} GIT_BRANCH=${env.gitlabBranch} GIT_URL=${gitlabSourceRepoHttpUrl} pytest -m develop  --junitxml=junit.xml -sv --capture sys"
