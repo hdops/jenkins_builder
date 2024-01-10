@@ -82,7 +82,7 @@ pipeline {
                    sh "mkdir src/tests"
                    sh "cp -r tests/* src/tests"
                    //git_commit_author = "" //"${env.gitlabUserName}"
-                   prefix = 'JENKINS_URL=${BUILD_URL} TYPE=ka_config_checker '
+                   prefix = 'BUILD_URL=${BUILD_URL} TYPE=ka_config_checker '
                    if (git_group=="phoenix-config"){
                         dir("${WORKSPACE}/src"){
                           git_commit_author = sh(returnStdout: true, script: 'git log -n 1 --pretty=format:"%an"')
